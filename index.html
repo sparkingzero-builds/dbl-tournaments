@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/bracket.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    .hero {
+      min-height: calc(100vh - 58px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    .hero-title {
+      font-size: clamp(32px, 6vw, 56px);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 0;
+      line-height: 1.1;
+    }
+
+    .hero-title .text-cyan {
+      text-shadow: 0 0 24px rgba(0, 229, 255, 0.5);
+    }
+
+    .hero-sub {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-top: 6px;
+      margin-bottom: 32px;
+    }
+
+    .hero-status {
+      margin-bottom: 28px;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .hero-divider {
+      width: 120px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      margin: 40px 0 36px;
+      opacity: 0.5;
+    }
+
+    .hero-info {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      max-width: 620px;
+      width: 100%;
+    }
+
+    .info-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px 14px;
+      text-align: center;
+      transition: all 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--cyan), var(--pink));
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .info-card:hover {
+      border-color: var(--cyan);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .info-card:hover::before {
+      opacity: 1;
+    }
+
+    .info-card-icon {
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+    }
+
+    .info-card h4 {
+      color: var(--cyan);
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .info-card p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    @media (max-width: 600px) {
+      .hero-info { grid-template-columns: 1fr; max-width: 280px; }
+      .hero-sub { letter-spacing: 0.1em; }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
+      <ul class="navbar-links">
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="particles-bg" id="particles"></div>
+
+  <section class="hero page page-enter">
+    <h1 class="hero-title">DBL <span class="text-cyan">Tournaments</span></h1>
+    <p class="hero-sub">Dragon Ball Legends Competitive</p>
+
+    <div class="hero-status" id="hero-status">
+      <span class="status status-completed">No Active Tournament</span>
+    </div>
+
+    <div id="hero-countdown"></div>
+
+    <div class="hero-cta">
+      <a href="tournament.html" class="btn btn-primary btn-lg">Enter Tournament</a>
+      <a href="bracket.html" class="btn btn-secondary btn-lg">View Bracket</a>
+    </div>
+
+    <div class="hero-divider"></div>
+
+    <div class="hero-info stagger">
+      <div class="info-card">
+        <div class="info-card-icon">⚔</div>
+        <h4>Compete</h4>
+        <p>Sign up, build your team, and battle it out</p>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon">👥</div>
+        <h4>Team Build</h4>
+        <p>Select your 3-man squad from the themed roster</p>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon">🏆</div>
+        <h4>Win</h4>
+        <p>Climb the bracket and claim the title</p>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/particles.js"></script>
+  <script>
+    initParticles(document.getElementById('particles'));
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const tournament = await db.getActiveTournament();
+        const statusEl = document.getElementById('hero-status');
+        if (tournament) {
+          if (tournament.theme) ThemeManager.apply(tournament.theme);
+          const statusClass = tournament.status === 'signup' ? 'status-signup' : 'status-active';
+          const statusText = tournament.status === 'signup' ? 'Signups Open' : 'In Progress';
+          statusEl.innerHTML = `
+            <span class="status ${statusClass}">${statusText}</span>
+            <h3 style="margin-top:10px;color:var(--cyan)">${tournament.name}</h3>
+          `;
+
+          if (tournament.signup_deadline && tournament.status === 'signup') {
+            initCountdown(document.getElementById('hero-countdown'), tournament.signup_deadline, 'Signups Close In');
+          } else if (tournament.start_time && tournament.status === 'signup') {
+            initCountdown(document.getElementById('hero-countdown'), tournament.start_time, 'Tournament Starts In');
+          }
+        }
+      } catch (e) {}
+    });
+
+    function initCountdown(container, deadline, label) {
+      if (!container || !deadline) return;
+
+      function render() {
+        const now = Date.now();
+        const end = new Date(deadline).getTime();
+        const diff = end - now;
+
+        if (diff <= 0) {
+          container.innerHTML = '<div class="countdown-expired">Time\'s Up!</div>';
+          setTimeout(() => location.reload(), 2000);
+          return;
+        }
+
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+
+        container.innerHTML = `
+          <div class="countdown-label">${label}</div>
+          <div class="countdown-panel">
+            <div class="countdown-unit">
+              <div class="countdown-digit">${String(d).padStart(2, '0')}</div>
+              <div class="countdown-suffix">Days</div>
+            </div>
+            <span class="countdown-separator">:</span>
+            <div class="countdown-unit">
+              <div class="countdown-digit">${String(h).padStart(2, '0')}</div>
+              <div class="countdown-suffix">Hours</div>
+            </div>
+            <span class="countdown-separator">:</span>
+            <div class="countdown-unit">
+              <div class="countdown-digit">${String(m).padStart(2, '0')}</div>
+              <div class="countdown-suffix">Mins</div>
+            </div>
+            <span class="countdown-separator">:</span>
+            <div class="countdown-unit">
+              <div class="countdown-digit">${String(s).padStart(2, '0')}</div>
+              <div class="countdown-suffix">Secs</div>
+            </div>
+          </div>
+        `;
+      }
+
+      render();
+      setInterval(render, 1000);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+/* Tournament Custom Themes */
+
+/* Default: Cyberpunk (already in main.css) */
+
+/* Saiyan Saga — Red/Orange energy */
+[data-theme="saiyan"] {
+  --bg: #1a0a0a;
+  --bg-2: #2a1010;
+  --panel: #351515;
+  --panel-2: #451e1e;
+  --line: #552828;
+  --text: #f8e4e4;
+  --muted: #b88888;
+  --cyan: #ff6b35;
+  --cyan-dim: rgba(255, 107, 53, 0.15);
+  --pink: #ff2d2d;
+  --pink-dim: rgba(255, 45, 45, 0.15);
+  --gold: #ffd740;
+  --gold-dim: rgba(255, 215, 64, 0.15);
+}
+
+/* Namek Saga — Green/Teal */
+[data-theme="namek"] {
+  --bg: #0a1a0d;
+  --bg-2: #102a13;
+  --panel: #153518;
+  --panel-2: #1e4520;
+  --line: #285528;
+  --text: #e4f8e6;
+  --muted: #88b88c;
+  --cyan: #2ed573;
+  --cyan-dim: rgba(46, 213, 115, 0.15);
+  --pink: #00e5ff;
+  --pink-dim: rgba(0, 229, 255, 0.15);
+  --gold: #ffd740;
+  --gold-dim: rgba(255, 215, 64, 0.15);
+}
+
+/* Cell Saga — Purple/Gold */
+[data-theme="cell"] {
+  --bg: #120a1a;
+  --bg-2: #1a1028;
+  --panel: #241535;
+  --panel-2: #301e45;
+  --line: #3e2855;
+  --text: #ece4f8;
+  --muted: #a888b8;
+  --cyan: #a55eea;
+  --cyan-dim: rgba(165, 94, 234, 0.15);
+  --pink: #ffd740;
+  --pink-dim: rgba(255, 215, 64, 0.15);
+  --gold: #ff6b35;
+  --gold-dim: rgba(255, 107, 53, 0.15);
+}
+
+/* Buu Saga — Pink/Magenta */
+[data-theme="buu"] {
+  --bg: #1a0a14;
+  --bg-2: #2a1020;
+  --panel: #351528;
+  --panel-2: #451e35;
+  --line: #552840;
+  --text: #f8e4f0;
+  --muted: #b888a8;
+  --cyan: #ff2d78;
+  --cyan-dim: rgba(255, 45, 120, 0.15);
+  --pink: #a55eea;
+  --pink-dim: rgba(165, 94, 234, 0.15);
+  --gold: #00e5ff;
+  --gold-dim: rgba(0, 229, 255, 0.15);
+}
+
+/* GT — Blue/Silver */
+[data-theme="gt"] {
+  --bg: #0a0e1a;
+  --bg-2: #101828;
+  --panel: #152035;
+  --panel-2: #1e2a45;
+  --line: #283555;
+  --text: #e4e8f8;
+  --muted: #8898b8;
+  --cyan: #5f9fff;
+  --cyan-dim: rgba(95, 159, 255, 0.15);
+  --pink: #c0c0c0;
+  --pink-dim: rgba(192, 192, 192, 0.15);
+  --gold: #ffd740;
+  --gold-dim: rgba(255, 215, 64, 0.15);
+}
+
+/* Super — Blue/Gold (Ultra Instinct) */
+[data-theme="super"] {
+  --bg: #0a0d1a;
+  --bg-2: #10152a;
+  --panel: #151d35;
+  --panel-2: #1e2845;
+  --line: #283555;
+  --text: #e4e8f8;
+  --muted: #8890b8;
+  --cyan: #69b4ff;
+  --cyan-dim: rgba(105, 180, 255, 0.15);
+  --pink: #ffd740;
+  --pink-dim: rgba(255, 215, 64, 0.15);
+  --gold: #ff6b35;
+  --gold-dim: rgba(255, 107, 53, 0.15);
+}

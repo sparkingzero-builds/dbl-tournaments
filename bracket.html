@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bracket — DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/bracket.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="bracket.html" class="active">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="particles-bg" id="particles"></div>
+
+  <main class="page page-enter">
+    <div class="container">
+      <div style="text-align:center;padding:20px 0;">
+        <h1 style="color:var(--cyan);text-shadow:0 0 20px rgba(0,229,255,0.3);" id="bracket-title">Tournament Bracket</h1>
+        <p class="text-muted mt-1" id="bracket-sub"></p>
+      </div>
+    </div>
+    <div class="bracket-container" id="bracket-container">
+      <div class="loader"><div class="loader-spinner"></div></div>
+    </div>
+
+    <!-- Match Report Form -->
+    <div class="container mt-4" id="report-section" style="display:none;">
+      <div class="card" style="max-width:500px;margin:0 auto;">
+        <h3 class="mb-2">Report Match Result</h3>
+        <p class="text-muted mb-2" style="font-size:13px;">Played your match? Report the result and your admin will verify it.</p>
+        <div class="flex flex-col gap-2">
+          <label style="font-weight:600;font-size:0.9rem;">Your Discord Username</label>
+          <input type="text" id="report-username" placeholder="e.g. Player#1234" />
+          <label style="font-weight:600;font-size:0.9rem;">Who Won?</label>
+          <input type="text" id="report-winner" placeholder="Winner's Discord Username" />
+          <label style="font-weight:600;font-size:0.9rem;">Screenshot URL (optional)</label>
+          <input type="text" id="report-screenshot" placeholder="Link to screenshot proof" />
+          <label style="font-weight:600;font-size:0.9rem;">Notes (optional)</label>
+          <input type="text" id="report-notes" placeholder="e.g. 2-1, close match" />
+          <button class="btn btn-primary mt-2" onclick="submitReport()">Submit Report</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/confetti.js"></script>
+  <script src="js/bracket.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/particles.js"></script>
+  <script>
+    initParticles(document.getElementById('particles'));
+
+    async function loadBracket() {
+      const container = document.getElementById('bracket-container');
+
+      try {
+        const tournament = await db.getActiveTournament();
+        if (!tournament) {
+          // Try most recent completed
+          const all = await db.getAllTournaments();
+          const latest = all.find(t => t.status === 'completed') || all[0];
+          if (!latest) {
+            container.innerHTML = '<div class="empty-state"><h3>No Tournament</h3><p>No bracket data available yet.</p></div>';
+            return;
+          }
+          await renderBracketFor(latest, container);
+          return;
+        }
+
+        if (tournament.theme) ThemeManager.apply(tournament.theme);
+        document.getElementById('bracket-title').textContent = tournament.name;
+        document.getElementById('bracket-sub').textContent =
+          tournament.status === 'signup' ? 'Bracket will be generated when signups close' : 'Live bracket';
+
+        if (tournament.status === 'signup') {
+          container.innerHTML = '<div class="empty-state"><h3>Signups Still Open</h3><p>The bracket will appear once the tournament begins.</p></div>';
+          return;
+        }
+
+        await renderBracketFor(tournament, container);
+
+        // Show match report form if tournament is active
+        activeTournament = tournament;
+        if (tournament.status === 'active') {
+          document.getElementById('report-section').style.display = 'block';
+        }
+
+        // Track spectators
+        try {
+          await db.trackSpectator(tournament.id, 'bracket');
+          setInterval(() => db.trackSpectator(tournament.id, 'bracket').catch(() => {}), 60000);
+          const count = await db.getSpectatorCount(tournament.id);
+          if (count > 0) {
+            document.getElementById('bracket-sub').textContent += ` — ${count} watching live`;
+          }
+        } catch (e) {}
+
+        subscribeToChanges(tournament.id, {
+          onMatch: async () => {
+            await renderBracketFor(tournament, container);
+            NotificationSystem.show('A match result has been updated!', 'ko');
+          }
+        });
+      } catch (e) {
+        container.innerHTML = '<div class="empty-state"><h3>Not Connected</h3><p>Connect to Supabase to view the bracket.</p></div>';
+      }
+    }
+
+    async function renderBracketFor(tournament, container) {
+      const signups = await db.getSignups(tournament.id);
+      const matches = await db.getMatches(tournament.id);
+      BracketManager.renderBracket(container, matches, signups, {
+        teamsVisible: tournament.teams_visible
+      });
+    }
+
+    let activeTournament = null;
+
+    async function submitReport() {
+      const username = document.getElementById('report-username').value.trim();
+      const winner = document.getElementById('report-winner').value.trim();
+      const screenshot = document.getElementById('report-screenshot').value.trim();
+      const notes = document.getElementById('report-notes').value.trim();
+
+      if (!username || !winner) {
+        NotificationSystem.show('Username and winner are required', 'error');
+        return;
+      }
+
+      if (!activeTournament) return;
+
+      try {
+        const signups = await db.getSignups(activeTournament.id);
+        const matches = await db.getMatches(activeTournament.id);
+
+        const playerSignup = signups.find(s => s.discord_username.toLowerCase() === username.toLowerCase());
+        if (!playerSignup) {
+          NotificationSystem.show('You are not in this tournament', 'error');
+          return;
+        }
+
+        const myMatch = matches.find(m =>
+          !m.winner_id &&
+          (m.player1_id === playerSignup.id || m.player2_id === playerSignup.id)
+        );
+
+        if (!myMatch) {
+          NotificationSystem.show('No pending match found for you', 'error');
+          return;
+        }
+
+        await db.submitMatchReport({
+          match_id: myMatch.id,
+          reported_by: username,
+          claimed_winner: winner,
+          screenshot_url: screenshot || null,
+          notes: notes || null
+        });
+
+        NotificationSystem.show('Report submitted! Waiting for admin approval.', 'success');
+        document.getElementById('report-username').value = '';
+        document.getElementById('report-winner').value = '';
+        document.getElementById('report-screenshot').value = '';
+        document.getElementById('report-notes').value = '';
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadBracket);
+  </script>
+</body>
+</html>

@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — DBL Tournaments</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/roster.css" />
+  <link rel="stylesheet" href="../css/bracket.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <link rel="stylesheet" href="../css/themes.css" />
+  <style>
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 24px;
+    }
+
+    .admin-badge {
+      background: linear-gradient(135deg, var(--cyan), var(--pink));
+      color: #000;
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .toggle-switch {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .toggle-track {
+      width: 44px;
+      height: 24px;
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      position: relative;
+      transition: all 0.15s;
+    }
+
+    .toggle-track.active {
+      background: var(--cyan);
+      border-color: var(--cyan);
+    }
+
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.15s;
+    }
+
+    .toggle-track.active::after {
+      transform: translateX(20px);
+    }
+
+    .signup-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .signup-table th {
+      text-align: left;
+      padding: 10px 14px;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--cyan);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .signup-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(46, 39, 85, 0.3);
+    }
+
+    .signup-table tr:hover td {
+      background: rgba(0, 229, 255, 0.03);
+    }
+
+    .action-btn {
+      background: none;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+
+    .action-btn:hover {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .action-btn.btn-advance {
+      border-color: rgba(0, 229, 255, 0.3);
+      color: var(--cyan);
+    }
+
+    .action-btn.btn-advance:hover {
+      border-color: var(--cyan);
+    }
+
+    .char-select-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 6px;
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 10px;
+      background: var(--bg-2);
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+    }
+
+    .char-select-card {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .char-select-card:hover {
+      border-color: var(--cyan);
+    }
+
+    .char-select-card.selected {
+      border-color: var(--pink);
+      box-shadow: 0 0 10px rgba(255, 45, 120, 0.25);
+    }
+
+    .char-select-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .char-select-card .check {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 16px;
+      height: 16px;
+      background: var(--pink);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 10px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .char-select-card.selected .check {
+      display: flex;
+    }
+
+    .winner-select-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 4, 14, 0.82);
+      backdrop-filter: blur(4px);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .winner-select-box {
+      background: var(--panel);
+      border: 1px solid var(--cyan);
+      border-radius: var(--radius);
+      padding: 28px;
+      text-align: center;
+      min-width: 340px;
+      box-shadow: var(--shadow), 0 0 30px rgba(0, 229, 255, 0.08);
+    }
+
+    .winner-option {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0;
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .winner-option:hover {
+      border-color: var(--cyan);
+      background: var(--cyan-dim);
+    }
+
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="../index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
+      <ul class="navbar-links">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../tournament.html">Tournament</a></li>
+        <li><a href="../bracket.html">Bracket</a></li>
+        <li><a href="../history.html">History</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="page container page-enter">
+    <div class="admin-header">
+      <h2>Admin Panel</h2>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="tournament">Tournament</button>
+      <button class="tab" data-tab="players">Players</button>
+      <button class="tab" data-tab="bracket">Bracket</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </div>
+
+    <!-- Tournament Tab -->
+    <div class="tab-content active" id="tab-tournament">
+      <div class="card">
+        <h3 class="mb-3" id="form-title">Create Tournament</h3>
+        <form id="tournament-form" onsubmit="return false;">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tournament Name</label>
+              <input type="text" id="t-name" placeholder="e.g. Legends Neo Season 1" />
+            </div>
+            <div class="form-group">
+              <label>Max Players</label>
+              <input type="text" id="t-max" placeholder="16" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description / Rules</label>
+            <textarea id="t-desc" rows="3" placeholder="Tournament rules and theme info..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Allowed Characters (click to toggle)</label>
+            <div style="margin-bottom:10px;">
+              <button class="btn btn-sm btn-secondary" type="button" onclick="selectAllChars()">Select All</button>
+              <button class="btn btn-sm btn-secondary" type="button" onclick="deselectAllChars()">Deselect All</button>
+              <span class="text-muted" style="margin-left:10px;" id="char-select-count">0 selected</span>
+            </div>
+            <div class="filter-bar" id="admin-char-filters" style="margin-bottom:10px;"></div>
+            <div class="char-select-grid" id="admin-char-grid"></div>
+          </div>
+          <button class="btn btn-primary btn-charge" type="button" onclick="saveTournament()">
+            <span id="save-btn-text">Create Tournament</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="card mt-3" id="existing-tournaments">
+        <h3 class="mb-2">All Tournaments</h3>
+        <div id="tournament-list"></div>
+      </div>
+    </div>
+
+    <!-- Players Tab -->
+    <div class="tab-content" id="tab-players">
+      <div class="card">
+        <div class="flex justify-between items-center mb-2">
+          <h3>Registered Players</h3>
+          <span class="text-muted" id="player-total">0 players</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="signup-table" id="signup-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Discord</th>
+                <th>Team</th>
+                <th>Signed Up</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="signup-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="no-players">
+          <p>No players registered yet.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bracket Tab -->
+    <div class="tab-content" id="tab-bracket">
+      <div class="card mb-3">
+        <div class="flex justify-between items-center">
+          <h3>Bracket Controls</h3>
+          <div class="flex gap-1">
+            <button class="btn btn-sm btn-primary" onclick="generateBracket()">Generate Bracket</button>
+            <button class="btn btn-sm btn-secondary" onclick="resetBracket()">Reset Bracket</button>
+          </div>
+        </div>
+        <p class="text-muted mt-1">Generate a bracket from current signups. Click on matches to set winners.</p>
+      </div>
+      <div class="bracket-container" id="admin-bracket">
+        <div class="empty-state"><h3>No bracket</h3><p>Generate one from the controls above.</p></div>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div class="tab-content" id="tab-settings">
+      <div class="card">
+        <h3 class="mb-3">Tournament Settings</h3>
+        <div class="form-group">
+          <div class="toggle-switch" onclick="toggleTeamVisibility()">
+            <div class="toggle-track" id="visibility-toggle"></div>
+            <span>Show player teams publicly</span>
+          </div>
+        </div>
+        <div class="form-group mt-3">
+          <label>Tournament Theme</label>
+          <div class="flex gap-1 mt-1" id="theme-selector"></div>
+        </div>
+        <div class="form-group mt-3">
+          <label>Seeding Mode</label>
+          <div class="flex gap-1 mt-1">
+            <button class="btn btn-sm btn-secondary seeding-btn active" data-mode="random" onclick="setSeedingMode('random')">Random</button>
+            <button class="btn btn-sm btn-secondary seeding-btn" data-mode="manual" onclick="setSeedingMode('manual')">Manual</button>
+            <button class="btn btn-sm btn-secondary seeding-btn" data-mode="performance" onclick="setSeedingMode('performance')">By Performance</button>
+          </div>
+        </div>
+        <div class="form-group mt-3">
+          <label>Signup Deadline</label>
+          <input type="datetime-local" id="signup-deadline" style="max-width:300px;" onchange="updateDeadline()" />
+        </div>
+        <div class="form-group mt-2">
+          <label>Tournament Start Time</label>
+          <input type="datetime-local" id="start-time" style="max-width:300px;" onchange="updateStartTime()" />
+        </div>
+        <div class="divider"></div>
+        <div class="form-group">
+          <label>Tournament Status</label>
+          <div class="flex gap-1 mt-1">
+            <button class="btn btn-sm btn-secondary" onclick="setStatus('draft')">Draft</button>
+            <button class="btn btn-sm btn-secondary" onclick="setStatus('signup')">Open Signups</button>
+            <button class="btn btn-sm btn-primary" onclick="setStatus('active')">Start Tournament</button>
+            <button class="btn btn-sm btn-gold" onclick="setStatus('completed')">Complete</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Match Reports -->
+      <div class="card mt-3">
+        <h3 class="mb-2">Match Reports</h3>
+        <p class="text-muted mb-2">Player-submitted match results awaiting approval.</p>
+        <div id="match-reports-list"></div>
+      </div>
+
+      <!-- Spectator Count -->
+      <div class="card mt-3">
+        <div class="flex justify-between items-center">
+          <h3>Live Viewers</h3>
+          <span class="text-cyan" id="spectator-count" style="font-family:'Exo 2',sans-serif;font-weight:800;font-size:1.2rem;">0</span>
+        </div>
+        <p class="text-muted mt-1">Currently watching the bracket page.</p>
+      </div>
+    </div>
+  </main>
+
+  <div id="winner-modal-root"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/characters.js"></script>
+  <script src="../js/confetti.js"></script>
+  <script src="../js/bracket.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script src="../js/sounds.js"></script>
+  <script src="../js/themes.js"></script>
+  <script>
+    let currentTournament = null;
+    let allCharacters = [];
+    let selectedCharIds = new Set();
+    let signups = [];
+    let matches = [];
+    let editingId = null;
+
+    // Tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+
+        if (tab.dataset.tab === 'players') loadPlayers();
+        if (tab.dataset.tab === 'bracket') loadAdminBracket();
+        if (tab.dataset.tab === 'settings') loadSettings();
+      });
+    });
+
+    // Init
+    document.addEventListener('DOMContentLoaded', async () => {
+      await CharacterManager.load();
+      allCharacters = CharacterManager.getAll();
+      renderAdminCharGrid();
+      loadTournaments();
+      loadActiveTournament();
+    });
+
+    // Character grid for admin
+    function renderAdminCharGrid(filterText = '', filterElement = '', filterRarity = '') {
+      const grid = document.getElementById('admin-char-grid');
+      grid.innerHTML = '';
+
+      let chars = allCharacters;
+      if (filterText) chars = chars.filter(c => c.name.toLowerCase().includes(filterText.toLowerCase()));
+      if (filterElement) chars = chars.filter(c => c.element === filterElement);
+      if (filterRarity) chars = chars.filter(c => c.rarity === filterRarity);
+
+      chars.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'char-select-card' + (selectedCharIds.has(c.id) ? ' selected' : '');
+        card.innerHTML = `
+          <img src="${c.image}" alt="${c.name}" title="${c.name}" loading="lazy" onerror="this.style.display='none'" />
+          <div class="check">✓</div>
+        `;
+        card.addEventListener('click', () => {
+          if (selectedCharIds.has(c.id)) {
+            selectedCharIds.delete(c.id);
+          } else {
+            selectedCharIds.add(c.id);
+          }
+          card.classList.toggle('selected');
+          updateCharCount();
+        });
+        grid.appendChild(card);
+      });
+      updateCharCount();
+
+      // Render filter bar
+      const filterBar = document.getElementById('admin-char-filters');
+      if (!filterBar.dataset.init) {
+        filterBar.dataset.init = '1';
+        filterBar.innerHTML = `
+          <input type="search" placeholder="Search..." id="admin-char-search" style="max-width:200px;" />
+          <div class="element-filters">
+            <button class="element-btn active" data-element="">ALL</button>
+            <button class="element-btn" data-element="RED">R</button>
+            <button class="element-btn" data-element="BLU">B</button>
+            <button class="element-btn" data-element="GRN">G</button>
+            <button class="element-btn" data-element="YEL">Y</button>
+            <button class="element-btn" data-element="PUR">P</button>
+            <button class="element-btn" data-element="LGT">L</button>
+          </div>
+          <select id="admin-rarity-filter" class="rarity-select">
+            <option value="">All Rarities</option>
+            <option value="LEGEND">Legend</option>
+            <option value="ULTRA">Ultra</option>
+            <option value="SPARKING">Sparking</option>
+            <option value="EXTREME">Extreme</option>
+            <option value="HERO">Hero</option>
+          </select>
+        `;
+
+        filterBar.querySelector('#admin-char-search').addEventListener('input', applyAdminFilters);
+        filterBar.querySelector('#admin-rarity-filter').addEventListener('change', applyAdminFilters);
+        filterBar.querySelectorAll('.element-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            filterBar.querySelectorAll('.element-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyAdminFilters();
+          });
+        });
+      }
+    }
+
+    function applyAdminFilters() {
+      const search = document.getElementById('admin-char-search')?.value || '';
+      const element = document.querySelector('#admin-char-filters .element-btn.active')?.dataset.element || '';
+      const rarity = document.getElementById('admin-rarity-filter')?.value || '';
+      renderAdminCharGrid(search, element, rarity);
+    }
+
+    function selectAllChars() {
+      allCharacters.forEach(c => selectedCharIds.add(c.id));
+      applyAdminFilters();
+    }
+
+    function deselectAllChars() {
+      selectedCharIds.clear();
+      applyAdminFilters();
+    }
+
+    function updateCharCount() {
+      const el = document.getElementById('char-select-count');
+      if (el) el.textContent = selectedCharIds.size + ' selected';
+    }
+
+    // Tournament CRUD
+    async function saveTournament() {
+      const name = document.getElementById('t-name').value.trim();
+      const maxPlayers = parseInt(document.getElementById('t-max').value) || 16;
+      const desc = document.getElementById('t-desc').value.trim();
+
+      if (!name) {
+        NotificationSystem.show('Tournament name is required', 'error');
+        return;
+      }
+
+      const data = {
+        name,
+        max_players: maxPlayers,
+        description: desc,
+        allowed_characters: [...selectedCharIds],
+        status: 'signup'
+      };
+
+      try {
+        if (editingId) {
+          delete data.status;
+          await db.updateTournament(editingId, data);
+          NotificationSystem.show('Tournament updated!', 'success');
+        } else {
+          await db.createTournament(data);
+          NotificationSystem.show('Tournament created!', 'success');
+        }
+
+        editingId = null;
+        document.getElementById('form-title').textContent = 'Create Tournament';
+        document.getElementById('save-btn-text').textContent = 'Create Tournament';
+        document.getElementById('tournament-form').reset();
+        selectedCharIds.clear();
+        applyAdminFilters();
+        loadTournaments();
+        loadActiveTournament();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function loadTournaments() {
+      try {
+        const tournaments = await db.getAllTournaments();
+        const list = document.getElementById('tournament-list');
+
+        if (!tournaments.length) {
+          list.innerHTML = '<p class="text-muted">No tournaments yet.</p>';
+          return;
+        }
+
+        list.innerHTML = tournaments.map(t => `
+          <div class="player-row" style="margin-bottom:6px;">
+            <div class="player-info">
+              <span class="player-name">${t.name}</span>
+              <span class="status status-${t.status === 'active' ? 'active' : t.status === 'signup' ? 'signup' : 'completed'}" style="margin-left:10px;">${t.status}</span>
+            </div>
+            <div class="flex gap-1">
+              <button class="action-btn btn-advance" onclick="editTournament('${t.id}')">Edit</button>
+              <button class="action-btn" style="background:var(--pink);color:#fff;" onclick="deleteTournament('${t.id}','${t.name.replace(/'/g,"\\'")}')">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        document.getElementById('tournament-list').innerHTML = '<p class="text-muted">Connect Supabase to manage tournaments.</p>';
+      }
+    }
+
+    async function editTournament(id) {
+      try {
+        const t = await db.getTournament(id);
+        editingId = t.id;
+        document.getElementById('t-name').value = t.name || '';
+        document.getElementById('t-max').value = t.max_players || 16;
+        document.getElementById('t-desc').value = t.description || '';
+        selectedCharIds = new Set(t.allowed_characters || []);
+        applyAdminFilters();
+        document.getElementById('form-title').textContent = 'Edit Tournament';
+        document.getElementById('save-btn-text').textContent = 'Update Tournament';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (e) {
+        NotificationSystem.show('Error loading tournament', 'error');
+      }
+    }
+
+    async function loadActiveTournament() {
+      try {
+        currentTournament = await db.getActiveTournament();
+        if (!currentTournament) {
+          const all = await db.getAllTournaments();
+          currentTournament = all[0] || null;
+        }
+      } catch (e) {
+        currentTournament = null;
+      }
+    }
+
+    // Players
+    async function loadPlayers() {
+      if (!currentTournament) return;
+      try {
+        signups = await db.getSignups(currentTournament.id);
+        const tbody = document.getElementById('signup-tbody');
+        const noPlayers = document.getElementById('no-players');
+        const total = document.getElementById('player-total');
+
+        total.textContent = signups.length + ' players';
+
+        if (!signups.length) {
+          tbody.innerHTML = '';
+          noPlayers.classList.remove('hidden');
+          return;
+        }
+
+        noPlayers.classList.add('hidden');
+        tbody.innerHTML = signups.map((s, i) => {
+          const teamHtml = s.team ? s.team.map(c =>
+            `<img src="${c.image}" alt="${c.name}" title="${c.name}" style="width:30px;height:30px;border-radius:4px;border:1px solid var(--border-color);" onerror="this.style.display='none'" />`
+          ).join('') : '<span class="text-muted">—</span>';
+
+          const date = new Date(s.created_at).toLocaleDateString();
+
+          return `
+            <tr>
+              <td>${i + 1}</td>
+              <td><strong>${s.discord_username}</strong></td>
+              <td><div class="flex gap-1">${teamHtml}</div></td>
+              <td class="text-muted">${date}</td>
+              <td><button class="action-btn" onclick="removePlayer('${s.id}')">Remove</button></td>
+            </tr>`;
+        }).join('');
+      } catch (e) {
+        document.getElementById('signup-tbody').innerHTML = '';
+      }
+    }
+
+    async function removePlayer(id) {
+      if (!confirm('Remove this player?')) return;
+      try {
+        await db.removeSignup(id);
+        NotificationSystem.show('Player removed', 'warning');
+        loadPlayers();
+      } catch (e) {
+        NotificationSystem.show('Error removing player', 'error');
+      }
+    }
+
+    // Bracket
+    async function loadAdminBracket() {
+      if (!currentTournament) return;
+      const container = document.getElementById('admin-bracket');
+
+      try {
+        signups = await db.getSignups(currentTournament.id);
+        matches = await db.getMatches(currentTournament.id);
+
+        BracketManager.renderBracket(container, matches, signups, {
+          admin: true,
+          teamsVisible: true,
+          onSelectWinner: showWinnerModal
+        });
+      } catch (e) {
+        container.innerHTML = '<div class="empty-state"><p>Could not load bracket.</p></div>';
+      }
+    }
+
+    async function generateBracket() {
+      if (!currentTournament) {
+        NotificationSystem.show('No tournament selected', 'error');
+        return;
+      }
+
+      signups = await db.getSignups(currentTournament.id);
+      if (signups.length < 2) {
+        NotificationSystem.show('Need at least 2 players', 'error');
+        return;
+      }
+
+      // Shuffle players
+      const shuffled = [...signups].sort(() => Math.random() - 0.5);
+      const bracketData = BracketManager.generateBracket(shuffled, currentTournament.id);
+
+      try {
+        await db.deleteMatches(currentTournament.id);
+        await db.createMatches(bracketData);
+        NotificationSystem.show('Bracket generated!', 'success');
+        loadAdminBracket();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function resetBracket() {
+      if (!currentTournament) return;
+      if (!confirm('This will delete all matches. Continue?')) return;
+      try {
+        await db.deleteMatches(currentTournament.id);
+        NotificationSystem.show('Bracket reset', 'warning');
+        loadAdminBracket();
+      } catch (e) {
+        NotificationSystem.show('Error resetting bracket', 'error');
+      }
+    }
+
+    function showWinnerModal(match, playerId) {
+      const p1 = signups.find(s => s.id === match.player1_id);
+      const p2 = signups.find(s => s.id === match.player2_id);
+      const root = document.getElementById('winner-modal-root');
+
+      root.innerHTML = `
+        <div class="winner-select-modal" onclick="if(event.target===this)this.remove()">
+          <div class="winner-select-box">
+            <h3 style="margin-bottom:6px;">Select Winner</h3>
+            <p class="text-muted mb-3">Who won this match?</p>
+            <div class="form-group">
+              <label>Score (optional)</label>
+              <input type="text" id="match-score" placeholder="e.g. 2-1" style="max-width:120px;margin:0 auto;" />
+            </div>
+            <button class="winner-option" onclick="selectWinner('${match.id}', '${match.player1_id}')">${p1?.discord_username || 'Player 1'}</button>
+            <button class="winner-option" onclick="selectWinner('${match.id}', '${match.player2_id}')">${p2?.discord_username || 'Player 2'}</button>
+            <button class="btn btn-sm btn-secondary mt-2" onclick="this.closest('.winner-select-modal').remove()">Cancel</button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function selectWinner(matchId, winnerId) {
+      const score = document.getElementById('match-score')?.value || null;
+      document.getElementById('winner-modal-root').innerHTML = '';
+
+      try {
+        await db.updateMatch(matchId, { winner_id: winnerId, score });
+
+        // Propagate
+        matches = await db.getMatches(currentTournament.id);
+        const completedMatch = matches.find(m => m.id === matchId);
+        if (completedMatch) {
+          const propagation = BracketManager.propagateWinner(matches, completedMatch);
+          if (propagation) {
+            await db.updateMatch(propagation.id, propagation);
+          }
+        }
+
+        NotificationSystem.show('Result saved!', 'ko');
+        loadAdminBracket();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    // Settings
+    function loadSettings() {
+      if (!currentTournament) return;
+      const toggle = document.getElementById('visibility-toggle');
+      if (currentTournament.teams_visible) {
+        toggle.classList.add('active');
+      } else {
+        toggle.classList.remove('active');
+      }
+    }
+
+    async function toggleTeamVisibility() {
+      if (!currentTournament) {
+        NotificationSystem.show('No active tournament', 'error');
+        return;
+      }
+      const toggle = document.getElementById('visibility-toggle');
+      const newVal = !toggle.classList.contains('active');
+
+      try {
+        await db.updateTournament(currentTournament.id, { teams_visible: newVal });
+        currentTournament.teams_visible = newVal;
+        toggle.classList.toggle('active');
+        NotificationSystem.show(newVal ? 'Teams are now visible' : 'Teams are now hidden', 'info');
+      } catch (e) {
+        NotificationSystem.show('Error updating visibility', 'error');
+      }
+    }
+
+    async function deleteTournament(id, name) {
+      if (!confirm(`Delete "${name}"? This will remove all signups and matches too.`)) return;
+      try {
+        await db.deleteTournament(id);
+        NotificationSystem.show(`"${name}" deleted`, 'ko');
+        playSound('ko');
+        if (currentTournament?.id === id) currentTournament = null;
+        loadTournaments();
+        loadActiveTournament();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function setStatus(status) {
+      if (!currentTournament) {
+        NotificationSystem.show('No tournament selected', 'error');
+        return;
+      }
+      try {
+        await db.updateTournament(currentTournament.id, { status });
+        currentTournament.status = status;
+        NotificationSystem.show(`Status set to ${status}`, 'success');
+        loadTournaments();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    // Theme selector
+    function renderThemeSelector() {
+      const container = document.getElementById('theme-selector');
+      if (!container) return;
+      const themes = ThemeManager.getAll();
+      const current = currentTournament?.theme || 'cyberpunk';
+      container.innerHTML = Object.entries(themes).map(([key, t]) => `
+        <button class="btn btn-sm ${key === current ? 'btn-primary' : 'btn-secondary'}"
+          onclick="setTheme('${key}')">${t.icon} ${t.name}</button>
+      `).join('');
+    }
+
+    async function setTheme(theme) {
+      if (!currentTournament) {
+        NotificationSystem.show('No tournament selected', 'error');
+        return;
+      }
+      try {
+        await db.updateTournament(currentTournament.id, { theme });
+        currentTournament.theme = theme;
+        ThemeManager.apply(theme);
+        renderThemeSelector();
+        NotificationSystem.show(`Theme set to ${theme}`, 'success');
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    // Seeding mode
+    async function setSeedingMode(mode) {
+      if (!currentTournament) {
+        NotificationSystem.show('No tournament selected', 'error');
+        return;
+      }
+      try {
+        await db.updateTournament(currentTournament.id, { seeding_mode: mode });
+        currentTournament.seeding_mode = mode;
+        document.querySelectorAll('.seeding-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.mode === mode);
+          b.classList.toggle('btn-primary', b.dataset.mode === mode);
+          b.classList.toggle('btn-secondary', b.dataset.mode !== mode);
+        });
+        NotificationSystem.show(`Seeding: ${mode}`, 'success');
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    // Countdown fields
+    async function updateDeadline() {
+      if (!currentTournament) return;
+      const val = document.getElementById('signup-deadline').value;
+      try {
+        await db.updateTournament(currentTournament.id, { signup_deadline: val ? new Date(val).toISOString() : null });
+        NotificationSystem.show('Signup deadline updated', 'success');
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function updateStartTime() {
+      if (!currentTournament) return;
+      const val = document.getElementById('start-time').value;
+      try {
+        await db.updateTournament(currentTournament.id, { start_time: val ? new Date(val).toISOString() : null });
+        NotificationSystem.show('Start time updated', 'success');
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    // Match reports
+    async function loadMatchReports() {
+      if (!currentTournament) return;
+      const list = document.getElementById('match-reports-list');
+      try {
+        const reports = await db.getMatchReports(currentTournament.id);
+        if (!reports.length) {
+          list.innerHTML = '<p class="text-muted">No pending reports.</p>';
+          return;
+        }
+        list.innerHTML = reports.map(r => `
+          <div class="player-row" style="margin-bottom:6px;">
+            <div class="player-info">
+              <span class="player-name">${r.reported_by}</span>
+              <span class="text-muted" style="margin-left:8px;">claims <strong class="text-cyan">${r.claimed_winner}</strong> won</span>
+              ${r.screenshot_url ? `<a href="${r.screenshot_url}" target="_blank" class="text-pink" style="margin-left:8px;">Screenshot</a>` : ''}
+              ${r.notes ? `<span class="text-muted" style="margin-left:8px;font-size:12px;">${r.notes}</span>` : ''}
+            </div>
+            <div class="flex gap-1">
+              <button class="action-btn btn-advance" onclick="approveReport('${r.id}', '${r.match_id}', '${r.claimed_winner}')">Approve</button>
+              <button class="action-btn" onclick="denyReport('${r.id}')">Deny</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        list.innerHTML = '<p class="text-muted">Could not load reports.</p>';
+      }
+    }
+
+    async function approveReport(reportId, matchId, claimedWinner) {
+      try {
+        await db.updateMatchReport(reportId, { status: 'approved' });
+        NotificationSystem.show('Report approved', 'success');
+        loadMatchReports();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function denyReport(reportId) {
+      try {
+        await db.updateMatchReport(reportId, { status: 'denied' });
+        NotificationSystem.show('Report denied', 'warning');
+        loadMatchReports();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    // Spectator count
+    async function loadSpectatorCount() {
+      if (!currentTournament) return;
+      try {
+        const count = await db.getSpectatorCount(currentTournament.id);
+        const el = document.getElementById('spectator-count');
+        if (el) el.textContent = count;
+      } catch (e) {}
+    }
+
+    // Update loadSettings to include new fields
+    const _origLoadSettings = loadSettings;
+    loadSettings = function() {
+      _origLoadSettings();
+      renderThemeSelector();
+      loadMatchReports();
+      loadSpectatorCount();
+
+      if (currentTournament) {
+        const seedMode = currentTournament.seeding_mode || 'random';
+        document.querySelectorAll('.seeding-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.mode === seedMode);
+          b.classList.toggle('btn-primary', b.dataset.mode === seedMode);
+          b.classList.toggle('btn-secondary', b.dataset.mode !== seedMode);
+        });
+
+        if (currentTournament.signup_deadline) {
+          const dl = new Date(currentTournament.signup_deadline);
+          document.getElementById('signup-deadline').value = dl.toISOString().slice(0, 16);
+        }
+        if (currentTournament.start_time) {
+          const st = new Date(currentTournament.start_time);
+          document.getElementById('start-time').value = st.toISOString().slice(0, 16);
+        }
+      }
+    };
+  </script>
+</body>
+</html>

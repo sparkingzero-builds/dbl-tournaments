@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tournament — DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/roster.css" />
+  <link rel="stylesheet" href="css/bracket.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    .tournament-header {
+      text-align: center;
+      padding: 40px 0 30px;
+    }
+
+    .tournament-name {
+      font-size: clamp(24px, 4vw, 36px);
+      color: var(--cyan);
+      text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+      margin-bottom: 8px;
+    }
+
+    .tournament-desc {
+      color: var(--muted);
+      max-width: 600px;
+      margin: 0 auto 20px;
+      font-size: 14px;
+    }
+
+    .signup-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    .signup-form-panel {
+      position: sticky;
+      top: 80px;
+      align-self: start;
+    }
+
+    .player-count {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--cyan);
+    }
+
+    .player-count span {
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .signup-closed {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .signup-closed h2 {
+      color: var(--pink);
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .signup-section {
+        grid-template-columns: 1fr;
+      }
+
+      .signup-form-panel {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html" class="active">Tournament</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="particles-bg" id="particles"></div>
+
+  <main class="page container page-enter">
+    <div id="tournament-content">
+      <div class="loader"><div class="loader-spinner"></div></div>
+    </div>
+  </main>
+
+  <!-- Character select modal -->
+  <div class="modal-overlay" id="char-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Select Your Team</h3>
+        <button class="modal-close" onclick="closeCharModal()">&times;</button>
+      </div>
+      <div class="team-display" id="modal-team-slots"></div>
+      <div class="filter-bar" id="modal-filters"></div>
+      <div class="char-grid" id="modal-char-grid"></div>
+      <div style="text-align:center;margin-top:20px;">
+        <button class="btn btn-primary" id="confirm-team-btn" disabled onclick="confirmTeam()">Confirm Team (0/3)</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/characters.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/particles.js"></script>
+  <script>
+    initParticles(document.getElementById('particles'));
+
+    let currentTournament = null;
+    let signups = [];
+
+    async function loadTournament() {
+      const content = document.getElementById('tournament-content');
+
+      try {
+        currentTournament = await db.getActiveTournament();
+      } catch (e) {
+        currentTournament = null;
+      }
+
+      if (!currentTournament) {
+        content.innerHTML = `
+          <div class="signup-closed">
+            <h2>No Active Tournament</h2>
+            <p class="text-muted">Check back later or join the Discord for updates.</p>
+            <a href="index.html" class="btn btn-secondary mt-3">Back to Home</a>
+          </div>`;
+        return;
+      }
+
+      try {
+        signups = await db.getSignups(currentTournament.id);
+      } catch (e) {
+        signups = [];
+      }
+
+      await CharacterManager.load();
+      if (currentTournament.theme) ThemeManager.apply(currentTournament.theme);
+      if (currentTournament.allowed_characters) {
+        CharacterManager.setAllowed(currentTournament.allowed_characters);
+      }
+
+      renderTournamentPage();
+
+      // Realtime
+      try {
+        subscribeToChanges(currentTournament.id, {
+          onSignup: async () => {
+            signups = await db.getSignups(currentTournament.id);
+            renderPlayerList();
+            NotificationSystem.show('A new player has signed up!', 'signup');
+          },
+          onTournament: async (payload) => {
+            currentTournament = payload.new;
+            renderTournamentPage();
+          }
+        });
+      } catch (e) {}
+    }
+
+    function renderTournamentPage() {
+      const content = document.getElementById('tournament-content');
+      const isSignup = currentTournament.status === 'signup';
+
+      content.innerHTML = `
+        <div class="tournament-header">
+          <span class="status ${isSignup ? 'status-signup' : 'status-active'}">${isSignup ? 'Signups Open' : 'In Progress'}</span>
+          <h1 class="tournament-name mt-2">${currentTournament.name}</h1>
+          ${currentTournament.description ? `<p class="tournament-desc">${currentTournament.description}</p>` : ''}
+          <div class="player-count mt-2">${signups.length} <span>/ ${currentTournament.max_players || '∞'} players</span></div>
+        </div>
+
+        <div id="tournament-countdown"></div>
+
+        ${isSignup ? `
+        <div class="signup-section">
+          <div>
+            <h3 class="mb-2">Registered Players</h3>
+            <div id="player-list" class="player-list stagger"></div>
+          </div>
+          <div class="signup-form-panel">
+            <div class="card card-glow">
+              <h3 class="mb-2">Sign Up</h3>
+              <div class="flex flex-col gap-2">
+                <label style="font-weight:600;font-size:0.9rem;">Discord Username</label>
+                <input type="text" id="discord-input" placeholder="e.g. Player#1234" />
+                <label style="font-weight:600;font-size:0.9rem;margin-top:8px;">Your Team</label>
+                <div class="team-display" id="signup-team-slots"></div>
+                <button class="btn btn-secondary" onclick="openCharModal()">Pick Characters</button>
+                <button class="btn btn-primary btn-charge mt-2" id="signup-btn" onclick="submitSignup()" disabled>
+                  Sign Up
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        ` : `
+        <div>
+          <h3 class="mb-2">Players</h3>
+          <div id="player-list" class="player-list stagger"></div>
+          <div class="text-center mt-3">
+            <a href="bracket.html" class="btn btn-primary btn-lg">View Bracket</a>
+          </div>
+        </div>
+        `}
+      `;
+
+      renderPlayerList();
+
+      if (isSignup) {
+        CharacterManager.renderTeamSlots(document.getElementById('signup-team-slots'));
+        updateSignupBtn();
+
+        CharacterManager.setTeamChangeHandler((team) => {
+          CharacterManager.renderTeamSlots(document.getElementById('signup-team-slots'));
+          updateSignupBtn();
+        });
+
+        // Countdown timer
+        if (currentTournament.signup_deadline) {
+          initCountdown(document.getElementById('tournament-countdown'), currentTournament.signup_deadline, 'Signups Close In');
+        } else if (currentTournament.start_time) {
+          initCountdown(document.getElementById('tournament-countdown'), currentTournament.start_time, 'Tournament Starts In');
+        }
+      }
+    }
+
+    function renderPlayerList() {
+      const list = document.getElementById('player-list');
+      if (!list) return;
+
+      if (!signups.length) {
+        list.innerHTML = '<div class="empty-state"><p>No players registered yet. Be the first!</p></div>';
+        return;
+      }
+
+      list.innerHTML = signups.map((s, i) => {
+        let teamHtml = '';
+        if (currentTournament.teams_visible && s.team) {
+          teamHtml = `<div class="player-team">${s.team.map(c =>
+            `<img src="${c.image}" alt="${c.name}" title="${c.name}" onerror="this.style.display='none'" />`
+          ).join('')}</div>`;
+        }
+
+        return `
+          <div class="player-row">
+            <div class="player-info">
+              <span class="player-number">${String(i + 1).padStart(2, '0')}</span>
+              <a class="player-name" href="profile.html?player=${encodeURIComponent(s.discord_username)}">${s.discord_username}</a>
+            </div>
+            ${teamHtml}
+          </div>`;
+      }).join('');
+    }
+
+    function updateSignupBtn() {
+      const btn = document.getElementById('signup-btn');
+      if (!btn) return;
+      const name = document.getElementById('discord-input')?.value.trim();
+      const team = CharacterManager.getTeam();
+      btn.disabled = !name || team.length !== 3;
+    }
+
+    // Character modal
+    function openCharModal() {
+      const modal = document.getElementById('char-modal');
+      modal.classList.add('open');
+      CharacterManager.renderFilterBar(
+        document.getElementById('modal-filters'),
+        document.getElementById('modal-char-grid'),
+        { selectable: true, onSelect: onCharSelect }
+      );
+      CharacterManager.renderTeamSlots(document.getElementById('modal-team-slots'));
+      updateConfirmBtn();
+    }
+
+    function closeCharModal() {
+      document.getElementById('char-modal').classList.remove('open');
+    }
+
+    function onCharSelect(char, team) {
+      CharacterManager.renderTeamSlots(document.getElementById('modal-team-slots'));
+      updateConfirmBtn();
+    }
+
+    function updateConfirmBtn() {
+      const btn = document.getElementById('confirm-team-btn');
+      const team = CharacterManager.getTeam();
+      btn.textContent = `Confirm Team (${team.length}/3)`;
+      btn.disabled = team.length !== 3;
+    }
+
+    function confirmTeam() {
+      closeCharModal();
+      CharacterManager.renderTeamSlots(document.getElementById('signup-team-slots'));
+      updateSignupBtn();
+    }
+
+    async function submitSignup() {
+      const name = document.getElementById('discord-input').value.trim();
+      const team = CharacterManager.getTeam();
+      if (!name || team.length !== 3) return;
+
+      const btn = document.getElementById('signup-btn');
+      btn.disabled = true;
+      btn.textContent = 'Signing up...';
+
+      try {
+        const teamData = team.map(c => ({
+          id: c.id,
+          name: c.name,
+          element: c.element,
+          rarity: c.rarity,
+          image: c.image
+        }));
+
+        await db.signup(currentTournament.id, name, teamData);
+        NotificationSystem.show(`${name} has been registered!`, 'success');
+
+        CharacterManager.clearTeam();
+        document.getElementById('discord-input').value = '';
+        signups = await db.getSignups(currentTournament.id);
+        renderTournamentPage();
+      } catch (e) {
+        if (e.message?.includes('duplicate') || e.code === '23505') {
+          NotificationSystem.show('You are already registered!', 'warning');
+        } else {
+          NotificationSystem.show('Error signing up. Try again.', 'error');
+        }
+        btn.disabled = false;
+        btn.textContent = 'Sign Up';
+      }
+    }
+
+    // Listen for input changes
+    document.addEventListener('input', (e) => {
+      if (e.target.id === 'discord-input') updateSignupBtn();
+    });
+
+    document.addEventListener('DOMContentLoaded', loadTournament);
+
+    function initCountdown(container, deadline, label) {
+      if (!container || !deadline) return;
+
+      function render() {
+        const now = Date.now();
+        const end = new Date(deadline).getTime();
+        const diff = end - now;
+
+        if (diff <= 0) {
+          container.innerHTML = '<div class="countdown-expired">Time\'s Up!</div>';
+          setTimeout(() => location.reload(), 2000);
+          return;
+        }
+
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+
+        container.innerHTML = `
+          <div class="countdown-label">${label}</div>
+          <div class="countdown-panel">
+            <div class="countdown-unit">
+              <div class="countdown-digit">${String(d).padStart(2, '0')}</div>
+              <div class="countdown-suffix">Days</div>
+            </div>
+            <span class="countdown-separator">:</span>
+            <div class="countdown-unit">
+              <div class="countdown-digit">${String(h).padStart(2, '0')}</div>
+              <div class="countdown-suffix">Hours</div>
+            </div>
+            <span class="countdown-separator">:</span>
+            <div class="countdown-unit">
+              <div class="countdown-digit">${String(m).padStart(2, '0')}</div>
+              <div class="countdown-suffix">Mins</div>
+            </div>
+            <span class="countdown-separator">:</span>
+            <div class="countdown-unit">
+              <div class="countdown-digit">${String(s).padStart(2, '0')}</div>
+              <div class="countdown-suffix">Secs</div>
+            </div>
+          </div>
+        `;
+      }
+
+      render();
+      setInterval(render, 1000);
+    }
+  </script>
+</body>
+</html>

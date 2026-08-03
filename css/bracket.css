@@ -1,0 +1,284 @@
+/* Bracket Layout */
+.bracket-container {
+  overflow-x: auto;
+  padding: 20px;
+}
+
+.bracket {
+  display: flex;
+  gap: 50px;
+  min-width: max-content;
+  align-items: center;
+}
+
+.bracket-round {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 200px;
+}
+
+.round-header {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* Match Card */
+.match-card {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 6px 0;
+  transition: border-color 0.15s;
+}
+
+.match-card:hover {
+  border-color: rgba(0, 229, 255, 0.3);
+}
+
+.match-card.final {
+  border-color: var(--pink);
+  box-shadow: 0 0 16px rgba(255, 45, 120, 0.15);
+}
+
+.match-player {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 8px;
+  border-bottom: 1px solid rgba(46, 39, 85, 0.4);
+  transition: background 0.15s;
+}
+
+.match-player:last-child {
+  border-bottom: none;
+}
+
+.match-player.winner {
+  background: rgba(0, 229, 255, 0.05);
+}
+
+.match-player.winner .player-match-name {
+  color: var(--cyan);
+  font-weight: 700;
+}
+
+.match-player.loser {
+  opacity: 0.3;
+}
+
+.match-player.bye {
+  opacity: 0.18;
+  font-style: italic;
+}
+
+.player-match-name {
+  flex: 1;
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.match-score {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--pink);
+  min-width: 24px;
+  text-align: right;
+}
+
+.match-team-icons {
+  display: flex;
+  gap: 3px;
+}
+
+.match-team-icons img {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  object-fit: cover;
+}
+
+/* Champion */
+.champion-card {
+  text-align: center;
+  padding: 24px;
+  background: var(--panel);
+  border: 1px solid var(--pink);
+  border-radius: var(--radius);
+  box-shadow: 0 0 30px rgba(255, 45, 120, 0.12);
+  min-width: 180px;
+}
+
+.champion-label {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--pink);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.champion-name {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--cyan);
+  text-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+}
+
+/* Admin clickable */
+.match-card.clickable {
+  cursor: pointer;
+}
+
+.match-card.clickable:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.12);
+}
+
+.match-card.clickable .match-player:hover {
+  background: rgba(0, 229, 255, 0.06);
+}
+
+/* Countdown Timer */
+.countdown-panel {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+}
+
+.countdown-label {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--pink);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 56px;
+}
+
+.countdown-digit {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--cyan);
+  text-shadow: 0 0 16px rgba(0, 229, 255, 0.5);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  min-width: 52px;
+  text-align: center;
+  line-height: 1;
+}
+
+.countdown-suffix {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+.countdown-separator {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--pink);
+  margin-top: -10px;
+}
+
+.countdown-expired {
+  text-align: center;
+  color: var(--pink);
+  font-family: 'Exo 2', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .bracket-container {
+    padding: 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .bracket {
+    gap: 30px;
+  }
+
+  .bracket-round {
+    min-width: 170px;
+  }
+
+  .match-player {
+    padding: 10px 10px;
+  }
+
+  .player-match-name {
+    font-size: 12px;
+  }
+
+  .match-team-icons img {
+    width: 18px;
+    height: 18px;
+  }
+
+  .champion-card {
+    padding: 18px;
+    min-width: 140px;
+  }
+
+  .champion-name {
+    font-size: 1.1rem;
+  }
+
+  .countdown-panel {
+    gap: 8px;
+    padding: 12px;
+    flex-wrap: wrap;
+  }
+
+  .countdown-digit {
+    font-size: 1.4rem;
+    min-width: 44px;
+    padding: 5px 8px;
+  }
+
+  .countdown-separator {
+    font-size: 1rem;
+  }
+}

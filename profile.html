@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Player Profile — DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <style>
+    .profile-header {
+      text-align: center;
+      padding: 40px 0 20px;
+    }
+
+    .profile-name {
+      font-size: clamp(24px, 5vw, 40px);
+      color: var(--cyan);
+      text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+      margin-bottom: 4px;
+    }
+
+    .profile-subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* Stats row */
+    .profile-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      max-width: 700px;
+      margin: 24px auto 36px;
+    }
+
+    .p-stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px 10px;
+      text-align: center;
+    }
+
+    .p-stat-value {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .p-stat-value.cyan { color: var(--cyan); }
+    .p-stat-value.green { color: var(--green); }
+    .p-stat-value.red { color: var(--red); }
+    .p-stat-value.gold { color: var(--gold); }
+
+    .p-stat-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    /* Sections */
+    .profile-sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .profile-section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .profile-section h3 {
+      font-size: 14px;
+      color: var(--cyan);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .profile-section.full-width {
+      grid-column: 1 / -1;
+    }
+
+    /* Tournament history list */
+    .tourney-history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .tourney-history-item .t-name {
+      font-weight: 600;
+    }
+
+    .tourney-history-item .t-date {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .placement {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .placement.gold { color: var(--gold); }
+    .placement.silver { color: #c0c0c0; }
+    .placement.normal { color: var(--muted); }
+
+    /* Rival / character rows */
+    .rival-row, .char-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .rival-row .rival-name {
+      font-weight: 600;
+    }
+
+    .rival-row .rival-count, .char-row .char-count {
+      color: var(--cyan);
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .char-row {
+      gap: 10px;
+    }
+
+    .char-row img {
+      width: 30px;
+      height: 30px;
+      border-radius: 5px;
+      border: 1px solid var(--line);
+      object-fit: cover;
+    }
+
+    .char-row .char-name {
+      flex: 1;
+      font-weight: 600;
+    }
+
+    /* Win rate bar */
+    .winrate-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: var(--line);
+      border-radius: 3px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .winrate-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    @media (max-width: 700px) {
+      .profile-stats { grid-template-columns: repeat(2, 1fr); }
+      .profile-sections { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">&#9776;</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="particles-bg" id="particles"></div>
+
+  <main class="page container page-enter">
+    <div id="profile-content">
+      <div class="loader"><div class="loader-spinner"></div></div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/particles.js"></script>
+  <script>
+    initParticles(document.getElementById('particles'));
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const params = new URLSearchParams(window.location.search);
+      const playerName = params.get('player');
+      const content = document.getElementById('profile-content');
+
+      if (!playerName) {
+        content.innerHTML = '<div class="empty-state"><h3>No Player Specified</h3><p>Add ?player=Username to the URL.</p></div>';
+        return;
+      }
+
+      document.title = `${playerName} — DBL Tournaments`;
+
+      try {
+        // Get all signups for this player
+        const signups = await db.getPlayerStats(playerName);
+
+        if (!signups.length) {
+          content.innerHTML = `<div class="empty-state"><h3>Player Not Found</h3><p>"${playerName}" hasn't entered any tournaments.</p></div>`;
+          return;
+        }
+
+        // Get all matches for this player
+        const signupIds = signups.map(s => s.id);
+        const matches = await db.getPlayerMatches(playerName);
+
+        // Calculate stats
+        let wins = 0;
+        let losses = 0;
+        matches.forEach(m => {
+          if (!m.winner_id) return;
+          if (signupIds.includes(m.winner_id)) {
+            wins++;
+          } else {
+            losses++;
+          }
+        });
+        const totalMatches = wins + losses;
+        const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
+
+        // Tournament history with placement
+        const tournamentIds = [...new Set(signups.map(s => s.tournament_id))];
+        const tournamentDetails = [];
+        for (const tid of tournamentIds) {
+          try {
+            const t = await db.getTournament(tid);
+            const tMatches = await db.getMatches(tid);
+            const playerSignup = signups.find(s => s.tournament_id === tid);
+
+            // Determine placement
+            let placement = 'Participated';
+            let placementClass = 'normal';
+            if (tMatches.length) {
+              const maxRound = Math.max(...tMatches.map(m => m.round));
+              const finalMatch = tMatches.find(m => m.round === maxRound && m.winner_id);
+              if (finalMatch && finalMatch.winner_id === playerSignup?.id) {
+                placement = 'Champion';
+                placementClass = 'gold';
+              } else if (finalMatch && (finalMatch.player1_id === playerSignup?.id || finalMatch.player2_id === playerSignup?.id)) {
+                placement = 'Runner-up';
+                placementClass = 'silver';
+              } else {
+                // Find the round they lost in
+                const lostMatch = tMatches.find(m => m.winner_id &&
+                  (m.player1_id === playerSignup?.id || m.player2_id === playerSignup?.id) &&
+                  m.winner_id !== playerSignup?.id
+                );
+                if (lostMatch) {
+                  const roundName = lostMatch.round === maxRound - 1 ? 'Semi-Finals' : `Round ${lostMatch.round}`;
+                  placement = `Eliminated ${roundName}`;
+                }
+              }
+            }
+
+            tournamentDetails.push({ tournament: t, placement, placementClass });
+          } catch (e) {}
+        }
+
+        // Rival tracker
+        const rivalCounts = {};
+        matches.forEach(m => {
+          const isP1 = signupIds.includes(m.player1_id);
+          const opponent = isP1 ? m.player2 : m.player1;
+          if (opponent) {
+            const name = opponent.discord_username;
+            rivalCounts[name] = (rivalCounts[name] || 0) + 1;
+          }
+        });
+        const rivals = Object.entries(rivalCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+        // Character affinity
+        const charCounts = {};
+        signups.forEach(s => {
+          if (s.team) {
+            s.team.forEach(c => {
+              const key = c.name;
+              if (!charCounts[key]) charCounts[key] = { count: 0, image: c.image, name: c.name };
+              charCounts[key].count++;
+            });
+          }
+        });
+        const topChars = Object.values(charCounts).sort((a, b) => b.count - a.count).slice(0, 6);
+
+        // Render
+        content.innerHTML = `
+          <div class="profile-header">
+            <h1 class="profile-name">${playerName}</h1>
+            <div class="profile-subtitle">Player Profile</div>
+          </div>
+
+          <div class="profile-stats stagger">
+            <div class="p-stat">
+              <div class="p-stat-value cyan">${totalMatches}</div>
+              <div class="p-stat-label">Matches</div>
+            </div>
+            <div class="p-stat">
+              <div class="p-stat-value green">${wins}</div>
+              <div class="p-stat-label">Wins</div>
+            </div>
+            <div class="p-stat">
+              <div class="p-stat-value red">${losses}</div>
+              <div class="p-stat-label">Losses</div>
+            </div>
+            <div class="p-stat">
+              <div class="p-stat-value gold">${winRate}%</div>
+              <div class="p-stat-label">Win Rate</div>
+              <div class="winrate-bar-bg"><div class="winrate-bar-fill" style="width:${winRate}%"></div></div>
+            </div>
+          </div>
+
+          <div class="profile-sections">
+            <div class="profile-section">
+              <h3>Tournament History</h3>
+              ${tournamentDetails.length ? tournamentDetails.map(td => {
+                const date = new Date(td.tournament.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                return `<div class="tourney-history-item">
+                  <div>
+                    <div class="t-name">${td.tournament.name}</div>
+                    <div class="t-date">${date}</div>
+                  </div>
+                  <div class="placement ${td.placementClass}">${td.placement}</div>
+                </div>`;
+              }).join('') : '<div class="empty-state"><p>No tournament data yet.</p></div>'}
+            </div>
+
+            <div class="profile-section">
+              <h3>Rival Tracker</h3>
+              ${rivals.length ? rivals.map(([name, count]) =>
+                `<div class="rival-row">
+                  <a class="rival-name" href="profile.html?player=${encodeURIComponent(name)}">${name}</a>
+                  <span class="rival-count">${count} match${count > 1 ? 'es' : ''}</span>
+                </div>`
+              ).join('') : '<div class="empty-state"><p>No match data yet.</p></div>'}
+            </div>
+
+            <div class="profile-section full-width">
+              <h3>Character Affinity</h3>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;">
+                ${topChars.length ? topChars.map(c =>
+                  `<div class="char-row">
+                    <img src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
+                    <span class="char-name">${c.name}</span>
+                    <span class="char-count">${c.count}x</span>
+                  </div>`
+                ).join('') : '<div class="empty-state"><p>No team data.</p></div>'}
+              </div>
+            </div>
+          </div>
+        `;
+
+      } catch (e) {
+        console.error('Profile load error:', e);
+        content.innerHTML = '<div class="empty-state"><p>Error loading player profile.</p></div>';
+      }
+    });
+  </script>
+</body>
+</html>
