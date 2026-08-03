@@ -242,8 +242,8 @@
     let tournament = null;
     let signups = [];
     let mySignup = null;
-    let bannedChars = [];
-    let banCount = 3;
+    let selectedVote = null;
+    let banCount = 1;
     let allChars = [];
 
     async function init() {
@@ -272,7 +272,7 @@
       }
 
       if (tournament.theme) ThemeManager.apply(tournament.theme);
-      banCount = tournament.ban_count || 3;
+      banCount = tournament.ban_count || 1;
 
       try {
         signups = await db.getSignups(tournament.id);
@@ -283,45 +283,67 @@
       await CharacterManager.load();
       allChars = CharacterManager.getAll();
 
-      showLoginOrBanPhase();
+      showLoginOrVote();
     }
 
-    function showLoginOrBanPhase() {
+    function getVoteResults() {
+      const votes = {};
+      signups.forEach(s => {
+        if (s.bans && s.bans.length > 0) {
+          s.bans.forEach(id => {
+            votes[id] = (votes[id] || 0) + 1;
+          });
+        }
+      });
+      return Object.entries(votes)
+        .map(([id, count]) => ({ id, count }))
+        .sort((a, b) => b.count - a.count);
+    }
+
+    function getBannedCharIds() {
+      const results = getVoteResults();
+      if (!results.length) return new Set();
+      return new Set(results.slice(0, banCount).map(r => r.id));
+    }
+
+    function showLoginOrVote() {
       const content = document.getElementById('ban-content');
       const saved = sessionStorage.getItem('ban_username');
 
       if (saved) {
         mySignup = signups.find(s => s.discord_username.toLowerCase() === saved.toLowerCase());
         if (mySignup) {
-          if (mySignup.bans && mySignup.bans.length >= banCount) {
-            showAlreadyBanned();
+          if (mySignup.bans && mySignup.bans.length > 0) {
+            showVoteSubmitted();
             return;
           }
-          bannedChars = mySignup.bans || [];
-          showBanPhase();
+          showVotePage();
           return;
         }
       }
 
+      const allDone = signups.every(s => s.bans && s.bans.length > 0);
+      const votedCount = signups.filter(s => s.bans && s.bans.length > 0).length;
+
       content.innerHTML = `
         <div class="ban-header">
-          <h1 class="ban-title">⚔ Ban Phase</h1>
-          <p class="ban-subtitle">${tournament.name} — Each player bans ${banCount} character${banCount !== 1 ? 's' : ''}. Banned characters are removed from the entire tournament — anyone using them must re-pick.</p>
+          <h1 class="ban-title">⚔ Ban Vote</h1>
+          <p class="ban-subtitle">${tournament.name} — Vote for the character you want banned. The top ${banCount} most-voted character${banCount !== 1 ? 's get' : ' gets'} banned from the tournament.</p>
         </div>
         <div class="ban-login">
           <div class="card card-glow">
             <h3 class="mb-2">Enter Your Username</h3>
-            <p class="text-muted mb-2" style="font-size:13px;">Enter the Discord username you signed up with.</p>
+            <p class="text-muted mb-2" style="font-size:13px;">Enter the Discord username you signed up with to cast your vote.</p>
             <input type="text" id="ban-username" placeholder="e.g. Player#1234" />
-            <button class="btn btn-primary btn-lg mt-2" onclick="loginForBan()" style="width:100%;">Enter Ban Phase</button>
+            <button class="btn btn-primary btn-lg mt-2" onclick="loginForBan()" style="width:100%;">Cast Your Vote</button>
           </div>
           <div class="ban-status-list mt-3">
-            <h4 class="mb-1 text-muted">Ban Status</h4>
+            <h4 class="mb-1 text-muted">Votes: ${votedCount} / ${signups.length}</h4>
             ${signups.map(s => `
               <div class="ban-player-row">
                 <span class="player-name">${s.discord_username}</span>
-                ${s.bans && s.bans.length >= banCount
-                  ? '<span class="ban-done">✓ Done</span>'
+                ${s.bans && s.bans.length > 0
+                  ? '<span class="ban-done">✓ Voted</span>'
                   : '<span class="ban-pending">Pending</span>'}
               </div>
             `).join('')}
@@ -349,85 +371,247 @@
 
       sessionStorage.setItem('ban_username', mySignup.discord_username);
 
-      if (mySignup.bans && mySignup.bans.length >= banCount) {
-        showAlreadyBanned();
+      if (mySignup.bans && mySignup.bans.length > 0) {
+        showVoteSubmitted();
         return;
       }
 
-      bannedChars = mySignup.bans || [];
-      showBanPhase();
+      showVotePage();
     }
 
-    function getGlobalBanList() {
-      const allBans = new Set();
-      signups.forEach(s => {
-        if (s.bans && s.bans.length) {
-          s.bans.forEach(id => allBans.add(id));
-        }
-      });
-      return allBans;
-    }
-
-    function showAlreadyBanned() {
+    function showVotePage() {
       const content = document.getElementById('ban-content');
-      const globalBans = getGlobalBanList();
-      const myTeam = mySignup.team || [];
-      const conflicting = myTeam.filter(c => globalBans.has(c.id));
-      const allDone = signups.every(s => s.bans && s.bans.length >= banCount);
+      selectedVote = null;
+
+      content.innerHTML = `
+        <div class="ban-header">
+          <h1 class="ban-title">⚔ Ban Vote</h1>
+          <p class="ban-subtitle">Pick 1 character you want banned from the tournament. The character with the most votes gets removed.</p>
+        </div>
+        <div class="ban-phase-content">
+          <div class="ban-sidebar">
+            <div class="ban-counter">Your Vote</div>
+            <div id="vote-slot">
+              <div class="ban-slot"><span class="ban-slot__empty">Pick a character</span></div>
+            </div>
+            <button class="btn btn-primary btn-lg mt-2" id="submit-vote-btn" onclick="submitVote()" disabled style="width:100%;">
+              Submit Vote
+            </button>
+          </div>
+          <div>
+            <div class="filter-bar" id="ban-filters"></div>
+            <div class="char-grid" id="ban-char-grid"></div>
+          </div>
+        </div>`;
+
+      renderVoteGrid();
+    }
+
+    function renderVoteSlot() {
+      const container = document.getElementById('vote-slot');
+      if (!container) return;
+
+      if (selectedVote) {
+        const c = allChars.find(ch => ch.id === selectedVote);
+        container.innerHTML = `
+          <div class="ban-slot filled">
+            <img class="ban-slot__img" src="${c?.image || ''}" alt="${c?.name || ''}" onerror="this.style.display='none'" />
+            <span class="ban-slot__name">${c?.name || 'Unknown'}</span>
+            <button class="ban-slot__remove" onclick="clearVote()">&times;</button>
+          </div>`;
+      } else {
+        container.innerHTML = `<div class="ban-slot"><span class="ban-slot__empty">Pick a character</span></div>`;
+      }
+
+      const btn = document.getElementById('submit-vote-btn');
+      if (btn) btn.disabled = !selectedVote;
+    }
+
+    function renderVoteGrid() {
+      const filterBar = document.getElementById('ban-filters');
+      filterBar.innerHTML = `
+        <input type="search" placeholder="Search characters..." id="ban-search" />
+        <div class="element-filters">
+          <button class="element-btn active" data-element="">ALL</button>
+          <button class="element-btn" data-element="RED">R</button>
+          <button class="element-btn" data-element="BLU">B</button>
+          <button class="element-btn" data-element="GRN">G</button>
+          <button class="element-btn" data-element="YEL">Y</button>
+          <button class="element-btn" data-element="PUR">P</button>
+          <button class="element-btn" data-element="LGT">L</button>
+        </div>
+        <select id="ban-rarity-filter" class="rarity-select">
+          <option value="">All Rarities</option>
+          <option value="LEGEND">Legend</option>
+          <option value="ULTRA">Ultra</option>
+          <option value="SPARKING">Sparking</option>
+          <option value="EXTREME">Extreme</option>
+          <option value="HERO">Hero</option>
+        </select>
+      `;
+
+      filterBar.querySelector('#ban-search').addEventListener('input', applyVoteFilters);
+      filterBar.querySelector('#ban-rarity-filter').addEventListener('change', applyVoteFilters);
+      filterBar.querySelectorAll('.element-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          filterBar.querySelectorAll('.element-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          applyVoteFilters();
+        });
+      });
+
+      applyVoteFilters();
+    }
+
+    function applyVoteFilters() {
+      const search = document.getElementById('ban-search')?.value || '';
+      const element = document.querySelector('#ban-filters .element-btn.active')?.dataset.element || '';
+      const rarity = document.getElementById('ban-rarity-filter')?.value || '';
+
+      let chars = allChars;
+      if (search) chars = chars.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
+      if (element) chars = chars.filter(c => c.element === element);
+      if (rarity) chars = chars.filter(c => c.rarity === rarity);
+
+      const grid = document.getElementById('ban-char-grid');
+      grid.innerHTML = '';
+
+      const fallbackImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23161d2e' width='100' height='100'/%3E%3Ctext x='50' y='55' text-anchor='middle' fill='%238fa0c4' font-size='12'%3E%3F%3C/text%3E%3C/svg%3E";
+      const elementColors = {
+        RED: 'var(--el-red)', BLU: 'var(--el-blu)', GRN: 'var(--el-grn)',
+        YEL: 'var(--el-yel)', PUR: 'var(--el-pur)', LGT: 'var(--el-lgt)'
+      };
+
+      chars.forEach(c => {
+        const card = document.createElement('div');
+        const isSelected = selectedVote === c.id;
+        card.className = 'char-card' + (isSelected ? ' ban-selected' : '');
+
+        const rarityClass = (c.rarity || '').toLowerCase();
+        card.innerHTML = `
+          <div class="char-card__art">
+            <img src="${c.image}" alt="${c.name}" loading="lazy" onerror="this.src='${fallbackImg}'" />
+            <div class="char-card__element" style="background:${elementColors[c.element] || '#666'}"></div>
+            <span class="char-card__rarity badge-${rarityClass}">${c.rarity}</span>
+          </div>
+          <div class="char-card__body">
+            <div class="char-card__name">${c.name}</div>
+          </div>
+        `;
+
+        card.addEventListener('click', () => {
+          selectedVote = isSelected ? null : c.id;
+          if (!isSelected) playSound('click');
+          renderVoteSlot();
+          applyVoteFilters();
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    function clearVote() {
+      selectedVote = null;
+      renderVoteSlot();
+      applyVoteFilters();
+    }
+
+    async function submitVote() {
+      if (!selectedVote || !mySignup) return;
+
+      const btn = document.getElementById('submit-vote-btn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      try {
+        await db.updateSignupBans(mySignup.id, [selectedVote]);
+        mySignup.bans = [selectedVote];
+        playSound('ko');
+        NotificationSystem.show('Vote submitted!', 'success');
+
+        signups = await db.getSignups(tournament.id);
+        mySignup = signups.find(s => s.id === mySignup.id);
+        showVoteSubmitted();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Submit Vote';
+      }
+    }
+
+    function showVoteSubmitted() {
+      const content = document.getElementById('ban-content');
+      const allDone = signups.every(s => s.bans && s.bans.length > 0);
+      const votedCount = signups.filter(s => s.bans && s.bans.length > 0).length;
+      const votedChar = allChars.find(c => c.id === (mySignup.bans || [])[0]);
+      const results = getVoteResults();
+      const bannedIds = getBannedCharIds();
 
       let html = `
         <div class="ban-success">
-          <h2>Bans Submitted!</h2>
-          <p class="text-muted mb-3">You've submitted your ${banCount} ban${banCount !== 1 ? 's' : ''}.</p>
+          <h2>Vote Cast!</h2>
+          <p class="text-muted mb-3">${votedCount} / ${signups.length} players have voted.</p>
           <div class="card" style="max-width:500px;margin:0 auto;">
-            <h4 class="mb-2 text-pink">Your Bans</h4>
-            ${(mySignup.bans || []).map(id => {
-              const c = allChars.find(ch => ch.id === id);
-              return c ? `
-                <div class="ban-slot filled">
-                  <img class="ban-slot__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
-                  <span class="ban-slot__name">${c.name}</span>
-                </div>` : '';
-            }).join('')}
+            <h4 class="mb-2 text-pink">You Voted to Ban</h4>
+            ${votedChar ? `
+              <div class="ban-slot filled">
+                <img class="ban-slot__img" src="${votedChar.image}" alt="${votedChar.name}" onerror="this.style.display='none'" />
+                <span class="ban-slot__name">${votedChar.name}</span>
+              </div>` : ''}
           </div>`;
 
       if (!allDone) {
         html += `
           <div class="card mt-3" style="max-width:500px;margin:0 auto;">
-            <p class="text-muted">Waiting for all players to submit bans...</p>
+            <p class="text-muted">Waiting for all players to vote...</p>
             <div class="ban-status-list mt-2">
               ${signups.map(s => `
                 <div class="ban-player-row">
                   <span class="player-name">${s.discord_username}</span>
-                  ${s.bans && s.bans.length >= banCount
-                    ? '<span class="ban-done">✓ Done</span>'
+                  ${s.bans && s.bans.length > 0
+                    ? '<span class="ban-done">✓ Voted</span>'
                     : '<span class="ban-pending">Pending</span>'}
                 </div>
               `).join('')}
             </div>
           </div>`;
-      } else if (conflicting.length > 0) {
+      } else {
         html += `
           <div class="card mt-3" style="max-width:500px;margin:0 auto;border-color:var(--pink);">
-            <h4 class="text-pink mb-2">⚠ Team Conflict!</h4>
-            <p class="text-muted mb-2" style="font-size:13px;">Some characters on your team were banned by other players. You must replace them.</p>
-            <div class="mb-2">
+            <h4 class="text-pink mb-2">Vote Results</h4>
+            ${results.map(r => {
+              const c = allChars.find(ch => ch.id === r.id);
+              const isBanned = bannedIds.has(r.id);
+              return c ? `
+                <div class="ban-slot ${isBanned ? 'filled' : ''}" style="${isBanned ? '' : 'opacity:0.5;'}">
+                  <img class="ban-slot__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
+                  <span class="ban-slot__name" style="${isBanned ? 'color:var(--pink);' : ''}">${c.name}</span>
+                  <span style="font-family:'Exo 2',sans-serif;font-weight:800;font-size:13px;color:${isBanned ? 'var(--pink)' : 'var(--muted)'};">${r.count} vote${r.count !== 1 ? 's' : ''}${isBanned ? ' — BANNED' : ''}</span>
+                </div>` : '';
+            }).join('')}
+          </div>`;
+
+        const myTeam = mySignup.team || [];
+        const conflicting = myTeam.filter(c => bannedIds.has(c.id));
+        if (conflicting.length > 0) {
+          html += `
+            <div class="card mt-3" style="max-width:500px;margin:0 auto;border-color:var(--pink);">
+              <h4 class="text-pink mb-2">⚠ Team Conflict!</h4>
+              <p class="text-muted mb-2" style="font-size:13px;">A character on your team was banned! You need to replace them.</p>
               ${conflicting.map(c => `
                 <div class="ban-slot filled">
                   <img class="ban-slot__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
                   <span class="ban-slot__name" style="text-decoration:line-through;color:var(--pink);">${c.name}</span>
-                  <span style="color:var(--pink);font-size:11px;font-weight:700;">BANNED</span>
                 </div>
               `).join('')}
-            </div>
-            <button class="btn btn-primary btn-lg" onclick="startRepick()" style="width:100%;">Re-Pick Team</button>
-          </div>`;
-      } else {
-        html += `
-          <div class="card mt-3" style="max-width:500px;margin:0 auto;border-color:var(--green);">
-            <h4 style="color:var(--green);">✓ Team is Clear</h4>
-            <p class="text-muted mt-1">None of your characters were banned. You're good to go!</p>
-          </div>`;
+              <button class="btn btn-primary btn-lg mt-2" onclick="startRepick()" style="width:100%;">Re-Pick Team</button>
+            </div>`;
+        } else {
+          html += `
+            <div class="card mt-3" style="max-width:500px;margin:0 auto;border-color:var(--green);">
+              <h4 style="color:var(--green);">✓ Team is Clear</h4>
+              <p class="text-muted mt-1">Your team isn't affected by the ban. You're good to go!</p>
+            </div>`;
+        }
       }
 
       html += `<a href="tournament.html" class="btn btn-secondary mt-3">Back to Tournament</a></div>`;
@@ -438,15 +622,15 @@
 
     function startRepick() {
       const content = document.getElementById('ban-content');
-      const globalBans = getGlobalBanList();
+      const bannedIds = getBannedCharIds();
       const myTeam = mySignup.team || [];
-      repickTeam = myTeam.filter(c => !globalBans.has(c.id));
+      repickTeam = myTeam.filter(c => !bannedIds.has(c.id));
       const slotsNeeded = 3 - repickTeam.length;
 
       content.innerHTML = `
         <div class="ban-header">
           <h1 class="ban-title" style="color:var(--cyan);">Re-Pick Team</h1>
-          <p class="ban-subtitle">Replace your banned characters. Pick ${slotsNeeded} new character${slotsNeeded !== 1 ? 's' : ''} to complete your team.</p>
+          <p class="ban-subtitle">Replace your banned character${slotsNeeded !== 1 ? 's' : ''}. Pick ${slotsNeeded} new character${slotsNeeded !== 1 ? 's' : ''} to complete your team.</p>
         </div>
         <div class="ban-phase-content">
           <div class="ban-sidebar">
@@ -469,6 +653,8 @@
     function renderRepickSlots() {
       const container = document.getElementById('repick-slots');
       if (!container) return;
+      const bannedIds = getBannedCharIds();
+      const keptCount = (mySignup.team || []).filter(t => !bannedIds.has(t.id)).length;
       let html = '';
       for (let i = 0; i < 3; i++) {
         if (repickTeam[i]) {
@@ -477,7 +663,7 @@
             <div class="ban-slot filled" style="border-color:var(--cyan);">
               <img class="ban-slot__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
               <span class="ban-slot__name">${c.name}</span>
-              ${i >= (mySignup.team || []).filter(t => !getGlobalBanList().has(t.id)).length ? `<button class="ban-slot__remove" style="color:var(--cyan);" onclick="removeRepick(${i})">&times;</button>` : ''}
+              ${i >= keptCount ? `<button class="ban-slot__remove" style="color:var(--cyan);" onclick="removeRepick(${i})">&times;</button>` : ''}
             </div>`;
         } else {
           html += `<div class="ban-slot"><span class="ban-slot__empty">Slot ${i + 1}</span></div>`;
@@ -529,7 +715,7 @@
       const search = document.getElementById('repick-search')?.value || '';
       const element = document.querySelector('#repick-filters .element-btn.active')?.dataset.element || '';
       const rarity = document.getElementById('repick-rarity-filter')?.value || '';
-      const globalBans = getGlobalBanList();
+      const bannedIds = getBannedCharIds();
 
       let chars = allChars;
       if (search) chars = chars.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
@@ -547,7 +733,7 @@
 
       chars.forEach(c => {
         const card = document.createElement('div');
-        const isBanned = globalBans.has(c.id);
+        const isBanned = bannedIds.has(c.id);
         const isOnTeam = repickTeam.some(t => t.id === c.id);
         card.className = 'char-card' + (isBanned ? ' banned' : '') + (isOnTeam ? ' ban-selected' : '');
         if (isOnTeam) card.style.borderColor = 'var(--cyan)';
@@ -572,8 +758,9 @@
     }
 
     function toggleRepick(char) {
+      const bannedIds = getBannedCharIds();
+      const keptCount = (mySignup.team || []).filter(t => !bannedIds.has(t.id)).length;
       const idx = repickTeam.findIndex(c => c.id === char.id);
-      const keptCount = (mySignup.team || []).filter(t => !getGlobalBanList().has(t.id)).length;
       if (idx !== -1 && idx >= keptCount) {
         repickTeam.splice(idx, 1);
       } else if (idx === -1 && repickTeam.length < 3) {
@@ -585,7 +772,8 @@
     }
 
     function removeRepick(index) {
-      const keptCount = (mySignup.team || []).filter(t => !getGlobalBanList().has(t.id)).length;
+      const bannedIds = getBannedCharIds();
+      const keptCount = (mySignup.team || []).filter(t => !bannedIds.has(t.id)).length;
       if (index >= keptCount) {
         repickTeam.splice(index, 1);
         renderRepickSlots();
@@ -607,188 +795,11 @@
         mySignup.team = teamData;
         playSound('match');
         NotificationSystem.show('Team updated!', 'success');
-        showAlreadyBanned();
+        showVoteSubmitted();
       } catch (e) {
         NotificationSystem.show('Error: ' + e.message, 'error');
         btn.disabled = false;
         btn.textContent = 'Confirm Team';
-      }
-    }
-
-    function showBanPhase() {
-      const content = document.getElementById('ban-content');
-
-      content.innerHTML = `
-        <div class="ban-header">
-          <h1 class="ban-title">⚔ Ban Phase</h1>
-          <p class="ban-subtitle">Select ${banCount} character${banCount !== 1 ? 's' : ''} to ban. These characters will be globally banned — no one in the tournament can use them.</p>
-        </div>
-        <div class="ban-phase-content">
-          <div class="ban-sidebar">
-            <div class="ban-counter"><span id="ban-count-display">${bannedChars.length}</span> / ${banCount} <span>Bans</span></div>
-            <div id="ban-slots"></div>
-            <button class="btn btn-primary btn-lg mt-2" id="submit-bans-btn" onclick="submitBans()" disabled style="width:100%;">
-              Confirm Bans
-            </button>
-          </div>
-          <div>
-            <div class="filter-bar" id="ban-filters"></div>
-            <div class="char-grid" id="ban-char-grid"></div>
-          </div>
-        </div>`;
-
-      renderBanSlots();
-      renderBanGrid();
-    }
-
-    function renderBanSlots() {
-      const container = document.getElementById('ban-slots');
-      if (!container) return;
-
-      let html = '';
-      for (let i = 0; i < banCount; i++) {
-        if (bannedChars[i]) {
-          const c = allChars.find(ch => ch.id === bannedChars[i]);
-          html += `
-            <div class="ban-slot filled">
-              <img class="ban-slot__img" src="${c?.image || ''}" alt="${c?.name || ''}" onerror="this.style.display='none'" />
-              <span class="ban-slot__name">${c?.name || 'Unknown'}</span>
-              <button class="ban-slot__remove" onclick="removeBan(${i})">&times;</button>
-            </div>`;
-        } else {
-          html += `
-            <div class="ban-slot">
-              <span class="ban-slot__empty">Ban slot ${i + 1}</span>
-            </div>`;
-        }
-      }
-      container.innerHTML = html;
-
-      const countEl = document.getElementById('ban-count-display');
-      if (countEl) countEl.textContent = bannedChars.length;
-
-      const btn = document.getElementById('submit-bans-btn');
-      if (btn) btn.disabled = bannedChars.length < banCount;
-    }
-
-    function renderBanGrid() {
-      const grid = document.getElementById('ban-char-grid');
-      const filterBar = document.getElementById('ban-filters');
-
-      filterBar.innerHTML = `
-        <input type="search" placeholder="Search characters..." id="ban-search" />
-        <div class="element-filters">
-          <button class="element-btn active" data-element="">ALL</button>
-          <button class="element-btn" data-element="RED">R</button>
-          <button class="element-btn" data-element="BLU">B</button>
-          <button class="element-btn" data-element="GRN">G</button>
-          <button class="element-btn" data-element="YEL">Y</button>
-          <button class="element-btn" data-element="PUR">P</button>
-          <button class="element-btn" data-element="LGT">L</button>
-        </div>
-        <select id="ban-rarity-filter" class="rarity-select">
-          <option value="">All Rarities</option>
-          <option value="LEGEND">Legend</option>
-          <option value="ULTRA">Ultra</option>
-          <option value="SPARKING">Sparking</option>
-          <option value="EXTREME">Extreme</option>
-          <option value="HERO">Hero</option>
-        </select>
-      `;
-
-      filterBar.querySelector('#ban-search').addEventListener('input', applyBanFilters);
-      filterBar.querySelector('#ban-rarity-filter').addEventListener('change', applyBanFilters);
-      filterBar.querySelectorAll('.element-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          filterBar.querySelectorAll('.element-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          applyBanFilters();
-        });
-      });
-
-      applyBanFilters();
-    }
-
-    function applyBanFilters() {
-      const search = document.getElementById('ban-search')?.value || '';
-      const element = document.querySelector('#ban-filters .element-btn.active')?.dataset.element || '';
-      const rarity = document.getElementById('ban-rarity-filter')?.value || '';
-
-      let chars = allChars;
-      if (search) chars = chars.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
-      if (element) chars = chars.filter(c => c.element === element);
-      if (rarity) chars = chars.filter(c => c.rarity === rarity);
-
-      const grid = document.getElementById('ban-char-grid');
-      grid.innerHTML = '';
-
-      const fallbackImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23161d2e' width='100' height='100'/%3E%3Ctext x='50' y='55' text-anchor='middle' fill='%238fa0c4' font-size='12'%3E%3F%3C/text%3E%3C/svg%3E";
-      const elementColors = {
-        RED: 'var(--el-red)', BLU: 'var(--el-blu)', GRN: 'var(--el-grn)',
-        YEL: 'var(--el-yel)', PUR: 'var(--el-pur)', LGT: 'var(--el-lgt)'
-      };
-
-      chars.forEach(c => {
-        const card = document.createElement('div');
-        const isBanned = bannedChars.includes(c.id);
-        card.className = 'char-card' + (isBanned ? ' ban-selected' : '');
-
-        const rarityClass = (c.rarity || '').toLowerCase();
-        card.innerHTML = `
-          <div class="char-card__art">
-            <img src="${c.image}" alt="${c.name}" loading="lazy" onerror="this.src='${fallbackImg}'" />
-            <div class="char-card__element" style="background:${elementColors[c.element] || '#666'}"></div>
-            <span class="char-card__rarity badge-${rarityClass}">${c.rarity}</span>
-          </div>
-          <div class="char-card__body">
-            <div class="char-card__name">${c.name}</div>
-          </div>
-        `;
-
-        card.addEventListener('click', () => toggleBan(c.id));
-        grid.appendChild(card);
-      });
-    }
-
-    function toggleBan(charId) {
-      const idx = bannedChars.indexOf(charId);
-      if (idx !== -1) {
-        bannedChars.splice(idx, 1);
-      } else if (bannedChars.length < banCount) {
-        bannedChars.push(charId);
-        playSound('click');
-      } else {
-        NotificationSystem.show(`You can only ban ${banCount} characters`, 'error');
-        return;
-      }
-      renderBanSlots();
-      applyBanFilters();
-    }
-
-    function removeBan(index) {
-      bannedChars.splice(index, 1);
-      renderBanSlots();
-      applyBanFilters();
-    }
-
-    async function submitBans() {
-      if (bannedChars.length < banCount) return;
-      if (!mySignup) return;
-
-      const btn = document.getElementById('submit-bans-btn');
-      btn.disabled = true;
-      btn.textContent = 'Submitting...';
-
-      try {
-        await db.updateSignupBans(mySignup.id, bannedChars);
-        mySignup.bans = bannedChars;
-        playSound('ko');
-        NotificationSystem.show('Bans submitted!', 'success');
-        showAlreadyBanned();
-      } catch (e) {
-        NotificationSystem.show('Error: ' + e.message, 'error');
-        btn.disabled = false;
-        btn.textContent = 'Confirm Bans';
       }
     }
 
