@@ -255,10 +255,12 @@ const db = {
     return data?.length || 0;
   },
 
-  async updateSignupBans(signupId, bans) {
+  async updateSignupBans(signupId, bans, team) {
+    const updates = { bans };
+    if (team) updates.team = team;
     const { data, error } = await supabaseClient
       .from('signups')
-      .update({ bans })
+      .update(updates)
       .eq('id', signupId)
       .select()
       .single();
