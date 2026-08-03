@@ -49,7 +49,7 @@ const db = {
     const { data, error } = await supabaseClient
       .from('tournaments')
       .select('*')
-      .in('status', ['signup', 'active'])
+      .in('status', ['signup', 'banning', 'active'])
       .limit(1)
       .single();
     if (error && error.code === 'PGRST116') return null;
@@ -253,6 +253,17 @@ const db = {
       .gte('last_seen', fiveMinAgo);
     if (error) throw error;
     return data?.length || 0;
+  },
+
+  async updateSignupBans(signupId, bans) {
+    const { data, error } = await supabaseClient
+      .from('signups')
+      .update({ bans })
+      .eq('id', signupId)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
   },
 
   async getPlayerMatches(discordUsername) {

@@ -377,6 +377,11 @@
           </div>
         </div>
         <div class="form-group mt-3">
+          <label>Bans Per Player</label>
+          <input type="number" id="ban-count" min="1" max="10" value="3" style="max-width:120px;" onchange="updateBanCount()" />
+          <p class="text-muted mt-1" style="font-size:12px;">How many characters each player can ban during the ban phase.</p>
+        </div>
+        <div class="form-group mt-3">
           <label>Signup Deadline</label>
           <input type="datetime-local" id="signup-deadline" style="max-width:300px;" onchange="updateDeadline()" />
         </div>
@@ -390,6 +395,7 @@
           <div class="flex gap-1 mt-1">
             <button class="btn btn-sm btn-secondary" onclick="setStatus('draft')">Draft</button>
             <button class="btn btn-sm btn-secondary" onclick="setStatus('signup')">Open Signups</button>
+            <button class="btn btn-sm btn-danger" onclick="setStatus('banning')">Ban Phase</button>
             <button class="btn btn-sm btn-primary" onclick="setStatus('active')">Start Tournament</button>
             <button class="btn btn-sm btn-gold" onclick="setStatus('completed')">Complete</button>
           </div>
@@ -600,7 +606,7 @@
           <div class="player-row" style="margin-bottom:6px;">
             <div class="player-info">
               <span class="player-name">${t.name}</span>
-              <span class="status status-${t.status === 'active' ? 'active' : t.status === 'signup' ? 'signup' : 'completed'}" style="margin-left:10px;">${t.status}</span>
+              <span class="status status-${t.status === 'active' ? 'active' : t.status === 'signup' || t.status === 'banning' ? 'signup' : 'completed'}" style="margin-left:10px;">${t.status}</span>
             </div>
             <div class="flex gap-1">
               <button class="action-btn btn-advance" onclick="editTournament('${t.id}')">Edit</button>
@@ -983,6 +989,18 @@
       } catch (e) {}
     }
 
+    async function updateBanCount() {
+      if (!currentTournament) return;
+      const val = parseInt(document.getElementById('ban-count').value) || 3;
+      try {
+        await db.updateTournament(currentTournament.id, { ban_count: val });
+        currentTournament.ban_count = val;
+        NotificationSystem.show(`Ban count set to ${val}`, 'success');
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
     // Update loadSettings to include new fields
     const _origLoadSettings = loadSettings;
     loadSettings = function() {
@@ -992,6 +1010,7 @@
       loadSpectatorCount();
 
       if (currentTournament) {
+        document.getElementById('ban-count').value = currentTournament.ban_count || 3;
         const seedMode = currentTournament.seeding_mode || 'random';
         document.querySelectorAll('.seeding-btn').forEach(b => {
           b.classList.toggle('active', b.dataset.mode === seedMode);
