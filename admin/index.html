@@ -402,6 +402,16 @@
         </div>
       </div>
 
+      <!-- Ban Vote Results -->
+      <div class="card mt-3" id="ban-results-card" style="display:none;">
+        <h3 class="mb-2 text-pink">Ban Vote Results</h3>
+        <p class="text-muted mb-2">Player votes and which character gets banned.</p>
+        <div id="ban-vote-results"></div>
+        <div class="divider"></div>
+        <h4 class="mb-1 text-muted">Individual Votes</h4>
+        <div id="ban-individual-votes"></div>
+      </div>
+
       <!-- Match Reports -->
       <div class="card mt-3">
         <h3 class="mb-2">Match Reports</h3>
@@ -1001,6 +1011,73 @@
       }
     }
 
+    async function loadBanResults() {
+      if (currentTournament && !signups.length) {
+        try { signups = await db.getSignups(currentTournament.id); } catch(e) {}
+      }
+      const card = document.getElementById('ban-results-card');
+      if (!currentTournament || currentTournament.status !== 'banning') {
+        card.style.display = 'none';
+        return;
+      }
+      card.style.display = '';
+
+      const banCount = currentTournament.ban_count || 1;
+      const votes = {};
+      const playerVotes = [];
+      const votedCount = signups.filter(s => s.bans && s.bans.length > 0).length;
+
+      signups.forEach(s => {
+        if (s.bans && s.bans.length > 0) {
+          s.bans.forEach(id => { votes[id] = (votes[id] || 0) + 1; });
+          const c = allCharacters.find(ch => ch.id === s.bans[0]);
+          playerVotes.push({ player: s.discord_username, char: c?.name || 'Unknown', image: c?.image || '' });
+        }
+      });
+
+      const sorted = Object.entries(votes)
+        .map(([id, count]) => ({ id, count, char: allCharacters.find(c => c.id === id) }))
+        .sort((a, b) => b.count - a.count);
+
+      const resultsEl = document.getElementById('ban-vote-results');
+      if (!sorted.length) {
+        resultsEl.innerHTML = `<p class="text-muted">No votes yet. ${votedCount}/${signups.length} voted.</p>`;
+      } else {
+        resultsEl.innerHTML = `<p class="text-muted mb-2">${votedCount} / ${signups.length} players voted</p>` +
+          sorted.map((r, i) => {
+            const isBanned = i < banCount;
+            return `
+              <div class="player-row" style="margin-bottom:6px;${isBanned ? 'border:1px solid var(--pink);border-radius:var(--radius-sm);' : ''}">
+                <div class="player-info" style="gap:10px;">
+                  <img src="${r.char?.image || ''}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;" onerror="this.style.display='none'" />
+                  <span class="player-name" style="${isBanned ? 'color:var(--pink);' : ''}">${r.char?.name || 'Unknown'}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-family:'Exo 2',sans-serif;font-weight:800;font-size:14px;color:${isBanned ? 'var(--pink)' : 'var(--muted)'};">${r.count} vote${r.count !== 1 ? 's' : ''}</span>
+                  ${isBanned ? '<span style="font-size:10px;font-weight:700;color:var(--pink);text-transform:uppercase;letter-spacing:0.1em;">BANNED</span>' : ''}
+                </div>
+              </div>`;
+          }).join('');
+      }
+
+      const indivEl = document.getElementById('ban-individual-votes');
+      if (!playerVotes.length) {
+        indivEl.innerHTML = '<p class="text-muted">No votes yet.</p>';
+      } else {
+        indivEl.innerHTML = playerVotes.map(v => `
+          <div class="player-row" style="margin-bottom:4px;">
+            <div class="player-info">
+              <span class="player-name">${v.player}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <img src="${v.image}" style="width:24px;height:24px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />
+              <span class="text-muted" style="font-size:12px;">${v.char}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
     // Update loadSettings to include new fields
     const _origLoadSettings = loadSettings;
     loadSettings = function() {
@@ -1008,9 +1085,10 @@
       renderThemeSelector();
       loadMatchReports();
       loadSpectatorCount();
+      loadBanResults();
 
       if (currentTournament) {
-        document.getElementById('ban-count').value = currentTournament.ban_count || 3;
+        document.getElementById('ban-count').value = currentTournament.ban_count || 1;
         const seedMode = currentTournament.seeding_mode || 'random';
         document.querySelectorAll('.seeding-btn').forEach(b => {
           b.classList.toggle('active', b.dataset.mode === seedMode);
