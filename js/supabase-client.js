@@ -268,6 +268,88 @@ const db = {
     return data;
   },
 
+  // Match Chat
+  async getMatchChat(matchId) {
+    const { data, error } = await supabaseClient
+      .from('match_chat')
+      .select('*')
+      .eq('match_id', matchId)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async sendChatMessage(matchId, username, message) {
+    const { data, error } = await supabaseClient
+      .from('match_chat')
+      .insert({ match_id: matchId, username, message })
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  // ELO Rankings
+  async getLeaderboard() {
+    const { data, error } = await supabaseClient
+      .from('elo_ratings')
+      .select('*')
+      .order('elo', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async getPlayerElo(discordUsername) {
+    const { data, error } = await supabaseClient
+      .from('elo_ratings')
+      .select('*')
+      .eq('discord_username', discordUsername)
+      .single();
+    if (error && error.code === 'PGRST116') return null;
+    if (error) throw error;
+    return data;
+  },
+
+  async updateElo(discordUsername, eloChange, isWin) {
+    // Check if player exists
+    const existing = await this.getPlayerElo(discordUsername);
+
+    if (existing) {
+      const newElo = existing.elo + eloChange;
+      const updates = {
+        elo: newElo,
+        wins: isWin ? existing.wins + 1 : existing.wins,
+        losses: isWin ? existing.losses : existing.losses + 1,
+        peak_elo: Math.max(existing.peak_elo || existing.elo, newElo),
+        updated_at: new Date().toISOString()
+      };
+      const { data, error } = await supabaseClient
+        .from('elo_ratings')
+        .update(updates)
+        .eq('discord_username', discordUsername)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    } else {
+      const newElo = 1000 + eloChange;
+      const { data, error } = await supabaseClient
+        .from('elo_ratings')
+        .insert({
+          discord_username: discordUsername,
+          elo: newElo,
+          wins: isWin ? 1 : 0,
+          losses: isWin ? 0 : 1,
+          peak_elo: Math.max(1000, newElo),
+          tournaments_played: 0
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    }
+  },
+
   async getPlayerMatches(discordUsername) {
     // First get all signup IDs for this player
     const signups = await this.getPlayerStats(discordUsername);

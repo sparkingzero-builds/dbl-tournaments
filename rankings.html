@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rankings — DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    .rankings-header {
+      text-align: center;
+      padding: 40px 0 30px;
+    }
+
+    .rankings-title {
+      font-size: clamp(24px, 4vw, 36px);
+      color: var(--cyan);
+      text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+      margin-bottom: 8px;
+    }
+
+    .rankings-subtitle {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .search-bar {
+      max-width: 400px;
+      margin: 0 auto 24px;
+      position: relative;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding-left: 36px;
+    }
+
+    .search-bar .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .leaderboard {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .lb-row {
+      display: grid;
+      grid-template-columns: 50px 1fr 100px 100px 80px;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      margin-bottom: 6px;
+      transition: all 0.15s;
+    }
+
+    .lb-row:hover {
+      border-color: var(--cyan);
+      background: var(--panel-2);
+    }
+
+    .lb-row.top-1 {
+      border-color: var(--gold);
+      box-shadow: 0 0 16px rgba(255, 215, 0, 0.15);
+    }
+
+    .lb-row.top-2 {
+      border-color: #c0c0c0;
+      box-shadow: 0 0 12px rgba(192, 192, 192, 0.1);
+    }
+
+    .lb-row.top-3 {
+      border-color: #cd7f32;
+      box-shadow: 0 0 12px rgba(205, 127, 50, 0.1);
+    }
+
+    .lb-header {
+      display: grid;
+      grid-template-columns: 50px 1fr 100px 100px 80px;
+      padding: 8px 16px;
+      margin-bottom: 8px;
+    }
+
+    .lb-header span {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .lb-rank {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 900;
+      font-size: 16px;
+      color: var(--muted);
+    }
+
+    .top-1 .lb-rank { color: var(--gold); font-size: 20px; }
+    .top-2 .lb-rank { color: #c0c0c0; font-size: 18px; }
+    .top-3 .lb-rank { color: #cd7f32; font-size: 18px; }
+
+    .lb-player {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lb-name {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .lb-name:hover {
+      color: var(--cyan);
+    }
+
+    .lb-tier {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 3px;
+      line-height: 1;
+    }
+
+    .tier-diamond { background: rgba(185, 242, 255, 0.15); color: #b9f2ff; }
+    .tier-platinum { background: rgba(229, 228, 226, 0.15); color: #e5e4e2; }
+    .tier-gold { background: rgba(255, 215, 0, 0.15); color: var(--gold); }
+    .tier-silver { background: rgba(192, 192, 192, 0.15); color: #c0c0c0; }
+    .tier-bronze { background: rgba(205, 127, 50, 0.15); color: #cd7f32; }
+
+    .lb-elo {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 900;
+      font-size: 16px;
+      color: var(--cyan);
+    }
+
+    .lb-record {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .lb-record .w { color: var(--green, #4caf50); font-weight: 700; }
+    .lb-record .l { color: var(--red, #f44336); font-weight: 700; }
+
+    .lb-tourneys {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .lb-row, .lb-header {
+        grid-template-columns: 36px 1fr 70px 70px;
+      }
+      .lb-tourneys, .lb-header span:last-child {
+        display: none;
+      }
+      .lb-row {
+        padding: 10px 12px;
+      }
+      .lb-elo {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">&#9776;</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html" class="active">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="particles-bg" id="particles"></div>
+
+  <main class="page container page-enter">
+    <div class="rankings-header">
+      <h1 class="rankings-title">ELO Rankings</h1>
+      <p class="rankings-subtitle">Competitive leaderboard based on match performance</p>
+    </div>
+
+    <div class="search-bar">
+      <span class="search-icon">&#128269;</span>
+      <input type="search" id="player-search" placeholder="Search player..." />
+    </div>
+
+    <div class="leaderboard" id="leaderboard">
+      <div class="loader"><div class="loader-spinner"></div></div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/particles.js"></script>
+  <script>
+    initParticles(document.getElementById('particles'));
+
+    let allPlayers = [];
+
+    function getTier(elo) {
+      if (elo >= 1400) return { name: 'Diamond', cls: 'tier-diamond' };
+      if (elo >= 1200) return { name: 'Platinum', cls: 'tier-platinum' };
+      if (elo >= 1100) return { name: 'Gold', cls: 'tier-gold' };
+      if (elo >= 1000) return { name: 'Silver', cls: 'tier-silver' };
+      return { name: 'Bronze', cls: 'tier-bronze' };
+    }
+
+    function renderLeaderboard(players) {
+      const container = document.getElementById('leaderboard');
+
+      if (!players.length) {
+        container.innerHTML = '<div class="empty-state"><h3>No Rankings Yet</h3><p>Rankings will appear after tournament matches are processed.</p></div>';
+        return;
+      }
+
+      let html = `
+        <div class="lb-header">
+          <span>#</span>
+          <span>Player</span>
+          <span>ELO</span>
+          <span>Record</span>
+          <span>Tourneys</span>
+        </div>
+      `;
+
+      players.forEach((p, i) => {
+        const rank = i + 1;
+        const tier = getTier(p.elo);
+        const topClass = rank === 1 ? 'top-1' : rank === 2 ? 'top-2' : rank === 3 ? 'top-3' : '';
+
+        html += `
+          <div class="lb-row ${topClass} stagger">
+            <div class="lb-rank">${rank}</div>
+            <div class="lb-player">
+              <a class="lb-name" href="profile.html?player=${encodeURIComponent(p.discord_username)}">${p.discord_username}</a>
+              <span class="lb-tier ${tier.cls}">${tier.name}</span>
+            </div>
+            <div class="lb-elo">${p.elo}</div>
+            <div class="lb-record"><span class="w">${p.wins}</span>W / <span class="l">${p.losses}</span>L</div>
+            <div class="lb-tourneys">${p.tournaments_played || 0}</div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    document.getElementById('player-search').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      if (!q) {
+        renderLeaderboard(allPlayers);
+        return;
+      }
+      const filtered = allPlayers.filter(p => p.discord_username.toLowerCase().includes(q));
+      renderLeaderboard(filtered);
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        allPlayers = await db.getLeaderboard();
+        renderLeaderboard(allPlayers);
+      } catch (e) {
+        console.error('Rankings load error:', e);
+        document.getElementById('leaderboard').innerHTML = '<div class="empty-state"><p>Error loading rankings.</p></div>';
+      }
+    });
+  </script>
+</body>
+</html>

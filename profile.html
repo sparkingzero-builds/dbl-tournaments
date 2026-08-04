@@ -197,6 +197,7 @@
         <li><a href="index.html">Home</a></li>
         <li><a href="tournament.html">Tournament</a></li>
         <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
         <li><a href="bracket.html">Bracket</a></li>
         <li><a href="history.html">History</a></li>
       </ul>
@@ -328,6 +329,8 @@
             <div class="profile-subtitle">Player Profile</div>
           </div>
 
+          <div id="elo-section"></div>
+
           <div class="profile-stats stagger">
             <div class="p-stat">
               <div class="p-stat-value cyan">${totalMatches}</div>
@@ -387,6 +390,30 @@
             </div>
           </div>
         `;
+
+        // Load ELO rating
+        try {
+          const eloData = await db.getPlayerElo(playerName);
+          if (eloData) {
+            const tier = eloData.elo >= 1400 ? { name: 'Diamond', cls: 'tier-diamond' }
+              : eloData.elo >= 1200 ? { name: 'Platinum', cls: 'tier-platinum' }
+              : eloData.elo >= 1100 ? { name: 'Gold', cls: 'tier-gold' }
+              : eloData.elo >= 1000 ? { name: 'Silver', cls: 'tier-silver' }
+              : { name: 'Bronze', cls: 'tier-bronze' };
+
+            document.getElementById('elo-section').innerHTML = `
+              <div class="card" style="max-width:400px;margin:0 auto 24px;text-align:center;padding:20px;">
+                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:6px;">ELO Rating</div>
+                <div style="font-family:'Exo 2',sans-serif;font-size:2.4rem;font-weight:900;color:var(--cyan);line-height:1;">${eloData.elo}</div>
+                <span style="display:inline-block;margin-top:6px;font-size:10px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;padding:2px 8px;border-radius:3px;"
+                  class="${tier.cls}">${tier.name}</span>
+                ${eloData.peak_elo > eloData.elo ? `<div style="font-size:11px;color:var(--muted);margin-top:6px;">Peak: ${eloData.peak_elo}</div>` : ''}
+              </div>
+            `;
+          }
+        } catch (e) {
+          console.error('ELO load error:', e);
+        }
 
       } catch (e) {
         console.error('Profile load error:', e);

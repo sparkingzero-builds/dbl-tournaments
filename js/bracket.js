@@ -155,8 +155,12 @@ const BracketManager = (() => {
 
             let teamHtml = '';
             if (options.teamsVisible && player?.team) {
+              const bannedSet = options.bannedCharIds || new Set();
               teamHtml = `<div class="match-team-icons">
-                ${player.team.map(c => `<img src="${c.image}" alt="${c.name}" title="${c.name}" onerror="this.style.display='none'" />`).join('')}
+                ${player.team.map(c => {
+                  const isBanned = bannedSet.has(c.id);
+                  return `<img src="${c.image}" alt="${c.name}" title="${c.name}${isBanned ? ' (BANNED)' : ''}" style="${isBanned ? 'opacity:0.2;filter:grayscale(1);border-color:var(--pink);' : ''}" onerror="this.style.display='none'" />`;
+                }).join('')}
               </div>`;
             }
 
