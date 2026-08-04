@@ -96,6 +96,10 @@ const BracketManager = (() => {
     return `Round ${round}`;
   }
 
+  function getProfileBase() {
+    return window.location.pathname.includes('/admin') ? '../' : '';
+  }
+
   function renderBracket(container, matches, signups, options = {}) {
     container.innerHTML = '';
 
@@ -164,7 +168,7 @@ const BracketManager = (() => {
               </div>`;
             }
 
-            const nameHtml = player ? `<a href="profile.html?player=${encodeURIComponent(name)}" class="player-match-name" onclick="event.stopPropagation()">${name}</a>` : `<span class="player-match-name">${name}</span>`;
+            const nameHtml = player ? `<a href="${getProfileBase()}profile.html?player=${encodeURIComponent(name)}" class="player-match-name" onclick="event.stopPropagation()">${name}</a>` : `<span class="player-match-name">${name}</span>`;
             div.innerHTML = `
               ${nameHtml}
               ${teamHtml}
@@ -207,7 +211,7 @@ const BracketManager = (() => {
       champEl.className = 'champion-card float-in';
       champEl.innerHTML = `
         <div class="champion-label">Champion</div>
-        <div class="champion-name">${champ ? `<a href="profile.html?player=${encodeURIComponent(champ.discord_username)}">${champ.discord_username}</a>` : 'Unknown'}</div>
+        <div class="champion-name">${champ ? `<a href="${getProfileBase()}profile.html?player=${encodeURIComponent(champ.discord_username)}">${champ.discord_username}</a>` : 'Unknown'}</div>
       `;
       bracket.appendChild(champEl);
     }
