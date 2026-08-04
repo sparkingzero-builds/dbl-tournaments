@@ -350,6 +350,38 @@ const db = {
     }
   },
 
+  // Predictions
+  async submitPrediction(matchId, sessionId, predictedWinnerId) {
+    const { data, error } = await supabaseClient
+      .from('predictions')
+      .upsert({
+        match_id: matchId,
+        session_id: sessionId,
+        predicted_winner_id: predictedWinnerId
+      }, { onConflict: 'match_id,session_id' })
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async getPredictions(tournamentId, sessionId) {
+    const { data, error } = await supabaseClient
+      .from('predictions')
+      .select('*, match:matches!predictions_match_id_fkey(tournament_id)')
+      .eq('session_id', sessionId);
+    if (error) throw error;
+    return (data || []).filter(p => p.match?.tournament_id === tournamentId);
+  },
+
+  async getAllPredictions(tournamentId) {
+    const { data, error } = await supabaseClient
+      .from('predictions')
+      .select('*, match:matches!predictions_match_id_fkey(tournament_id)');
+    if (error) throw error;
+    return (data || []).filter(p => p.match?.tournament_id === tournamentId);
+  },
+
   async getPlayerMatches(discordUsername) {
     // First get all signup IDs for this player
     const signups = await this.getPlayerStats(discordUsername);

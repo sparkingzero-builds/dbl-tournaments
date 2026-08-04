@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compare Players - DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    .compare-inputs {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+    .compare-inputs input {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: var(--text);
+      padding: 10px 16px;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 14px;
+      width: 220px;
+    }
+    .compare-inputs input:focus {
+      outline: none;
+      border-color: var(--cyan);
+      box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+    }
+    .compare-inputs input::placeholder {
+      color: var(--muted);
+    }
+    .compare-vs {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .compare-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .compare-header {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      background: var(--bg-2);
+    }
+    .compare-header .p1-name {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--cyan);
+      text-align: left;
+    }
+    .compare-header .p2-name {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--pink);
+      text-align: right;
+    }
+    .compare-header .vs-label {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      padding: 0 16px;
+    }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+    .stat-row:hover {
+      background: var(--bg-2);
+    }
+    .stat-val {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      transition: color 0.3s;
+    }
+    .stat-val.left {
+      text-align: left;
+    }
+    .stat-val.right {
+      text-align: right;
+    }
+    .stat-val.win-p1 { color: var(--cyan); text-shadow: 0 0 10px rgba(0, 229, 255, 0.4); }
+    .stat-val.win-p2 { color: var(--pink); text-shadow: 0 0 10px rgba(255, 0, 200, 0.4); }
+    .stat-val.neutral { color: var(--muted); }
+    .stat-label {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      text-align: center;
+      white-space: nowrap;
+      padding: 0 12px;
+    }
+
+    .h2h-section {
+      border-top: 2px solid var(--line);
+      padding: 20px;
+    }
+    .h2h-title {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .h2h-match {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      background: var(--bg-2);
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .h2h-match .winner {
+      font-weight: 700;
+    }
+    .h2h-match .loser {
+      color: var(--muted);
+    }
+    .h2h-match .round-info {
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      padding: 0 8px;
+    }
+    .h2h-none {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .compare-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .compare-empty p {
+      margin-top: 8px;
+      font-size: 13px;
+    }
+
+    .stat-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stat-bar-wrap.left { justify-content: flex-start; }
+    .stat-bar-wrap.right { justify-content: flex-end; flex-direction: row-reverse; }
+    .stat-bar {
+      height: 6px;
+      border-radius: 3px;
+      transition: width 0.5s ease;
+      min-width: 4px;
+    }
+    .stat-bar.cyan { background: var(--cyan); }
+    .stat-bar.pink { background: var(--pink); }
+
+    .loading-spinner {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 600px) {
+      .compare-inputs input { width: 160px; }
+      .stat-val { font-size: 16px; }
+      .compare-header .p1-name,
+      .compare-header .p2-name { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">&#9776;</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+        <li><a href="compare.html" class="active">Compare</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="particles-bg" id="particles"></div>
+
+  <section class="page page-enter" style="padding: 30px 20px; max-width: 800px; margin: 0 auto;">
+    <h1 style="text-align:center; margin-bottom: 6px;">Player <span class="text-cyan">Compare</span></h1>
+    <p style="text-align:center; color:var(--muted); font-size:13px; margin-bottom: 28px;">Head-to-head stat breakdown</p>
+
+    <div class="compare-inputs">
+      <input type="text" id="player1-input" placeholder="Player 1 username" />
+      <span class="compare-vs">VS</span>
+      <input type="text" id="player2-input" placeholder="Player 2 username" />
+      <button class="btn btn-cyan" onclick="runCompare()">Compare</button>
+    </div>
+
+    <div id="compare-result">
+      <div class="compare-empty">
+        <span style="font-size: 32px;">&#9876;&#65039;</span>
+        <p>Enter two player usernames to compare their stats</p>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/particles.js"></script>
+  <script>
+    if (typeof initParticles === 'function') initParticles();
+
+    async function runCompare() {
+      const u1 = document.getElementById('player1-input').value.trim();
+      const u2 = document.getElementById('player2-input').value.trim();
+      const resultEl = document.getElementById('compare-result');
+
+      if (!u1 || !u2) {
+        resultEl.innerHTML = '<div class="compare-empty"><p>Please enter both usernames</p></div>';
+        return;
+      }
+      if (u1.toLowerCase() === u2.toLowerCase()) {
+        resultEl.innerHTML = '<div class="compare-empty"><p>Enter two different players to compare</p></div>';
+        return;
+      }
+
+      resultEl.innerHTML = '<div class="loading-spinner">Loading stats...</div>';
+
+      try {
+        const [p1Matches, p2Matches, p1Signups, p2Signups, p1Elo, p2Elo, allTournaments] = await Promise.all([
+          db.getPlayerMatches(u1),
+          db.getPlayerMatches(u2),
+          db.getPlayerStats(u1),
+          db.getPlayerStats(u2),
+          db.getPlayerElo(u1),
+          db.getPlayerElo(u2),
+          db.getAllTournaments()
+        ]);
+
+        // Calculate stats
+        const p1Stats = calcStats(u1, p1Matches, p1Signups, p1Elo, allTournaments);
+        const p2Stats = calcStats(u2, p2Matches, p2Signups, p2Elo, allTournaments);
+
+        // Head to head
+        const h2h = findH2H(u1, u2, p1Matches);
+
+        renderComparison(u1, u2, p1Stats, p2Stats, h2h);
+      } catch (err) {
+        console.error(err);
+        resultEl.innerHTML = '<div class="compare-empty"><p>Error loading player data. Check the usernames and try again.</p></div>';
+      }
+    }
+
+    function calcStats(username, matches, signups, elo, allTournaments) {
+      const uLower = username.toLowerCase();
+      const completedMatches = matches.filter(m => m.winner_id);
+      const signupIds = signups.map(s => s.id);
+
+      let wins = 0, losses = 0;
+      completedMatches.forEach(m => {
+        if (signupIds.includes(m.winner_id)) {
+          wins++;
+        } else if (signupIds.includes(m.player1_id) || signupIds.includes(m.player2_id)) {
+          losses++;
+        }
+      });
+
+      const totalMatches = wins + losses;
+      const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
+
+      // Tournaments entered = unique tournament IDs from signups
+      const tournamentIds = [...new Set(signups.map(s => s.tournament_id))];
+      const tournamentsEntered = tournamentIds.length;
+
+      // Tournament wins: check completed tournaments where this player won the final
+      let tournamentWins = 0;
+      const completedTourneys = allTournaments.filter(t => t.status === 'completed');
+      for (const t of completedTourneys) {
+        if (t.champion && t.champion.toLowerCase() === uLower) {
+          tournamentWins++;
+        }
+      }
+
+      return {
+        totalMatches,
+        wins,
+        losses,
+        winRate,
+        tournamentsEntered,
+        tournamentWins,
+        elo: elo ? elo.elo : null,
+        peakElo: elo ? elo.peak_elo : null
+      };
+    }
+
+    function findH2H(u1, u2, p1Matches) {
+      const u1Lower = u1.toLowerCase();
+      const u2Lower = u2.toLowerCase();
+      const headToHead = [];
+
+      for (const m of p1Matches) {
+        if (!m.player1 || !m.player2) continue;
+        const mp1 = m.player1.discord_username?.toLowerCase();
+        const mp2 = m.player2.discord_username?.toLowerCase();
+
+        const involves1 = mp1 === u1Lower || mp2 === u1Lower;
+        const involves2 = mp1 === u2Lower || mp2 === u2Lower;
+
+        if (involves1 && involves2 && m.winner_id) {
+          const winnerIsP1 = (m.winner_id === m.player1_id && mp1 === u1Lower) ||
+                             (m.winner_id === m.player2_id && mp2 === u1Lower);
+          headToHead.push({
+            round: m.round,
+            tournamentId: m.tournament_id,
+            winnerUsername: winnerIsP1 ? u1 : u2,
+            loserUsername: winnerIsP1 ? u2 : u1
+          });
+        }
+      }
+
+      return headToHead;
+    }
+
+    function renderComparison(u1, u2, p1, p2, h2h) {
+      const resultEl = document.getElementById('compare-result');
+
+      const stats = [
+        { label: 'Matches Played', v1: p1.totalMatches, v2: p2.totalMatches },
+        { label: 'Wins', v1: p1.wins, v2: p2.wins },
+        { label: 'Losses', v1: p1.losses, v2: p2.losses, lowerBetter: true },
+        { label: 'Win Rate', v1: p1.winRate, v2: p2.winRate, suffix: '%' },
+        { label: 'Tournaments', v1: p1.tournamentsEntered, v2: p2.tournamentsEntered },
+        { label: 'Championships', v1: p1.tournamentWins, v2: p2.tournamentWins },
+      ];
+
+      if (p1.elo !== null || p2.elo !== null) {
+        stats.push({ label: 'ELO Rating', v1: p1.elo ?? '-', v2: p2.elo ?? '-' });
+        if (p1.peakElo !== null || p2.peakElo !== null) {
+          stats.push({ label: 'Peak ELO', v1: p1.peakElo ?? '-', v2: p2.peakElo ?? '-' });
+        }
+      }
+
+      const h2hP1Wins = h2h.filter(m => m.winnerUsername.toLowerCase() === u1.toLowerCase()).length;
+      const h2hP2Wins = h2h.filter(m => m.winnerUsername.toLowerCase() === u2.toLowerCase()).length;
+      stats.push({ label: 'H2H Record', v1: h2hP1Wins, v2: h2hP2Wins });
+
+      let rows = stats.map(s => {
+        const v1Num = typeof s.v1 === 'number' ? s.v1 : -1;
+        const v2Num = typeof s.v2 === 'number' ? s.v2 : -1;
+        let c1 = 'neutral', c2 = 'neutral';
+        if (v1Num !== v2Num && v1Num >= 0 && v2Num >= 0) {
+          if (s.lowerBetter) {
+            c1 = v1Num < v2Num ? 'win-p1' : 'neutral';
+            c2 = v2Num < v1Num ? 'win-p2' : 'neutral';
+          } else {
+            c1 = v1Num > v2Num ? 'win-p1' : 'neutral';
+            c2 = v2Num > v1Num ? 'win-p2' : 'neutral';
+          }
+        }
+        const suffix = s.suffix || '';
+        return `
+          <div class="stat-row">
+            <span class="stat-val left ${c1}">${s.v1}${suffix}</span>
+            <span class="stat-label">${s.label}</span>
+            <span class="stat-val right ${c2}">${s.v2}${suffix}</span>
+          </div>`;
+      }).join('');
+
+      // H2H detail section
+      let h2hHtml = '';
+      if (h2h.length > 0) {
+        const matchRows = h2h.map(m => {
+          const wIsP1 = m.winnerUsername.toLowerCase() === u1.toLowerCase();
+          return `
+            <div class="h2h-match">
+              <span class="${wIsP1 ? 'winner' : 'loser'}" style="text-align:left; color: ${wIsP1 ? 'var(--cyan)' : 'var(--muted)'}">${u1}</span>
+              <span class="round-info">R${m.round}</span>
+              <span class="${!wIsP1 ? 'winner' : 'loser'}" style="text-align:right; color: ${!wIsP1 ? 'var(--pink)' : 'var(--muted)'}">${u2}</span>
+            </div>`;
+        }).join('');
+        h2hHtml = `
+          <div class="h2h-section">
+            <div class="h2h-title">Direct Matchups</div>
+            ${matchRows}
+          </div>`;
+      } else {
+        h2hHtml = `
+          <div class="h2h-section">
+            <div class="h2h-title">Direct Matchups</div>
+            <div class="h2h-none">These players have never faced each other</div>
+          </div>`;
+      }
+
+      resultEl.innerHTML = `
+        <div class="compare-panel">
+          <div class="compare-header">
+            <span class="p1-name">${u1}</span>
+            <span class="vs-label">VS</span>
+            <span class="p2-name">${u2}</span>
+          </div>
+          ${rows}
+          ${h2hHtml}
+        </div>`;
+    }
+
+    // Allow Enter key to trigger compare
+    document.getElementById('player1-input').addEventListener('keydown', e => { if (e.key === 'Enter') runCompare(); });
+    document.getElementById('player2-input').addEventListener('keydown', e => { if (e.key === 'Enter') runCompare(); });
+  </script>
+</body>
+</html>

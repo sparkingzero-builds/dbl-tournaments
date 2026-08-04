@@ -22,6 +22,7 @@
         <li><a href="rankings.html">Rankings</a></li>
         <li><a href="bracket.html" class="active">Bracket</a></li>
         <li><a href="history.html">History</a></li>
+        <li><a href="compare.html">Compare</a></li>
       </ul>
     </div>
   </nav>
@@ -72,6 +73,25 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Live Tournament Timer -->
+    <div class="container mt-4" id="timer-section" style="display:none;">
+      <div class="card" style="max-width:500px;margin:0 auto;text-align:center;padding:24px;">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;color:var(--pink);margin-bottom:8px;">Match Deadline</div>
+        <div id="match-timer" style="font-family:'Exo 2',sans-serif;font-size:2.4rem;font-weight:900;color:var(--cyan);letter-spacing:0.05em;">--:--:--</div>
+        <div class="text-muted mt-1" style="font-size:12px;" id="timer-label">Time remaining for current round</div>
+      </div>
+    </div>
+
+    <!-- Spectator Predictions -->
+    <div class="container mt-4" id="predictions-section" style="display:none;">
+      <div class="card" style="max-width:600px;margin:0 auto;">
+        <h3 style="margin:0 0 4px;font-family:'Exo 2',sans-serif;font-size:1rem;color:var(--gold);">Predict Winners</h3>
+        <p class="text-muted" style="font-size:12px;margin-bottom:14px;">Pick who you think will win each match</p>
+        <div id="prediction-matches"></div>
+        <div id="prediction-results" style="margin-top:16px;"></div>
       </div>
     </div>
 
@@ -135,12 +155,14 @@
 
         await renderBracketFor(tournament, container);
 
-        // Show match report form and chat if tournament is active
+        // Show match report form, chat, timer, predictions if tournament is active
         activeTournament = tournament;
         if (tournament.status === 'active') {
           document.getElementById('report-section').style.display = 'block';
           const matches = await db.getMatches(tournament.id);
           await initChat(tournament, matches);
+          initTimer(tournament);
+          await initPredictions(tournament, matches);
         }
 
         // Track spectators
@@ -364,6 +386,101 @@
       } catch (e) {
         NotificationSystem.show('Failed to send message', 'error');
         input.value = message;
+      }
+    }
+
+    // --- Live Tournament Timer ---
+    let timerInterval = null;
+    function initTimer(tournament) {
+      const deadline = tournament.match_deadline;
+      if (!deadline) return;
+      document.getElementById('timer-section').style.display = 'block';
+      if (timerInterval) clearInterval(timerInterval);
+      function tick() {
+        const diff = new Date(deadline).getTime() - Date.now();
+        const el = document.getElementById('match-timer');
+        if (diff <= 0) {
+          el.textContent = "TIME'S UP";
+          el.style.color = 'var(--pink)';
+          document.getElementById('timer-label').textContent = 'Match deadline has passed';
+          clearInterval(timerInterval);
+          return;
+        }
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        if (diff < 300000) { el.style.color = 'var(--pink)'; }
+        else { el.style.color = 'var(--cyan)'; }
+      }
+      tick();
+      timerInterval = setInterval(tick, 1000);
+    }
+
+    // --- Spectator Predictions ---
+    let predictionSignups = [];
+    async function initPredictions(tournament, matches) {
+      const pending = matches.filter(m => !m.winner_id && m.player1_id && m.player2_id);
+      if (!pending.length) return;
+      document.getElementById('predictions-section').style.display = 'block';
+      predictionSignups = await db.getSignups(tournament.id);
+      const nameMap = {};
+      predictionSignups.forEach(s => { nameMap[s.id] = s.discord_username; });
+
+      const sessionId = sessionStorage.getItem('spectator_id') || crypto.randomUUID();
+      sessionStorage.setItem('spectator_id', sessionId);
+
+      // Load existing predictions
+      let myPredictions = {};
+      try {
+        const existing = await db.getPredictions(tournament.id, sessionId);
+        existing.forEach(p => { myPredictions[p.match_id] = p.predicted_winner_id; });
+      } catch(e) {}
+
+      // Load prediction counts
+      let allPredictions = [];
+      try { allPredictions = await db.getAllPredictions(tournament.id); } catch(e) {}
+
+      const container = document.getElementById('prediction-matches');
+      container.innerHTML = pending.map(m => {
+        const p1 = nameMap[m.player1_id] || 'TBD';
+        const p2 = nameMap[m.player2_id] || 'TBD';
+        const myPick = myPredictions[m.id];
+        const p1Votes = allPredictions.filter(p => p.match_id === m.id && p.predicted_winner_id === m.player1_id).length;
+        const p2Votes = allPredictions.filter(p => p.match_id === m.id && p.predicted_winner_id === m.player2_id).length;
+        const totalVotes = p1Votes + p2Votes;
+        const p1Pct = totalVotes ? Math.round(p1Votes / totalVotes * 100) : 50;
+        const p2Pct = totalVotes ? Math.round(p2Votes / totalVotes * 100) : 50;
+
+        return `<div style="background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">R${m.round} M${m.match_number}</div>
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <button onclick="predict('${m.id}','${m.player1_id}','${tournament.id}')" class="btn btn-sm ${myPick === m.player1_id ? 'btn-primary' : 'btn-secondary'}" style="flex:1;font-size:13px;">${p1}</button>
+            <span style="color:var(--muted);align-self:center;font-size:11px;">VS</span>
+            <button onclick="predict('${m.id}','${m.player2_id}','${tournament.id}')" class="btn btn-sm ${myPick === m.player2_id ? 'btn-primary' : 'btn-secondary'}" style="flex:1;font-size:13px;">${p2}</button>
+          </div>
+          <div style="display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--line);">
+            <div style="width:${p1Pct}%;background:var(--cyan);transition:width 0.3s;"></div>
+            <div style="width:${p2Pct}%;background:var(--pink);transition:width 0.3s;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px;">
+            <span>${p1Pct}% (${p1Votes})</span>
+            <span>${p2Pct}% (${p2Votes})</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function predict(matchId, winnerId, tournamentId) {
+      const sessionId = sessionStorage.getItem('spectator_id');
+      if (!sessionId) return;
+      try {
+        await db.submitPrediction(matchId, sessionId, winnerId);
+        const matches = await db.getMatches(tournamentId);
+        await initPredictions(activeTournament, matches);
+        playSound?.('click');
+      } catch(e) {
+        NotificationSystem.show('Could not save prediction', 'error');
       }
     }
   </script>

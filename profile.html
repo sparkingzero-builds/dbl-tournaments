@@ -182,9 +182,96 @@
       transition: width 0.5s ease;
     }
 
+    /* Achievement Badges */
+    .achievements-section {
+      max-width: 700px;
+      margin: 0 auto 28px;
+    }
+
+    .achievements-title {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--cyan);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .badges-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 10px;
+    }
+
+    .badge-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px 8px 10px;
+      text-align: center;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .badge-card.earned {
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.15);
+    }
+
+    .badge-card.earned.tier-gold-badge {
+      border-color: var(--gold);
+      box-shadow: 0 0 16px rgba(255, 215, 0, 0.25);
+    }
+
+    .badge-card.earned:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+    }
+
+    .badge-card.earned.tier-gold-badge:hover {
+      box-shadow: 0 0 24px rgba(255, 215, 0, 0.4);
+    }
+
+    .badge-card.locked {
+      opacity: 0.3;
+      filter: grayscale(1);
+    }
+
+    .badge-icon {
+      font-size: 28px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .badge-card.locked .badge-icon::after {
+      content: '🔒';
+      font-size: 12px;
+      position: absolute;
+      top: 6px;
+      right: 6px;
+    }
+
+    .badge-name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .badge-desc {
+      font-size: 9px;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
     @media (max-width: 700px) {
       .profile-stats { grid-template-columns: repeat(2, 1fr); }
       .profile-sections { grid-template-columns: 1fr; }
+      .badges-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
     }
   </style>
 </head>
@@ -200,6 +287,7 @@
         <li><a href="rankings.html">Rankings</a></li>
         <li><a href="bracket.html">Bracket</a></li>
         <li><a href="history.html">History</a></li>
+        <li><a href="compare.html">Compare</a></li>
       </ul>
     </div>
   </nav>
@@ -331,6 +419,8 @@
 
           <div id="elo-section"></div>
 
+          <div id="achievements-section"></div>
+
           <div class="profile-stats stagger">
             <div class="p-stat">
               <div class="p-stat-value cyan">${totalMatches}</div>
@@ -413,6 +503,105 @@
           }
         } catch (e) {
           console.error('ELO load error:', e);
+        }
+
+        // --- Achievement Badges ---
+        try {
+          const badgeDefs = [
+            { id: 'champion',     icon: '🏆', name: 'Champion',     desc: 'Won a tournament',                     gold: true },
+            { id: 'on_fire',      icon: '🔥', name: 'On Fire',      desc: 'Won 3+ matches in a row',              gold: false },
+            { id: 'veteran',      icon: '⚔️', name: 'Veteran',      desc: 'Played in 3+ tournaments',             gold: false },
+            { id: 'sharpshooter', icon: '🎯', name: 'Sharpshooter', desc: '75%+ win rate (min 4 matches)',         gold: false },
+            { id: 'dynasty',      icon: '👑', name: 'Dynasty',      desc: 'Won 2+ tournaments',                   gold: true },
+            { id: 'iron_wall',    icon: '🛡️', name: 'Iron Wall',    desc: 'Never lost in a tournament (min 2)',    gold: false },
+            { id: 'first_blood',  icon: '🌟', name: 'First Blood',  desc: 'Won their first ever match',           gold: false },
+            { id: 'underdog',     icon: '💀', name: 'Underdog',     desc: 'Beat a player with higher ELO',        gold: false },
+          ];
+
+          const earned = new Set();
+
+          // Count tournament wins (Champion placements)
+          const tourneyWins = tournamentDetails.filter(td => td.placement === 'Champion').length;
+          if (tourneyWins >= 1) earned.add('champion');
+          if (tourneyWins >= 2) earned.add('dynasty');
+
+          // Veteran: 3+ tournaments
+          if (tournamentIds.length >= 3) earned.add('veteran');
+
+          // Sharpshooter: 75%+ win rate, min 4 matches
+          if (totalMatches >= 4 && winRate >= 75) earned.add('sharpshooter');
+
+          // First Blood: won at least one match
+          if (wins >= 1) earned.add('first_blood');
+
+          // Iron Wall: undefeated in at least one tournament (min 2 matches in that tournament)
+          for (const tid of tournamentIds) {
+            const playerSignup = signups.find(s => s.tournament_id === tid);
+            if (!playerSignup) continue;
+            const tMatches = matches.filter(m =>
+              m.player1_id === playerSignup.id || m.player2_id === playerSignup.id
+            );
+            const completedInT = tMatches.filter(m => m.winner_id);
+            if (completedInT.length >= 2) {
+              const lostAny = completedInT.some(m => m.winner_id !== playerSignup.id);
+              if (!lostAny) { earned.add('iron_wall'); break; }
+            }
+          }
+
+          // On Fire: 3+ consecutive wins (ordered by match id as proxy for time)
+          const sortedMatches = [...matches].filter(m => m.winner_id).sort((a, b) => a.id - b.id);
+          let streak = 0;
+          for (const m of sortedMatches) {
+            if (signupIds.includes(m.winner_id)) {
+              streak++;
+              if (streak >= 3) { earned.add('on_fire'); break; }
+            } else {
+              streak = 0;
+            }
+          }
+
+          // Underdog: beat a player with higher ELO
+          try {
+            const playerElo = await db.getPlayerElo(playerName);
+            if (playerElo) {
+              for (const m of matches) {
+                if (!m.winner_id || !signupIds.includes(m.winner_id)) continue;
+                const isP1 = signupIds.includes(m.player1_id);
+                const opponent = isP1 ? m.player2 : m.player1;
+                if (opponent) {
+                  try {
+                    const oppElo = await db.getPlayerElo(opponent.discord_username);
+                    if (oppElo && oppElo.elo > playerElo.elo) {
+                      earned.add('underdog');
+                      break;
+                    }
+                  } catch (_) {}
+                }
+              }
+            }
+          } catch (_) {}
+
+          // Render badges
+          const badgesHtml = badgeDefs.map(b => {
+            const isEarned = earned.has(b.id);
+            const cls = isEarned
+              ? `badge-card earned${b.gold ? ' tier-gold-badge' : ''}`
+              : 'badge-card locked';
+            return `<div class="${cls}" title="${b.desc}">
+              <div class="badge-icon">${b.icon}</div>
+              <div class="badge-name">${b.name}</div>
+              <div class="badge-desc">${b.desc}</div>
+            </div>`;
+          }).join('');
+
+          document.getElementById('achievements-section').innerHTML = `
+            <div class="achievements-section">
+              <div class="achievements-title">Achievements</div>
+              <div class="badges-grid">${badgesHtml}</div>
+            </div>
+          `;
+        } catch (e) {
+          console.error('Badges error:', e);
         }
 
       } catch (e) {
