@@ -350,6 +350,44 @@ const db = {
     }
   },
 
+  // Blacklist
+  async getBlacklist() {
+    const { data, error } = await supabaseClient
+      .from('blacklist')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async addToBlacklist(discordUsername, reason) {
+    const { data, error } = await supabaseClient
+      .from('blacklist')
+      .insert({ discord_username: discordUsername, reason })
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async removeFromBlacklist(id) {
+    const { error } = await supabaseClient
+      .from('blacklist')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  async isBlacklisted(discordUsername) {
+    const { data, error } = await supabaseClient
+      .from('blacklist')
+      .select('id')
+      .ilike('discord_username', discordUsername)
+      .limit(1);
+    if (error) throw error;
+    return data && data.length > 0;
+  },
+
   // Predictions
   async submitPrediction(matchId, sessionId, predictedWinnerId) {
     const { data, error } = await supabaseClient

@@ -328,6 +328,14 @@
       btn.textContent = 'Signing up...';
 
       try {
+        const blocked = await db.isBlacklisted(name);
+        if (blocked) {
+          NotificationSystem.show('You are not allowed to sign up.', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Sign Up';
+          return;
+        }
+
         const teamData = team.map(c => ({
           id: c.id,
           name: c.name,
