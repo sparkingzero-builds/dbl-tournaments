@@ -1,5 +1,27 @@
 [
   {
+    "id": 738,
+    "name": "Super Saiyan God SS Kaioken Goku",
+    "formName": "Super Saiyan God SS Kaioken Goku",
+    "element": "PUR",
+    "rarity": "LEGEND",
+    "zenkai": false,
+    "lf": false,
+    "tags": "",
+    "image": "https://dblegends.net/assets/card_cutins/BChaCut_0738_GokuSSGSSKAIOU_738.webp"
+  },
+  {
+    "id": 739,
+    "name": "God of Destruction Toppo",
+    "formName": "God of Destruction Toppo",
+    "element": "RED",
+    "rarity": "SPARKING",
+    "zenkai": false,
+    "lf": false,
+    "tags": "",
+    "image": "https://dblegends.net/assets/card_cutins/BChaCut_0739_ToppoGod_739.webp"
+  },
+  {
     "id": 737,
     "name": "Android #17 & Golden Frieza",
     "formName": "Android #17 & Golden Frieza",

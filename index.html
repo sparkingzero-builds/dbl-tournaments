@@ -122,9 +122,102 @@
       line-height: 1.4;
     }
 
+    .new-chars {
+      max-width: 620px;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .new-chars-title {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--pink);
+      margin-bottom: 12px;
+    }
+
+    .new-chars-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .new-char-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .new-char-card:hover {
+      border-color: var(--cyan);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .new-char-card img {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      object-position: top;
+      display: block;
+    }
+
+    .new-char-info {
+      padding: 10px 14px;
+    }
+
+    .new-char-name {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .new-char-meta {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .new-char-tag {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 8px;
+      border-radius: 3px;
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+    }
+
+    .new-char-tag.pur { color: #b266ff; border-color: rgba(178,102,255,0.3); }
+    .new-char-tag.red { color: #ff4d6a; border-color: rgba(255,77,106,0.3); }
+    .new-char-tag.legend { color: var(--gold); border-color: rgba(255,215,64,0.3); }
+    .new-char-tag.sparking { color: var(--cyan); border-color: rgba(0,229,255,0.3); }
+
+    .new-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--pink);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 3px 8px;
+      border-radius: 3px;
+    }
+
     @media (max-width: 600px) {
       .hero-info { grid-template-columns: 1fr; max-width: 280px; }
       .hero-sub { letter-spacing: 0.1em; }
+      .new-chars-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -160,6 +253,36 @@
     <div class="hero-cta">
       <a href="tournament.html" class="btn btn-primary btn-lg">Enter Tournament</a>
       <a href="bracket.html" class="btn btn-secondary btn-lg">View Bracket</a>
+    </div>
+
+    <div class="hero-divider"></div>
+
+    <div class="new-chars">
+      <div class="new-chars-title">New Characters</div>
+      <div class="new-chars-grid stagger">
+        <div class="new-char-card">
+          <span class="new-badge">New</span>
+          <img src="https://dblegends.net/assets/card_cutins/BChaCut_0738_GokuSSGSSKAIOU_738.webp" alt="Super Saiyan God SS Kaioken Goku" />
+          <div class="new-char-info">
+            <div class="new-char-name">Super Saiyan God SS Kaioken Goku</div>
+            <div class="new-char-meta">
+              <span class="new-char-tag pur">PUR</span>
+              <span class="new-char-tag legend">LEGEND</span>
+            </div>
+          </div>
+        </div>
+        <div class="new-char-card">
+          <span class="new-badge">New</span>
+          <img src="https://dblegends.net/assets/card_cutins/BChaCut_0739_ToppoGod_739.webp" alt="God of Destruction Toppo" />
+          <div class="new-char-info">
+            <div class="new-char-name">God of Destruction Toppo</div>
+            <div class="new-char-meta">
+              <span class="new-char-tag red">RED</span>
+              <span class="new-char-tag sparking">SPARKING</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="hero-divider"></div>
