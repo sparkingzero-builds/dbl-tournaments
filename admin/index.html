@@ -1111,6 +1111,10 @@
     }
 
     async function loadBanResults() {
+      if (!allCharacters.length) {
+        await CharacterManager.load();
+        allCharacters = CharacterManager.getAll();
+      }
       if (currentTournament && !signups.length) {
         try { signups = await db.getSignups(currentTournament.id); } catch(e) {}
       }
