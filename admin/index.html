@@ -1086,7 +1086,7 @@
         try { signups = await db.getSignups(currentTournament.id); } catch(e) {}
       }
       const card = document.getElementById('ban-results-card');
-      if (!currentTournament || currentTournament.status !== 'banning') {
+      if (!currentTournament) {
         card.style.display = 'none';
         return;
       }
