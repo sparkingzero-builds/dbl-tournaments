@@ -919,6 +919,35 @@
         return;
       }
       try {
+        // When moving from banning to active, strip banned chars from teams
+        if (status === 'active' && currentTournament.status === 'banning') {
+          const tSignups = await db.getSignups(currentTournament.id);
+          const banCount = currentTournament.ban_count || 1;
+          const votes = {};
+          tSignups.forEach(s => {
+            if (s.bans && s.bans.length > 0) {
+              s.bans.forEach(id => { votes[id] = (votes[id] || 0) + 1; });
+            }
+          });
+          const sorted = Object.entries(votes).sort((a, b) => b[1] - a[1]);
+          const bannedIds = new Set(sorted.slice(0, banCount).map(([id]) => id));
+
+          if (bannedIds.size > 0) {
+            let stripped = 0;
+            for (const s of tSignups) {
+              if (!s.team) continue;
+              const cleaned = s.team.filter(c => !bannedIds.has(c.id));
+              if (cleaned.length < s.team.length) {
+                await db.updateSignupBans(s.id, s.bans || [], cleaned);
+                stripped++;
+              }
+            }
+            if (stripped > 0) {
+              NotificationSystem.show(`Removed banned characters from ${stripped} player team${stripped > 1 ? 's' : ''}`, 'warning');
+            }
+          }
+        }
+
         await db.updateTournament(currentTournament.id, { status });
         currentTournament.status = status;
         NotificationSystem.show(`Status set to ${status}`, 'success');
