@@ -1133,13 +1133,13 @@
       signups.forEach(s => {
         if (s.bans && s.bans.length > 0) {
           s.bans.forEach(id => { votes[id] = (votes[id] || 0) + 1; });
-          const c = allCharacters.find(ch => ch.id === s.bans[0]);
+          const c = allCharacters.find(ch => String(ch.id) === String(s.bans[0]));
           playerVotes.push({ player: s.discord_username, char: c?.name || 'Unknown', image: c?.image || '' });
         }
       });
 
       const sorted = Object.entries(votes)
-        .map(([id, count]) => ({ id, count, char: allCharacters.find(c => c.id === id) }))
+        .map(([id, count]) => ({ id, count, char: allCharacters.find(c => String(c.id) === String(id)) }))
         .sort((a, b) => b.count - a.count);
 
       const resultsEl = document.getElementById('ban-vote-results');
@@ -1351,7 +1351,7 @@
 
         // Most banned
         const bannedEntries = Object.entries(banVotes)
-          .map(([id, count]) => ({ id, count, char: allCharacters.find(c => c.id === id) }))
+          .map(([id, count]) => ({ id, count, char: allCharacters.find(c => String(c.id) === String(id)) }))
           .filter(e => e.char)
           .sort((a, b) => b.count - a.count).slice(0, 6);
         document.getElementById('stat-banned-chars').innerHTML = bannedEntries.length
