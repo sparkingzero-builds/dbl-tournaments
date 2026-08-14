@@ -261,7 +261,7 @@
         tournament = null;
       }
 
-      if (!tournament || tournament.status !== 'banning') {
+      if (!tournament || (tournament.status !== 'banning' && tournament.status !== 'active')) {
         content.innerHTML = `
           <div class="ban-header">
             <h1 class="ban-title">Ban Phase</h1>
@@ -315,6 +315,10 @@
       if (saved) {
         mySignup = signups.find(s => s.discord_username.toLowerCase() === saved.toLowerCase());
         if (mySignup) {
+          if (tournament.status === 'active') {
+            showRepickIfNeeded();
+            return;
+          }
           if (mySignup.bans && mySignup.bans.length > 0) {
             showVoteSubmitted();
             return;
@@ -322,6 +326,11 @@
           showVotePage();
           return;
         }
+      }
+
+      if (tournament.status === 'active') {
+        showActiveRepickLogin();
+        return;
       }
 
       const allDone = signups.every(s => s.bans && s.bans.length > 0);
@@ -581,8 +590,8 @@
           <div class="card mt-3" style="max-width:500px;margin:0 auto;border-color:var(--pink);">
             <h4 class="text-pink mb-2">Vote Results</h4>
             ${results.map(r => {
-              const c = allChars.find(ch => ch.id === r.id);
-              const isBanned = bannedIds.has(r.id);
+              const c = allChars.find(ch => String(ch.id) === String(r.id));
+              const isBanned = bannedIds.has(String(r.id));
               return c ? `
                 <div class="ban-slot ${isBanned ? 'filled' : ''}" style="${isBanned ? '' : 'opacity:0.5;'}">
                   <img class="ban-slot__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
@@ -593,7 +602,7 @@
           </div>`;
 
         const myTeam = mySignup.team || [];
-        const conflicting = myTeam.filter(c => bannedIds.has(c.id));
+        const conflicting = myTeam.filter(c => bannedIds.has(String(c.id)));
         if (conflicting.length > 0) {
           html += `
             <div class="card mt-3" style="max-width:500px;margin:0 auto;border-color:var(--pink);">
@@ -620,13 +629,92 @@
       content.innerHTML = html;
     }
 
+    function showActiveRepickLogin() {
+      const content = document.getElementById('ban-content');
+      const bannedIds = getBannedCharIds();
+      const results = getVoteResults();
+
+      let bannedHtml = '';
+      if (results.length) {
+        bannedHtml = `
+          <div class="card mt-3" style="max-width:500px;margin:0 auto;border-color:var(--pink);">
+            <h4 class="text-pink mb-2">Banned Characters</h4>
+            ${results.slice(0, banCount).map(r => {
+              const c = allChars.find(ch => String(ch.id) === String(r.id));
+              return c ? `
+                <div class="ban-slot filled">
+                  <img class="ban-slot__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
+                  <span class="ban-slot__name" style="color:var(--pink);">${c.name}</span>
+                </div>` : '';
+            }).join('')}
+          </div>`;
+      }
+
+      content.innerHTML = `
+        <div class="ban-header">
+          <h1 class="ban-title" style="color:var(--cyan);">Re-Pick Team</h1>
+          <p class="ban-subtitle">The ban phase is over. If your team has a banned character, log in to swap them out.</p>
+        </div>
+        <div class="ban-login">
+          <div class="card card-glow">
+            <h3 class="mb-2">Enter Your Username</h3>
+            <p class="text-muted mb-2" style="font-size:13px;">Enter the Discord username you signed up with to check your team.</p>
+            <input type="text" id="ban-username" placeholder="e.g. Player#1234" />
+            <button class="btn btn-primary btn-lg mt-2" onclick="loginForBan()" style="width:100%;">Check Team</button>
+          </div>
+          ${bannedHtml}
+        </div>`;
+    }
+
+    function showRepickIfNeeded() {
+      const content = document.getElementById('ban-content');
+      const bannedIds = getBannedCharIds();
+      const myTeam = mySignup.team || [];
+      const conflicting = myTeam.filter(c => bannedIds.has(String(c.id)));
+
+      if (conflicting.length > 0) {
+        const results = getVoteResults();
+        content.innerHTML = `
+          <div class="ban-header">
+            <h1 class="ban-title" style="color:var(--pink);">⚠ Team Conflict</h1>
+            <p class="ban-subtitle">A character on your team was banned. You need to replace them before your match.</p>
+          </div>
+          <div style="max-width:500px;margin:0 auto;">
+            <div class="card" style="border-color:var(--pink);">
+              <h4 class="text-pink mb-2">Banned from your team:</h4>
+              ${conflicting.map(c => `
+                <div class="ban-slot filled">
+                  <img class="ban-slot__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
+                  <span class="ban-slot__name" style="text-decoration:line-through;color:var(--pink);">${c.name}</span>
+                </div>
+              `).join('')}
+              <button class="btn btn-primary btn-lg mt-2" onclick="startRepick()" style="width:100%;">Re-Pick Team</button>
+            </div>
+            <a href="bracket.html" class="btn btn-secondary mt-3" style="display:block;text-align:center;">Back to Bracket</a>
+          </div>`;
+      } else {
+        content.innerHTML = `
+          <div class="ban-header">
+            <h1 class="ban-title" style="color:var(--cyan);">✓ Team Clear</h1>
+            <p class="ban-subtitle">Your team isn't affected by any bans. You're good to go!</p>
+          </div>
+          <div style="max-width:500px;margin:0 auto;">
+            <div class="card" style="border-color:var(--green);">
+              <h4 style="color:var(--green);">✓ All Good</h4>
+              <p class="text-muted mt-1">None of your characters were banned.</p>
+            </div>
+            <a href="bracket.html" class="btn btn-primary mt-3" style="display:block;text-align:center;">Go to Bracket</a>
+          </div>`;
+      }
+    }
+
     let repickTeam = [];
 
     function startRepick() {
       const content = document.getElementById('ban-content');
       const bannedIds = getBannedCharIds();
       const myTeam = mySignup.team || [];
-      repickTeam = myTeam.filter(c => !bannedIds.has(c.id));
+      repickTeam = myTeam.filter(c => !bannedIds.has(String(c.id)));
       const slotsNeeded = 3 - repickTeam.length;
 
       content.innerHTML = `
@@ -656,7 +744,7 @@
       const container = document.getElementById('repick-slots');
       if (!container) return;
       const bannedIds = getBannedCharIds();
-      const keptCount = (mySignup.team || []).filter(t => !bannedIds.has(t.id)).length;
+      const keptCount = (mySignup.team || []).filter(t => !bannedIds.has(String(t.id))).length;
       let html = '';
       for (let i = 0; i < 3; i++) {
         if (repickTeam[i]) {
@@ -735,7 +823,7 @@
 
       chars.forEach(c => {
         const card = document.createElement('div');
-        const isBanned = bannedIds.has(c.id);
+        const isBanned = bannedIds.has(String(c.id));
         const isOnTeam = repickTeam.some(t => t.id === c.id);
         card.className = 'char-card' + (isBanned ? ' banned' : '') + (isOnTeam ? ' ban-selected' : '');
         if (isOnTeam) card.style.borderColor = 'var(--cyan)';
@@ -761,7 +849,7 @@
 
     function toggleRepick(char) {
       const bannedIds = getBannedCharIds();
-      const keptCount = (mySignup.team || []).filter(t => !bannedIds.has(t.id)).length;
+      const keptCount = (mySignup.team || []).filter(t => !bannedIds.has(String(t.id))).length;
       const idx = repickTeam.findIndex(c => c.id === char.id);
       if (idx !== -1 && idx >= keptCount) {
         repickTeam.splice(idx, 1);
@@ -775,7 +863,7 @@
 
     function removeRepick(index) {
       const bannedIds = getBannedCharIds();
-      const keptCount = (mySignup.team || []).filter(t => !bannedIds.has(t.id)).length;
+      const keptCount = (mySignup.team || []).filter(t => !bannedIds.has(String(t.id))).length;
       if (index >= keptCount) {
         repickTeam.splice(index, 1);
         renderRepickSlots();
