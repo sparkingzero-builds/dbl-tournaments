@@ -681,22 +681,29 @@
       const myTeam = mySignup.team || [];
       const conflicting = myTeam.filter(c => allBanned.has(String(c.id)));
 
-      if (conflicting.length > 0) {
-        const results = getVoteResults();
+      const needsRepick = conflicting.length > 0 || myTeam.length < 3;
+
+      if (needsRepick) {
+        const missingCount = 3 - myTeam.filter(c => !allBanned.has(String(c.id))).length;
+        const message = conflicting.length > 0
+          ? 'A character on your team was banned. You need to replace them before your match.'
+          : `Your team only has ${myTeam.length} character${myTeam.length !== 1 ? 's' : ''}. You need to fill your team to 3.`;
         content.innerHTML = `
           <div class="ban-header">
-            <h1 class="ban-title" style="color:var(--pink);">⚠ Team Conflict</h1>
-            <p class="ban-subtitle">A character on your team was banned. You need to replace them before your match.</p>
+            <h1 class="ban-title" style="color:var(--pink);">⚠ Team Incomplete</h1>
+            <p class="ban-subtitle">${message}</p>
           </div>
           <div style="max-width:500px;margin:0 auto;">
             <div class="card" style="border-color:var(--pink);">
+              ${conflicting.length > 0 ? `
               <h4 class="text-pink mb-2">Banned from your team:</h4>
               ${conflicting.map(c => `
                 <div class="ban-slot filled">
                   <img class="ban-slot__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
                   <span class="ban-slot__name" style="text-decoration:line-through;color:var(--pink);">${c.name}</span>
                 </div>
-              `).join('')}
+              `).join('')}` : `
+              <h4 class="text-pink mb-2">You need ${missingCount} more character${missingCount !== 1 ? 's' : ''}</h4>`}
               <button class="btn btn-primary btn-lg mt-2" onclick="startRepick()" style="width:100%;">Re-Pick Team</button>
             </div>
             <a href="bracket.html" class="btn btn-secondary mt-3" style="display:block;text-align:center;">Back to Bracket</a>
