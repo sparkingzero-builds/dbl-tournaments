@@ -201,6 +201,7 @@
       const banCount = tournament.ban_count || 1;
       const sorted = Object.entries(votes).sort((a, b) => b[1] - a[1]);
       sorted.slice(0, banCount).forEach(([id]) => bannedCharIds.add(String(id)));
+      (tournament.tournament_bans || []).forEach(id => bannedCharIds.add(String(id)));
 
       BracketManager.renderBracket(container, matches, signups, {
         teamsVisible: tournament.teams_visible,

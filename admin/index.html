@@ -1531,15 +1531,41 @@
       const allVoted = signups.length > 0 && signups.every(s => s.bans && s.bans.length > 0);
       const votedCount = signups.filter(s => s.bans && s.bans.length > 0).length;
 
+      const permBans = currentTournament.tournament_bans || [];
+
       if (hasVotes) {
         desc.textContent = `Re-ban round in progress — ${votedCount}/${signups.length} voted.`;
         container.innerHTML = `
-          <button class="btn btn-sm btn-danger mt-1" onclick="endReban()">End Re-Ban & Strip Teams</button>
-          <button class="btn btn-sm btn-secondary mt-1" style="margin-left:6px;" onclick="startReban()">Reset Votes</button>`;
+          <div class="flex gap-1 mt-1" style="flex-wrap:wrap;">
+            <button class="btn btn-sm btn-danger" onclick="endReban('round')">End Ban — This Round Only</button>
+            <button class="btn btn-sm btn-pink" onclick="endReban('tournament')" style="background:var(--pink);color:#fff;">End Ban — Whole Tournament</button>
+            <button class="btn btn-sm btn-secondary" onclick="startReban()">Reset Votes</button>
+          </div>`;
       } else {
         desc.textContent = 'Clear all ban votes and open a new ban round. Players can vote again on the Ban Phase page. Bracket stays intact.';
         container.innerHTML = `<button class="btn btn-sm btn-danger mt-1" onclick="startReban()">Re-Ban Round</button>`;
       }
+
+      let permHtml = '';
+      if (permBans.length > 0) {
+        if (!allCharacters.length) { await CharacterManager.load(); allCharacters = CharacterManager.getAll(); }
+        permHtml = `
+          <div class="mt-2" style="border-top:1px solid var(--line);padding-top:10px;">
+            <label style="font-size:12px;color:var(--pink);">Tournament-Wide Bans</label>
+            <div class="flex gap-1 mt-1" style="flex-wrap:wrap;">
+              ${permBans.map(id => {
+                const c = allCharacters.find(ch => String(ch.id) === String(id));
+                return c ? `
+                  <div style="display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--pink);border-radius:var(--radius-sm);padding:4px 8px;">
+                    <img src="${c.image}" style="width:24px;height:24px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />
+                    <span style="font-size:12px;color:var(--pink);font-weight:700;">${c.name}</span>
+                    <button onclick="removeTournamentBan('${id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">&times;</button>
+                  </div>` : '';
+              }).join('')}
+            </div>
+          </div>`;
+      }
+      container.innerHTML += permHtml;
     }
 
     async function startReban() {
@@ -1567,9 +1593,10 @@
       }
     }
 
-    async function endReban() {
+    async function endReban(mode) {
       if (!currentTournament || currentTournament.status !== 'active') return;
-      if (!confirm('This will remove newly banned characters from player teams. Continue?')) return;
+      const label = mode === 'tournament' ? 'These characters will be banned for the ENTIRE tournament.' : 'These characters will only be banned for this round.';
+      if (!confirm(`${label}\n\nBanned characters will be removed from player teams. Continue?`)) return;
 
       try {
         const tSignups = await db.getSignups(currentTournament.id);
@@ -1582,6 +1609,13 @@
         });
         const sorted = Object.entries(votes).sort((a, b) => b[1] - a[1]);
         const bannedIds = new Set(sorted.slice(0, banCount).map(([id]) => id));
+
+        if (mode === 'tournament' && bannedIds.size > 0) {
+          const existing = currentTournament.tournament_bans || [];
+          const merged = [...new Set([...existing.map(String), ...bannedIds])];
+          await db.updateTournament(currentTournament.id, { tournament_bans: merged });
+          currentTournament.tournament_bans = merged;
+        }
 
         let stripped = 0;
         if (bannedIds.size > 0) {
@@ -1596,8 +1630,24 @@
         }
 
         signups = await db.getSignups(currentTournament.id);
-        NotificationSystem.show(`Re-ban ended. Removed banned characters from ${stripped} team${stripped !== 1 ? 's' : ''}.`, 'success');
+        const modeLabel = mode === 'tournament' ? 'Tournament-wide ban applied.' : 'Round ban applied.';
+        NotificationSystem.show(`${modeLabel} Removed banned characters from ${stripped} team${stripped !== 1 ? 's' : ''}.`, 'success');
         loadBanResults();
+        updateRebanButtons();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function removeTournamentBan(charId) {
+      if (!currentTournament) return;
+      if (!confirm('Remove this tournament-wide ban?')) return;
+      try {
+        const existing = (currentTournament.tournament_bans || []).map(String);
+        const updated = existing.filter(id => id !== String(charId));
+        await db.updateTournament(currentTournament.id, { tournament_bans: updated });
+        currentTournament.tournament_bans = updated;
+        NotificationSystem.show('Tournament ban removed.', 'success');
         updateRebanButtons();
       } catch (e) {
         NotificationSystem.show('Error: ' + e.message, 'error');

@@ -308,6 +308,12 @@
       return new Set(results.slice(0, banCount).map(r => r.id));
     }
 
+    function getAllBannedIds() {
+      const voteBans = getBannedCharIds();
+      const tournamentBans = (tournament?.tournament_bans || []).map(String);
+      return new Set([...voteBans, ...tournamentBans]);
+    }
+
     function showLoginOrVote() {
       const content = document.getElementById('ban-content');
       const saved = sessionStorage.getItem('ban_username');
@@ -671,9 +677,9 @@
 
     function showRepickIfNeeded() {
       const content = document.getElementById('ban-content');
-      const bannedIds = getBannedCharIds();
+      const allBanned = getAllBannedIds();
       const myTeam = mySignup.team || [];
-      const conflicting = myTeam.filter(c => bannedIds.has(String(c.id)));
+      const conflicting = myTeam.filter(c => allBanned.has(String(c.id)));
 
       if (conflicting.length > 0) {
         const results = getVoteResults();
@@ -715,9 +721,9 @@
 
     function startRepick() {
       const content = document.getElementById('ban-content');
-      const bannedIds = getBannedCharIds();
+      const allBanned = getAllBannedIds();
       const myTeam = mySignup.team || [];
-      repickTeam = myTeam.filter(c => !bannedIds.has(String(c.id)));
+      repickTeam = myTeam.filter(c => !allBanned.has(String(c.id)));
       const slotsNeeded = 3 - repickTeam.length;
 
       content.innerHTML = `
@@ -824,9 +830,11 @@
         YEL: 'var(--el-yel)', PUR: 'var(--el-pur)', LGT: 'var(--el-lgt)'
       };
 
+      const allBanned = getAllBannedIds();
+
       chars.forEach(c => {
         const card = document.createElement('div');
-        const isBanned = bannedIds.has(String(c.id));
+        const isBanned = allBanned.has(String(c.id));
         const isOnTeam = repickTeam.some(t => t.id === c.id);
         card.className = 'char-card' + (isBanned ? ' banned' : '') + (isOnTeam ? ' ban-selected' : '');
         if (isOnTeam) card.style.borderColor = 'var(--cyan)';
