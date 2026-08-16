@@ -456,6 +456,16 @@
           <p class="text-muted" style="font-size:12px;" id="reban-desc">Clear all ban votes and open a new ban round.</p>
           <div id="reban-buttons"></div>
         </div>
+        <div class="divider"></div>
+        <div class="form-group" id="manual-ban-section">
+          <label>Manual Character Bans</label>
+          <p class="text-muted" style="font-size:12px;">Ban any character from the tournament instantly. Banned characters are removed from all player teams.</p>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <input type="text" id="manual-ban-search" placeholder="Search character..." style="flex:1;" oninput="filterManualBanList()" />
+          </div>
+          <div id="manual-ban-dropdown" style="display:none;max-height:200px;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-sm);margin-top:4px;"></div>
+          <div id="manual-ban-list" class="mt-2" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div>
       </div>
 
       <!-- ELO Update -->
@@ -1520,6 +1530,7 @@
         const rebanEl = document.getElementById('reban-section');
         rebanEl.style.display = currentTournament.status === 'active' ? '' : 'none';
         if (currentTournament.status === 'active') updateRebanButtons();
+        renderManualBanList();
       }
     };
 
@@ -1649,9 +1660,94 @@
         currentTournament.tournament_bans = updated;
         NotificationSystem.show('Tournament ban removed.', 'success');
         updateRebanButtons();
+        renderManualBanList();
       } catch (e) {
         NotificationSystem.show('Error: ' + e.message, 'error');
       }
+    }
+
+    function filterManualBanList() {
+      const query = (document.getElementById('manual-ban-search')?.value || '').toLowerCase();
+      const dropdown = document.getElementById('manual-ban-dropdown');
+      if (!query || query.length < 2) {
+        dropdown.style.display = 'none';
+        return;
+      }
+      if (!allCharacters.length) return;
+      const banned = new Set((currentTournament?.tournament_bans || []).map(String));
+      const matches = allCharacters.filter(c =>
+        c.name.toLowerCase().includes(query) && !banned.has(String(c.id))
+      ).slice(0, 10);
+
+      if (!matches.length) {
+        dropdown.style.display = 'none';
+        return;
+      }
+
+      dropdown.style.display = '';
+      dropdown.innerHTML = matches.map(c => `
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;border-bottom:1px solid var(--line);"
+             onmouseover="this.style.background='var(--bg-2)'" onmouseout="this.style.background=''"
+             onclick="addManualBan('${c.id}')">
+          <img src="${c.image}" style="width:28px;height:28px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />
+          <span style="font-size:13px;font-weight:600;">${c.name}</span>
+          <span style="font-size:10px;color:var(--muted);margin-left:auto;">${c.element} · ${c.rarity}</span>
+        </div>
+      `).join('');
+    }
+
+    async function addManualBan(charId) {
+      if (!currentTournament) return;
+      try {
+        const existing = (currentTournament.tournament_bans || []).map(String);
+        if (existing.includes(String(charId))) return;
+        const updated = [...existing, String(charId)];
+        await db.updateTournament(currentTournament.id, { tournament_bans: updated });
+        currentTournament.tournament_bans = updated;
+
+        // Strip from teams
+        const tSignups = await db.getSignups(currentTournament.id);
+        let stripped = 0;
+        for (const s of tSignups) {
+          if (!s.team) continue;
+          const cleaned = s.team.filter(c => String(c.id) !== String(charId));
+          if (cleaned.length < s.team.length) {
+            await db.updateSignupBans(s.id, s.bans || [], cleaned);
+            stripped++;
+          }
+        }
+        signups = await db.getSignups(currentTournament.id);
+
+        const c = allCharacters.find(ch => String(ch.id) === String(charId));
+        NotificationSystem.show(`${c?.name || 'Character'} banned.${stripped ? ` Removed from ${stripped} team${stripped !== 1 ? 's' : ''}.` : ''}`, 'success');
+
+        document.getElementById('manual-ban-search').value = '';
+        document.getElementById('manual-ban-dropdown').style.display = 'none';
+        renderManualBanList();
+        updateRebanButtons();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    function renderManualBanList() {
+      const container = document.getElementById('manual-ban-list');
+      if (!container || !currentTournament) return;
+      const bans = (currentTournament.tournament_bans || []).map(String);
+      if (!bans.length) {
+        container.innerHTML = '<span class="text-muted" style="font-size:12px;">No characters banned.</span>';
+        return;
+      }
+      if (!allCharacters.length) return;
+      container.innerHTML = bans.map(id => {
+        const c = allCharacters.find(ch => String(ch.id) === String(id));
+        return c ? `
+          <div style="display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--pink);border-radius:var(--radius-sm);padding:4px 8px;">
+            <img src="${c.image}" style="width:24px;height:24px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />
+            <span style="font-size:12px;color:var(--pink);font-weight:700;">${c.name}</span>
+            <button onclick="removeTournamentBan('${id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">&times;</button>
+          </div>` : '';
+      }).join('');
     }
   </script>
 </body>
