@@ -315,12 +315,12 @@
       if (saved) {
         mySignup = signups.find(s => s.discord_username.toLowerCase() === saved.toLowerCase());
         if (mySignup) {
-          if (tournament.status === 'active') {
-            showRepickIfNeeded();
-            return;
-          }
           if (mySignup.bans && mySignup.bans.length > 0) {
-            showVoteSubmitted();
+            if (tournament.status === 'active') {
+              showRepickIfNeeded();
+            } else {
+              showVoteSubmitted();
+            }
             return;
           }
           showVotePage();
@@ -329,8 +329,11 @@
       }
 
       if (tournament.status === 'active') {
-        showActiveRepickLogin();
-        return;
+        const allVoted = signups.every(s => s.bans && s.bans.length > 0);
+        if (allVoted && signups.length > 0) {
+          showActiveRepickLogin();
+          return;
+        }
       }
 
       const allDone = signups.every(s => s.bans && s.bans.length > 0);

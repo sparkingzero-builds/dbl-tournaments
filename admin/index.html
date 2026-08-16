@@ -451,6 +451,11 @@
             <button class="btn btn-sm btn-gold" onclick="setStatus('completed')">Complete</button>
           </div>
         </div>
+        <div class="form-group mt-2" id="reban-section" style="display:none;">
+          <label>Mid-Tournament Re-Ban</label>
+          <p class="text-muted" style="font-size:12px;">Clear all ban votes and open a new ban round. Players can vote again on the Ban Phase page. Bracket stays intact.</p>
+          <button class="btn btn-sm btn-danger mt-1" onclick="startReban()">Re-Ban Round</button>
+        </div>
       </div>
 
       <!-- ELO Update -->
@@ -1047,7 +1052,7 @@
             let stripped = 0;
             for (const s of tSignups) {
               if (!s.team) continue;
-              const cleaned = s.team.filter(c => !bannedIds.has(c.id));
+              const cleaned = s.team.filter(c => !bannedIds.has(String(c.id)));
               if (cleaned.length < s.team.length) {
                 await db.updateSignupBans(s.id, s.bans || [], cleaned);
                 stripped++;
@@ -1511,8 +1516,35 @@
           const md = new Date(currentTournament.match_deadline);
           document.getElementById('match-deadline').value = md.toISOString().slice(0, 16);
         }
+
+        const rebanEl = document.getElementById('reban-section');
+        rebanEl.style.display = currentTournament.status === 'active' ? '' : 'none';
       }
     };
+
+    async function startReban() {
+      if (!currentTournament || currentTournament.status !== 'active') {
+        NotificationSystem.show('Tournament must be active to re-ban', 'error');
+        return;
+      }
+      if (!confirm('This will clear all ban votes and let players vote again. Banned characters already removed from teams stay removed. Continue?')) return;
+
+      try {
+        const tSignups = await db.getSignups(currentTournament.id);
+        let cleared = 0;
+        for (const s of tSignups) {
+          if (s.bans && s.bans.length > 0) {
+            await db.updateSignupBans(s.id, [], s.team);
+            cleared++;
+          }
+        }
+        signups = await db.getSignups(currentTournament.id);
+        NotificationSystem.show(`Cleared ${cleared} ban votes. New ban round is open — players can vote on the Ban Phase page.`, 'success');
+        loadBanResults();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
   </script>
 </body>
 </html>
