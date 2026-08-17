@@ -622,6 +622,20 @@
 
         if (error) throw error;
         NotificationSystem.show(`Voted for ${username}!`, 'success');
+
+        // Award points for power ranking vote (once per session)
+        if (!sessionStorage.getItem('pr_points_awarded')) {
+          const voterName = sessionStorage.getItem('shop_username') || sessionStorage.getItem('ban_username') || sessionStorage.getItem('chat_username');
+          if (voterName) {
+            try {
+              await db.awardPoints(voterName, 10, 'power_ranking_vote');
+              sessionStorage.setItem('pr_points_awarded', 'true');
+            } catch (ptErr) {
+              console.error('Power ranking vote points error:', ptErr);
+            }
+          }
+        }
+
         await loadPrVotes();
       } catch (e) {
         console.error(e);

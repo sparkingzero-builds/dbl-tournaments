@@ -275,6 +275,7 @@
       <button class="tab" data-tab="bracket">Bracket</button>
       <button class="tab" data-tab="stats">Stats</button>
       <button class="tab" data-tab="settings">Settings</button>
+      <button class="tab" data-tab="economy">Economy</button>
     </div>
 
     <!-- Tournament Tab -->
@@ -400,6 +401,144 @@
           <h3 class="mb-2" style="color:var(--green);">Most Banned Characters</h3>
           <div id="stat-banned-chars"><p class="text-muted">Loading...</p></div>
         </div>
+      </div>
+    </div>
+
+    <!-- Economy Tab -->
+    <div class="tab-content" id="tab-economy">
+      <!-- Award/Deduct Points -->
+      <div class="card">
+        <h3 class="mb-3" style="color:var(--gold);">Award / Deduct Points</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Discord Username</label>
+            <input type="text" id="eco-username" placeholder="e.g. Player#1234" />
+          </div>
+          <div class="form-group">
+            <label>Amount (negative to deduct)</label>
+            <input type="number" id="eco-amount" placeholder="100" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Reason</label>
+          <select id="eco-reason">
+            <option value="match_win">Match Win</option>
+            <option value="participation">Participation</option>
+            <option value="tournament_complete">Tournament Complete</option>
+            <option value="champion">Champion</option>
+            <option value="bonus">Bonus</option>
+            <option value="penalty">Penalty</option>
+            <option value="refund">Refund</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-charge" type="button" onclick="awardPointsAdmin()">Award Points</button>
+      </div>
+
+      <!-- Points Leaderboard -->
+      <div class="card mt-3">
+        <div class="flex justify-between items-center mb-2">
+          <h3 style="color:var(--cyan);">Points Leaderboard</h3>
+          <button class="btn btn-sm btn-secondary" onclick="loadPointsLeaderboard()">Refresh</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="signup-table" id="points-leaderboard-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Player</th>
+                <th>Balance</th>
+                <th>Lifetime Earned</th>
+              </tr>
+            </thead>
+            <tbody id="points-leaderboard-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="no-points-data">
+          <p>No points data yet.</p>
+        </div>
+      </div>
+
+      <!-- Shop Item Manager -->
+      <div class="card mt-3">
+        <h3 class="mb-3" style="color:var(--pink);">Shop Item Manager</h3>
+        <div id="shop-item-form-wrapper">
+          <h4 class="mb-2" id="shop-form-title">Add New Item</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Type</label>
+              <select id="shop-item-type">
+                <option value="flair_border">Flair Border</option>
+                <option value="flair_title">Flair Title</option>
+                <option value="alt_art">Alt Art</option>
+                <option value="profile_bg">Profile Background</option>
+                <option value="ban_immunity">Ban Immunity</option>
+                <option value="double_down">Double Down</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" id="shop-item-name" placeholder="e.g. Fire Border" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" id="shop-item-desc" placeholder="Short description..." />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Cost (points)</label>
+              <input type="number" id="shop-item-cost" placeholder="500" />
+            </div>
+            <div class="form-group">
+              <label>Metadata (JSON)</label>
+              <input type="text" id="shop-item-meta" placeholder='{"effect":"flair-fire"}' />
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="toggle-switch" onclick="toggleShopItemActive()">
+              <div class="toggle-track active" id="shop-item-active-toggle"></div>
+              <span>Active</span>
+            </div>
+          </div>
+          <div class="flex gap-1">
+            <button class="btn btn-primary btn-charge" type="button" onclick="saveShopItem()">
+              <span id="shop-save-btn-text">Add Item</span>
+            </button>
+            <button class="btn btn-secondary hidden" type="button" id="shop-cancel-btn" onclick="cancelEditShopItem()">Cancel</button>
+          </div>
+        </div>
+
+        <div class="divider" style="margin:20px 0;"></div>
+
+        <div class="flex justify-between items-center mb-2">
+          <h4>Existing Items</h4>
+          <button class="btn btn-sm btn-secondary" onclick="loadShopItems()">Refresh</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="signup-table" id="shop-items-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Cost</th>
+                <th>Active</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="shop-items-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="no-shop-items">
+          <p>No shop items yet.</p>
+        </div>
+      </div>
+
+      <!-- Seed Defaults -->
+      <div class="card mt-3">
+        <h3 class="mb-2">Seed Default Items</h3>
+        <p class="text-muted mb-2" style="font-size:13px;">Add starter flair borders, titles, and consumables. Skips items that already exist by name.</p>
+        <button class="btn btn-primary btn-charge" type="button" onclick="seedDefaultShopItems()">Seed Defaults</button>
       </div>
     </div>
 
@@ -547,6 +686,7 @@
         if (tab.dataset.tab === 'bracket') loadAdminBracket();
         if (tab.dataset.tab === 'stats') loadStats();
         if (tab.dataset.tab === 'settings') loadSettings();
+        if (tab.dataset.tab === 'economy') loadEconomy();
       });
     });
 
@@ -981,6 +1121,27 @@
       try {
         await db.updateMatch(matchId, { winner_id: winnerId, score });
 
+        // Auto-award points for match result
+        try {
+          const { data: existingPts } = await supabaseClient.from('point_transactions').select('id').eq('reference_id', matchId).limit(1);
+          if (!existingPts || existingPts.length === 0) {
+            matches = await db.getMatches(currentTournament.id);
+            const awardMatch = matches.find(m => m.id === matchId);
+            if (awardMatch && awardMatch.player1 && awardMatch.player2) {
+              const winnerName = awardMatch.winner_id === awardMatch.player1_id
+                ? awardMatch.player1.discord_username
+                : awardMatch.player2.discord_username;
+              const loserName = awardMatch.winner_id === awardMatch.player1_id
+                ? awardMatch.player2.discord_username
+                : awardMatch.player1.discord_username;
+              await db.awardPoints(winnerName, 100, 'match_win', matchId);
+              await db.awardPoints(loserName, 25, 'participation', matchId);
+            }
+          }
+        } catch (ptErr) {
+          console.error('Point award error:', ptErr);
+        }
+
         // Propagate
         matches = await db.getMatches(currentTournament.id);
         const completedMatch = matches.find(m => m.id === matchId);
@@ -1078,6 +1239,39 @@
 
         await db.updateTournament(currentTournament.id, { status });
         currentTournament.status = status;
+
+        // Auto-award points on tournament completion
+        if (status === 'completed') {
+          try {
+            const refId = currentTournament.id + '_complete';
+            const { data: existingPts } = await supabaseClient.from('point_transactions').select('id').eq('reference_id', refId).limit(1);
+            if (!existingPts || existingPts.length === 0) {
+              const tSignups = await db.getSignups(currentTournament.id);
+              for (const s of tSignups) {
+                if (s.discord_username) {
+                  await db.awardPoints(s.discord_username, 200, 'tournament_complete', refId);
+                }
+              }
+              // Award champion bonus
+              const tMatches = await db.getMatches(currentTournament.id);
+              if (tMatches && tMatches.length > 0) {
+                const maxRound = Math.max(...tMatches.map(m => m.round || 0));
+                const finalMatch = tMatches.find(m => m.round === maxRound && m.winner_id);
+                if (finalMatch) {
+                  const champion = finalMatch.winner_id === finalMatch.player1_id
+                    ? finalMatch.player1 : finalMatch.player2;
+                  if (champion && champion.discord_username) {
+                    await db.awardPoints(champion.discord_username, 500, 'champion', refId);
+                  }
+                }
+              }
+              NotificationSystem.show('Points awarded to all participants!', 'success');
+            }
+          } catch (ptErr) {
+            console.error('Tournament completion points error:', ptErr);
+          }
+        }
+
         NotificationSystem.show(`Status set to ${status}`, 'success');
         loadTournaments();
       } catch (e) {
@@ -1750,6 +1944,213 @@
             <button onclick="removeTournamentBan('${id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">&times;</button>
           </div>` : '';
       }).join('');
+    }
+
+    // ── Economy Tab ──────────────────────────────────────────────
+    let editingShopItemId = null;
+
+    async function loadEconomy() {
+      await loadPointsLeaderboard();
+      await loadShopItems();
+    }
+
+    // Award / Deduct Points
+    async function awardPointsAdmin() {
+      const username = document.getElementById('eco-username').value.trim();
+      const amount = parseInt(document.getElementById('eco-amount').value);
+      const reason = document.getElementById('eco-reason').value;
+
+      if (!username) { NotificationSystem.show('Enter a Discord username', 'error'); return; }
+      if (!amount || isNaN(amount)) { NotificationSystem.show('Enter a valid amount', 'error'); return; }
+
+      try {
+        await db.awardPoints(username, amount, reason);
+        NotificationSystem.show(`${amount > 0 ? 'Awarded' : 'Deducted'} ${Math.abs(amount)} points ${amount > 0 ? 'to' : 'from'} ${username}`, 'success');
+        document.getElementById('eco-username').value = '';
+        document.getElementById('eco-amount').value = '';
+        loadPointsLeaderboard();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    // Points Leaderboard
+    async function loadPointsLeaderboard() {
+      const tbody = document.getElementById('points-leaderboard-tbody');
+      const empty = document.getElementById('no-points-data');
+      try {
+        const data = await db.getPointsLeaderboard();
+        if (!data || !data.length) {
+          tbody.innerHTML = '';
+          empty.classList.remove('hidden');
+          return;
+        }
+        empty.classList.add('hidden');
+        tbody.innerHTML = data.map((p, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td><strong>${p.discord_username}</strong></td>
+            <td style="color:var(--green);font-family:'Exo 2',sans-serif;font-weight:700;">${p.balance}</td>
+            <td style="color:var(--gold);font-family:'Exo 2',sans-serif;font-weight:700;">${p.lifetime_earned}</td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = '';
+        empty.classList.remove('hidden');
+      }
+    }
+
+    // Shop Item Active Toggle
+    function toggleShopItemActive() {
+      document.getElementById('shop-item-active-toggle').classList.toggle('active');
+    }
+
+    // Save Shop Item (create or update)
+    async function saveShopItem() {
+      const type = document.getElementById('shop-item-type').value;
+      const name = document.getElementById('shop-item-name').value.trim();
+      const description = document.getElementById('shop-item-desc').value.trim();
+      const cost = parseInt(document.getElementById('shop-item-cost').value);
+      const metaRaw = document.getElementById('shop-item-meta').value.trim();
+      const active = document.getElementById('shop-item-active-toggle').classList.contains('active');
+
+      if (!name) { NotificationSystem.show('Item name is required', 'error'); return; }
+      if (!cost || isNaN(cost) || cost < 0) { NotificationSystem.show('Enter a valid cost', 'error'); return; }
+
+      let metadata = {};
+      if (metaRaw) {
+        try { metadata = JSON.parse(metaRaw); } catch (e) { NotificationSystem.show('Invalid JSON in metadata', 'error'); return; }
+      }
+
+      const item = { type, name, description, cost, metadata, active };
+
+      try {
+        if (editingShopItemId) {
+          await db.updateShopItem(editingShopItemId, item);
+          NotificationSystem.show('Item updated', 'success');
+        } else {
+          await db.createShopItem(item);
+          NotificationSystem.show('Item created', 'success');
+        }
+        cancelEditShopItem();
+        loadShopItems();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    function cancelEditShopItem() {
+      editingShopItemId = null;
+      document.getElementById('shop-form-title').textContent = 'Add New Item';
+      document.getElementById('shop-save-btn-text').textContent = 'Add Item';
+      document.getElementById('shop-cancel-btn').classList.add('hidden');
+      document.getElementById('shop-item-type').value = 'flair_border';
+      document.getElementById('shop-item-name').value = '';
+      document.getElementById('shop-item-desc').value = '';
+      document.getElementById('shop-item-cost').value = '';
+      document.getElementById('shop-item-meta').value = '';
+      document.getElementById('shop-item-active-toggle').classList.add('active');
+    }
+
+    function editShopItem(item) {
+      editingShopItemId = item.id;
+      document.getElementById('shop-form-title').textContent = 'Edit Item';
+      document.getElementById('shop-save-btn-text').textContent = 'Update Item';
+      document.getElementById('shop-cancel-btn').classList.remove('hidden');
+      document.getElementById('shop-item-type').value = item.type;
+      document.getElementById('shop-item-name').value = item.name;
+      document.getElementById('shop-item-desc').value = item.description || '';
+      document.getElementById('shop-item-cost').value = item.cost;
+      document.getElementById('shop-item-meta').value = item.metadata ? JSON.stringify(item.metadata) : '';
+      const toggle = document.getElementById('shop-item-active-toggle');
+      if (item.active) { toggle.classList.add('active'); } else { toggle.classList.remove('active'); }
+    }
+
+    async function deleteShopItem(id, name) {
+      if (!confirm(`Delete "${name}"?`)) return;
+      try {
+        await db.deleteShopItem(id);
+        NotificationSystem.show(`"${name}" deleted`, 'ko');
+        loadShopItems();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    // Load all shop items (admin: include inactive)
+    let shopItemsCache = [];
+    async function loadShopItems() {
+      const tbody = document.getElementById('shop-items-tbody');
+      const empty = document.getElementById('no-shop-items');
+      try {
+        const { data, error } = await supabaseClient
+          .from('shop_items')
+          .select('*')
+          .order('type')
+          .order('cost');
+        if (error) throw error;
+        shopItemsCache = data || [];
+        if (!shopItemsCache.length) {
+          tbody.innerHTML = '';
+          empty.classList.remove('hidden');
+          return;
+        }
+        empty.classList.add('hidden');
+        tbody.innerHTML = shopItemsCache.map(item => `
+          <tr>
+            <td><strong>${item.name}</strong></td>
+            <td><span style="font-size:11px;color:var(--muted);text-transform:uppercase;">${item.type.replace('_', ' ')}</span></td>
+            <td style="color:var(--gold);font-family:'Exo 2',sans-serif;font-weight:700;">${item.cost}</td>
+            <td>${item.active ? '<span style="color:var(--green);font-weight:700;">Yes</span>' : '<span style="color:var(--red);font-weight:700;">No</span>'}</td>
+            <td>
+              <div class="flex gap-1">
+                <button class="action-btn btn-advance" onclick='editShopItem(${JSON.stringify(item).replace(/'/g,"&#39;")})'>Edit</button>
+                <button class="action-btn" onclick="deleteShopItem('${item.id}','${item.name.replace(/'/g,"\\'")}')">Delete</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = '';
+        empty.classList.remove('hidden');
+      }
+    }
+
+    // Seed default shop items
+    async function seedDefaultShopItems() {
+      const defaults = [
+        { type: 'flair_border', name: 'Fire Border', description: 'A blazing fire effect around your profile', cost: 500, metadata: { effect: 'flair-fire' }, active: true },
+        { type: 'flair_border', name: 'Ice Border', description: 'A frozen ice effect around your profile', cost: 500, metadata: { effect: 'flair-ice' }, active: true },
+        { type: 'flair_border', name: 'Royal Border', description: 'A regal golden border effect', cost: 750, metadata: { effect: 'flair-royal' }, active: true },
+        { type: 'flair_border', name: 'Shadow Border', description: 'A dark shadowy border effect', cost: 600, metadata: { effect: 'flair-shadow' }, active: true },
+        { type: 'flair_title', name: 'Dragon Slayer', description: 'Display the title "Dragon Slayer"', cost: 300, metadata: { title: 'Dragon Slayer' }, active: true },
+        { type: 'flair_title', name: 'Unbreakable', description: 'Display the title "Unbreakable"', cost: 300, metadata: { title: 'Unbreakable' }, active: true },
+        { type: 'flair_title', name: 'Rising Star', description: 'Display the title "Rising Star"', cost: 200, metadata: { title: 'Rising Star' }, active: true },
+        { type: 'flair_title', name: 'Legendary', description: 'Display the title "Legendary"', cost: 1000, metadata: { title: 'Legendary' }, active: true },
+        { type: 'ban_immunity', name: 'Ban Immunity', description: 'Protect one character from being banned in the next ban phase', cost: 1500, metadata: {}, active: true },
+        { type: 'double_down', name: 'Double Down', description: 'Bet on yourself — earn double points if you win your next match', cost: 800, metadata: {}, active: true }
+      ];
+
+      try {
+        // Get existing items to check by name
+        const { data: existing } = await supabaseClient.from('shop_items').select('name');
+        const existingNames = new Set((existing || []).map(e => e.name));
+
+        let created = 0;
+        let skipped = 0;
+        for (const item of defaults) {
+          if (existingNames.has(item.name)) {
+            skipped++;
+            continue;
+          }
+          await db.createShopItem(item);
+          created++;
+        }
+        NotificationSystem.show(`Seeded ${created} item${created !== 1 ? 's' : ''}${skipped ? `, skipped ${skipped} existing` : ''}`, 'success');
+        loadShopItems();
+      } catch (e) {
+        NotificationSystem.show('Error seeding items: ' + e.message, 'error');
+      }
     }
   </script>
 </body>

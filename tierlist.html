@@ -506,6 +506,19 @@
 
         if (error) throw error;
         NotificationSystem.show(`Submitted ${entries.length} votes!`, 'success');
+
+        // Award points for tier list voting (once per session)
+        if (!sessionStorage.getItem('tier_points_awarded')) {
+          const username = sessionStorage.getItem('shop_username') || sessionStorage.getItem('ban_username') || sessionStorage.getItem('chat_username');
+          if (username) {
+            try {
+              await db.awardPoints(username, 10, 'tier_vote');
+              sessionStorage.setItem('tier_points_awarded', 'true');
+            } catch (ptErr) {
+              console.error('Tier vote points error:', ptErr);
+            }
+          }
+        }
       } catch (e) {
         console.error(e);
         NotificationSystem.show('Error submitting votes. Try again.', 'error');

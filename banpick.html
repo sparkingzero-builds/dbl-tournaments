@@ -547,6 +547,14 @@
       try {
         await db.updateSignupBans(mySignup.id, [selectedVote]);
         mySignup.bans = [selectedVote];
+
+        // Award points for ban vote
+        try {
+          await db.awardPoints(mySignup.discord_username, 10, 'ban_vote', tournament.id + '_ban');
+        } catch (ptErr) {
+          console.error('Ban vote points error:', ptErr);
+        }
+
         playSound('ko');
         NotificationSystem.show('Vote submitted!', 'success');
 
