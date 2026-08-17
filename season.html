@@ -173,6 +173,14 @@
       margin-bottom: 6px;
       min-height: 28px;
     }
+    .reward-detail {
+      font-size: 9px;
+      color: var(--muted);
+      font-style: italic;
+      margin-bottom: 4px;
+      line-height: 1.2;
+      min-height: 11px;
+    }
     .reward-track-label {
       display: inline-block;
       font-size: 9px;
@@ -343,13 +351,30 @@
   <script src="js/notifications.js"></script>
   <script>
     const REWARD_ICONS = {
-      points: '💎',
-      flair_border: '🖼️',
-      flair_title: '✨',
-      badge: '🏅',
-      ban_immunity: '🛡️',
-      profile_bg: '🎨'
+      points: '💎', flair_border: '🖼️', flair_title: '✨', badge: '🏅',
+      ban_immunity: '🛡️', profile_bg: '🎨', aura: '🔥', victory_quote: '💬',
+      kings_commentary: '👑', golden_name: '⭐', hype_bomb: '💥', scouter: '📡',
+      vegetas_pride: '💪', double_down: '🎲'
     };
+
+    function getRewardTooltip(reward) {
+      if (!reward) return '';
+      const meta = reward.metadata || {};
+      let detail = '';
+      switch (reward.type) {
+        case 'flair_title': detail = `Title: "${meta.title || reward.name}"`; break;
+        case 'aura': detail = 'Animated glow on bracket'; break;
+        case 'flair_border': detail = 'Profile card border'; break;
+        case 'victory_quote': detail = `"${meta.quote || '...'}"`; break;
+        case 'points': detail = `${meta.amount || 0} points`; break;
+        case 'profile_bg': detail = 'Profile background'; break;
+        case 'kings_commentary': detail = 'Gold trash talk'; break;
+        case 'scouter': detail = 'See opponent team'; break;
+        case 'badge': detail = `${meta.icon || '🏅'} Badge`; break;
+        default: detail = reward.description || '';
+      }
+      return detail;
+    }
 
     function tierThreshold(tier) { return tier * 100; }
     function getCurrentTier(xp) {
@@ -471,11 +496,13 @@
           }
         }
 
+        const tooltip = reward ? getRewardTooltip(reward) : '';
         html += `
-          <div class="${classes}" data-tier="${t}">
+          <div class="${classes}" data-tier="${t}" ${tooltip ? `title="${tooltip.replace(/"/g,'&quot;')}"` : ''}>
             <div class="reward-tier">Tier ${t}</div>
             <div class="reward-icon">${icon}</div>
             <div class="reward-name">${name}</div>
+            ${tooltip ? `<div class="reward-detail">${tooltip}</div>` : ''}
             <span class="reward-track-label ${trackType}">${trackType}</span>
             ${btnHtml}
           </div>

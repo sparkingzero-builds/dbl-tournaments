@@ -129,6 +129,18 @@
       opacity: 0.4;
       cursor: not-allowed;
     }
+    .item-preview {
+      text-align: center;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 4px;
+    }
+    @keyframes preview-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.08); opacity: 1; }
+    }
     .tab-bar {
       display: flex;
       gap: 0;
@@ -311,13 +323,85 @@
     let currentBalance = 0;
 
     const TYPE_LABELS = {
-      flair_border: 'Flair Borders',
-      flair_title: 'Flair Titles',
-      alt_art: 'Alt Art',
-      profile_bg: 'Profile Backgrounds',
-      ban_immunity: 'Ban Immunity',
-      double_down: 'Double Down'
+      flair_border: '🖼️ Flair Borders',
+      flair_title: '✨ Titles',
+      aura: '🔥 Aura Effects',
+      victory_quote: '💬 Victory Quotes',
+      kings_commentary: '👑 Social',
+      golden_name: '👑 Social',
+      hype_bomb: '👑 Social',
+      profile_bg: '🎨 Profile Backgrounds',
+      badge: '🏅 Badges',
+      ban_immunity: '🛡️ Gameplay',
+      double_down: '🎲 Gameplay',
+      scouter: '🛡️ Gameplay',
+      vegetas_pride: '🎲 Gameplay',
+      alt_art: 'Alt Art'
     };
+
+    const TYPE_ICONS = {
+      flair_border: '🖼️', flair_title: '✨', aura: '🔥', victory_quote: '💬',
+      kings_commentary: '👑', golden_name: '⭐', hype_bomb: '💥',
+      profile_bg: '🎨', badge: '🏅', ban_immunity: '🛡️', double_down: '🎲',
+      scouter: '📡', vegetas_pride: '💪'
+    };
+
+    function getItemPreview(item) {
+      const meta = item.metadata || {};
+      switch (item.type) {
+        case 'flair_border': {
+          const gradients = {
+            'flair-fire': 'conic-gradient(from 0deg, #ff4500, #ff8c00, #ffd700, #ff4500)',
+            'flair-ice': 'conic-gradient(from 0deg, #00bfff, #e0f7ff, #00bfff, #4dd0e1)',
+            'flair-royal': 'conic-gradient(from 0deg, #9b59b6, #ffd700, #9b59b6, #e74c3c)',
+            'flair-shadow': 'conic-gradient(from 0deg, #1a1a2e, #6c3483, #1a1a2e, #2c3e50)',
+            'flair-champion': 'conic-gradient(from 0deg, #ffd700, #ff6b00, #ff0080, #8b00ff, #00d4ff, #ffd700)'
+          };
+          const bg = gradients[meta.effect] || 'var(--line)';
+          return `<div style="width:60px;height:60px;border-radius:10px;background:${bg};padding:3px;margin:0 auto 8px;">
+            <div style="width:100%;height:100%;background:var(--bg-2);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:20px;">🎭</div></div>`;
+        }
+        case 'aura': {
+          const colors = {
+            'aura-blue': 'rgba(0,120,255,0.7)', 'aura-red': 'rgba(255,40,40,0.7)',
+            'aura-gold': 'rgba(255,215,0,0.7)', 'aura-ui': 'rgba(200,200,255,0.7)'
+          };
+          const c = colors[meta.effect] || 'rgba(0,229,255,0.5)';
+          return `<div style="width:60px;height:60px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:24px;border-radius:50%;animation:preview-pulse 2s ease-in-out infinite;box-shadow:0 0 15px ${c}, 0 0 30px ${c};">⚡</div>`;
+        }
+        case 'flair_title':
+          return `<div style="margin:0 auto 8px;padding:4px 12px;background:linear-gradient(135deg,var(--cyan),var(--pink));border-radius:999px;font-size:11px;font-weight:700;display:inline-block;color:#000;">${meta.title || item.name}</div>`;
+        case 'victory_quote':
+          return `<div style="margin:0 auto 8px;font-style:italic;color:var(--gold);font-size:12px;text-shadow:0 0 6px rgba(255,215,0,0.3);">"${meta.quote || '...'}"</div>`;
+        case 'kings_commentary':
+          return `<div style="margin:0 auto 8px;padding:6px 10px;background:rgba(255,215,0,0.08);border-left:3px solid var(--gold);border-radius:var(--radius-sm);font-size:11px;color:var(--text);position:relative;">
+            <span style="position:absolute;top:-8px;right:4px;font-size:12px;">👑</span>Your message here</div>`;
+        case 'golden_name':
+          return `<div style="margin:0 auto 8px;font-weight:700;color:var(--gold);text-shadow:0 0 8px rgba(255,215,0,0.5);font-size:14px;">YourName</div>`;
+        case 'hype_bomb':
+          return `<div style="margin:0 auto 8px;font-size:28px;animation:preview-pulse 1.5s ease-in-out infinite;">💥🔥</div>`;
+        case 'profile_bg': {
+          const bgs = {
+            'tournament-arena': 'linear-gradient(135deg,rgba(20,20,40,0.95),rgba(40,20,60,0.95))',
+            'world-of-void': 'radial-gradient(ellipse,rgba(30,0,50,0.95),#000)',
+            'time-chamber': 'linear-gradient(180deg,rgba(255,255,255,0.15),rgba(20,20,40,0.95))'
+          };
+          return `<div style="width:60px;height:40px;border-radius:6px;margin:0 auto 8px;background:${bgs[meta.bg] || 'var(--bg-2)'};border:1px solid var(--line);"></div>`;
+        }
+        case 'badge':
+          return `<div style="margin:0 auto 8px;font-size:28px;">${meta.icon || '🏅'}</div>`;
+        case 'scouter':
+          return `<div style="margin:0 auto 8px;font-size:28px;">📡</div>`;
+        case 'vegetas_pride':
+          return `<div style="margin:0 auto 8px;font-size:28px;">💪</div>`;
+        case 'ban_immunity':
+          return `<div style="margin:0 auto 8px;font-size:28px;">🛡️</div>`;
+        case 'double_down':
+          return `<div style="margin:0 auto 8px;font-size:28px;">🎲</div>`;
+        default:
+          return `<div style="margin:0 auto 8px;font-size:28px;">${TYPE_ICONS[item.type] || '🏆'}</div>`;
+      }
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       if (shopUsername) {
@@ -373,17 +457,39 @@
         });
 
         let html = '';
-        const typeOrder = ['flair_border', 'flair_title', 'alt_art', 'profile_bg', 'ban_immunity', 'double_down'];
+        const typeOrder = ['flair_title', 'aura', 'flair_border', 'victory_quote', 'profile_bg', 'kings_commentary', 'golden_name', 'hype_bomb', 'badge', 'scouter', 'vegetas_pride', 'ban_immunity', 'double_down'];
         const allTypes = [...new Set([...typeOrder.filter(t => grouped[t]), ...Object.keys(grouped).filter(t => !typeOrder.includes(t))])];
 
+        const socialTypes = new Set(['kings_commentary', 'golden_name', 'hype_bomb']);
+        const gameplayTypes = new Set(['ban_immunity', 'double_down', 'scouter', 'vegetas_pride']);
+        const rendered = new Set();
+
         allTypes.forEach(type => {
-          const label = TYPE_LABELS[type] || type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-          html += `<div class="section-title">${label}</div>`;
+          let sectionLabel, sectionItems;
+          if (socialTypes.has(type)) {
+            if (rendered.has('_social')) return;
+            rendered.add('_social');
+            sectionLabel = '👑 Social';
+            sectionItems = [];
+            ['kings_commentary','golden_name','hype_bomb'].forEach(t => { if (grouped[t]) sectionItems.push(...grouped[t]); });
+          } else if (gameplayTypes.has(type)) {
+            if (rendered.has('_gameplay')) return;
+            rendered.add('_gameplay');
+            sectionLabel = '🛡️ Gameplay';
+            sectionItems = [];
+            ['ban_immunity','double_down','scouter','vegetas_pride'].forEach(t => { if (grouped[t]) sectionItems.push(...grouped[t]); });
+          } else {
+            sectionLabel = TYPE_LABELS[type] || type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            sectionItems = grouped[type];
+          }
+
+          html += `<div class="section-title">${sectionLabel}</div>`;
           html += '<div class="shop-grid">';
-          grouped[type].forEach(item => {
+          sectionItems.forEach(item => {
             const canBuy = currentBalance >= item.cost;
             html += `
               <div class="shop-card">
+                <div class="item-preview">${getItemPreview(item)}</div>
                 <div class="item-name">${escapeHtml(item.name)}</div>
                 <div class="item-desc">${escapeHtml(item.description || '')}</div>
                 <div class="item-cost">${item.cost.toLocaleString()} pts</div>
