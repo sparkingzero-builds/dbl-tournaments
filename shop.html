@@ -332,18 +332,13 @@
       hype_bomb: '👑 Social',
       profile_bg: '🎨 Profile Backgrounds',
       badge: '🏅 Badges',
-      ban_immunity: '🛡️ Gameplay',
-      double_down: '🎲 Gameplay',
-      scouter: '🛡️ Gameplay',
-      vegetas_pride: '🎲 Gameplay',
       alt_art: 'Alt Art'
     };
 
     const TYPE_ICONS = {
       flair_border: '🖼️', flair_title: '✨', aura: '🔥', victory_quote: '💬',
       kings_commentary: '👑', golden_name: '⭐', hype_bomb: '💥',
-      profile_bg: '🎨', badge: '🏅', ban_immunity: '🛡️', double_down: '🎲',
-      scouter: '📡', vegetas_pride: '💪'
+      profile_bg: '🎨', badge: '🏅'
     };
 
     function getItemPreview(item) {
@@ -390,14 +385,6 @@
         }
         case 'badge':
           return `<div style="margin:0 auto 8px;font-size:28px;">${meta.icon || '🏅'}</div>`;
-        case 'scouter':
-          return `<div style="margin:0 auto 8px;font-size:28px;">📡</div>`;
-        case 'vegetas_pride':
-          return `<div style="margin:0 auto 8px;font-size:28px;">💪</div>`;
-        case 'ban_immunity':
-          return `<div style="margin:0 auto 8px;font-size:28px;">🛡️</div>`;
-        case 'double_down':
-          return `<div style="margin:0 auto 8px;font-size:28px;">🎲</div>`;
         default:
           return `<div style="margin:0 auto 8px;font-size:28px;">${TYPE_ICONS[item.type] || '🏆'}</div>`;
       }
@@ -457,11 +444,10 @@
         });
 
         let html = '';
-        const typeOrder = ['flair_title', 'aura', 'flair_border', 'victory_quote', 'profile_bg', 'kings_commentary', 'golden_name', 'hype_bomb', 'badge', 'scouter', 'vegetas_pride', 'ban_immunity', 'double_down'];
+        const typeOrder = ['flair_title', 'aura', 'flair_border', 'victory_quote', 'profile_bg', 'kings_commentary', 'golden_name', 'hype_bomb', 'badge'];
         const allTypes = [...new Set([...typeOrder.filter(t => grouped[t]), ...Object.keys(grouped).filter(t => !typeOrder.includes(t))])];
 
         const socialTypes = new Set(['kings_commentary', 'golden_name', 'hype_bomb']);
-        const gameplayTypes = new Set(['ban_immunity', 'double_down', 'scouter', 'vegetas_pride']);
         const rendered = new Set();
 
         allTypes.forEach(type => {
@@ -472,12 +458,6 @@
             sectionLabel = '👑 Social';
             sectionItems = [];
             ['kings_commentary','golden_name','hype_bomb'].forEach(t => { if (grouped[t]) sectionItems.push(...grouped[t]); });
-          } else if (gameplayTypes.has(type)) {
-            if (rendered.has('_gameplay')) return;
-            rendered.add('_gameplay');
-            sectionLabel = '🛡️ Gameplay';
-            sectionItems = [];
-            ['ban_immunity','double_down','scouter','vegetas_pride'].forEach(t => { if (grouped[t]) sectionItems.push(...grouped[t]); });
           } else {
             sectionLabel = TYPE_LABELS[type] || type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
             sectionItems = grouped[type];

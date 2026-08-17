@@ -473,8 +473,12 @@
                 <option value="flair_title">Flair Title</option>
                 <option value="alt_art">Alt Art</option>
                 <option value="profile_bg">Profile Background</option>
-                <option value="ban_immunity">Ban Immunity</option>
-                <option value="double_down">Double Down</option>
+                <option value="aura">Aura</option>
+                <option value="victory_quote">Victory Quote</option>
+                <option value="kings_commentary">King Kai's Commentary</option>
+                <option value="golden_name">Golden Name</option>
+                <option value="hype_bomb">Hype Bomb</option>
+                <option value="badge">Badge</option>
               </select>
             </div>
             <div class="form-group">
@@ -596,8 +600,12 @@
               <option value="flair_border">Flair Border</option>
               <option value="flair_title">Flair Title</option>
               <option value="badge">Badge</option>
-              <option value="ban_immunity">Ban Immunity</option>
               <option value="profile_bg">Profile Background</option>
+              <option value="aura">Aura</option>
+              <option value="victory_quote">Victory Quote</option>
+              <option value="kings_commentary">King Kai's Commentary</option>
+              <option value="golden_name">Golden Name</option>
+              <option value="hype_bomb">Hype Bomb</option>
             </select>
           </div>
           <div class="form-group">
@@ -2302,11 +2310,7 @@
         { type: 'profile_bg', name: 'Tournament Arena', description: 'World Tournament stage background on your profile', cost: 900, metadata: { bg: 'tournament-arena' }, active: true },
         { type: 'profile_bg', name: 'World of Void', description: 'The empty void from Tournament of Power', cost: 1200, metadata: { bg: 'world-of-void' }, active: true },
         { type: 'profile_bg', name: 'Hyperbolic Time Chamber', description: 'Train in the endless white void', cost: 1500, metadata: { bg: 'time-chamber' }, active: true },
-        // ── Gameplay Items ──
-        { type: 'ban_immunity', name: 'Ban Immunity', description: 'Protect one character from being banned next ban phase', cost: 1500, metadata: {}, active: true },
-        { type: 'double_down', name: 'Double Down', description: 'Bet on yourself — earn double points if you win your next match', cost: 800, metadata: {}, active: true },
-        { type: 'scouter', name: 'Scouter', description: 'See your opponent\'s team before the match — Vegeta\'s favorite toy', cost: 2000, metadata: {}, active: true },
-        { type: 'vegetas_pride', name: 'Vegeta\'s Pride', description: 'Place a bounty on yourself — if someone beats you, they get 2x points', cost: 1000, metadata: { bounty_mult: 2 }, active: true },
+        // ── Cosmetic Extras ──
         // ── Badges ──
         { type: 'badge', name: 'First Blood Badge', description: 'Badge for winning your first match ever', cost: 200, metadata: { badge: 'first-blood', icon: '🩸' }, active: true },
         { type: 'badge', name: 'Dragon Ball Collector', description: 'Collect all 7 Dragon Balls badge', cost: 3500, metadata: { badge: 'dragonball-collector', icon: '🟠' }, active: true },
@@ -2497,7 +2501,7 @@
         { tier: 12, name: 'Royal Border', type: 'flair_border', track: 'premium', premium_cost: 400, metadata: { effect: 'flair-royal' } },
         { tier: 13, name: 'World of Void BG', type: 'profile_bg', track: 'premium', premium_cost: 450, description: 'The void from Tournament of Power', metadata: { bg: 'world-of-void' } },
         { tier: 14, name: 'Spirit Bomb Quote', type: 'victory_quote', track: 'premium', premium_cost: 400, metadata: { quote: 'Lend me your energy!' } },
-        { tier: 15, name: 'Scouter', type: 'scouter', track: 'premium', premium_cost: 600, description: 'See opponent team before matches', metadata: {} },
+        { tier: 15, name: '300 Zeni', type: 'points', track: 'premium', premium_cost: 0, metadata: { amount: 300 } },
         { tier: 16, name: 'Frieza Force Commander', type: 'flair_title', track: 'premium', premium_cost: 500, metadata: { title: 'Frieza Force Commander' } },
         { tier: 17, name: 'Shadow Border', type: 'flair_border', track: 'premium', premium_cost: 500, metadata: { effect: 'flair-shadow' } },
         { tier: 18, name: 'God of Destruction Title', type: 'flair_title', track: 'premium', premium_cost: 700, description: 'Hakai!', metadata: { title: 'God of Destruction' } },

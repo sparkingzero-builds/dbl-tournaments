@@ -352,9 +352,8 @@
   <script>
     const REWARD_ICONS = {
       points: '💎', flair_border: '🖼️', flair_title: '✨', badge: '🏅',
-      ban_immunity: '🛡️', profile_bg: '🎨', aura: '🔥', victory_quote: '💬',
-      kings_commentary: '👑', golden_name: '⭐', hype_bomb: '💥', scouter: '📡',
-      vegetas_pride: '💪', double_down: '🎲'
+      profile_bg: '🎨', aura: '🔥', victory_quote: '💬',
+      kings_commentary: '👑', golden_name: '⭐', hype_bomb: '💥'
     };
 
     function getRewardTooltip(reward) {
@@ -369,7 +368,6 @@
         case 'points': detail = `${meta.amount || 0} points`; break;
         case 'profile_bg': detail = 'Profile background'; break;
         case 'kings_commentary': detail = 'Gold trash talk'; break;
-        case 'scouter': detail = 'See opponent team'; break;
         case 'badge': detail = `${meta.icon || '🏅'} Badge`; break;
         default: detail = reward.description || '';
       }
