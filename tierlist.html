@@ -108,6 +108,26 @@
       object-fit: cover;
     }
 
+    .tier-char-info {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      font-size: 11px;
+      color: var(--cyan);
+      text-decoration: none;
+      background: rgba(0,0,0,0.6);
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 3;
+    }
+    .tier-char:hover .tier-char-info { opacity: 1; }
+
     .tier-char .char-name-tip {
       position: absolute;
       bottom: 0;
@@ -433,6 +453,7 @@
                    onclick="cycleChar(${c.id})"
                    title="${c.name}">
         <img src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
+        <a href="character.html?id=${c.id}" class="tier-char-info" onclick="event.stopPropagation()" title="View kit">ℹ</a>
         <div class="char-name-tip">${c.name.length > 18 ? c.name.slice(0, 16) + '..' : c.name}</div>
       </div>`;
     }
@@ -624,9 +645,9 @@
 
         return `
           <div class="result-card">
-            <div class="result-card__art"><img src="${r.char.image}" alt="${r.char.name}" onerror="this.style.display='none'" /></div>
+            <a href="character.html?id=${r.char.id}" class="result-card__art" style="display:block;"><img src="${r.char.image}" alt="${r.char.name}" onerror="this.style.display='none'" /></a>
             <div class="result-card__info">
-              <div class="result-card__name">${r.char.name}</div>
+              <a href="character.html?id=${r.char.id}" class="result-card__name" style="color:inherit;text-decoration:none;">${r.char.name}</a>
               <div class="result-card__bars">${bars}</div>
             </div>
             <div>

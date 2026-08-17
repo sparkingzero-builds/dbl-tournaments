@@ -416,7 +416,7 @@
         let teamHtml = '';
         if (currentTournament.teams_visible && s.team) {
           teamHtml = `<div class="player-team">${s.team.map(c =>
-            `<img src="${c.image}" alt="${c.name}" title="${c.name}" onerror="this.style.display='none'" />`
+            `<a href="character.html?id=${c.id}" title="${c.name}"><img src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" /></a>`
           ).join('')}</div>`;
         }
 

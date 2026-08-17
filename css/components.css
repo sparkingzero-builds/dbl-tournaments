@@ -71,7 +71,20 @@
 
 .char-card__body {
   padding: 7px 10px 0;
+  position: relative;
 }
+
+.char-card__info {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 14px;
+  color: var(--cyan);
+  text-decoration: none;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.char-card__info:hover { opacity: 1; }
 
 .char-card__name {
   font-weight: 600;

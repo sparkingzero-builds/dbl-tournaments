@@ -768,7 +768,7 @@
           if (s.team) {
             s.team.forEach(c => {
               const key = c.name;
-              if (!charCounts[key]) charCounts[key] = { count: 0, image: c.image, name: c.name };
+              if (!charCounts[key]) charCounts[key] = { count: 0, image: c.image, name: c.name, id: c.id };
               charCounts[key].count++;
             });
           }
@@ -835,11 +835,11 @@
               <h3>Character Affinity</h3>
               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;">
                 ${topChars.length ? topChars.map(c =>
-                  `<div class="char-row">
+                  `<a href="character.html?id=${c.id}" class="char-row" style="text-decoration:none;color:inherit;">
                     <img src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
                     <span class="char-name">${c.name}</span>
                     <span class="char-count">${c.count}x</span>
-                  </div>`
+                  </a>`
                 ).join('') : '<div class="empty-state"><p>No team data.</p></div>'}
               </div>
             </div>
@@ -1054,12 +1054,12 @@
                   ${cardChars.length ? `
                     <div class="card-chars">
                       ${cardChars.map(c => `
-                        <div style="text-align:center">
+                        <a href="character.html?id=${c.id}" style="text-align:center;text-decoration:none;color:inherit;">
                           <div class="card-char">
                             <img src="${c.image}" alt="${c.name}" onerror="this.parentElement.style.display='none'" />
                           </div>
                           <div class="card-char-label">${c.name.split(' ').slice(0, 2).join(' ')}</div>
-                        </div>
+                        </a>
                       `).join('')}
                     </div>
                   ` : ''}

@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Character — DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    .char-hero {
+      display: flex;
+      gap: 30px;
+      align-items: flex-start;
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    .char-image-wrap {
+      flex-shrink: 0;
+      width: 200px;
+      position: relative;
+    }
+    .char-image-wrap img {
+      width: 100%;
+      border-radius: var(--radius);
+      border: 2px solid var(--line);
+    }
+    .char-element {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .char-element.RED { background: #e74c3c; color: #fff; }
+    .char-element.BLU { background: #3498db; color: #fff; }
+    .char-element.GRN { background: #2ecc71; color: #fff; }
+    .char-element.PUR { background: #9b59b6; color: #fff; }
+    .char-element.YEL { background: #f1c40f; color: #000; }
+    .char-element.LGT { background: #ecf0f1; color: #000; }
+    .char-rarity {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+    }
+    .char-rarity.SPARKING { background: var(--gold); color: #000; }
+    .char-rarity.LEGEND { background: linear-gradient(135deg, #ffd700, #ff6b00); color: #000; }
+    .char-rarity.ULTRA { background: linear-gradient(135deg, #ff0080, #8b00ff); color: #fff; }
+
+    .char-info { flex: 1; }
+    .char-name {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+    .char-card-id {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .char-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .char-tag {
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 3px 12px;
+      font-size: 12px;
+      color: var(--text);
+      font-weight: 600;
+    }
+    .dblegends-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--cyan);
+      font-size: 13px;
+      text-decoration: none;
+      margin-top: 8px;
+    }
+    .dblegends-link:hover { text-decoration: underline; }
+
+    /* Stats Bar */
+    .stats-section {
+      max-width: 900px;
+      margin: 0 auto 24px;
+      padding: 0 20px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .stat-bar-item {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+    }
+    .stat-bar-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .stat-bar-value {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      color: var(--cyan);
+    }
+    .stat-bar-track {
+      height: 6px;
+      background: var(--bg);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .stat-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.8s ease;
+    }
+    .stat-bar-fill.hp { background: linear-gradient(90deg, var(--green), #2ecc71); }
+    .stat-bar-fill.atk { background: linear-gradient(90deg, #e74c3c, #ff6b6b); }
+    .stat-bar-fill.def { background: linear-gradient(90deg, #3498db, #5dade2); }
+    .stat-bar-fill.crit { background: linear-gradient(90deg, var(--gold), #f39c12); }
+
+    /* Kit Sections */
+    .kit-section {
+      max-width: 900px;
+      margin: 0 auto 20px;
+      padding: 0 20px;
+    }
+    .kit-title {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--cyan);
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--line);
+    }
+    .kit-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 10px;
+    }
+    .kit-card-name {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+    .kit-card-desc {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    /* Traits */
+    .trait-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 8px;
+    }
+    .trait-name {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--pink);
+      margin-bottom: 2px;
+    }
+    .trait-desc {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Z-Abilities */
+    .z-ability-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 8px;
+    }
+    .z-ability-level {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+    .z-ability-desc {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.4;
+      white-space: pre-line;
+    }
+
+    /* Arts Cards */
+    .arts-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+    .arts-card-name {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--pink);
+      margin-bottom: 6px;
+    }
+    .arts-card-desc {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    .loading-kit {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .no-kit {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+
+    /* Tourney Stats */
+    .tourney-stats {
+      max-width: 900px;
+      margin: 0 auto 30px;
+      padding: 0 20px;
+    }
+    .tourney-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+    }
+    .ts-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      text-align: center;
+    }
+    .ts-value {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--cyan);
+    }
+    .ts-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 600px) {
+      .char-hero { flex-direction: column; align-items: center; text-align: center; }
+      .char-image-wrap { width: 160px; }
+      .char-tags { justify-content: center; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">&#9776;</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+        <li><a href="compare.html">Compare</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="tierlist.html">Tier List</a></li>
+        <li><a href="season.html">Season</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container" id="content">
+    <div class="loading-kit" id="loading">
+      <h2>Loading character...</h2>
+    </div>
+  </div>
+
+  <script src="js/sounds.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const charId = params.get('id');
+
+    if (!charId) {
+      document.getElementById('content').innerHTML = '<div class="no-kit"><h2>No character selected</h2><p>Go back and click on a character.</p></div>';
+    }
+
+    let allCharacters = [];
+    let kitData = null;
+    let charInfo = null;
+
+    const STAT_MAXES = {
+      health: 3200000,
+      strike_atk: 350000,
+      blast_atk: 350000,
+      strike_def: 250000,
+      blast_def: 250000,
+      critical: 6000,
+      ki_restore: 3000,
+    };
+
+    async function init() {
+      if (!charId) return;
+
+      try {
+        const [charsResp, kitsResp] = await Promise.all([
+          fetch('data/characters.json'),
+          fetch('data/character_kits.json')
+        ]);
+        allCharacters = await charsResp.json();
+        const allKits = await kitsResp.json();
+
+        charInfo = allCharacters.find(c => String(c.id) === String(charId));
+        kitData = allKits[String(charId)];
+
+        if (!charInfo) {
+          document.getElementById('content').innerHTML = '<div class="no-kit"><h2>Character not found</h2></div>';
+          return;
+        }
+
+        document.title = `${charInfo.name} — DBL Tournaments`;
+        render();
+        playSound('reveal');
+      } catch (e) {
+        console.error(e);
+        document.getElementById('content').innerHTML = '<div class="no-kit"><h2>Error loading character data</h2><p>' + e.message + '</p></div>';
+      }
+    }
+
+    function render() {
+      const el = charInfo.element || '';
+      const elBase = el.replace('+', '').replace('2', '');
+      const rarity = charInfo.rarity || kitData?.rarity || '';
+      const tags = kitData?.tags || [];
+      const traits = kitData?.traits || [];
+      const stats = kitData?.stats || {};
+      const mainAbility = kitData?.main_ability;
+      const legendAction = kitData?.legend_action;
+      const uniques = kitData?.unique_abilities || [];
+      const zAbilities = kitData?.z_abilities || [];
+      const artsCards = kitData?.arts_cards || [];
+      const cardId = kitData?.card_id || '';
+
+      let html = '';
+
+      // Hero section
+      html += `
+        <div class="char-hero">
+          <div class="char-image-wrap">
+            <img src="${charInfo.image}" alt="${charInfo.name}" onerror="this.src='https://dblegends.net/assets/card_icons/BChaIco_${String(charInfo.id).padStart(4,'0')}_${charInfo.id}.webp'" />
+            <span class="char-element ${elBase}">${el}</span>
+            <span class="char-rarity ${rarity}">${rarity}</span>
+          </div>
+          <div class="char-info">
+            <div class="char-name">${charInfo.name}</div>
+            <div class="char-card-id">${cardId || ''} ${charInfo.zenkai ? '• ZENKAI' : ''} ${charInfo.lf ? '• LEGENDS LIMITED' : ''}</div>
+            <div class="char-tags">
+              ${tags.map(t => `<span class="char-tag">${t}</span>`).join('')}
+            </div>
+            <a class="dblegends-link" href="https://dblegends.net/character/${charId}" target="_blank" rel="noopener">
+              View full details on dblegends.net →
+            </a>
+          </div>
+        </div>
+      `;
+
+      // Stats
+      if (Object.keys(stats).length > 0) {
+        html += '<div class="stats-section"><div class="kit-title">Stats (Max)</div><div class="stats-grid">';
+        const statLabels = {
+          health: 'Health', strike_atk: 'Strike ATK', blast_atk: 'Blast ATK',
+          strike_def: 'Strike DEF', blast_def: 'Blast DEF', critical: 'Critical', ki_restore: 'Ki Restore'
+        };
+        const statClasses = {
+          health: 'hp', strike_atk: 'atk', blast_atk: 'atk',
+          strike_def: 'def', blast_def: 'def', critical: 'crit', ki_restore: 'crit'
+        };
+        for (const [key, label] of Object.entries(statLabels)) {
+          const val = stats[key] || 0;
+          const max = STAT_MAXES[key] || 1;
+          const pct = Math.min(100, (val / max) * 100);
+          html += `
+            <div class="stat-bar-item">
+              <div class="stat-bar-label">${label} <span class="stat-bar-value">${val.toLocaleString()}</span></div>
+              <div class="stat-bar-track"><div class="stat-bar-fill ${statClasses[key]}" style="width:${pct}%"></div></div>
+            </div>`;
+        }
+        html += '</div></div>';
+      }
+
+      // Traits
+      if (traits.length > 0) {
+        html += '<div class="kit-section"><div class="kit-title">Traits</div>';
+        traits.forEach(t => {
+          html += `<div class="trait-card"><div class="trait-name">${t.name}</div>${t.description ? `<div class="trait-desc">${t.description}</div>` : ''}</div>`;
+        });
+        html += '</div>';
+      }
+
+      // Main Ability
+      if (mainAbility && mainAbility.name) {
+        html += `<div class="kit-section"><div class="kit-title">Main Ability</div>
+          <div class="kit-card"><div class="kit-card-name">${mainAbility.name}</div><div class="kit-card-desc">${mainAbility.description || ''}</div></div>
+        </div>`;
+      }
+
+      // Legend Action
+      if (legendAction && legendAction.name) {
+        html += `<div class="kit-section"><div class="kit-title">Legend Action</div>
+          <div class="kit-card"><div class="kit-card-name">${legendAction.name}</div><div class="kit-card-desc">${legendAction.description || ''}</div></div>
+        </div>`;
+      }
+
+      // Unique Abilities
+      if (uniques.length > 0) {
+        html += '<div class="kit-section"><div class="kit-title">Unique Abilities</div>';
+        uniques.forEach(u => {
+          if (!u.name) return;
+          html += `<div class="kit-card"><div class="kit-card-name">${u.name}</div><div class="kit-card-desc">${u.description || ''}</div></div>`;
+        });
+        html += '</div>';
+      }
+
+      // Z-Abilities
+      if (zAbilities.length > 0) {
+        html += '<div class="kit-section"><div class="kit-title">Z-Abilities</div>';
+        zAbilities.forEach(z => {
+          html += `<div class="z-ability-card"><div class="z-ability-level">${z.name || 'Z Ability'}</div><div class="z-ability-desc">${z.description || ''}</div></div>`;
+        });
+        html += '</div>';
+      }
+
+      // Arts Cards
+      if (artsCards.length > 0) {
+        html += '<div class="kit-section"><div class="kit-title">Arts Cards</div>';
+        artsCards.forEach(a => {
+          html += `<div class="arts-card"><div class="arts-card-name">${a.name}</div><div class="arts-card-desc">${a.description || ''}</div></div>`;
+        });
+        html += '</div>';
+      }
+
+      // Tournament stats (how often this character is picked/banned in our tourneys)
+      html += '<div class="tourney-stats" id="tourney-stats"></div>';
+
+      document.getElementById('content').innerHTML = html;
+
+      // Load tournament stats async
+      loadTourneyStats();
+    }
+
+    async function loadTourneyStats() {
+      const container = document.getElementById('tourney-stats');
+      if (!container) return;
+
+      try {
+        const { data: signups } = await supabaseClient
+          .from('tournament_signups')
+          .select('team');
+
+        let picked = 0;
+        let totalTeams = 0;
+        if (signups) {
+          signups.forEach(s => {
+            if (!s.team) return;
+            totalTeams++;
+            if (s.team.some(c => String(c.id) === String(charId))) picked++;
+          });
+        }
+
+        if (totalTeams === 0) {
+          container.innerHTML = '';
+          return;
+        }
+
+        const pickRate = totalTeams > 0 ? Math.round((picked / totalTeams) * 100) : 0;
+
+        container.innerHTML = `
+          <div class="kit-title">Tournament Stats</div>
+          <div class="tourney-stats-grid">
+            <div class="ts-card">
+              <div class="ts-value">${picked}</div>
+              <div class="ts-label">Times Picked</div>
+            </div>
+            <div class="ts-card">
+              <div class="ts-value">${pickRate}%</div>
+              <div class="ts-label">Pick Rate</div>
+            </div>
+            <div class="ts-card">
+              <div class="ts-value">${totalTeams}</div>
+              <div class="ts-label">Total Teams</div>
+            </div>
+          </div>
+        `;
+      } catch (_) {}
+    }
+
+    init();
+  </script>
+</body>
+</html>
