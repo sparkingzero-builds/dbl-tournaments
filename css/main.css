@@ -410,6 +410,125 @@ textarea:focus {
 }
 .status-completed::before { background: var(--muted); animation: none; }
 
+/* Site Toolbar */
+.site-toolbar {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  z-index: 9998;
+  display: flex;
+  gap: 6px;
+}
+
+.tb-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: rgba(13, 10, 26, 0.9);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.tb-btn:hover {
+  border-color: var(--cyan);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 229, 255, 0.15);
+}
+
+/* Player Search Modal */
+#player-search-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 4, 14, 0.8);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 120px;
+}
+
+.ps-modal {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 90%;
+  max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.ps-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.ps-header h3 {
+  font-family: 'Exo 2', sans-serif;
+  font-weight: 800;
+  color: var(--cyan);
+  font-size: 18px;
+}
+
+.ps-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.ps-results {
+  margin-top: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.ps-result {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  margin-bottom: 4px;
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.15s;
+}
+
+.ps-result:hover {
+  border-color: var(--cyan);
+}
+
+.ps-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.ps-stats {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'Exo 2', sans-serif;
+}
+
+.ps-empty {
+  text-align: center;
+  padding: 20px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -564,4 +683,24 @@ textarea:focus {
   .card { padding: 14px 12px; }
 
   .btn-lg { padding: 14px 20px; }
+
+  .site-toolbar {
+    bottom: 10px;
+    left: 10px;
+    gap: 4px;
+  }
+
+  .tb-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  #player-search-overlay {
+    padding-top: 80px;
+  }
+
+  .ps-modal {
+    padding: 16px;
+  }
 }
