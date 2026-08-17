@@ -2266,16 +2266,51 @@
     // Seed default shop items
     async function seedDefaultShopItems() {
       const defaults = [
+        // ── Flair Borders ──
         { type: 'flair_border', name: 'Fire Border', description: 'A blazing fire effect around your profile', cost: 500, metadata: { effect: 'flair-fire' }, active: true },
         { type: 'flair_border', name: 'Ice Border', description: 'A frozen ice effect around your profile', cost: 500, metadata: { effect: 'flair-ice' }, active: true },
         { type: 'flair_border', name: 'Royal Border', description: 'A regal golden border effect', cost: 750, metadata: { effect: 'flair-royal' }, active: true },
         { type: 'flair_border', name: 'Shadow Border', description: 'A dark shadowy border effect', cost: 600, metadata: { effect: 'flair-shadow' }, active: true },
-        { type: 'flair_title', name: 'Dragon Slayer', description: 'Display the title "Dragon Slayer"', cost: 300, metadata: { title: 'Dragon Slayer' }, active: true },
-        { type: 'flair_title', name: 'Unbreakable', description: 'Display the title "Unbreakable"', cost: 300, metadata: { title: 'Unbreakable' }, active: true },
-        { type: 'flair_title', name: 'Rising Star', description: 'Display the title "Rising Star"', cost: 200, metadata: { title: 'Rising Star' }, active: true },
-        { type: 'flair_title', name: 'Legendary', description: 'Display the title "Legendary"', cost: 1000, metadata: { title: 'Legendary' }, active: true },
-        { type: 'ban_immunity', name: 'Ban Immunity', description: 'Protect one character from being banned in the next ban phase', cost: 1500, metadata: {}, active: true },
-        { type: 'double_down', name: 'Double Down', description: 'Bet on yourself — earn double points if you win your next match', cost: 800, metadata: {}, active: true }
+        // ── DB Titles ──
+        { type: 'flair_title', name: 'Earthling', description: '"Earthling" — everyone starts somewhere', cost: 100, metadata: { title: 'Earthling' }, active: true },
+        { type: 'flair_title', name: 'Saiyan Warrior', description: '"Saiyan Warrior" — born to fight', cost: 300, metadata: { title: 'Saiyan Warrior' }, active: true },
+        { type: 'flair_title', name: 'Super Saiyan', description: '"Super Saiyan" — the legend awakens', cost: 500, metadata: { title: 'Super Saiyan' }, active: true },
+        { type: 'flair_title', name: 'Z Fighter', description: '"Z Fighter" — protector of Earth', cost: 400, metadata: { title: 'Z Fighter' }, active: true },
+        { type: 'flair_title', name: 'Namekian Elder', description: '"Namekian Elder" — wisdom of the ages', cost: 350, metadata: { title: 'Namekian Elder' }, active: true },
+        { type: 'flair_title', name: 'Elite Saiyan', description: '"Elite Saiyan" — Vegeta would approve', cost: 700, metadata: { title: 'Elite Saiyan' }, active: true },
+        { type: 'flair_title', name: 'Frieza Force Commander', description: '"Frieza Force Commander" — fear and respect', cost: 800, metadata: { title: 'Frieza Force Commander' }, active: true },
+        { type: 'flair_title', name: 'God of Destruction', description: '"God of Destruction" — hakai!', cost: 2000, metadata: { title: 'God of Destruction' }, active: true },
+        { type: 'flair_title', name: 'Ultra Instinct', description: '"Ultra Instinct" — beyond the gods', cost: 3000, metadata: { title: 'Ultra Instinct' }, active: true },
+        { type: 'flair_title', name: 'Grand Zeno', description: '"Grand Zeno" — ruler of all', cost: 5000, metadata: { title: 'Grand Zeno' }, active: true },
+        // ── Aura Effects ──
+        { type: 'aura', name: 'Blue Ki Aura', description: 'A pulsing blue ki glow around your name on the bracket', cost: 600, metadata: { effect: 'aura-blue' }, active: true },
+        { type: 'aura', name: 'Red Ki Aura', description: 'A fiery red ki glow — Kaio-Ken style', cost: 600, metadata: { effect: 'aura-red' }, active: true },
+        { type: 'aura', name: 'Golden SSJ Aura', description: 'Super Saiyan golden glow on the bracket', cost: 1000, metadata: { effect: 'aura-gold' }, active: true },
+        { type: 'aura', name: 'Ultra Instinct Aura', description: 'Silver shimmer — mastered UI energy', cost: 2500, metadata: { effect: 'aura-ui' }, active: true },
+        // ── Victory Quotes ──
+        { type: 'victory_quote', name: 'Kamehameha!', description: 'Show "Kamehameha!" after winning on the bracket', cost: 400, metadata: { quote: 'Kamehameha!' }, active: true },
+        { type: 'victory_quote', name: 'Final Flash!', description: 'Show "Final Flash!" after winning on the bracket', cost: 400, metadata: { quote: 'Final Flash!' }, active: true },
+        { type: 'victory_quote', name: 'You\'re Nothing', description: 'Show "You\'re nothing but a weakling" — Vegeta energy', cost: 500, metadata: { quote: "You're nothing but a weakling." }, active: true },
+        { type: 'victory_quote', name: 'It\'s Over 9000', description: 'Show "It\'s over 9000!!!" after a win', cost: 500, metadata: { quote: "It's over 9000!!!" }, active: true },
+        { type: 'victory_quote', name: 'This Isn\'t Even My Final Form', description: 'The classic Frieza taunt', cost: 750, metadata: { quote: "This isn't even my final form." }, active: true },
+        { type: 'victory_quote', name: 'Owari Da', description: 'Show "Owari Da." — Beerus finisher', cost: 800, metadata: { quote: 'Owari Da.' }, active: true },
+        // ── Social Rewards ──
+        { type: 'kings_commentary', name: 'King Kai\'s Commentary', description: 'Your trash talk messages get a golden crown highlight', cost: 1200, metadata: {}, active: true },
+        { type: 'golden_name', name: 'Golden Name', description: 'Your name appears in gold on the shoutbox', cost: 800, metadata: {}, active: true },
+        { type: 'hype_bomb', name: 'Hype Bomb', description: 'Your hype clicks count as 10x — Spirit Bomb energy!', cost: 1500, metadata: { multiplier: 10 }, active: true },
+        // ── Profile Backgrounds ──
+        { type: 'profile_bg', name: 'Tournament Arena', description: 'World Tournament stage background on your profile', cost: 900, metadata: { bg: 'tournament-arena' }, active: true },
+        { type: 'profile_bg', name: 'World of Void', description: 'The empty void from Tournament of Power', cost: 1200, metadata: { bg: 'world-of-void' }, active: true },
+        { type: 'profile_bg', name: 'Hyperbolic Time Chamber', description: 'Train in the endless white void', cost: 1500, metadata: { bg: 'time-chamber' }, active: true },
+        // ── Gameplay Items ──
+        { type: 'ban_immunity', name: 'Ban Immunity', description: 'Protect one character from being banned next ban phase', cost: 1500, metadata: {}, active: true },
+        { type: 'double_down', name: 'Double Down', description: 'Bet on yourself — earn double points if you win your next match', cost: 800, metadata: {}, active: true },
+        { type: 'scouter', name: 'Scouter', description: 'See your opponent\'s team before the match — Vegeta\'s favorite toy', cost: 2000, metadata: {}, active: true },
+        { type: 'vegetas_pride', name: 'Vegeta\'s Pride', description: 'Place a bounty on yourself — if someone beats you, they get 2x points', cost: 1000, metadata: { bounty_mult: 2 }, active: true },
+        // ── Badges ──
+        { type: 'badge', name: 'First Blood Badge', description: 'Badge for winning your first match ever', cost: 200, metadata: { badge: 'first-blood', icon: '🩸' }, active: true },
+        { type: 'badge', name: 'Dragon Ball Collector', description: 'Collect all 7 Dragon Balls badge', cost: 3500, metadata: { badge: 'dragonball-collector', icon: '🟠' }, active: true },
+        { type: 'badge', name: 'Tournament of Power Survivor', description: 'Season 1 exclusive — you were there', cost: 0, metadata: { badge: 'top-survivor', icon: '⭐', exclusive: true }, active: true },
       ];
 
       try {
@@ -2436,19 +2471,38 @@
     async function seedDefaultRewards() {
       if (!adminActiveSeason) return;
       const defaults = [
-        { tier: 1, name: 'Rising Star', type: 'flair_title', track: 'free', premium_cost: 0, metadata: { title: 'Rising Star' } },
-        { tier: 2, name: '50 Points', type: 'points', track: 'free', premium_cost: 0, metadata: { amount: 50 } },
+        // Free track — Dragon Ball progression
+        { tier: 1, name: 'Earthling Title', type: 'flair_title', track: 'free', premium_cost: 0, description: 'Everyone starts somewhere', metadata: { title: 'Earthling' } },
+        { tier: 2, name: '50 Zeni', type: 'points', track: 'free', premium_cost: 0, metadata: { amount: 50 } },
+        { tier: 3, name: 'Saiyan Title', type: 'flair_title', track: 'free', premium_cost: 0, description: 'The warrior awakens', metadata: { title: 'Saiyan' } },
+        { tier: 4, name: '75 Zeni', type: 'points', track: 'free', premium_cost: 0, metadata: { amount: 75 } },
+        { tier: 5, name: 'Super Saiyan Title', type: 'flair_title', track: 'free', premium_cost: 0, description: 'The legend!', metadata: { title: 'Super Saiyan' } },
+        { tier: 6, name: '100 Zeni', type: 'points', track: 'free', premium_cost: 0, metadata: { amount: 100 } },
+        { tier: 8, name: 'Z Fighter Title', type: 'flair_title', track: 'free', premium_cost: 0, description: 'Protector of Earth', metadata: { title: 'Z Fighter' } },
+        { tier: 10, name: 'Namekian Warrior Title', type: 'flair_title', track: 'free', premium_cost: 0, description: 'Wisdom and power', metadata: { title: 'Namekian Warrior' } },
+        { tier: 12, name: '150 Zeni', type: 'points', track: 'free', premium_cost: 0, metadata: { amount: 150 } },
+        { tier: 15, name: '250 Zeni', type: 'points', track: 'free', premium_cost: 0, metadata: { amount: 250 } },
+        { tier: 18, name: 'First Blood Badge', type: 'badge', track: 'free', premium_cost: 0, description: 'First blood!', metadata: { badge: 'first-blood', icon: '🩸' } },
+        { tier: 20, name: 'ToP Survivor Badge', type: 'badge', track: 'free', premium_cost: 0, description: 'Season 1 exclusive — you survived the Tournament of Power', metadata: { badge: 'top-survivor', icon: '⭐', exclusive: true } },
+        // Premium track — power upgrades
+        { tier: 1, name: 'Blue Ki Aura', type: 'aura', track: 'premium', premium_cost: 100, description: 'Blue ki glow on bracket', metadata: { effect: 'aura-blue' } },
         { tier: 3, name: 'Fire Border', type: 'flair_border', track: 'premium', premium_cost: 200, metadata: { effect: 'flair-fire' } },
-        { tier: 5, name: '100 Points', type: 'points', track: 'free', premium_cost: 0, metadata: { amount: 100 } },
+        { tier: 4, name: 'Kamehameha! Quote', type: 'victory_quote', track: 'premium', premium_cost: 150, metadata: { quote: 'Kamehameha!' } },
+        { tier: 5, name: 'Red Ki Aura', type: 'aura', track: 'premium', premium_cost: 250, description: 'Kaio-Ken red glow on bracket', metadata: { effect: 'aura-red' } },
         { tier: 7, name: 'Ice Border', type: 'flair_border', track: 'premium', premium_cost: 300, metadata: { effect: 'flair-ice' } },
-        { tier: 8, name: 'Ban Immunity', type: 'ban_immunity', track: 'premium', premium_cost: 500, metadata: {} },
-        { tier: 10, name: 'Veteran Badge', type: 'badge', track: 'free', premium_cost: 0, metadata: { badge: 'veteran' } },
+        { tier: 8, name: 'King Kai\'s Commentary', type: 'kings_commentary', track: 'premium', premium_cost: 400, description: 'Golden crowned trash talk', metadata: {} },
+        { tier: 9, name: 'Elite Saiyan Title', type: 'flair_title', track: 'premium', premium_cost: 350, metadata: { title: 'Elite Saiyan' } },
+        { tier: 10, name: 'Tournament Arena BG', type: 'profile_bg', track: 'premium', premium_cost: 300, description: 'World Tournament stage background', metadata: { bg: 'tournament-arena' } },
+        { tier: 11, name: 'Golden SSJ Aura', type: 'aura', track: 'premium', premium_cost: 500, description: 'Super Saiyan golden glow', metadata: { effect: 'aura-gold' } },
         { tier: 12, name: 'Royal Border', type: 'flair_border', track: 'premium', premium_cost: 400, metadata: { effect: 'flair-royal' } },
-        { tier: 13, name: 'Exclusive Background', type: 'profile_bg', track: 'premium', premium_cost: 350, metadata: { bg: 'exclusive-1' } },
-        { tier: 15, name: '200 Points', type: 'points', track: 'free', premium_cost: 0, metadata: { amount: 200 } },
+        { tier: 13, name: 'World of Void BG', type: 'profile_bg', track: 'premium', premium_cost: 450, description: 'The void from Tournament of Power', metadata: { bg: 'world-of-void' } },
+        { tier: 14, name: 'Spirit Bomb Quote', type: 'victory_quote', track: 'premium', premium_cost: 400, metadata: { quote: 'Lend me your energy!' } },
+        { tier: 15, name: 'Scouter', type: 'scouter', track: 'premium', premium_cost: 600, description: 'See opponent team before matches', metadata: {} },
+        { tier: 16, name: 'Frieza Force Commander', type: 'flair_title', track: 'premium', premium_cost: 500, metadata: { title: 'Frieza Force Commander' } },
         { tier: 17, name: 'Shadow Border', type: 'flair_border', track: 'premium', premium_cost: 500, metadata: { effect: 'flair-shadow' } },
-        { tier: 18, name: 'Legendary', type: 'flair_title', track: 'premium', premium_cost: 600, metadata: { title: 'Legendary' } },
-        { tier: 20, name: 'Season Champion Border', type: 'flair_border', track: 'premium', premium_cost: 1000, metadata: { effect: 'flair-champion' } }
+        { tier: 18, name: 'God of Destruction Title', type: 'flair_title', track: 'premium', premium_cost: 700, description: 'Hakai!', metadata: { title: 'God of Destruction' } },
+        { tier: 19, name: 'Ultra Instinct Aura', type: 'aura', track: 'premium', premium_cost: 800, description: 'Silver shimmer — mastered UI', metadata: { effect: 'aura-ui' } },
+        { tier: 20, name: 'Zeno\'s Champion Border', type: 'flair_border', track: 'premium', premium_cost: 1000, description: 'Season champion exclusive', metadata: { effect: 'flair-champion' } },
       ];
 
       try {

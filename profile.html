@@ -286,6 +286,44 @@
       align-items: center;
       margin: 0 auto 32px;
       max-width: 370px;
+      position: relative;
+      animation: card-entrance 1.2s ease-out;
+    }
+
+    @keyframes card-entrance {
+      0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(30px);
+        filter: brightness(3) blur(8px);
+      }
+      30% {
+        opacity: 1;
+        filter: brightness(2) blur(2px);
+      }
+      60% {
+        transform: scale(1.02) translateY(-5px);
+        filter: brightness(1.2) blur(0);
+      }
+      100% {
+        transform: scale(1) translateY(0);
+        filter: brightness(1) blur(0);
+      }
+    }
+
+    .player-card-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -20px;
+      border-radius: 20px;
+      background: radial-gradient(circle, rgba(0, 229, 255, 0.4) 0%, transparent 70%);
+      animation: energy-burst 1s ease-out forwards;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @keyframes energy-burst {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(2); opacity: 0; }
     }
 
     .player-card {
@@ -532,6 +570,28 @@
     .player-card.flair-shadow {
       background: conic-gradient(from var(--card-angle, 0deg), #1a1a2e, #6c3483, #1a1a2e, #2c3e50);
       box-shadow: 0 0 30px rgba(108, 52, 131, 0.3), 0 0 60px rgba(44, 62, 80, 0.15);
+    }
+    .player-card.flair-champion {
+      background: conic-gradient(from var(--card-angle, 0deg), #ffd700, #ff6b00, #ff0080, #8b00ff, #00d4ff, #ffd700);
+      box-shadow: 0 0 40px rgba(255, 215, 0, 0.4), 0 0 80px rgba(255, 0, 128, 0.2);
+      animation: champion-pulse 3s ease-in-out infinite;
+    }
+    @keyframes champion-pulse {
+      0%, 100% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.4), 0 0 80px rgba(255, 0, 128, 0.2); }
+      50% { box-shadow: 0 0 60px rgba(255, 215, 0, 0.6), 0 0 120px rgba(255, 0, 128, 0.35); }
+    }
+
+    /* Profile Backgrounds */
+    .profile-bg-tournament-arena {
+      background: linear-gradient(135deg, rgba(20,20,40,0.95), rgba(40,20,60,0.95)),
+        repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,215,0,0.03) 40px, rgba(255,215,0,0.03) 41px),
+        repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,215,0,0.03) 40px, rgba(255,215,0,0.03) 41px);
+    }
+    .profile-bg-world-of-void {
+      background: radial-gradient(ellipse at center, rgba(30,0,50,0.95) 0%, rgba(5,0,15,0.98) 60%, #000 100%);
+    }
+    .profile-bg-time-chamber {
+      background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(200,200,220,0.04) 40%, rgba(20,20,40,0.95) 100%);
     }
 
     @media (max-width: 700px) {
@@ -909,6 +969,7 @@
           // Equipped flair items
           let flairBorderClass = '';
           let flairTitle = '';
+          let profileBg = '';
           try {
             const { data: equipped } = await supabaseClient
               .from('player_inventory')
@@ -917,11 +978,16 @@
               .eq('equipped', true);
             if (equipped) {
               for (const inv of equipped) {
-                if (inv.item?.item_type === 'flair_border' && inv.item?.effect) {
-                  flairBorderClass = 'flair-' + inv.item.effect;
+                const t = inv.item?.type || inv.item?.item_type;
+                const meta = inv.item?.metadata || {};
+                if (t === 'flair_border' && (meta.effect || inv.item?.effect)) {
+                  flairBorderClass = meta.effect || inv.item.effect;
                 }
-                if (inv.item?.item_type === 'flair_title' && inv.item?.effect) {
-                  flairTitle = inv.item.effect;
+                if (t === 'flair_title' && (meta.title || inv.item?.effect)) {
+                  flairTitle = meta.title || inv.item.effect;
+                }
+                if (t === 'profile_bg' && meta.bg) {
+                  profileBg = meta.bg;
                 }
               }
             }
@@ -953,6 +1019,8 @@
             { id: 'underdog',     icon: '💀' },
           ];
           const earnedBadgeIcons = badgeDefs.filter(b => earned.has(b.id)).map(b => b.icon);
+
+          if (profileBg) document.body.classList.add('profile-bg-' + profileBg);
 
           const cardHtml = `
             <div class="player-card-wrap">
@@ -1013,6 +1081,7 @@
 
           // Insert card at the very top of profile content
           content.insertAdjacentHTML('afterbegin', cardHtml);
+          playSound('powerup');
         } catch (e) {
           console.error('Player card error:', e);
         }

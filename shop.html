@@ -405,6 +405,7 @@
     async function buyItem(itemId, cost, name) {
       try {
         await db.purchaseItem(shopUsername, itemId, cost);
+        playSound('purchase');
         NotificationSystem.show(`Purchased ${name}!`, 'success');
         await refreshBalance();
         await loadShopItems();
@@ -412,6 +413,7 @@
           await loadInventory();
         }
       } catch (e) {
+        playSound('error');
         NotificationSystem.show(e.message || 'Purchase failed', 'error');
       }
     }
@@ -450,9 +452,9 @@
     async function toggleEquip(inventoryId, isEquipped) {
       try {
         if (isEquipped) {
-          await db.unequipItem(shopUsername, inventoryId);
+          await db.unequipItem(shopUsername, inventoryId); playSound('equip');
         } else {
-          await db.equipItem(shopUsername, inventoryId);
+          await db.equipItem(shopUsername, inventoryId); playSound('equip');
         }
         await loadInventory();
       } catch (e) {

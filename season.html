@@ -493,6 +493,7 @@
     async function claimReward(tier) {
       try {
         myProgress = await db.claimSeasonReward(activeSeason.id, myUsername, tier);
+        playSound('claim');
         const reward = seasonRewards.find(r => r.tier === tier);
         NotificationSystem.show(`Claimed: ${reward ? reward.name : 'Reward'}!`, 'ko');
         renderXPBar();

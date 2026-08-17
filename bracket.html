@@ -44,6 +44,68 @@
     .match-card.most-hyped{border:1px solid var(--gold) !important;box-shadow:0 0 16px rgba(255,215,0,.35) !important;position:relative;}
     .most-hyped-label{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--bg);font-family:'Exo 2',sans-serif;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap;z-index:2;}
 
+    /* ── Aura Effects ── */
+    .aura-blue .player-match-name {
+      animation: aura-pulse-blue 2s ease-in-out infinite;
+    }
+    @keyframes aura-pulse-blue {
+      0%, 100% { text-shadow: 0 0 8px rgba(0, 120, 255, 0.6), 0 0 20px rgba(0, 120, 255, 0.3); }
+      50% { text-shadow: 0 0 16px rgba(0, 120, 255, 0.9), 0 0 40px rgba(0, 120, 255, 0.5); }
+    }
+    .aura-red .player-match-name {
+      animation: aura-pulse-red 2s ease-in-out infinite;
+    }
+    @keyframes aura-pulse-red {
+      0%, 100% { text-shadow: 0 0 8px rgba(255, 40, 40, 0.6), 0 0 20px rgba(255, 40, 40, 0.3); }
+      50% { text-shadow: 0 0 16px rgba(255, 40, 40, 0.9), 0 0 40px rgba(255, 40, 40, 0.5); }
+    }
+    .aura-gold .player-match-name {
+      animation: aura-pulse-gold 2s ease-in-out infinite;
+    }
+    @keyframes aura-pulse-gold {
+      0%, 100% { text-shadow: 0 0 8px rgba(255, 215, 0, 0.6), 0 0 20px rgba(255, 215, 0, 0.3); }
+      50% { text-shadow: 0 0 16px rgba(255, 215, 0, 0.9), 0 0 40px rgba(255, 215, 0, 0.5); }
+    }
+    .aura-ui .player-match-name {
+      animation: aura-pulse-ui 2.5s ease-in-out infinite;
+    }
+    @keyframes aura-pulse-ui {
+      0%, 100% { text-shadow: 0 0 8px rgba(200, 200, 255, 0.6), 0 0 20px rgba(200, 200, 255, 0.3); color: rgba(220, 220, 255, 1); }
+      50% { text-shadow: 0 0 20px rgba(200, 200, 255, 0.9), 0 0 50px rgba(200, 200, 255, 0.5); color: #fff; }
+    }
+
+    /* ── Victory Quotes ── */
+    .victory-quote {
+      font-style: italic;
+      font-size: 10px;
+      color: var(--gold);
+      padding: 2px 8px;
+      opacity: 0;
+      animation: quote-fade-in 0.8s ease-out 0.3s forwards;
+      text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+    }
+    @keyframes quote-fade-in {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── King Kai's Commentary ── */
+    .shoutbox-msg.kai {
+      border-left: 3px solid var(--gold);
+      background: rgba(255, 215, 0, 0.08);
+      position: relative;
+    }
+    .shoutbox-msg.kai::before {
+      content: '\U0001F451';
+      position: absolute;
+      top: -8px;
+      right: 4px;
+      font-size: 12px;
+    }
+    .shoutbox-msg.kai .msg-user {
+      color: var(--gold) !important;
+    }
+
     @media(max-width:500px){
       .shoutbox-panel{width:calc(100vw - 20px);right:10px;bottom:60px;}
       .shoutbox-toggle{right:10px;bottom:10px;padding:8px 14px;font-size:.8rem;}
@@ -274,6 +336,53 @@
         teamsVisible: tournament.teams_visible,
         bannedCharIds
       });
+
+      // ── Aura Effects & Victory Quotes ──
+      try {
+        const allPlayers = signups.map(s => s.discord_username);
+        const auraMap = {};
+        if (!window._victoryQuotes) window._victoryQuotes = {};
+        for (const player of allPlayers) {
+          const { data } = await supabaseClient
+            .from('player_inventory')
+            .select('*, item:shop_items(*)')
+            .eq('discord_username', player)
+            .eq('equipped', true);
+          if (data) {
+            for (const inv of data) {
+              if (inv.item?.type === 'aura' && inv.item?.metadata?.effect) {
+                auraMap[player] = inv.item.metadata.effect;
+              }
+              if (inv.item?.type === 'victory_quote' && inv.item?.metadata?.quote) {
+                window._victoryQuotes[player] = inv.item.metadata.quote;
+              }
+            }
+          }
+        }
+        // Apply aura classes
+        document.querySelectorAll('.match-player').forEach(el => {
+          const nameEl = el.querySelector('.player-match-name');
+          const name = nameEl?.textContent?.trim();
+          if (name && auraMap[name]) {
+            el.classList.add(auraMap[name]);
+          }
+        });
+        // Apply victory quotes to winners
+        document.querySelectorAll('.match-card').forEach(card => {
+          const winnerEl = card.querySelector('.match-player.winner .player-match-name');
+          if (winnerEl && window._victoryQuotes) {
+            const name = winnerEl.textContent.trim();
+            if (window._victoryQuotes[name]) {
+              const quoteEl = document.createElement('div');
+              quoteEl.className = 'victory-quote';
+              quoteEl.textContent = `"${window._victoryQuotes[name]}"`;
+              winnerEl.closest('.match-player')?.appendChild(quoteEl);
+            }
+          }
+        });
+      } catch (e) {
+        console.warn('Aura/quote load error:', e);
+      }
     }
 
     let activeTournament = null;
@@ -608,10 +717,14 @@
       if (list.querySelector(`[data-stid="${msg.id}"]`)) return;
       const me = msg.username === getShoutboxName();
       const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const uLower = (msg.username || '').toLowerCase();
+      const isKai = kaiSet.has(uLower);
+      const isGold = goldenNameSet.has(uLower);
       const div = document.createElement('div');
-      div.className = 'shoutbox-msg' + (me ? ' me' : '');
+      div.className = 'shoutbox-msg' + (me ? ' me' : '') + (isKai ? ' kai' : '');
       div.setAttribute('data-stid', msg.id);
-      div.innerHTML = `<div><span class="msg-user" style="color:${me ? 'var(--cyan)' : 'var(--pink)'};">${escapeHtml(msg.username)}</span><span class="msg-time">${time}</span></div><div class="msg-text">${escapeHtml(msg.message)}</div>`;
+      const nameColor = isGold ? 'var(--gold)' : (me ? 'var(--cyan)' : 'var(--pink)');
+      div.innerHTML = `<div><span class="msg-user" style="color:${nameColor};${isGold ? 'text-shadow:0 0 8px rgba(255,215,0,0.5);' : ''}">${escapeHtml(msg.username)}</span><span class="msg-time">${time}</span></div><div class="msg-text">${escapeHtml(msg.message)}</div>`;
       list.appendChild(div);
       list.scrollTop = list.scrollHeight;
     }
@@ -631,7 +744,26 @@
       }
     }
 
+    let kaiSet = new Set();
+    let goldenNameSet = new Set();
+
     async function initShoutbox(tournament) {
+      // Load King Kai's Commentary users
+      try {
+        const { data: kaiUsers } = await supabaseClient
+          .from('player_inventory')
+          .select('discord_username, item:shop_items!inner(type)')
+          .eq('equipped', true)
+          .eq('item.type', 'kings_commentary');
+        kaiSet = new Set((kaiUsers || []).map(u => u.discord_username.toLowerCase()));
+        const { data: goldUsers } = await supabaseClient
+          .from('player_inventory')
+          .select('discord_username, item:shop_items!inner(type)')
+          .eq('equipped', true)
+          .eq('item.type', 'golden_name');
+        goldenNameSet = new Set((goldUsers || []).map(u => u.discord_username.toLowerCase()));
+      } catch (_) {}
+
       // Restore saved name
       const saved = getShoutboxName();
       if (saved) {
@@ -685,7 +817,7 @@
       // Debounce: accumulate clicks, send after 500ms pause
       hypePendingCounts[matchId] = (hypePendingCounts[matchId] || 0) + 1;
 
-      // Optimistic local update
+      playSound('hype');
       hypeData[matchId] = (hypeData[matchId] || 0) + 1;
       updateHypeDisplay(matchId);
       updateMostHyped();

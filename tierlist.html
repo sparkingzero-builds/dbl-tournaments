@@ -513,6 +513,7 @@
         });
 
         if (error) throw error;
+        playSound('vote');
         NotificationSystem.show(`Submitted ${entries.length} votes!`, 'success');
 
         // Award points for tier list voting (once per session)
