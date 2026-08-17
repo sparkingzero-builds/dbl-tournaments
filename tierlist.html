@@ -294,6 +294,7 @@
         <li><a href="compare.html">Compare</a></li>
         <li><a href="shop.html">Shop</a></li>
         <li><a href="tierlist.html" class="active">Tier List</a></li>
+        <li><a href="season.html">Season</a></li>
       </ul>
     </div>
   </nav>
@@ -367,6 +368,13 @@
     ];
 
     let allChars = [];
+
+    // Season XP helper
+    let _activeSeason = null;
+    async function getActiveSeason() {
+      if (!_activeSeason) _activeSeason = await db.getActiveSeason();
+      return _activeSeason;
+    }
     // placements: { [charId]: 'S' | 'A' | ... }
     let placements = {};
     let sessionId = sessionStorage.getItem('tier_session_id');
@@ -513,6 +521,8 @@
           if (username) {
             try {
               await db.awardPoints(username, 10, 'tier_vote');
+              const season = await getActiveSeason();
+              if (season) await db.addSeasonXP(season.id, username, 10);
               sessionStorage.setItem('tier_points_awarded', 'true');
             } catch (ptErr) {
               console.error('Tier vote points error:', ptErr);

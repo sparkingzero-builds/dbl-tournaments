@@ -637,6 +637,164 @@ const db = {
       seen.add(m.id);
       return true;
     });
+  },
+
+  // ── Seasons ──────────────────────────────────────────────────
+
+  async getActiveSeason() {
+    const { data, error } = await supabaseClient
+      .from('seasons')
+      .select('*')
+      .eq('status', 'active')
+      .limit(1)
+      .single();
+    if (error && error.code === 'PGRST116') return null;
+    if (error) throw error;
+    return data;
+  },
+
+  async getAllSeasons() {
+    const { data, error } = await supabaseClient
+      .from('seasons')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async createSeason(season) {
+    const { data, error } = await supabaseClient
+      .from('seasons')
+      .insert(season)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async updateSeason(id, updates) {
+    const { data, error } = await supabaseClient
+      .from('seasons')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async getSeasonRewards(seasonId) {
+    const { data, error } = await supabaseClient
+      .from('season_rewards')
+      .select('*')
+      .eq('season_id', seasonId)
+      .order('tier', { ascending: true });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async createSeasonReward(reward) {
+    const { data, error } = await supabaseClient
+      .from('season_rewards')
+      .insert(reward)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async updateSeasonReward(id, updates) {
+    const { data, error } = await supabaseClient
+      .from('season_rewards')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteSeasonReward(id) {
+    const { error } = await supabaseClient
+      .from('season_rewards')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  async getSeasonProgress(seasonId, username) {
+    const { data, error } = await supabaseClient
+      .from('season_progress')
+      .select('*')
+      .eq('season_id', seasonId)
+      .eq('discord_username', username)
+      .single();
+    if (error && error.code === 'PGRST116') return null;
+    if (error) throw error;
+    return data;
+  },
+
+  async addSeasonXP(seasonId, username, amount) {
+    const existing = await this.getSeasonProgress(seasonId, username);
+    if (existing) {
+      const { data, error } = await supabaseClient
+        .from('season_progress')
+        .update({ xp: existing.xp + amount })
+        .eq('id', existing.id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    } else {
+      const { data, error } = await supabaseClient
+        .from('season_progress')
+        .insert({ season_id: seasonId, discord_username: username, xp: amount })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    }
+  },
+
+  async claimSeasonReward(seasonId, username, tier) {
+    const progress = await this.getSeasonProgress(seasonId, username);
+    if (!progress) throw new Error('No season progress found');
+
+    const threshold = tier * 100;
+    if (progress.xp < threshold) throw new Error('Not enough XP to claim this tier');
+
+    const claimed = progress.claimed_tiers || [];
+    if (claimed.includes(tier)) throw new Error('Already claimed this tier');
+
+    // Check if premium and deduct points
+    const rewards = await this.getSeasonRewards(seasonId);
+    const reward = rewards.find(r => r.tier === tier);
+    if (reward && reward.track === 'premium' && reward.premium_cost > 0) {
+      const points = await this.getPoints(username);
+      if (points.balance < reward.premium_cost) throw new Error('Not enough points for premium reward');
+      await this.awardPoints(username, -reward.premium_cost, 'season_premium_claim', `season_${seasonId}_tier_${tier}`);
+    }
+
+    const newClaimed = [...claimed, tier];
+    const { data, error } = await supabaseClient
+      .from('season_progress')
+      .update({ claimed_tiers: newClaimed })
+      .eq('id', progress.id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async getSeasonLeaderboard(seasonId) {
+    const { data, error } = await supabaseClient
+      .from('season_progress')
+      .select('*')
+      .eq('season_id', seasonId)
+      .order('xp', { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    return data || [];
   }
 };
 

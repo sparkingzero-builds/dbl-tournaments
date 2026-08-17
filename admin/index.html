@@ -259,6 +259,7 @@
         <li><a href="../compare.html">Compare</a></li>
         <li><a href="../shop.html">Shop</a></li>
         <li><a href="../tierlist.html">Tier List</a></li>
+        <li><a href="../season.html">Season</a></li>
       </ul>
     </div>
   </nav>
@@ -540,6 +541,133 @@
         <p class="text-muted mb-2" style="font-size:13px;">Add starter flair borders, titles, and consumables. Skips items that already exist by name.</p>
         <button class="btn btn-primary btn-charge" type="button" onclick="seedDefaultShopItems()">Seed Defaults</button>
       </div>
+
+      <!-- Season Management -->
+      <div class="card mt-3">
+        <h3 class="mb-3" style="color:var(--pink);">Season Management</h3>
+        <div id="season-mgmt-status"></div>
+
+        <!-- Create Season -->
+        <div id="season-create-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Season Name</label>
+              <input type="text" id="season-name-input" placeholder="e.g. Season 1: Rising Warriors" />
+            </div>
+          </div>
+          <button class="btn btn-primary btn-charge" type="button" onclick="createNewSeason()">Create Season</button>
+        </div>
+
+        <!-- Active Season Info -->
+        <div id="season-active-info" style="display:none;">
+          <div style="background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;">
+            <p><strong>Name:</strong> <span id="season-active-name"></span></p>
+            <p><strong>Started:</strong> <span id="season-active-started"></span></p>
+            <p><strong>Status:</strong> <span id="season-active-status" style="color:var(--green);"></span></p>
+          </div>
+          <button class="btn btn-sm btn-danger" onclick="endSeason()">End Season</button>
+        </div>
+      </div>
+
+      <!-- Season Rewards Manager -->
+      <div class="card mt-3" id="season-rewards-section" style="display:none;">
+        <h3 class="mb-3" style="color:var(--gold);">Season Rewards</h3>
+
+        <!-- Add Reward Form -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tier</label>
+            <input type="number" id="sr-tier" min="1" max="20" placeholder="1" />
+          </div>
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="sr-name" placeholder="e.g. Fire Border" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" id="sr-desc" placeholder="Short description..." />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type</label>
+            <select id="sr-type">
+              <option value="points">Points</option>
+              <option value="flair_border">Flair Border</option>
+              <option value="flair_title">Flair Title</option>
+              <option value="badge">Badge</option>
+              <option value="ban_immunity">Ban Immunity</option>
+              <option value="profile_bg">Profile Background</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Track</label>
+            <select id="sr-track">
+              <option value="free">Free</option>
+              <option value="premium">Premium</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Premium Cost (points)</label>
+            <input type="number" id="sr-cost" value="0" />
+          </div>
+          <div class="form-group">
+            <label>Metadata (JSON)</label>
+            <input type="text" id="sr-meta" placeholder='{"effect":"flair-fire"}' />
+          </div>
+        </div>
+        <div class="flex gap-1 mb-3">
+          <button class="btn btn-primary btn-charge" type="button" onclick="addSeasonReward()">Add Reward</button>
+          <button class="btn btn-secondary" type="button" onclick="seedDefaultRewards()">Seed Default Rewards</button>
+        </div>
+
+        <div class="divider" style="margin:16px 0;"></div>
+
+        <div style="overflow-x:auto;">
+          <table class="signup-table">
+            <thead>
+              <tr>
+                <th>Tier</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Track</th>
+                <th>Cost</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="season-rewards-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="no-season-rewards">
+          <p>No rewards yet. Add some or seed defaults.</p>
+        </div>
+      </div>
+
+      <!-- Season XP Leaderboard -->
+      <div class="card mt-3" id="season-xp-lb-section" style="display:none;">
+        <div class="flex justify-between items-center mb-2">
+          <h3 style="color:var(--cyan);">Season XP Leaderboard</h3>
+          <button class="btn btn-sm btn-secondary" onclick="loadSeasonXPLeaderboard()">Refresh</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="signup-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Player</th>
+                <th>XP</th>
+                <th>Tier</th>
+              </tr>
+            </thead>
+            <tbody id="season-xp-lb-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="no-season-xp-data">
+          <p>No XP data yet.</p>
+        </div>
+      </div>
     </div>
 
     <!-- Settings Tab -->
@@ -673,6 +801,13 @@
     let signups = [];
     let matches = [];
     let editingId = null;
+
+    // Season XP helper
+    let _activeSeason = null;
+    async function getActiveSeason() {
+      if (!_activeSeason) _activeSeason = await db.getActiveSeason();
+      return _activeSeason;
+    }
 
     // Tabs
     document.querySelectorAll('.tab').forEach(tab => {
@@ -1135,7 +1270,10 @@
                 ? awardMatch.player2.discord_username
                 : awardMatch.player1.discord_username;
               await db.awardPoints(winnerName, 100, 'match_win', matchId);
+              const _s1 = await getActiveSeason();
+              if (_s1) await db.addSeasonXP(_s1.id, winnerName, 100);
               await db.awardPoints(loserName, 25, 'participation', matchId);
+              if (_s1) await db.addSeasonXP(_s1.id, loserName, 25);
             }
           }
         } catch (ptErr) {
@@ -1250,6 +1388,8 @@
               for (const s of tSignups) {
                 if (s.discord_username) {
                   await db.awardPoints(s.discord_username, 200, 'tournament_complete', refId);
+                  const _s2 = await getActiveSeason();
+                  if (_s2) await db.addSeasonXP(_s2.id, s.discord_username, 200);
                 }
               }
               // Award champion bonus
@@ -1262,6 +1402,8 @@
                     ? finalMatch.player1 : finalMatch.player2;
                   if (champion && champion.discord_username) {
                     await db.awardPoints(champion.discord_username, 500, 'champion', refId);
+                    const _s3 = await getActiveSeason();
+                    if (_s3) await db.addSeasonXP(_s3.id, champion.discord_username, 500);
                   }
                 }
               }
@@ -1952,6 +2094,7 @@
     async function loadEconomy() {
       await loadPointsLeaderboard();
       await loadShopItems();
+      await loadSeasonManagement();
     }
 
     // Award / Deduct Points
@@ -1965,6 +2108,10 @@
 
       try {
         await db.awardPoints(username, amount, reason);
+        if (amount > 0) {
+          const _s4 = await getActiveSeason();
+          if (_s4) await db.addSeasonXP(_s4.id, username, amount);
+        }
         NotificationSystem.show(`${amount > 0 ? 'Awarded' : 'Deducted'} ${Math.abs(amount)} points ${amount > 0 ? 'to' : 'from'} ${username}`, 'success');
         document.getElementById('eco-username').value = '';
         document.getElementById('eco-amount').value = '';
@@ -2150,6 +2297,199 @@
         loadShopItems();
       } catch (e) {
         NotificationSystem.show('Error seeding items: ' + e.message, 'error');
+      }
+    }
+
+    // ── Season Management ──────────────────────────────────────
+
+    let adminActiveSeason = null;
+
+    async function loadSeasonManagement() {
+      try {
+        adminActiveSeason = await db.getActiveSeason();
+      } catch (e) {
+        adminActiveSeason = null;
+      }
+
+      const statusDiv = document.getElementById('season-mgmt-status');
+      const createForm = document.getElementById('season-create-form');
+      const activeInfo = document.getElementById('season-active-info');
+      const rewardsSection = document.getElementById('season-rewards-section');
+      const xpLbSection = document.getElementById('season-xp-lb-section');
+
+      if (adminActiveSeason) {
+        createForm.style.display = 'none';
+        activeInfo.style.display = 'block';
+        rewardsSection.style.display = 'block';
+        xpLbSection.style.display = 'block';
+        document.getElementById('season-active-name').textContent = adminActiveSeason.name;
+        document.getElementById('season-active-started').textContent = new Date(adminActiveSeason.started_at).toLocaleDateString();
+        document.getElementById('season-active-status').textContent = adminActiveSeason.status;
+        await loadSeasonRewards();
+        await loadSeasonXPLeaderboard();
+      } else {
+        createForm.style.display = 'block';
+        activeInfo.style.display = 'none';
+        rewardsSection.style.display = 'none';
+        xpLbSection.style.display = 'none';
+      }
+    }
+
+    async function createNewSeason() {
+      const name = document.getElementById('season-name-input').value.trim();
+      if (!name) { NotificationSystem.show('Enter a season name', 'error'); return; }
+      try {
+        await db.createSeason({ name });
+        _activeSeason = null; // reset cache
+        NotificationSystem.show('Season created!', 'success');
+        document.getElementById('season-name-input').value = '';
+        await loadSeasonManagement();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function endSeason() {
+      if (!adminActiveSeason) return;
+      if (!confirm('End this season? This cannot be undone.')) return;
+      try {
+        await db.updateSeason(adminActiveSeason.id, { status: 'completed', ended_at: new Date().toISOString() });
+        _activeSeason = null;
+        NotificationSystem.show('Season ended', 'success');
+        await loadSeasonManagement();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function loadSeasonRewards() {
+      if (!adminActiveSeason) return;
+      const tbody = document.getElementById('season-rewards-tbody');
+      const empty = document.getElementById('no-season-rewards');
+      try {
+        const rewards = await db.getSeasonRewards(adminActiveSeason.id);
+        if (!rewards.length) {
+          tbody.innerHTML = '';
+          empty.classList.remove('hidden');
+          return;
+        }
+        empty.classList.add('hidden');
+        tbody.innerHTML = rewards.map(r => `
+          <tr>
+            <td style="font-family:'Exo 2',sans-serif;font-weight:700;">${r.tier}</td>
+            <td><strong>${r.name}</strong></td>
+            <td>${r.type}</td>
+            <td><span style="color:${r.track === 'premium' ? 'var(--gold)' : '#a55eea'};font-weight:700;">${r.track}</span></td>
+            <td style="font-family:'Exo 2',sans-serif;">${r.premium_cost || 0}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="deleteSeasonReward('${r.id}')">Delete</button></td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = '';
+      }
+    }
+
+    async function addSeasonReward() {
+      if (!adminActiveSeason) return;
+      const tier = parseInt(document.getElementById('sr-tier').value);
+      const name = document.getElementById('sr-name').value.trim();
+      const desc = document.getElementById('sr-desc').value.trim();
+      const type = document.getElementById('sr-type').value;
+      const track = document.getElementById('sr-track').value;
+      const cost = parseInt(document.getElementById('sr-cost').value) || 0;
+      let meta = {};
+      try { meta = JSON.parse(document.getElementById('sr-meta').value || '{}'); } catch(e) {}
+
+      if (!tier || tier < 1 || tier > 20) { NotificationSystem.show('Tier must be 1-20', 'error'); return; }
+      if (!name) { NotificationSystem.show('Enter a reward name', 'error'); return; }
+
+      try {
+        await db.createSeasonReward({
+          season_id: adminActiveSeason.id,
+          tier, name, description: desc, type, track,
+          premium_cost: track === 'premium' ? cost : 0,
+          metadata: meta
+        });
+        NotificationSystem.show('Reward added!', 'success');
+        document.getElementById('sr-tier').value = '';
+        document.getElementById('sr-name').value = '';
+        document.getElementById('sr-desc').value = '';
+        document.getElementById('sr-cost').value = '0';
+        document.getElementById('sr-meta').value = '';
+        await loadSeasonRewards();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function deleteSeasonReward(id) {
+      if (!confirm('Delete this reward?')) return;
+      try {
+        await db.deleteSeasonReward(id);
+        NotificationSystem.show('Reward deleted', 'success');
+        await loadSeasonRewards();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function seedDefaultRewards() {
+      if (!adminActiveSeason) return;
+      const defaults = [
+        { tier: 1, name: 'Rising Star', type: 'flair_title', track: 'free', premium_cost: 0, metadata: { title: 'Rising Star' } },
+        { tier: 2, name: '50 Points', type: 'points', track: 'free', premium_cost: 0, metadata: { amount: 50 } },
+        { tier: 3, name: 'Fire Border', type: 'flair_border', track: 'premium', premium_cost: 200, metadata: { effect: 'flair-fire' } },
+        { tier: 5, name: '100 Points', type: 'points', track: 'free', premium_cost: 0, metadata: { amount: 100 } },
+        { tier: 7, name: 'Ice Border', type: 'flair_border', track: 'premium', premium_cost: 300, metadata: { effect: 'flair-ice' } },
+        { tier: 8, name: 'Ban Immunity', type: 'ban_immunity', track: 'premium', premium_cost: 500, metadata: {} },
+        { tier: 10, name: 'Veteran Badge', type: 'badge', track: 'free', premium_cost: 0, metadata: { badge: 'veteran' } },
+        { tier: 12, name: 'Royal Border', type: 'flair_border', track: 'premium', premium_cost: 400, metadata: { effect: 'flair-royal' } },
+        { tier: 13, name: 'Exclusive Background', type: 'profile_bg', track: 'premium', premium_cost: 350, metadata: { bg: 'exclusive-1' } },
+        { tier: 15, name: '200 Points', type: 'points', track: 'free', premium_cost: 0, metadata: { amount: 200 } },
+        { tier: 17, name: 'Shadow Border', type: 'flair_border', track: 'premium', premium_cost: 500, metadata: { effect: 'flair-shadow' } },
+        { tier: 18, name: 'Legendary', type: 'flair_title', track: 'premium', premium_cost: 600, metadata: { title: 'Legendary' } },
+        { tier: 20, name: 'Season Champion Border', type: 'flair_border', track: 'premium', premium_cost: 1000, metadata: { effect: 'flair-champion' } }
+      ];
+
+      try {
+        const existing = await db.getSeasonRewards(adminActiveSeason.id);
+        const existingTiers = new Set(existing.map(r => r.tier));
+        let created = 0, skipped = 0;
+        for (const r of defaults) {
+          if (existingTiers.has(r.tier)) { skipped++; continue; }
+          await db.createSeasonReward({ ...r, season_id: adminActiveSeason.id });
+          created++;
+        }
+        NotificationSystem.show(`Seeded ${created} reward${created !== 1 ? 's' : ''}${skipped ? `, skipped ${skipped} existing` : ''}`, 'success');
+        await loadSeasonRewards();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function loadSeasonXPLeaderboard() {
+      if (!adminActiveSeason) return;
+      const tbody = document.getElementById('season-xp-lb-tbody');
+      const empty = document.getElementById('no-season-xp-data');
+      try {
+        const data = await db.getSeasonLeaderboard(adminActiveSeason.id);
+        if (!data || !data.length) {
+          tbody.innerHTML = '';
+          empty.classList.remove('hidden');
+          return;
+        }
+        empty.classList.add('hidden');
+        tbody.innerHTML = data.map((p, i) => {
+          const tier = Math.floor(p.xp / 100);
+          return `<tr>
+            <td>${i + 1}</td>
+            <td><strong>${p.discord_username}</strong></td>
+            <td style="color:var(--cyan);font-family:'Exo 2',sans-serif;font-weight:700;">${p.xp}</td>
+            <td style="color:var(--gold);font-family:'Exo 2',sans-serif;font-weight:700;">${tier}</td>
+          </tr>`;
+        }).join('');
+      } catch (e) {
+        tbody.innerHTML = '';
       }
     }
   </script>

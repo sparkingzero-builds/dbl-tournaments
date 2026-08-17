@@ -225,6 +225,7 @@
         <li><a href="compare.html">Compare</a></li>
         <li><a href="shop.html">Shop</a></li>
         <li><a href="tierlist.html">Tier List</a></li>
+        <li><a href="season.html">Season</a></li>
       </ul>
     </div>
   </nav>
@@ -265,6 +266,13 @@
 
     let currentTournament = null;
     let signups = [];
+
+    // Season XP helper
+    let _activeSeason = null;
+    async function getActiveSeason() {
+      if (!_activeSeason) _activeSeason = await db.getActiveSeason();
+      return _activeSeason;
+    }
 
     async function loadTournament() {
       const content = document.getElementById('tournament-content');
@@ -629,6 +637,8 @@
           if (voterName) {
             try {
               await db.awardPoints(voterName, 10, 'power_ranking_vote');
+              const season = await getActiveSeason();
+              if (season) await db.addSeasonXP(season.id, voterName, 10);
               sessionStorage.setItem('pr_points_awarded', 'true');
             } catch (ptErr) {
               console.error('Power ranking vote points error:', ptErr);

@@ -221,6 +221,7 @@
         <li><a href="compare.html">Compare</a></li>
         <li><a href="shop.html">Shop</a></li>
         <li><a href="tierlist.html">Tier List</a></li>
+        <li><a href="season.html">Season</a></li>
       </ul>
     </div>
   </nav>
@@ -249,6 +250,13 @@
     let selectedVote = null;
     let banCount = 1;
     let allChars = [];
+
+    // Season XP helper
+    let _activeSeason = null;
+    async function getActiveSeason() {
+      if (!_activeSeason) _activeSeason = await db.getActiveSeason();
+      return _activeSeason;
+    }
 
     async function init() {
       const content = document.getElementById('ban-content');
@@ -551,6 +559,8 @@
         // Award points for ban vote
         try {
           await db.awardPoints(mySignup.discord_username, 10, 'ban_vote', tournament.id + '_ban');
+          const season = await getActiveSeason();
+          if (season) await db.addSeasonXP(season.id, mySignup.discord_username, 10);
         } catch (ptErr) {
           console.error('Ban vote points error:', ptErr);
         }

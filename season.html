@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Season Pass — DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/bracket.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    .season-header {
+      text-align: center;
+      padding: 40px 0 20px;
+    }
+    .season-header h1 {
+      font-size: clamp(24px, 4vw, 36px);
+      color: var(--cyan);
+      text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+      margin-bottom: 4px;
+    }
+    .season-meta {
+      color: var(--muted);
+      font-size: 13px;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    /* Login */
+    .season-login {
+      max-width: 400px;
+      margin: 0 auto 30px;
+    }
+    .season-login .form-row-inline {
+      display: flex;
+      gap: 10px;
+    }
+    .season-login input {
+      flex: 1;
+      padding: 10px 14px;
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 14px;
+    }
+    .season-login input:focus {
+      outline: none;
+      border-color: var(--cyan);
+    }
+
+    /* XP Bar */
+    .xp-bar-wrapper {
+      max-width: 900px;
+      margin: 0 auto 30px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+    }
+    .xp-bar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .xp-bar-header .xp-label {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .xp-bar-header .xp-value {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--cyan);
+    }
+    .xp-bar-track {
+      width: 100%;
+      height: 18px;
+      background: var(--bg);
+      border-radius: 9px;
+      overflow: hidden;
+      position: relative;
+    }
+    .xp-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--pink));
+      border-radius: 9px;
+      transition: width 0.8s ease;
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+      min-width: 0;
+    }
+    .xp-tier-info {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    /* Reward Track */
+    .reward-track-wrapper {
+      max-width: 100%;
+      overflow-x: auto;
+      padding: 10px 0 20px;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+    }
+    .reward-track {
+      display: flex;
+      gap: 12px;
+      padding: 10px 20px;
+      min-width: max-content;
+    }
+    .reward-card {
+      width: 120px;
+      min-width: 120px;
+      background: var(--panel);
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px 10px;
+      text-align: center;
+      position: relative;
+      scroll-snap-align: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .reward-card.unlocked-free {
+      border-color: #a55eea;
+      box-shadow: 0 0 12px rgba(165, 94, 234, 0.3);
+    }
+    .reward-card.unlocked-premium {
+      border-color: var(--gold);
+      box-shadow: 0 0 12px rgba(255, 215, 64, 0.3);
+    }
+    .reward-card.current {
+      transform: scale(1.05);
+      border-color: var(--cyan);
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+    }
+    .reward-card.locked {
+      opacity: 0.4;
+      filter: grayscale(0.5);
+    }
+    .reward-card.claimed::after {
+      content: '\2713';
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      font-size: 16px;
+      color: var(--green);
+      font-weight: bold;
+    }
+    .reward-tier {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+    .reward-icon {
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+    .reward-name {
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: 6px;
+      min-height: 28px;
+    }
+    .reward-track-label {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+    .reward-track-label.free {
+      background: rgba(165, 94, 234, 0.2);
+      color: #a55eea;
+    }
+    .reward-track-label.premium {
+      background: var(--gold-dim);
+      color: var(--gold);
+    }
+    .reward-card .btn-claim {
+      width: 100%;
+      padding: 5px 8px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-claim.free {
+      background: #a55eea;
+      color: #fff;
+    }
+    .btn-claim.premium {
+      background: var(--gold);
+      color: #000;
+    }
+    .btn-claim:hover {
+      filter: brightness(1.2);
+    }
+
+    /* Leaderboard */
+    .season-leaderboard {
+      max-width: 600px;
+      margin: 30px auto;
+    }
+    .season-leaderboard h3 {
+      color: var(--cyan);
+      margin-bottom: 12px;
+    }
+    .lb-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .lb-table th {
+      text-align: left;
+      padding: 8px 12px;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+    }
+    .lb-table td {
+      padding: 8px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    /* No season */
+    .no-season {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+    }
+    .no-season h2 {
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+        <li><a href="compare.html">Compare</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="tierlist.html">Tier List</a></li>
+        <li><a href="season.html" class="active">Season</a></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="container" style="padding: 0 20px;">
+    <div class="season-header">
+      <h1>Season Pass</h1>
+      <p class="season-meta" id="season-meta"></p>
+    </div>
+
+    <!-- Login -->
+    <div class="season-login card" id="season-login">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Enter your Discord username to track your progress</p>
+      <div class="form-row-inline">
+        <input type="text" id="season-username" placeholder="e.g. Player#1234" />
+        <button class="btn btn-primary" onclick="loginSeason()">Load</button>
+      </div>
+    </div>
+
+    <!-- Content (hidden until loaded) -->
+    <div id="season-content" style="display:none;">
+      <!-- XP Bar -->
+      <div class="xp-bar-wrapper">
+        <div class="xp-bar-header">
+          <span class="xp-label">Season XP</span>
+          <span class="xp-value" id="xp-display">0 XP</span>
+        </div>
+        <div class="xp-bar-track">
+          <div class="xp-bar-fill" id="xp-bar-fill" style="width:0%"></div>
+        </div>
+        <div class="xp-tier-info">
+          <span id="xp-current-tier">Tier 0</span>
+          <span id="xp-next-threshold">Next: 100 XP</span>
+        </div>
+      </div>
+
+      <!-- Reward Track -->
+      <div class="reward-track-wrapper">
+        <div class="reward-track" id="reward-track"></div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="season-leaderboard card">
+        <h3>Season XP Leaderboard</h3>
+        <div style="overflow-x:auto;">
+          <table class="lb-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Player</th>
+                <th>XP</th>
+                <th>Tier</th>
+              </tr>
+            </thead>
+            <tbody id="season-lb-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- No active season -->
+    <div class="no-season" id="no-season" style="display:none;">
+      <h2>No Active Season</h2>
+      <p>Check back later for the next season pass!</p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/notifications.js"></script>
+  <script>
+    const REWARD_ICONS = {
+      points: '💎',
+      flair_border: '🖼️',
+      flair_title: '✨',
+      badge: '🏅',
+      ban_immunity: '🛡️',
+      profile_bg: '🎨'
+    };
+
+    function tierThreshold(tier) { return tier * 100; }
+    function getCurrentTier(xp) {
+      for (let t = 20; t >= 1; t--) {
+        if (xp >= tierThreshold(t)) return t;
+      }
+      return 0;
+    }
+
+    let activeSeason = null;
+    let seasonRewards = [];
+    let myProgress = null;
+    let myUsername = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Restore saved username
+      const saved = sessionStorage.getItem('season_username');
+      if (saved) {
+        document.getElementById('season-username').value = saved;
+      }
+
+      try {
+        activeSeason = await db.getActiveSeason();
+      } catch (e) {
+        console.error('Error loading season:', e);
+      }
+
+      if (!activeSeason) {
+        document.getElementById('no-season').style.display = 'block';
+        document.getElementById('season-login').style.display = 'none';
+        return;
+      }
+
+      // Show season meta
+      const started = new Date(activeSeason.started_at);
+      const days = Math.floor((Date.now() - started.getTime()) / (1000 * 60 * 60 * 24));
+      document.getElementById('season-meta').textContent =
+        `${activeSeason.name} • Day ${days + 1} • ${activeSeason.total_tiers || 20} Tiers`;
+
+      // Load rewards
+      seasonRewards = await db.getSeasonRewards(activeSeason.id);
+
+      // Auto-login if saved
+      if (saved) {
+        await loginSeason();
+      }
+    });
+
+    async function loginSeason() {
+      const input = document.getElementById('season-username');
+      const username = input.value.trim();
+      if (!username) {
+        NotificationSystem.show('Enter your Discord username', 'error');
+        return;
+      }
+      myUsername = username;
+      sessionStorage.setItem('season_username', username);
+
+      try {
+        myProgress = await db.getSeasonProgress(activeSeason.id, username);
+      } catch (e) {
+        console.error(e);
+      }
+
+      document.getElementById('season-login').style.display = 'none';
+      document.getElementById('season-content').style.display = 'block';
+
+      renderXPBar();
+      renderRewardTrack();
+      await loadSeasonLeaderboard();
+    }
+
+    function renderXPBar() {
+      const xp = myProgress ? myProgress.xp : 0;
+      const currentTier = getCurrentTier(xp);
+      const nextTier = Math.min(currentTier + 1, 20);
+      const nextThreshold = tierThreshold(nextTier);
+      const prevThreshold = currentTier > 0 ? tierThreshold(currentTier) : 0;
+      const progress = currentTier >= 20 ? 100 :
+        ((xp - prevThreshold) / (nextThreshold - prevThreshold)) * 100;
+
+      document.getElementById('xp-display').textContent = `${xp} XP`;
+      document.getElementById('xp-bar-fill').style.width = Math.min(progress, 100) + '%';
+      document.getElementById('xp-current-tier').textContent = `Tier ${currentTier}`;
+      document.getElementById('xp-next-threshold').textContent =
+        currentTier >= 20 ? 'MAX TIER!' : `Next: ${nextThreshold} XP`;
+    }
+
+    function renderRewardTrack() {
+      const track = document.getElementById('reward-track');
+      const xp = myProgress ? myProgress.xp : 0;
+      const claimed = myProgress ? (myProgress.claimed_tiers || []) : [];
+      const currentTier = getCurrentTier(xp);
+
+      let html = '';
+      for (let t = 1; t <= 20; t++) {
+        const threshold = tierThreshold(t);
+        const unlocked = xp >= threshold;
+        const isCurrent = t === currentTier + 1;
+        const isClaimed = claimed.includes(t);
+        const reward = seasonRewards.find(r => r.tier === t);
+        const icon = reward ? (REWARD_ICONS[reward.type] || '🏆') : '🔒';
+        const name = reward ? reward.name : 'No reward';
+        const trackType = reward ? reward.track : 'free';
+        const cost = reward ? reward.premium_cost : 0;
+
+        let classes = 'reward-card';
+        if (isClaimed) classes += ' claimed';
+        if (isCurrent) classes += ' current';
+        if (unlocked && !isClaimed) classes += trackType === 'premium' ? ' unlocked-premium' : ' unlocked-free';
+        if (!unlocked && !isCurrent) classes += ' locked';
+
+        let btnHtml = '';
+        if (reward && unlocked && !isClaimed) {
+          if (trackType === 'free') {
+            btnHtml = `<button class="btn-claim free" onclick="claimReward(${t})">Claim</button>`;
+          } else {
+            btnHtml = `<button class="btn-claim premium" onclick="claimReward(${t})">${cost} pts</button>`;
+          }
+        }
+
+        html += `
+          <div class="${classes}" data-tier="${t}">
+            <div class="reward-tier">Tier ${t}</div>
+            <div class="reward-icon">${icon}</div>
+            <div class="reward-name">${name}</div>
+            <span class="reward-track-label ${trackType}">${trackType}</span>
+            ${btnHtml}
+          </div>
+        `;
+      }
+      track.innerHTML = html;
+
+      // Scroll to current tier
+      const currentCard = track.querySelector('.reward-card.current') || track.querySelector('.reward-card.unlocked-free:last-of-type');
+      if (currentCard) {
+        setTimeout(() => currentCard.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }), 300);
+      }
+    }
+
+    async function claimReward(tier) {
+      try {
+        myProgress = await db.claimSeasonReward(activeSeason.id, myUsername, tier);
+        const reward = seasonRewards.find(r => r.tier === tier);
+        NotificationSystem.show(`Claimed: ${reward ? reward.name : 'Reward'}!`, 'ko');
+        renderXPBar();
+        renderRewardTrack();
+      } catch (e) {
+        NotificationSystem.show(e.message, 'error');
+      }
+    }
+
+    async function loadSeasonLeaderboard() {
+      const tbody = document.getElementById('season-lb-tbody');
+      try {
+        const data = await db.getSeasonLeaderboard(activeSeason.id);
+        if (!data.length) {
+          tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);text-align:center;">No players yet</td></tr>';
+          return;
+        }
+        tbody.innerHTML = data.map((p, i) => {
+          const tier = getCurrentTier(p.xp);
+          return `<tr>
+            <td style="font-family:'Exo 2',sans-serif;font-weight:700;">${i + 1}</td>
+            <td><strong>${p.discord_username}</strong></td>
+            <td style="color:var(--cyan);font-family:'Exo 2',sans-serif;font-weight:700;">${p.xp}</td>
+            <td style="color:var(--gold);font-family:'Exo 2',sans-serif;font-weight:700;">${tier}</td>
+          </tr>`;
+        }).join('');
+      } catch (e) {
+        console.error('Leaderboard error:', e);
+      }
+    }
+  </script>
+</body>
+</html>
