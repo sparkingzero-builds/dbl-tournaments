@@ -75,6 +75,139 @@
         position: static;
       }
     }
+
+    /* Power Rankings */
+    .power-rankings {
+      margin-top: 32px;
+    }
+
+    .power-rankings h3 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .power-rankings h3 .icon-fire {
+      color: var(--pink);
+    }
+
+    .pr-round-selector {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .pr-round-btn {
+      padding: 6px 16px;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pr-round-btn.active {
+      color: var(--cyan);
+      border-color: var(--cyan);
+    }
+
+    .pr-options {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .pr-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .pr-option:hover {
+      border-color: var(--cyan);
+    }
+
+    .pr-option.voted {
+      border-color: var(--pink);
+      box-shadow: 0 0 12px rgba(255, 45, 120, 0.15);
+    }
+
+    .pr-option.my-vote {
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.15);
+    }
+
+    .pr-name {
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+      min-width: 100px;
+    }
+
+    .pr-bar-bg {
+      flex: 1;
+      height: 24px;
+      background: var(--bg-2);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .pr-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--cyan), var(--pink));
+      transition: width 0.5s ease;
+    }
+
+    .pr-pct {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      width: 50px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .pr-feared {
+      text-align: center;
+      margin-top: 16px;
+      padding: 14px;
+      background: var(--panel);
+      border: 1px solid var(--pink);
+      border-radius: var(--radius);
+      box-shadow: 0 0 20px rgba(255, 45, 120, 0.1);
+    }
+
+    .pr-feared__label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--pink);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .pr-feared__name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--text);
+    }
   </style>
 </head>
 <body class="scanlines">
@@ -90,6 +223,8 @@
         <li><a href="bracket.html">Bracket</a></li>
         <li><a href="history.html">History</a></li>
         <li><a href="compare.html">Compare</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="tierlist.html">Tier List</a></li>
       </ul>
     </div>
   </nav>
@@ -224,10 +359,23 @@
             <a href="bracket.html" class="btn btn-primary btn-lg">View Bracket</a>
           </div>
         </div>
+        <div class="power-rankings" id="power-rankings-section">
+          <div class="card card-glow">
+            <h3><span class="icon-fire">&#128293;</span> Power Rankings — Who Will Win?</h3>
+            <div id="pr-round-selector" class="pr-round-selector"></div>
+            <div id="pr-content">
+              <div class="loader"><div class="loader-spinner"></div></div>
+            </div>
+          </div>
+        </div>
         `}
       `;
 
       renderPlayerList();
+
+      if (!isSignup) {
+        initPowerRankings();
+      }
 
       if (isSignup) {
         CharacterManager.renderTeamSlots(document.getElementById('signup-team-slots'));
@@ -366,6 +514,120 @@
     document.addEventListener('input', (e) => {
       if (e.target.id === 'discord-input') updateSignupBtn();
     });
+
+    // Power Rankings
+    let prSessionId = sessionStorage.getItem('pr_session_id');
+    if (!prSessionId) {
+      prSessionId = crypto.randomUUID();
+      sessionStorage.setItem('pr_session_id', prSessionId);
+    }
+    let prCurrentRound = 1;
+
+    async function initPowerRankings() {
+      if (!currentTournament || currentTournament.status !== 'active') return;
+
+      try {
+        // Determine rounds from matches
+        const { data: matches } = await supabaseClient.from('matches').select('round, winner').eq('tournament_id', currentTournament.id);
+        if (!matches || !matches.length) {
+          document.getElementById('pr-content').innerHTML = '<p class="text-muted">No matches yet.</p>';
+          return;
+        }
+
+        const rounds = [...new Set(matches.map(m => m.round))].sort((a, b) => a - b);
+        // Current round = max round with incomplete matches
+        const roundsWithIncomplete = rounds.filter(r => matches.some(m => m.round === r && !m.winner));
+        prCurrentRound = roundsWithIncomplete.length ? Math.min(...roundsWithIncomplete) : Math.max(...rounds);
+
+        // Round selector
+        const selector = document.getElementById('pr-round-selector');
+        if (rounds.length > 1) {
+          selector.innerHTML = rounds.map(r =>
+            `<button class="pr-round-btn ${r === prCurrentRound ? 'active' : ''}" onclick="selectPrRound(${r})">Round ${r}</button>`
+          ).join('');
+        }
+
+        await loadPrVotes();
+      } catch (e) {
+        console.error('Power rankings error:', e);
+      }
+    }
+
+    function selectPrRound(round) {
+      prCurrentRound = round;
+      document.querySelectorAll('.pr-round-btn').forEach(b => b.classList.toggle('active', parseInt(b.textContent.replace('Round ', '')) === round));
+      loadPrVotes();
+    }
+
+    async function loadPrVotes() {
+      const content = document.getElementById('pr-content');
+
+      try {
+        const { data: votes } = await supabaseClient.from('power_rankings_votes')
+          .select('*')
+          .eq('tournament_id', currentTournament.id)
+          .eq('round', prCurrentRound);
+
+        const myVote = (votes || []).find(v => v.voter_session === prSessionId);
+
+        // Tally
+        const tally = {};
+        (votes || []).forEach(v => {
+          tally[v.voted_for] = (tally[v.voted_for] || 0) + 1;
+        });
+
+        // Get all players
+        const players = signups.map(s => s.discord_username);
+        const totalVotes = (votes || []).length;
+
+        // Sort by votes desc
+        players.sort((a, b) => (tally[b] || 0) - (tally[a] || 0));
+
+        const topPlayer = players.length && totalVotes ? players[0] : null;
+
+        content.innerHTML = `
+          <div class="pr-options">
+            ${players.map(p => {
+              const count = tally[p] || 0;
+              const pct = totalVotes ? Math.round(count / totalVotes * 100) : 0;
+              const isMyVote = myVote && myVote.voted_for === p;
+              return `
+                <div class="pr-option ${isMyVote ? 'my-vote' : ''}" onclick="votePowerRanking('${p.replace(/'/g, "\\'")}')">
+                  <div class="pr-name">${p}</div>
+                  <div class="pr-bar-bg"><div class="pr-bar-fill" style="width:${pct}%"></div></div>
+                  <div class="pr-pct">${pct}%</div>
+                </div>`;
+            }).join('')}
+          </div>
+          ${topPlayer && totalVotes > 0 ? `
+          <div class="pr-feared">
+            <div class="pr-feared__label">Most Feared Player</div>
+            <div class="pr-feared__name">${topPlayer}</div>
+          </div>` : ''}
+        `;
+      } catch (e) {
+        console.error(e);
+        content.innerHTML = '<p class="text-muted">Failed to load power rankings.</p>';
+      }
+    }
+
+    async function votePowerRanking(username) {
+      try {
+        const { error } = await supabaseClient.from('power_rankings_votes').upsert({
+          tournament_id: currentTournament.id,
+          round: prCurrentRound,
+          voter_session: prSessionId,
+          voted_for: username
+        }, { onConflict: 'tournament_id,round,voter_session' });
+
+        if (error) throw error;
+        NotificationSystem.show(`Voted for ${username}!`, 'success');
+        await loadPrVotes();
+      } catch (e) {
+        console.error(e);
+        NotificationSystem.show('Error submitting vote.', 'error');
+      }
+    }
 
     document.addEventListener('DOMContentLoaded', loadTournament);
 

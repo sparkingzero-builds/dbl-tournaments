@@ -268,10 +268,278 @@
       line-height: 1.3;
     }
 
+    /* ── Player Card ── */
+    @keyframes cardBorderRotate {
+      0% { --card-angle: 0deg; }
+      100% { --card-angle: 360deg; }
+    }
+
+    @property --card-angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+
+    .player-card-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0 auto 32px;
+      max-width: 370px;
+    }
+
+    .player-card {
+      position: relative;
+      width: 350px;
+      min-height: 480px;
+      border-radius: 16px;
+      padding: 3px;
+      background: conic-gradient(from var(--card-angle, 0deg), var(--cyan), var(--pink), var(--gold), var(--cyan));
+      animation: cardBorderRotate 4s linear infinite;
+      box-shadow: 0 0 30px rgba(0, 229, 255, 0.2), 0 0 60px rgba(255, 0, 200, 0.1);
+    }
+
+    .player-card-inner {
+      background: linear-gradient(160deg, rgba(20, 20, 40, 0.95), rgba(10, 10, 25, 0.98));
+      backdrop-filter: blur(12px);
+      border-radius: 14px;
+      padding: 28px 24px 20px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .player-card-inner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at 30% 20%, rgba(0, 229, 255, 0.06) 0%, transparent 50%),
+                  radial-gradient(ellipse at 70% 80%, rgba(255, 0, 200, 0.04) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .card-top {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-player-name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+
+    .card-flair-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+      text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+      margin-bottom: 6px;
+    }
+
+    .card-tier-badge {
+      display: inline-block;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 3px 14px;
+      border-radius: 20px;
+      margin-top: 4px;
+    }
+
+    .card-tier-badge.tier-diamond  { background: rgba(0, 229, 255, 0.15); color: var(--cyan); box-shadow: 0 0 16px rgba(0, 229, 255, 0.3); }
+    .card-tier-badge.tier-platinum { background: rgba(180, 220, 255, 0.12); color: #b4dcff; box-shadow: 0 0 12px rgba(180, 220, 255, 0.2); }
+    .card-tier-badge.tier-gold     { background: rgba(255, 215, 0, 0.12); color: var(--gold); box-shadow: 0 0 12px rgba(255, 215, 0, 0.2); }
+    .card-tier-badge.tier-silver   { background: rgba(192, 192, 192, 0.12); color: #c0c0c0; box-shadow: 0 0 10px rgba(192, 192, 192, 0.15); }
+    .card-tier-badge.tier-bronze   { background: rgba(205, 127, 50, 0.12); color: #cd7f32; box-shadow: 0 0 10px rgba(205, 127, 50, 0.15); }
+
+    .card-elo-value {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--cyan);
+      line-height: 1;
+      margin-top: 6px;
+    }
+
+    .card-points-badge {
+      display: inline-block;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cyan);
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid rgba(0, 229, 255, 0.25);
+      border-radius: 20px;
+      padding: 2px 12px;
+      margin-top: 6px;
+    }
+
+    /* Characters row */
+    .card-chars {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-char {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid var(--line);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card-char:hover {
+      transform: scale(1.08);
+      box-shadow: 0 4px 20px rgba(0, 229, 255, 0.3);
+    }
+
+    .card-char img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-char-label {
+      font-size: 9px;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 80px;
+    }
+
+    /* Stats row on card */
+    .card-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-stat {
+      text-align: center;
+      padding: 8px 4px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+    }
+
+    .card-stat-val {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .card-stat-lbl {
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    /* Card badges */
+    .card-badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-badge-mini {
+      font-size: 20px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      transition: transform 0.2s;
+    }
+
+    .card-badge-mini:hover {
+      transform: scale(1.15);
+    }
+
+    /* Share button */
+    .card-share-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      padding: 8px 20px;
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      border-radius: 8px;
+      color: var(--cyan);
+      font-family: 'Exo 2', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .card-share-btn:hover {
+      background: rgba(0, 229, 255, 0.2);
+      box-shadow: 0 0 16px rgba(0, 229, 255, 0.2);
+    }
+
+    /* Flair border overrides */
+    .player-card.flair-fire {
+      background: conic-gradient(from var(--card-angle, 0deg), #ff4500, #ff8c00, #ffd700, #ff4500);
+      box-shadow: 0 0 30px rgba(255, 69, 0, 0.3), 0 0 60px rgba(255, 140, 0, 0.15);
+    }
+    .player-card.flair-ice {
+      background: conic-gradient(from var(--card-angle, 0deg), #00bfff, #e0f7ff, #00bfff, #4dd0e1);
+      box-shadow: 0 0 30px rgba(0, 191, 255, 0.3), 0 0 60px rgba(77, 208, 225, 0.15);
+    }
+    .player-card.flair-royal {
+      background: conic-gradient(from var(--card-angle, 0deg), #9b59b6, #ffd700, #9b59b6, #e74c3c);
+      box-shadow: 0 0 30px rgba(155, 89, 182, 0.3), 0 0 60px rgba(255, 215, 0, 0.15);
+    }
+    .player-card.flair-shadow {
+      background: conic-gradient(from var(--card-angle, 0deg), #1a1a2e, #6c3483, #1a1a2e, #2c3e50);
+      box-shadow: 0 0 30px rgba(108, 52, 131, 0.3), 0 0 60px rgba(44, 62, 80, 0.15);
+    }
+
     @media (max-width: 700px) {
       .profile-stats { grid-template-columns: repeat(2, 1fr); }
       .profile-sections { grid-template-columns: 1fr; }
       .badges-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+      .player-card { width: 100%; max-width: 350px; }
+      .card-char { width: 65px; height: 65px; }
     }
   </style>
 </head>
@@ -288,6 +556,8 @@
         <li><a href="bracket.html">Bracket</a></li>
         <li><a href="history.html">History</a></li>
         <li><a href="compare.html">Compare</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="tierlist.html">Tier List</a></li>
       </ul>
     </div>
   </nav>
@@ -307,6 +577,25 @@
   <script src="js/particles.js"></script>
   <script>
     initParticles(document.getElementById('particles'));
+
+    function copyProfileLink() {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        if (typeof NotificationSystem !== 'undefined') {
+          NotificationSystem.show('Profile link copied to clipboard!', 'success');
+        }
+      }).catch(() => {
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = window.location.href;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (typeof NotificationSystem !== 'undefined') {
+          NotificationSystem.show('Profile link copied to clipboard!', 'success');
+        }
+      });
+    }
 
     document.addEventListener('DOMContentLoaded', async () => {
       const params = new URLSearchParams(window.location.search);
@@ -602,6 +891,129 @@
           `;
         } catch (e) {
           console.error('Badges error:', e);
+        }
+
+        // ── Player Card ──
+        try {
+          const eloData = await db.getPlayerElo(playerName);
+          const elo = eloData ? eloData.elo : null;
+          const tier = elo
+            ? (elo >= 1400 ? { name: 'Diamond', icon: '💎', cls: 'tier-diamond' }
+              : elo >= 1200 ? { name: 'Platinum', icon: '⚡', cls: 'tier-platinum' }
+              : elo >= 1100 ? { name: 'Gold', icon: '🥇', cls: 'tier-gold' }
+              : elo >= 1000 ? { name: 'Silver', icon: '🥈', cls: 'tier-silver' }
+              : { name: 'Bronze', icon: '🥉', cls: 'tier-bronze' })
+            : null;
+
+          // Equipped flair items
+          let flairBorderClass = '';
+          let flairTitle = '';
+          try {
+            const { data: equipped } = await supabaseClient
+              .from('player_inventory')
+              .select('*, item:shop_items(*)')
+              .eq('discord_username', playerName)
+              .eq('equipped', true);
+            if (equipped) {
+              for (const inv of equipped) {
+                if (inv.item?.item_type === 'flair_border' && inv.item?.effect) {
+                  flairBorderClass = 'flair-' + inv.item.effect;
+                }
+                if (inv.item?.item_type === 'flair_title' && inv.item?.effect) {
+                  flairTitle = inv.item.effect;
+                }
+              }
+            }
+          } catch (_) {}
+
+          // Points
+          let pointsVal = null;
+          try {
+            const { data: points } = await supabaseClient
+              .from('player_points')
+              .select('*')
+              .eq('discord_username', playerName)
+              .single();
+            if (points) pointsVal = points.points;
+          } catch (_) {}
+
+          // Top 3 characters for the card
+          const cardChars = topChars.slice(0, 3);
+
+          // Earned badges (reuse the earned Set from above)
+          const badgeDefs = [
+            { id: 'champion',     icon: '🏆' },
+            { id: 'on_fire',      icon: '🔥' },
+            { id: 'veteran',      icon: '⚔️' },
+            { id: 'sharpshooter', icon: '🎯' },
+            { id: 'dynasty',      icon: '👑' },
+            { id: 'iron_wall',    icon: '🛡️' },
+            { id: 'first_blood',  icon: '🌟' },
+            { id: 'underdog',     icon: '💀' },
+          ];
+          const earnedBadgeIcons = badgeDefs.filter(b => earned.has(b.id)).map(b => b.icon);
+
+          const cardHtml = `
+            <div class="player-card-wrap">
+              <div class="player-card ${flairBorderClass}">
+                <div class="player-card-inner">
+                  <div class="card-top">
+                    <div class="card-player-name">${playerName}</div>
+                    ${flairTitle ? `<div class="card-flair-title">${flairTitle}</div>` : ''}
+                    ${tier ? `
+                      <div class="card-elo-value">${elo}</div>
+                      <span class="card-tier-badge ${tier.cls}">${tier.icon} ${tier.name}</span>
+                    ` : ''}
+                    ${pointsVal !== null ? `<div class="card-points-badge">💎 ${pointsVal.toLocaleString()} Points</div>` : ''}
+                  </div>
+
+                  ${cardChars.length ? `
+                    <div class="card-chars">
+                      ${cardChars.map(c => `
+                        <div style="text-align:center">
+                          <div class="card-char">
+                            <img src="${c.image}" alt="${c.name}" onerror="this.parentElement.style.display='none'" />
+                          </div>
+                          <div class="card-char-label">${c.name.split(' ').slice(0, 2).join(' ')}</div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  ` : ''}
+
+                  <div class="card-stats">
+                    <div class="card-stat">
+                      <div class="card-stat-val" style="color:var(--green)">${wins}</div>
+                      <div class="card-stat-lbl">Wins</div>
+                    </div>
+                    <div class="card-stat">
+                      <div class="card-stat-val" style="color:var(--red,#ff4757)">${losses}</div>
+                      <div class="card-stat-lbl">Losses</div>
+                    </div>
+                    <div class="card-stat">
+                      <div class="card-stat-val" style="color:var(--gold)">${winRate}%</div>
+                      <div class="card-stat-lbl">Win Rate</div>
+                    </div>
+                    <div class="card-stat">
+                      <div class="card-stat-val" style="color:var(--cyan)">${tournamentIds.length}</div>
+                      <div class="card-stat-lbl">Tourneys</div>
+                    </div>
+                  </div>
+
+                  ${earnedBadgeIcons.length ? `
+                    <div class="card-badges">
+                      ${earnedBadgeIcons.map(icon => `<div class="card-badge-mini" title="${icon}">${icon}</div>`).join('')}
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+              <button class="card-share-btn" onclick="copyProfileLink()">📋 Copy Profile Link</button>
+            </div>
+          `;
+
+          // Insert card at the very top of profile content
+          content.insertAdjacentHTML('afterbegin', cardHtml);
+        } catch (e) {
+          console.error('Player card error:', e);
         }
 
       } catch (e) {

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shop — DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/bracket.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    .shop-header {
+      text-align: center;
+      padding: 40px 0 20px;
+    }
+    .shop-header h1 {
+      font-size: clamp(24px, 4vw, 36px);
+      color: var(--cyan);
+      text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+      margin-bottom: 8px;
+    }
+    .balance-display {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--panel);
+      border: 1px solid var(--gold);
+      border-radius: var(--radius);
+      padding: 14px 28px;
+      margin: 16px 0 30px;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.15);
+    }
+    .balance-display .balance-label {
+      color: var(--muted);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .balance-display .balance-amount {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--gold);
+    }
+    .login-prompt {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .login-prompt input {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      width: 260px;
+      max-width: 100%;
+      margin-right: 8px;
+    }
+    .section-title {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--pink);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 30px 0 14px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 8px;
+    }
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .shop-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .shop-card:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 0 14px rgba(0, 229, 255, 0.15);
+    }
+    .shop-card .item-name {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .shop-card .item-desc {
+      font-size: 13px;
+      color: var(--muted);
+      flex: 1;
+      margin-bottom: 12px;
+    }
+    .shop-card .item-cost {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    .shop-card .btn-buy {
+      background: var(--cyan);
+      color: var(--bg);
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .shop-card .btn-buy:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+    .shop-card .btn-buy:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 24px;
+    }
+    .tab-bar button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .tab-bar button.active {
+      color: var(--cyan);
+      border-bottom-color: var(--cyan);
+    }
+    .tab-bar button:hover {
+      color: var(--text);
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .inventory-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 8px;
+    }
+    .inventory-item .inv-info {
+      flex: 1;
+    }
+    .inventory-item .inv-name {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .inventory-item .inv-type {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .equip-btn {
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .equip-btn.equipped {
+      border-color: var(--green);
+      color: var(--green);
+    }
+    .equip-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    .tx-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+    .tx-row:last-child { border-bottom: none; }
+    .tx-reason { color: var(--text); text-transform: capitalize; }
+    .tx-date { color: var(--muted); font-size: 12px; }
+    .tx-amount { font-family: 'Exo 2', sans-serif; font-weight: 700; }
+    .tx-amount.positive { color: var(--green); }
+    .tx-amount.negative { color: var(--pink); }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 40px 20px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">&#9776;</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+        <li><a href="compare.html">Compare</a></li>
+        <li><a href="shop.html" class="active">Shop</a></li>
+        <li><a href="tierlist.html">Tier List</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="particles-bg" id="particles"></div>
+
+  <main class="page page-enter">
+    <div class="container">
+      <!-- Login -->
+      <div id="login-section" class="login-prompt">
+        <h2 style="color:var(--cyan);margin-bottom:16px;">Enter the Shop</h2>
+        <p style="color:var(--muted);margin-bottom:20px;font-size:14px;">Log in with your Discord username to view your balance and buy items.</p>
+        <div style="display:inline-flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+          <input type="text" id="username-input" placeholder="Discord Username" />
+          <button class="btn btn-primary" onclick="loginShop()">Enter</button>
+        </div>
+      </div>
+
+      <!-- Shop Content (hidden until login) -->
+      <div id="shop-content" style="display:none;">
+        <div class="shop-header">
+          <h1>Point Shop</h1>
+          <div class="balance-display">
+            <span class="balance-label">Balance</span>
+            <span class="balance-amount" id="balance-value">0</span>
+          </div>
+        </div>
+
+        <div class="tab-bar">
+          <button class="active" onclick="switchTab('shop')">Shop</button>
+          <button onclick="switchTab('inventory')">My Inventory</button>
+          <button onclick="switchTab('history')">Transactions</button>
+        </div>
+
+        <!-- Tab: Shop -->
+        <div id="tab-shop" class="tab-content active">
+          <div id="shop-items-container">
+            <div class="loader"><div class="loader-spinner"></div></div>
+          </div>
+        </div>
+
+        <!-- Tab: Inventory -->
+        <div id="tab-inventory" class="tab-content">
+          <div id="inventory-container">
+            <div class="empty-state">No items yet. Buy something from the shop!</div>
+          </div>
+        </div>
+
+        <!-- Tab: Transactions -->
+        <div id="tab-history" class="tab-content">
+          <div id="tx-container" class="card" style="padding:0;overflow:hidden;">
+            <div class="empty-state">No transactions yet.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/particles.js"></script>
+  <script>
+    let shopUsername = sessionStorage.getItem('shop_username') || '';
+    let currentBalance = 0;
+
+    const TYPE_LABELS = {
+      flair_border: 'Flair Borders',
+      flair_title: 'Flair Titles',
+      alt_art: 'Alt Art',
+      profile_bg: 'Profile Backgrounds',
+      ban_immunity: 'Ban Immunity',
+      double_down: 'Double Down'
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (shopUsername) {
+        document.getElementById('username-input').value = shopUsername;
+        loginShop();
+      }
+    });
+
+    function loginShop() {
+      const input = document.getElementById('username-input');
+      const name = input.value.trim();
+      if (!name) {
+        NotificationSystem.show('Enter your Discord username', 'error');
+        return;
+      }
+      shopUsername = name;
+      sessionStorage.setItem('shop_username', shopUsername);
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('shop-content').style.display = 'block';
+      loadShop();
+    }
+
+    async function loadShop() {
+      await refreshBalance();
+      await loadShopItems();
+    }
+
+    async function refreshBalance() {
+      try {
+        const pts = await db.getPoints(shopUsername);
+        currentBalance = pts.balance || 0;
+        document.getElementById('balance-value').textContent = currentBalance.toLocaleString();
+      } catch (e) {
+        console.error('Failed to load balance', e);
+      }
+    }
+
+    async function loadShopItems() {
+      const container = document.getElementById('shop-items-container');
+      try {
+        const items = await db.getShopItems();
+        if (!items.length) {
+          container.innerHTML = '<div class="empty-state">No items available in the shop right now.</div>';
+          return;
+        }
+
+        // Group by type
+        const grouped = {};
+        items.forEach(item => {
+          const type = item.type || 'other';
+          if (!grouped[type]) grouped[type] = [];
+          grouped[type].push(item);
+        });
+
+        let html = '';
+        const typeOrder = ['flair_border', 'flair_title', 'alt_art', 'profile_bg', 'ban_immunity', 'double_down'];
+        const allTypes = [...new Set([...typeOrder.filter(t => grouped[t]), ...Object.keys(grouped).filter(t => !typeOrder.includes(t))])];
+
+        allTypes.forEach(type => {
+          const label = TYPE_LABELS[type] || type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+          html += `<div class="section-title">${label}</div>`;
+          html += '<div class="shop-grid">';
+          grouped[type].forEach(item => {
+            const canBuy = currentBalance >= item.cost;
+            html += `
+              <div class="shop-card">
+                <div class="item-name">${escapeHtml(item.name)}</div>
+                <div class="item-desc">${escapeHtml(item.description || '')}</div>
+                <div class="item-cost">${item.cost.toLocaleString()} pts</div>
+                <button class="btn-buy" ${canBuy ? '' : 'disabled'} onclick="buyItem('${item.id}', ${item.cost}, '${escapeHtml(item.name)}')">
+                  ${canBuy ? 'Buy' : 'Not Enough Points'}
+                </button>
+              </div>`;
+          });
+          html += '</div>';
+        });
+
+        container.innerHTML = html;
+      } catch (e) {
+        container.innerHTML = '<div class="empty-state">Failed to load shop items.</div>';
+        console.error(e);
+      }
+    }
+
+    async function buyItem(itemId, cost, name) {
+      try {
+        await db.purchaseItem(shopUsername, itemId, cost);
+        NotificationSystem.show(`Purchased ${name}!`, 'success');
+        await refreshBalance();
+        await loadShopItems();
+        if (document.getElementById('tab-inventory').classList.contains('active')) {
+          await loadInventory();
+        }
+      } catch (e) {
+        NotificationSystem.show(e.message || 'Purchase failed', 'error');
+      }
+    }
+
+    async function loadInventory() {
+      const container = document.getElementById('inventory-container');
+      try {
+        const items = await db.getInventory(shopUsername);
+        if (!items.length) {
+          container.innerHTML = '<div class="empty-state">No items yet. Buy something from the shop!</div>';
+          return;
+        }
+        let html = '';
+        items.forEach(inv => {
+          const item = inv.item || {};
+          const typeLabel = TYPE_LABELS[item.type] || item.type || '';
+          html += `
+            <div class="inventory-item">
+              <div class="inv-info">
+                <div class="inv-name">${escapeHtml(item.name || 'Unknown')}</div>
+                <div class="inv-type">${escapeHtml(typeLabel)}</div>
+              </div>
+              <button class="equip-btn ${inv.equipped ? 'equipped' : ''}"
+                onclick="toggleEquip('${inv.id}', ${inv.equipped})">
+                ${inv.equipped ? 'Equipped' : 'Equip'}
+              </button>
+            </div>`;
+        });
+        container.innerHTML = html;
+      } catch (e) {
+        container.innerHTML = '<div class="empty-state">Failed to load inventory.</div>';
+        console.error(e);
+      }
+    }
+
+    async function toggleEquip(inventoryId, isEquipped) {
+      try {
+        if (isEquipped) {
+          await db.unequipItem(shopUsername, inventoryId);
+        } else {
+          await db.equipItem(shopUsername, inventoryId);
+        }
+        await loadInventory();
+      } catch (e) {
+        NotificationSystem.show('Failed to update item', 'error');
+      }
+    }
+
+    async function loadTransactions() {
+      const container = document.getElementById('tx-container');
+      try {
+        const txs = await db.getPointTransactions(shopUsername);
+        if (!txs.length) {
+          container.innerHTML = '<div class="empty-state">No transactions yet.</div>';
+          return;
+        }
+        let html = '';
+        txs.forEach(tx => {
+          const isPositive = tx.amount >= 0;
+          const date = new Date(tx.created_at).toLocaleDateString('en-GB', {
+            day: 'numeric', month: 'short', year: 'numeric'
+          });
+          html += `
+            <div class="tx-row">
+              <div>
+                <div class="tx-reason">${escapeHtml(tx.reason || 'Unknown')}</div>
+                <div class="tx-date">${date}</div>
+              </div>
+              <div class="tx-amount ${isPositive ? 'positive' : 'negative'}">
+                ${isPositive ? '+' : ''}${tx.amount.toLocaleString()} pts
+              </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+      } catch (e) {
+        container.innerHTML = '<div class="empty-state">Failed to load transactions.</div>';
+        console.error(e);
+      }
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-bar button').forEach((btn, i) => {
+        btn.classList.toggle('active', ['shop', 'inventory', 'history'][i] === tab);
+      });
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+
+      if (tab === 'inventory') loadInventory();
+      if (tab === 'history') loadTransactions();
+      if (tab === 'shop') loadShopItems();
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

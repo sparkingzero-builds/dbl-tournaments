@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tier List — DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/bracket.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    .tier-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .tier-tab {
+      padding: 10px 28px;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tier-tab.active {
+      color: var(--cyan);
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+    }
+
+    /* Tier rows */
+    .tier-board {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 32px;
+    }
+
+    .tier-row {
+      display: flex;
+      align-items: stretch;
+      min-height: 80px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .tier-row.drag-over {
+      border-color: var(--cyan);
+      box-shadow: 0 0 16px rgba(0, 229, 255, 0.15);
+    }
+
+    .tier-label {
+      width: 60px;
+      min-width: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      color: #000;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .tier-chars {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 8px;
+      background: var(--panel);
+      min-height: 70px;
+      align-items: flex-start;
+      align-content: flex-start;
+    }
+
+    .tier-char {
+      width: 60px;
+      height: 60px;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      border: 2px solid transparent;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+
+    .tier-char:hover {
+      transform: scale(1.1);
+      z-index: 2;
+    }
+
+    .tier-char img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .tier-char .char-name-tip {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      font-size: 8px;
+      text-align: center;
+      padding: 2px;
+      line-height: 1.1;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .tier-char:hover .char-name-tip {
+      opacity: 1;
+    }
+
+    /* Unranked pool */
+    .unranked-section h3 {
+      color: var(--muted);
+      margin-bottom: 12px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .unranked-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 12px;
+      background: var(--panel);
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      min-height: 80px;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filter-row input,
+    .filter-row select {
+      padding: 8px 12px;
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .submit-row {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    /* Results */
+    .results-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .result-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 14px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+    }
+
+    .result-card__art {
+      width: 50px;
+      height: 50px;
+      border-radius: 6px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .result-card__art img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .result-card__info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .result-card__name {
+      font-weight: 700;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .result-card__bars {
+      display: flex;
+      gap: 3px;
+      margin-top: 6px;
+      height: 16px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .result-bar {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      color: #000;
+      min-width: 0;
+      transition: width 0.4s ease;
+    }
+
+    .result-card__tier-badge {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      width: 40px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .result-card__votes {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    .results-sort {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .sort-btn {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sort-btn.active {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    @media (max-width: 600px) {
+      .tier-label { width: 40px; min-width: 40px; font-size: 18px; }
+      .tier-char { width: 48px; height: 48px; }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+        <li><a href="compare.html">Compare</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="tierlist.html" class="active">Tier List</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="particles-bg" id="particles"></div>
+
+  <main class="page container page-enter">
+    <div style="text-align:center;padding:30px 0 20px;">
+      <h1 style="font-size:clamp(24px,4vw,36px);color:var(--cyan);text-shadow:0 0 20px rgba(0,229,255,0.3);margin-bottom:4px;">Community Tier List</h1>
+      <p class="text-muted" style="font-size:14px;">Rate every character. See what the community thinks.</p>
+    </div>
+
+    <div class="tier-tabs">
+      <button class="tier-tab active" data-tab="vote" onclick="switchTab('vote')">Vote</button>
+      <button class="tier-tab" data-tab="results" onclick="switchTab('results')">Results</button>
+    </div>
+
+    <div id="vote-view">
+      <div class="tier-board" id="tier-board"></div>
+      <div class="submit-row">
+        <button class="btn btn-primary btn-charge" id="submit-votes-btn" onclick="submitVotes()">Submit Votes</button>
+        <button class="btn btn-secondary" onclick="clearAllPlacements()" style="margin-left:8px;">Clear All</button>
+      </div>
+      <div class="unranked-section" style="margin-top:24px;">
+        <h3>Unranked Characters</h3>
+        <div class="filter-row">
+          <input type="text" id="search-input" placeholder="Search..." oninput="renderUnranked()" />
+          <select id="element-filter" onchange="renderUnranked()">
+            <option value="">All Elements</option>
+            <option value="RED">RED</option>
+            <option value="YEL">YEL</option>
+            <option value="PUR">PUR</option>
+            <option value="GRN">GRN</option>
+            <option value="BLU">BLU</option>
+            <option value="LGT">LGT</option>
+            <option value="DRK">DRK</option>
+          </select>
+        </div>
+        <div class="unranked-grid" id="unranked-grid"></div>
+      </div>
+    </div>
+
+    <div id="results-view" style="display:none;">
+      <div class="results-sort">
+        <button class="sort-btn active" data-sort="tier" onclick="sortResults('tier')">By Tier</button>
+        <button class="sort-btn" data-sort="name" onclick="sortResults('name')">By Name</button>
+        <button class="sort-btn" data-sort="votes" onclick="sortResults('votes')">By Votes</button>
+      </div>
+      <div class="results-list" id="results-list">
+        <div class="loader"><div class="loader-spinner"></div></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/characters.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/particles.js"></script>
+  <script>
+    initParticles(document.getElementById('particles'));
+
+    const TIERS = [
+      { key: 'S', color: '#ff4d6a' },
+      { key: 'A', color: '#ff8c42' },
+      { key: 'B', color: '#ffd740' },
+      { key: 'C', color: '#4caf50' },
+      { key: 'D', color: '#00e5ff' }
+    ];
+
+    let allChars = [];
+    // placements: { [charId]: 'S' | 'A' | ... }
+    let placements = {};
+    let sessionId = sessionStorage.getItem('tier_session_id');
+    if (!sessionId) {
+      sessionId = crypto.randomUUID();
+      sessionStorage.setItem('tier_session_id', sessionId);
+    }
+
+    async function init() {
+      await CharacterManager.load();
+      allChars = CharacterManager.getAll();
+      buildTierBoard();
+      renderAllTiers();
+      renderUnranked();
+    }
+
+    function buildTierBoard() {
+      const board = document.getElementById('tier-board');
+      board.innerHTML = TIERS.map(t => `
+        <div class="tier-row" data-tier="${t.key}"
+             ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, '${t.key}')">
+          <div class="tier-label" style="background:${t.color}">${t.key}</div>
+          <div class="tier-chars" id="tier-chars-${t.key}"></div>
+        </div>
+      `).join('');
+    }
+
+    function renderAllTiers() {
+      TIERS.forEach(t => {
+        const container = document.getElementById('tier-chars-' + t.key);
+        const chars = allChars.filter(c => placements[c.id] === t.key);
+        container.innerHTML = chars.map(c => charThumb(c)).join('');
+      });
+    }
+
+    function renderUnranked() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const element = document.getElementById('element-filter').value;
+      const grid = document.getElementById('unranked-grid');
+
+      const unranked = allChars.filter(c => {
+        if (placements[c.id]) return false;
+        if (search && !c.name.toLowerCase().includes(search)) return false;
+        if (element && c.element !== element) return false;
+        return true;
+      });
+
+      grid.innerHTML = unranked.length
+        ? unranked.map(c => charThumb(c)).join('')
+        : '<p style="color:var(--muted);padding:12px;font-size:13px;">All characters placed or none match filter.</p>';
+    }
+
+    function charThumb(c) {
+      return `<div class="tier-char" draggable="true" data-id="${c.id}"
+                   ondragstart="onDragStart(event, ${c.id})"
+                   onclick="cycleChar(${c.id})"
+                   title="${c.name}">
+        <img src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
+        <div class="char-name-tip">${c.name.length > 18 ? c.name.slice(0, 16) + '..' : c.name}</div>
+      </div>`;
+    }
+
+    // Click to cycle: unranked -> S -> A -> B -> C -> D -> unranked
+    function cycleChar(id) {
+      const current = placements[id];
+      const tierKeys = TIERS.map(t => t.key);
+      if (!current) {
+        placements[id] = 'S';
+      } else {
+        const idx = tierKeys.indexOf(current);
+        if (idx < tierKeys.length - 1) {
+          placements[id] = tierKeys[idx + 1];
+        } else {
+          delete placements[id];
+        }
+      }
+      renderAllTiers();
+      renderUnranked();
+    }
+
+    // Drag and drop
+    let dragCharId = null;
+
+    function onDragStart(e, id) {
+      dragCharId = id;
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function onDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.closest('.tier-row').classList.add('drag-over');
+    }
+
+    function onDragLeave(e) {
+      e.currentTarget.closest('.tier-row').classList.remove('drag-over');
+    }
+
+    function onDrop(e, tier) {
+      e.preventDefault();
+      e.currentTarget.closest('.tier-row').classList.remove('drag-over');
+      if (dragCharId !== null) {
+        placements[dragCharId] = tier;
+        dragCharId = null;
+        renderAllTiers();
+        renderUnranked();
+      }
+    }
+
+    function clearAllPlacements() {
+      placements = {};
+      renderAllTiers();
+      renderUnranked();
+      NotificationSystem.show('All placements cleared.', 'info');
+    }
+
+    async function submitVotes() {
+      const entries = Object.entries(placements);
+      if (entries.length === 0) {
+        NotificationSystem.show('Place at least one character in a tier first.', 'warning');
+        return;
+      }
+
+      const btn = document.getElementById('submit-votes-btn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      try {
+        const rows = entries.map(([charId, tier]) => ({
+          character_id: String(charId),
+          tier,
+          voter_session: sessionId
+        }));
+
+        const { error } = await supabaseClient.from('character_tier_votes').upsert(rows, {
+          onConflict: 'character_id,voter_session'
+        });
+
+        if (error) throw error;
+        NotificationSystem.show(`Submitted ${entries.length} votes!`, 'success');
+      } catch (e) {
+        console.error(e);
+        NotificationSystem.show('Error submitting votes. Try again.', 'error');
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Submit Votes';
+    }
+
+    // Tabs
+    function switchTab(tab) {
+      document.querySelectorAll('.tier-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+      document.getElementById('vote-view').style.display = tab === 'vote' ? '' : 'none';
+      document.getElementById('results-view').style.display = tab === 'results' ? '' : 'none';
+      if (tab === 'results') loadResults();
+    }
+
+    // Results
+    let resultsData = [];
+    let currentSort = 'tier';
+
+    async function loadResults() {
+      const list = document.getElementById('results-list');
+      list.innerHTML = '<div class="loader"><div class="loader-spinner"></div></div>';
+
+      try {
+        const { data, error } = await supabaseClient.from('character_tier_votes').select('*');
+        if (error) throw error;
+
+        // Aggregate per character
+        const agg = {};
+        (data || []).forEach(v => {
+          if (!agg[v.character_id]) agg[v.character_id] = { S: 0, A: 0, B: 0, C: 0, D: 0, total: 0 };
+          if (agg[v.character_id][v.tier] !== undefined) {
+            agg[v.character_id][v.tier]++;
+            agg[v.character_id].total++;
+          }
+        });
+
+        const tierValue = { S: 5, A: 4, B: 3, C: 2, D: 1 };
+
+        resultsData = allChars.map(c => {
+          const id = String(c.id);
+          const votes = agg[id] || { S: 0, A: 0, B: 0, C: 0, D: 0, total: 0 };
+          // Weighted average tier
+          let avgScore = 0;
+          if (votes.total > 0) {
+            avgScore = (votes.S * 5 + votes.A * 4 + votes.B * 3 + votes.C * 2 + votes.D * 1) / votes.total;
+          }
+          let avgTier = 'D';
+          if (avgScore >= 4.5) avgTier = 'S';
+          else if (avgScore >= 3.5) avgTier = 'A';
+          else if (avgScore >= 2.5) avgTier = 'B';
+          else if (avgScore >= 1.5) avgTier = 'C';
+
+          return { char: c, votes, avgTier, avgScore };
+        }).filter(r => r.votes.total > 0);
+
+        sortResults(currentSort, true);
+      } catch (e) {
+        console.error(e);
+        list.innerHTML = '<p class="text-muted" style="text-align:center;padding:40px;">Failed to load results.</p>';
+      }
+    }
+
+    function sortResults(by, skipRender) {
+      currentSort = by;
+      document.querySelectorAll('.sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === by));
+
+      const tierOrder = { S: 0, A: 1, B: 2, C: 3, D: 4 };
+      if (by === 'tier') resultsData.sort((a, b) => (tierOrder[a.avgTier] - tierOrder[b.avgTier]) || (b.avgScore - a.avgScore));
+      else if (by === 'name') resultsData.sort((a, b) => a.char.name.localeCompare(b.char.name));
+      else if (by === 'votes') resultsData.sort((a, b) => b.votes.total - a.votes.total);
+
+      renderResults();
+    }
+
+    function renderResults() {
+      const list = document.getElementById('results-list');
+      if (!resultsData.length) {
+        list.innerHTML = '<p class="text-muted" style="text-align:center;padding:40px;">No votes yet. Be the first to vote!</p>';
+        return;
+      }
+
+      const tierColors = { S: '#ff4d6a', A: '#ff8c42', B: '#ffd740', C: '#4caf50', D: '#00e5ff' };
+
+      list.innerHTML = resultsData.map(r => {
+        const bars = TIERS.map(t => {
+          const pct = r.votes.total ? (r.votes[t.key] / r.votes.total * 100) : 0;
+          return pct > 0 ? `<div class="result-bar" style="width:${pct}%;background:${t.color}">${pct >= 10 ? t.key : ''}</div>` : '';
+        }).join('');
+
+        return `
+          <div class="result-card">
+            <div class="result-card__art"><img src="${r.char.image}" alt="${r.char.name}" onerror="this.style.display='none'" /></div>
+            <div class="result-card__info">
+              <div class="result-card__name">${r.char.name}</div>
+              <div class="result-card__bars">${bars}</div>
+            </div>
+            <div>
+              <div class="result-card__tier-badge" style="color:${tierColors[r.avgTier]}">${r.avgTier}</div>
+              <div class="result-card__votes">${r.votes.total} vote${r.votes.total !== 1 ? 's' : ''}</div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

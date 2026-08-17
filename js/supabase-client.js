@@ -420,6 +420,196 @@ const db = {
     return (data || []).filter(p => p.match?.tournament_id === tournamentId);
   },
 
+  // Points
+  async getPoints(username) {
+    const { data, error } = await supabaseClient
+      .from('player_points')
+      .select('*')
+      .eq('discord_username', username)
+      .single();
+    if (error && error.code === 'PGRST116') return { balance: 0, lifetime_earned: 0 };
+    if (error) throw error;
+    return data;
+  },
+
+  async awardPoints(username, amount, reason, referenceId) {
+    const existing = await this.getPoints(username);
+    const hasRecord = existing.id !== undefined;
+
+    if (hasRecord) {
+      const updates = {
+        balance: existing.balance + amount,
+        lifetime_earned: amount > 0 ? existing.lifetime_earned + amount : existing.lifetime_earned,
+        updated_at: new Date().toISOString()
+      };
+      const { error } = await supabaseClient
+        .from('player_points')
+        .update(updates)
+        .eq('discord_username', username);
+      if (error) throw error;
+    } else {
+      const { error } = await supabaseClient
+        .from('player_points')
+        .insert({
+          discord_username: username,
+          balance: amount,
+          lifetime_earned: Math.max(amount, 0)
+        });
+      if (error) throw error;
+    }
+
+    const transaction = {
+      discord_username: username,
+      amount,
+      reason: reason || 'manual',
+      reference_id: referenceId || null
+    };
+    const { error: txError } = await supabaseClient
+      .from('point_transactions')
+      .insert(transaction);
+    if (txError) throw txError;
+  },
+
+  async getPointTransactions(username) {
+    const { data, error } = await supabaseClient
+      .from('point_transactions')
+      .select('*')
+      .eq('discord_username', username)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    return data || [];
+  },
+
+  async getPointsLeaderboard() {
+    const { data, error } = await supabaseClient
+      .from('player_points')
+      .select('*')
+      .order('lifetime_earned', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  // Shop
+  async getShopItems() {
+    const { data, error } = await supabaseClient
+      .from('shop_items')
+      .select('*')
+      .eq('active', true)
+      .order('cost', { ascending: true });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async createShopItem(item) {
+    const { data, error } = await supabaseClient
+      .from('shop_items')
+      .insert(item)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async updateShopItem(id, updates) {
+    const { data, error } = await supabaseClient
+      .from('shop_items')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteShopItem(id) {
+    const { error } = await supabaseClient
+      .from('shop_items')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  async getInventory(username) {
+    const { data, error } = await supabaseClient
+      .from('player_inventory')
+      .select('*, item:shop_items(*)')
+      .eq('discord_username', username);
+    if (error) throw error;
+    return data || [];
+  },
+
+  async purchaseItem(username, itemId, cost) {
+    const points = await this.getPoints(username);
+    if (points.balance < cost) {
+      throw new Error('Insufficient funds');
+    }
+
+    const { error: deductError } = await supabaseClient
+      .from('player_points')
+      .update({
+        balance: points.balance - cost,
+        updated_at: new Date().toISOString()
+      })
+      .eq('discord_username', username);
+    if (deductError) throw deductError;
+
+    const { error: txError } = await supabaseClient
+      .from('point_transactions')
+      .insert({
+        discord_username: username,
+        amount: -cost,
+        reason: 'purchase',
+        reference_id: String(itemId)
+      });
+    if (txError) throw txError;
+
+    const { data, error: invError } = await supabaseClient
+      .from('player_inventory')
+      .insert({
+        discord_username: username,
+        item_id: itemId
+      })
+      .select()
+      .single();
+    if (invError) throw invError;
+    return data;
+  },
+
+  async equipItem(username, inventoryId) {
+    const { data, error } = await supabaseClient
+      .from('player_inventory')
+      .update({ equipped: true })
+      .eq('id', inventoryId)
+      .eq('discord_username', username)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async unequipItem(username, inventoryId) {
+    const { data, error } = await supabaseClient
+      .from('player_inventory')
+      .update({ equipped: false })
+      .eq('id', inventoryId)
+      .eq('discord_username', username)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async getEquippedItems(username) {
+    const { data, error } = await supabaseClient
+      .from('player_inventory')
+      .select('*, item:shop_items(*)')
+      .eq('discord_username', username)
+      .eq('equipped', true);
+    if (error) throw error;
+    return data || [];
+  },
+
   async getPlayerMatches(discordUsername) {
     // First get all signup IDs for this player
     const signups = await this.getPlayerStats(discordUsername);
