@@ -594,6 +594,21 @@
       background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(200,200,220,0.04) 40%, rgba(20,20,40,0.95) 100%);
     }
 
+    .card-accolades {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-top: 6px;
+    }
+    .card-accolade {
+      font-size: 18px;
+      cursor: help;
+      transition: transform 0.15s;
+    }
+    .card-accolade:hover {
+      transform: scale(1.3);
+    }
+
     @media (max-width: 700px) {
       .profile-stats { grid-template-columns: repeat(2, 1fr); }
       .profile-sections { grid-template-columns: 1fr; }
@@ -1082,6 +1097,40 @@
           // Insert card at the very top of profile content
           content.insertAdjacentHTML('afterbegin', cardHtml);
           playSound('powerup');
+
+          // Check if this player has any accolades
+          try {
+            const accolades = [];
+            // Champion check
+            const { data: ct } = await supabaseClient.from('tournaments')
+              .select('id').eq('status', 'completed').order('created_at', { ascending: false }).limit(1);
+            if (ct?.length) {
+              const { data: fm } = await supabaseClient.from('matches')
+                .select('winner_id, player1_id, player2_id, player1:tournament_signups!matches_player1_id_fkey(discord_username), player2:tournament_signups!matches_player2_id_fkey(discord_username)')
+                .eq('tournament_id', ct[0].id).not('winner_id', 'is', null)
+                .order('round', { ascending: false }).limit(1);
+              if (fm?.length) {
+                const w = fm[0];
+                const champName = w.winner_id === w.player1_id ? w.player1?.discord_username : w.player2?.discord_username;
+                if (champName === playerName) accolades.push({ icon: '🏆', label: 'Current Champion' });
+              }
+            }
+            // Best streak
+            const { data: pts } = await supabaseClient.from('player_points')
+              .select('best_streak, current_streak').eq('discord_username', playerName).single();
+            if (pts?.best_streak >= 3) accolades.push({ icon: '🔥', label: `Best Streak: ${pts.best_streak}` });
+            if (pts?.current_streak >= 2) accolades.push({ icon: '⚡', label: `On ${pts.current_streak} Win Streak` });
+
+            if (accolades.length > 0) {
+              const wrap = document.querySelector('.player-card-inner .card-top');
+              if (wrap) {
+                const div = document.createElement('div');
+                div.className = 'card-accolades';
+                div.innerHTML = accolades.map(a => `<span class="card-accolade" title="${a.label}">${a.icon}</span>`).join('');
+                wrap.appendChild(div);
+              }
+            }
+          } catch (_) {}
         } catch (e) {
           console.error('Player card error:', e);
         }

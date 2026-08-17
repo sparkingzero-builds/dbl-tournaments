@@ -262,6 +262,23 @@
       color: var(--muted);
       margin-bottom: 10px;
     }
+    .exclusive-tag {
+      font-size: 8px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #000;
+      background: linear-gradient(135deg, #ffd700, #ff6b00);
+      padding: 2px 8px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-bottom: 4px;
+      animation: exclusive-shimmer 2s ease-in-out infinite;
+    }
+    @keyframes exclusive-shimmer {
+      0%, 100% { box-shadow: 0 0 4px rgba(255, 215, 0, 0.4); }
+      50% { box-shadow: 0 0 12px rgba(255, 215, 0, 0.8); }
+    }
   </style>
 </head>
 <body class="scanlines">
@@ -500,6 +517,7 @@
             <div class="reward-tier">Tier ${t}</div>
             <div class="reward-icon">${icon}</div>
             <div class="reward-name">${name}</div>
+            ${reward?.metadata?.exclusive ? '<div class="exclusive-tag">SEASON 1 EXCLUSIVE</div>' : ''}
             ${tooltip ? `<div class="reward-detail">${tooltip}</div>` : ''}
             <span class="reward-track-label ${trackType}">${trackType}</span>
             ${btnHtml}

@@ -236,6 +236,23 @@
       padding: 40px 20px;
       font-size: 14px;
     }
+    .exclusive-tag {
+      font-size: 8px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #000;
+      background: linear-gradient(135deg, #ffd700, #ff6b00);
+      padding: 2px 8px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-bottom: 4px;
+      animation: exclusive-shimmer 2s ease-in-out infinite;
+    }
+    @keyframes exclusive-shimmer {
+      0%, 100% { box-shadow: 0 0 4px rgba(255, 215, 0, 0.4); }
+      50% { box-shadow: 0 0 12px rgba(255, 215, 0, 0.8); }
+    }
   </style>
 </head>
 <body class="scanlines">
@@ -470,6 +487,7 @@
             html += `
               <div class="shop-card">
                 <div class="item-preview">${getItemPreview(item)}</div>
+                ${item.metadata?.exclusive ? '<div class="exclusive-tag">SEASON 1 EXCLUSIVE</div>' : ''}
                 <div class="item-name">${escapeHtml(item.name)}</div>
                 <div class="item-desc">${escapeHtml(item.description || '')}</div>
                 <div class="item-cost">${item.cost.toLocaleString()} pts</div>

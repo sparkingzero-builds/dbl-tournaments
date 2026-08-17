@@ -1282,6 +1282,37 @@
               if (_s1) await db.addSeasonXP(_s1.id, winnerName, 100);
               await db.awardPoints(loserName, 25, 'participation', matchId);
               if (_s1) await db.addSeasonXP(_s1.id, loserName, 25);
+
+              // Update win streaks
+              try {
+                const { data: winnerPts } = await supabaseClient
+                  .from('player_points')
+                  .select('current_streak, best_streak')
+                  .eq('discord_username', winnerName)
+                  .single();
+                if (winnerPts) {
+                  const newStreak = (winnerPts.current_streak || 0) + 1;
+                  const newBest = Math.max(newStreak, winnerPts.best_streak || 0);
+                  await supabaseClient.from('player_points')
+                    .update({ current_streak: newStreak, best_streak: newBest })
+                    .eq('discord_username', winnerName);
+
+                  // Streak bonus: 2x at 3 wins, 3x at 5 wins
+                  let bonus = 0;
+                  if (newStreak === 3) bonus = 100;
+                  if (newStreak === 5) bonus = 200;
+                  if (newStreak >= 7) bonus = 300;
+                  if (bonus > 0) {
+                    await db.awardPoints(winnerName, bonus, 'streak_bonus_' + newStreak, matchId + '_streak');
+                  }
+                }
+                // Reset loser streak
+                await supabaseClient.from('player_points')
+                  .update({ current_streak: 0 })
+                  .eq('discord_username', loserName);
+              } catch (streakErr) {
+                console.error('Streak update error:', streakErr);
+              }
             }
           }
         } catch (ptErr) {

@@ -166,6 +166,59 @@
       text-align: center;
     }
 
+    .accolades-section {
+      margin-bottom: 30px;
+    }
+    .accolades-section h2 {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 18px;
+      color: var(--cyan);
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .accolades-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .accolade-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .accolade-card:hover {
+      border-color: var(--gold);
+    }
+    .accolade-icon {
+      font-size: 32px;
+      margin-bottom: 6px;
+    }
+    .accolade-title {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .accolade-player {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text);
+    }
+    .accolade-player a {
+      color: var(--text);
+      text-decoration: none;
+    }
+    .accolade-player a:hover {
+      color: var(--cyan);
+    }
+
     @media (max-width: 600px) {
       .lb-row, .lb-header {
         grid-template-columns: 36px 1fr 70px 70px;
@@ -209,6 +262,8 @@
       <h1 class="rankings-title">ELO Rankings</h1>
       <p class="rankings-subtitle">Competitive leaderboard based on match performance</p>
     </div>
+
+    <div id="accolades-container"></div>
 
     <div class="search-bar">
       <span class="search-icon">&#128269;</span>
@@ -289,10 +344,102 @@
       renderLeaderboard(filtered);
     });
 
+    async function loadAccolades() {
+      try {
+        let champion = null, mostFeared = null, fanFavorite = null, veteran = null;
+
+        // Current Champion
+        const { data: completedTourneys } = await supabaseClient
+          .from('tournaments')
+          .select('id, name')
+          .eq('status', 'completed')
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (completedTourneys?.length) {
+          const { data: finalMatch } = await supabaseClient
+            .from('matches')
+            .select('winner_id, player1:tournament_signups!matches_player1_id_fkey(discord_username), player2:tournament_signups!matches_player2_id_fkey(discord_username)')
+            .eq('tournament_id', completedTourneys[0].id)
+            .not('winner_id', 'is', null)
+            .order('round', { ascending: false })
+            .limit(1);
+          if (finalMatch?.length) {
+            champion = finalMatch[0].winner_id === finalMatch[0].player1?.id
+              ? finalMatch[0].player1?.discord_username
+              : finalMatch[0].player2?.discord_username;
+          }
+        }
+
+        // Most Feared
+        const { data: fearData } = await supabaseClient
+          .from('power_rankings_votes')
+          .select('voted_for');
+        const fearCounts = {};
+        (fearData || []).forEach(v => { fearCounts[v.voted_for] = (fearCounts[v.voted_for] || 0) + 1; });
+        mostFeared = Object.entries(fearCounts).sort((a,b) => b[1] - a[1])[0]?.[0] || null;
+
+        // Fan Favorite
+        const { data: hypeData } = await supabaseClient
+          .from('match_hype')
+          .select('match_id, hype_count');
+        const { data: allMatches } = await supabaseClient
+          .from('matches')
+          .select('id, player1:tournament_signups!matches_player1_id_fkey(discord_username), player2:tournament_signups!matches_player2_id_fkey(discord_username)');
+        const playerHype = {};
+        (hypeData || []).forEach(h => {
+          const m = (allMatches || []).find(mm => mm.id === h.match_id);
+          if (m) {
+            const p1 = m.player1?.discord_username;
+            const p2 = m.player2?.discord_username;
+            if (p1) playerHype[p1] = (playerHype[p1] || 0) + h.hype_count;
+            if (p2) playerHype[p2] = (playerHype[p2] || 0) + h.hype_count;
+          }
+        });
+        fanFavorite = Object.entries(playerHype).sort((a,b) => b[1] - a[1])[0]?.[0] || null;
+
+        // Veteran
+        const { data: allSignups } = await supabaseClient
+          .from('tournament_signups')
+          .select('discord_username');
+        const signupCounts = {};
+        (allSignups || []).forEach(s => { signupCounts[s.discord_username] = (signupCounts[s.discord_username] || 0) + 1; });
+        veteran = Object.entries(signupCounts).sort((a,b) => b[1] - a[1])[0]?.[0] || null;
+
+        // Render
+        const accoladesList = [
+          { icon: '🏆', title: 'Current Champion', player: champion },
+          { icon: '😱', title: 'Most Feared', player: mostFeared },
+          { icon: '🔥', title: 'Fan Favorite', player: fanFavorite },
+          { icon: '🎖️', title: 'Veteran', player: veteran },
+        ].filter(a => a.player);
+
+        if (accoladesList.length === 0) return;
+
+        const container = document.getElementById('accolades-container');
+        container.innerHTML = `
+          <div class="accolades-section">
+            <h2>Accolades</h2>
+            <div class="accolades-grid">
+              ${accoladesList.map(a => `
+                <div class="accolade-card">
+                  <div class="accolade-icon">${a.icon}</div>
+                  <div class="accolade-title">${a.title}</div>
+                  <div class="accolade-player"><a href="profile.html?player=${encodeURIComponent(a.player)}">${a.player}</a></div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } catch (e) {
+        console.warn('Accolades load error:', e);
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         allPlayers = await db.getLeaderboard();
         renderLeaderboard(allPlayers);
+        await loadAccolades();
       } catch (e) {
         console.error('Rankings load error:', e);
         document.getElementById('leaderboard').innerHTML = '<div class="empty-state"><p>Error loading rankings.</p></div>';

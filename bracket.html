@@ -89,6 +89,53 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* ── Win Streak Badges ── */
+    .streak-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      background: linear-gradient(135deg, #ff4500, #ff8c00);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 999px;
+      margin-left: 6px;
+      font-family: 'Exo 2', sans-serif;
+      animation: streak-glow 1.5s ease-in-out infinite;
+      vertical-align: middle;
+    }
+    .streak-badge.mega {
+      background: linear-gradient(135deg, #ffd700, #ff4500);
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+    @keyframes streak-glow {
+      0%, 100% { box-shadow: 0 0 4px rgba(255, 69, 0, 0.4); }
+      50% { box-shadow: 0 0 12px rgba(255, 69, 0, 0.7); }
+    }
+
+    /* ── Rivalry Badge ── */
+    .rivalry-badge {
+      text-align: center;
+      padding: 2px 0;
+      font-size: 11px;
+      color: var(--pink);
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      border-top: 1px dashed rgba(255, 0, 128, 0.2);
+      border-bottom: 1px dashed rgba(255, 0, 128, 0.2);
+      animation: rival-flash 3s ease-in-out infinite;
+    }
+    .rivalry-record {
+      color: var(--text);
+      font-weight: 800;
+      letter-spacing: 0.1em;
+    }
+    @keyframes rival-flash {
+      0%, 100% { background: transparent; }
+      50% { background: rgba(255, 0, 128, 0.05); }
+    }
+
     /* ── King Kai's Commentary ── */
     .shoutbox-msg.kai {
       border-left: 3px solid var(--gold);
@@ -104,6 +151,20 @@
     }
     .shoutbox-msg.kai .msg-user {
       color: var(--gold) !important;
+    }
+
+    .title-badge {
+      display: inline-block;
+      font-size: 12px;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+    .champion-badge {
+      animation: crown-bounce 2s ease-in-out infinite;
+    }
+    @keyframes crown-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-2px); }
     }
 
     @media(max-width:500px){
@@ -382,6 +443,105 @@
         });
       } catch (e) {
         console.warn('Aura/quote load error:', e);
+      }
+
+      // ── Win Streak Badges ──
+      try {
+        const { data: streakData } = await supabaseClient
+          .from('player_points')
+          .select('discord_username, current_streak, best_streak')
+          .gt('current_streak', 1);
+        const streakMap = {};
+        (streakData || []).forEach(s => { streakMap[s.discord_username] = s.current_streak; });
+
+        document.querySelectorAll('.match-player').forEach(el => {
+          const nameEl = el.querySelector('.player-match-name');
+          if (!nameEl) return;
+          const name = nameEl.textContent.trim();
+          const streak = streakMap[name];
+          if (streak && streak >= 2) {
+            const badge = document.createElement('span');
+            badge.className = 'streak-badge';
+            if (streak >= 5) badge.classList.add('mega');
+            badge.title = `${streak} win streak!`;
+            badge.textContent = `🔥${streak}`;
+            nameEl.after(badge);
+          }
+        });
+      } catch (e) {
+        console.warn('Streak badge error:', e);
+      }
+
+      // ── Leaderboard Titles on Bracket ──
+      try {
+        const { data: ct } = await supabaseClient.from('tournaments')
+          .select('id').eq('status', 'completed').order('created_at', { ascending: false }).limit(1);
+        let champName = null;
+        if (ct?.length) {
+          const { data: fm } = await supabaseClient.from('matches')
+            .select('winner_id, player1_id, player2_id, player1:tournament_signups!matches_player1_id_fkey(discord_username), player2:tournament_signups!matches_player2_id_fkey(discord_username)')
+            .eq('tournament_id', ct[0].id).not('winner_id', 'is', null)
+            .order('round', { ascending: false }).limit(1);
+          if (fm?.length) {
+            const w = fm[0];
+            champName = w.winner_id === w.player1_id ? w.player1?.discord_username : w.player2?.discord_username;
+          }
+        }
+        if (champName) {
+          document.querySelectorAll('.player-match-name').forEach(el => {
+            if (el.textContent.trim() === champName) {
+              const badge = document.createElement('span');
+              badge.className = 'title-badge champion-badge';
+              badge.textContent = '👑';
+              badge.title = 'Current Champion';
+              el.after(badge);
+            }
+          });
+        }
+      } catch (_) {}
+
+      // ── Rivalry System ──
+      try {
+        const matchCards = document.querySelectorAll('.match-card');
+        for (const card of matchCards) {
+          const players = card.querySelectorAll('.player-match-name');
+          if (players.length < 2) continue;
+          const p1Name = players[0].textContent.trim();
+          const p2Name = players[1].textContent.trim();
+          if (p1Name === 'TBD' || p2Name === 'TBD' || p1Name === 'BYE' || p2Name === 'BYE') continue;
+          if (card.querySelector('.match-player.winner')) continue;
+
+          const { data: h2h } = await supabaseClient
+            .from('matches')
+            .select('winner_id, player1_id, player2_id, player1:tournament_signups!matches_player1_id_fkey(discord_username), player2:tournament_signups!matches_player2_id_fkey(discord_username)')
+            .not('winner_id', 'is', null);
+
+          if (h2h && h2h.length > 0) {
+            let p1Wins = 0, p2Wins = 0;
+            h2h.forEach(m => {
+              const mp1 = m.player1?.discord_username;
+              const mp2 = m.player2?.discord_username;
+              if ((mp1 === p1Name && mp2 === p2Name) || (mp1 === p2Name && mp2 === p1Name)) {
+                const winnerName = m.winner_id === m.player1_id ? mp1 : mp2;
+                if (winnerName === p1Name) p1Wins++;
+                else if (winnerName === p2Name) p2Wins++;
+              }
+            });
+
+            if (p1Wins + p2Wins > 0) {
+              const rivalDiv = document.createElement('div');
+              rivalDiv.className = 'rivalry-badge';
+              rivalDiv.innerHTML = `⚔️ <span class="rivalry-record">${p1Wins} - ${p2Wins}</span>`;
+              rivalDiv.title = `${p1Name} ${p1Wins} vs ${p2Wins} ${p2Name} (all time)`;
+              const firstPlayer = card.querySelector('.match-player');
+              if (firstPlayer && firstPlayer.nextSibling) {
+                card.insertBefore(rivalDiv, firstPlayer.nextSibling);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Rivalry system error:', e);
       }
     }
 
