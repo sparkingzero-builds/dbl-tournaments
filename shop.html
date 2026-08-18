@@ -107,7 +107,8 @@
       content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
       background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); pointer-events: none;
     }
-    .card-icon { z-index: 1; transition: transform 0.3s; }
+    .card-icon { z-index: 1; transition: transform 0.3s; overflow: hidden; border-radius: 8px; }
+    .card-icon img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
     .item-card:hover .card-icon { transform: scale(1.1); }
 
     .card-bg-effect { position: absolute; inset: 0; opacity: 0.3; z-index: 0; }
@@ -489,165 +490,47 @@
       epic: '#a855f7', legendary: '#f59e0b', mythic: '#ff2d78'
     };
 
-    function makeSVGIcon(item, size) {
-      const s = size || 80;
-      const meta = item.metadata || {};
-      const type = item.type;
+    const ITEM_IMAGES = {
+      flair_border: {
+        'flair-fire': 'https://dblegends.net/assets/messages/MeChaIco_0064.webp',
+        'flair-ice': 'https://dblegends.net/assets/messages/MeChaIco_0010.webp',
+        'flair-royal': 'https://dblegends.net/assets/messages/MeChaIco_0113.webp',
+        'flair-shadow': 'https://dblegends.net/assets/messages/MeChaIco_0315.webp',
+        'flair-champion': 'https://dblegends.net/assets/messages/MeChaIco_0427.webp',
+        _default: 'https://dblegends.net/assets/messages/MeChaIco_0007.webp'
+      },
+      aura: {
+        'aura-blue': 'https://dblegends.net/assets/messages/MeChaIco_0120.webp',
+        'aura-red': 'https://dblegends.net/assets/messages/MeChaIco_0092.webp',
+        'aura-gold': 'https://dblegends.net/assets/messages/MeChaIco_0280.webp',
+        'aura-ui': 'https://dblegends.net/assets/messages/MeChaIco_0163.webp',
+        _default: 'https://dblegends.net/assets/messages/MeChaIco_0107.webp'
+      },
+      flair_title: 'https://dblegends.net/assets/messages/MeChaIco_0004.webp',
+      victory_quote: 'https://dblegends.net/assets/messages/MeChaIco_0128.webp',
+      kings_commentary: 'https://dblegends.net/assets/messages/MeChaIco_0208.webp',
+      golden_name: 'https://dblegends.net/assets/messages/MeChaIco_0280.webp',
+      hype_bomb: 'https://dblegends.net/assets/messages/MeChaIco_0331.webp',
+      profile_bg: 'https://dblegends.net/assets/messages/MeChaIco_0168.webp',
+      badge: 'https://dblegends.net/assets/messages/MeChaIco_0427.webp',
+      double_down: 'https://dblegends.net/assets/messages/MeChaIco_0139.webp',
+      vegetas_pride: 'https://dblegends.net/assets/messages/MeChaIco_0027.webp',
+      ban_immunity: 'https://dblegends.net/assets/messages/MeChaIco_0152.webp',
+      scouter: 'https://dblegends.net/assets/messages/MeChaIco_0179.webp'
+    };
 
-      switch(type) {
-        case 'flair_border': {
-          const colors = {
-            'flair-fire': ['#ff4500','#ff8c00','#ffd700'],
-            'flair-ice': ['#00bfff','#e0f7ff','#4dd0e1'],
-            'flair-royal': ['#9b59b6','#ffd700','#e74c3c'],
-            'flair-shadow': ['#1a1a2e','#6c3483','#2c3e50'],
-            'flair-champion': ['#ffd700','#ff6b00','#ff0080']
-          };
-          const c = colors[meta.effect] || ['#00e5ff','#ff2d78','#ffd700'];
-          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs><linearGradient id="fb1" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
-              <stop stop-color="${c[0]}"/><stop offset=".5" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/>
-            </linearGradient></defs>
-            <rect x="6" y="6" width="68" height="68" rx="12" stroke="url(#fb1)" stroke-width="5" fill="none"/>
-            <rect x="14" y="14" width="52" height="52" rx="8" fill="rgba(20,15,40,0.8)" stroke="url(#fb1)" stroke-width="1.5"/>
-            <circle cx="40" cy="40" r="12" fill="url(#fb1)" opacity="0.3"/>
-            <text x="40" y="46" text-anchor="middle" fill="url(#fb1)" font-size="18" font-weight="bold" font-family="sans-serif">P</text>
-          </svg>`;
-        }
-        case 'aura': {
-          const colors = {
-            'aura-blue': ['#0078ff','#00c8ff'], 'aura-red': ['#ff2828','#ff6b6b'],
-            'aura-gold': ['#ffd700','#ffaa00'], 'aura-ui': ['#c8c8ff','#8080ff']
-          };
-          const c = colors[meta.effect] || ['#00e5ff','#00b8d4'];
-          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs><radialGradient id="ag1" cx="50%" cy="50%"><stop stop-color="${c[0]}" stop-opacity="0.6"/><stop offset="1" stop-color="${c[1]}" stop-opacity="0"/></radialGradient></defs>
-            <circle cx="40" cy="40" r="36" fill="url(#ag1)"/>
-            <circle cx="40" cy="40" r="24" fill="none" stroke="${c[0]}" stroke-width="2" opacity="0.5"/>
-            <circle cx="40" cy="40" r="16" fill="none" stroke="${c[0]}" stroke-width="1.5" opacity="0.7"/>
-            <circle cx="40" cy="40" r="8" fill="${c[0]}" opacity="0.8"/>
-            <path d="M40 12 L44 28 L40 24 L36 28 Z" fill="${c[0]}" opacity="0.6"/>
-            <path d="M40 68 L44 52 L40 56 L36 52 Z" fill="${c[0]}" opacity="0.6"/>
-            <path d="M12 40 L28 36 L24 40 L28 44 Z" fill="${c[0]}" opacity="0.6"/>
-            <path d="M68 40 L52 36 L56 40 L52 44 Z" fill="${c[0]}" opacity="0.6"/>
-          </svg>`;
-        }
-        case 'flair_title':
-          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs><linearGradient id="tg1" x1="0" y1="0" x2="80" y2="80"><stop stop-color="#00e5ff"/><stop offset="1" stop-color="#ff2d78"/></linearGradient></defs>
-            <rect x="10" y="24" width="60" height="32" rx="8" fill="rgba(20,15,40,0.9)" stroke="url(#tg1)" stroke-width="2"/>
-            <rect x="14" y="28" width="52" height="24" rx="5" fill="url(#tg1)" opacity="0.15"/>
-            <text x="40" y="45" text-anchor="middle" fill="url(#tg1)" font-size="14" font-weight="900" font-family="sans-serif" letter-spacing="2">${(meta.title || item.name || 'TITLE').substring(0,8).toUpperCase()}</text>
-            <polygon points="32,20 40,12 48,20" fill="url(#tg1)" opacity="0.5"/>
-          </svg>`;
-        case 'victory_quote':
-          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs><linearGradient id="vq1" x1="0" y1="0" x2="80" y2="80"><stop stop-color="#ffd700"/><stop offset="1" stop-color="#ff8c00"/></linearGradient></defs>
-            <path d="M16 20 H64 Q68 20 68 24 V50 Q68 54 64 54 H44 L34 64 L36 54 H16 Q12 54 12 50 V24 Q12 20 16 20Z" fill="rgba(20,15,40,0.9)" stroke="url(#vq1)" stroke-width="2"/>
-            <text x="40" y="34" text-anchor="middle" fill="url(#vq1)" font-size="22" font-weight="bold" font-family="serif">"</text>
-            <line x1="24" y1="40" x2="56" y2="40" stroke="url(#vq1)" stroke-width="1.5" opacity="0.5"/>
-            <line x1="28" y1="46" x2="48" y2="46" stroke="url(#vq1)" stroke-width="1.5" opacity="0.3"/>
-          </svg>`;
-        case 'kings_commentary':
-          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs><linearGradient id="kc1" x1="0" y1="0" x2="80" y2="80"><stop stop-color="#ffd700"/><stop offset="1" stop-color="#ff6b00"/></linearGradient></defs>
-            <rect x="12" y="30" width="56" height="36" rx="6" fill="rgba(20,15,40,0.9)" stroke="url(#kc1)" stroke-width="2"/>
-            <rect x="16" y="34" width="48" height="28" rx="4" fill="url(#kc1)" opacity="0.08"/>
-            <path d="M28 18 L40 8 L52 18 L48 22 L40 14 L32 22 Z" fill="url(#kc1)"/>
-            <circle cx="24" cy="18" r="3" fill="url(#kc1)"/>
-            <circle cx="56" cy="18" r="3" fill="url(#kc1)"/>
-            <circle cx="40" cy="6" r="3" fill="url(#kc1)"/>
-            <line x1="20" y1="42" x2="60" y2="42" stroke="url(#kc1)" stroke-width="1.5" opacity="0.4"/>
-            <line x1="20" y1="48" x2="52" y2="48" stroke="url(#kc1)" stroke-width="1.5" opacity="0.3"/>
-            <line x1="20" y1="54" x2="44" y2="54" stroke="url(#kc1)" stroke-width="1.5" opacity="0.2"/>
-          </svg>`;
-        case 'golden_name':
-          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs><linearGradient id="gn1" x1="0" y1="20" x2="80" y2="60"><stop stop-color="#ffd700"/><stop offset=".5" stop-color="#fff4b0"/><stop offset="1" stop-color="#ff8c00"/></linearGradient></defs>
-            <text x="40" y="50" text-anchor="middle" fill="url(#gn1)" font-size="28" font-weight="900" font-family="sans-serif" letter-spacing="1">NAME</text>
-            <line x1="10" y1="58" x2="70" y2="58" stroke="url(#gn1)" stroke-width="1" opacity="0.4"/>
-            <circle cx="40" cy="22" r="8" fill="none" stroke="url(#gn1)" stroke-width="1.5" opacity="0.5"/>
-            <circle cx="40" cy="22" r="3" fill="url(#gn1)" opacity="0.6"/>
-          </svg>`;
-        case 'hype_bomb':
-          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs><radialGradient id="hb1" cx="50%" cy="50%"><stop stop-color="#ff4500"/><stop offset="1" stop-color="#ff8c00" stop-opacity="0"/></radialGradient></defs>
-            <circle cx="40" cy="42" r="30" fill="url(#hb1)" opacity="0.3"/>
-            <circle cx="40" cy="42" r="16" fill="#ff4500" opacity="0.8"/>
-            <circle cx="40" cy="42" r="8" fill="#ffd700"/>
-            <path d="M40 10 L42 26" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round"/>
-            <path d="M58 16 L50 28" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round"/>
-            <path d="M68 36 L54 40" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round"/>
-            <path d="M22 16 L30 28" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round"/>
-            <path d="M12 36 L26 40" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round"/>
-            <path d="M24 60 L32 52" stroke="#ff8c00" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
-            <path d="M56 60 L48 52" stroke="#ff8c00" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
-          </svg>`;
-        case 'profile_bg': {
-          const bgs = {
-            'tournament-arena': ['#14142a','#281440','#a855f7'],
-            'world-of-void': ['#000','#1e0032','#6c3483'],
-            'time-chamber': ['#e8e8ff','#c0c0e0','#14142a']
-          };
-          const c = bgs[meta.bg] || ['#0d0a1a','#1a1535','#00e5ff'];
-          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs><linearGradient id="pb1" x1="0" y1="0" x2="80" y2="80"><stop stop-color="${c[0]}"/><stop offset=".5" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></linearGradient></defs>
-            <rect x="8" y="14" width="64" height="52" rx="6" fill="url(#pb1)" stroke="${c[2]}" stroke-width="2"/>
-            <rect x="14" y="20" width="20" height="20" rx="10" fill="${c[2]}" opacity="0.3"/>
-            <line x1="14" y1="48" x2="64" y2="48" stroke="${c[2]}" stroke-width="1.5" opacity="0.3"/>
-            <line x1="14" y1="54" x2="50" y2="54" stroke="${c[2]}" stroke-width="1" opacity="0.2"/>
-            <circle cx="58" cy="26" r="4" fill="${c[2]}" opacity="0.2"/>
-          </svg>`;
-        }
-        case 'badge':
-          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs><linearGradient id="bd1" x1="20" y1="10" x2="60" y2="70"><stop stop-color="#ffd700"/><stop offset="1" stop-color="#ff6b00"/></linearGradient></defs>
-            <circle cx="40" cy="36" r="22" fill="rgba(20,15,40,0.9)" stroke="url(#bd1)" stroke-width="2.5"/>
-            <circle cx="40" cy="36" r="16" fill="url(#bd1)" opacity="0.15"/>
-            <path d="M40 24 L43 32 L52 32 L45 37 L48 46 L40 41 L32 46 L35 37 L28 32 L37 32 Z" fill="url(#bd1)"/>
-            <path d="M30 56 L34 62 L40 68 L46 62 L50 56" stroke="url(#bd1)" stroke-width="2" fill="none" opacity="0.5"/>
-          </svg>`;
-        case 'double_down':
-          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs><linearGradient id="dd1" x1="0" y1="0" x2="80" y2="80"><stop stop-color="#00e5ff"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs>
-            <rect x="12" y="12" width="56" height="56" rx="10" fill="rgba(20,15,40,0.9)" stroke="url(#dd1)" stroke-width="2"/>
-            <text x="40" y="48" text-anchor="middle" fill="url(#dd1)" font-size="32" font-weight="900" font-family="sans-serif">×2</text>
-            <path d="M20 18 L28 18 L24 24 Z" fill="url(#dd1)" opacity="0.5"/>
-            <path d="M60 18 L52 18 L56 24 Z" fill="url(#dd1)" opacity="0.5"/>
-          </svg>`;
-        case 'vegetas_pride':
-          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs><linearGradient id="vp1" x1="0" y1="0" x2="80" y2="80"><stop stop-color="#a855f7"/><stop offset="1" stop-color="#ff2d78"/></linearGradient></defs>
-            <path d="M40 10 L48 28 L68 28 L52 40 L58 60 L40 48 L22 60 L28 40 L12 28 L32 28 Z" fill="none" stroke="url(#vp1)" stroke-width="2.5"/>
-            <path d="M40 18 L45 30 L58 30 L48 38 L52 52 L40 44 L28 52 L32 38 L22 30 L35 30 Z" fill="url(#vp1)" opacity="0.2"/>
-            <circle cx="40" cy="36" r="6" fill="url(#vp1)" opacity="0.6"/>
-            <path d="M36 34 L40 28 L44 34" stroke="#fff" stroke-width="1.5" fill="none" opacity="0.8"/>
-          </svg>`;
-        case 'ban_immunity':
-          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs><linearGradient id="bi1" x1="20" y1="8" x2="60" y2="72"><stop stop-color="#22c55e"/><stop offset="1" stop-color="#00e5ff"/></linearGradient></defs>
-            <path d="M40 8 L64 20 L64 44 Q64 64 40 74 Q16 64 16 44 L16 20 Z" fill="rgba(20,15,40,0.9)" stroke="url(#bi1)" stroke-width="2.5"/>
-            <path d="M40 16 L56 24 L56 42 Q56 58 40 66 Q24 58 24 42 L24 24 Z" fill="url(#bi1)" opacity="0.12"/>
-            <path d="M30 40 L38 48 L52 32" stroke="url(#bi1)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          </svg>`;
-        case 'scouter':
-          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs><linearGradient id="sc1" x1="0" y1="0" x2="80" y2="80"><stop stop-color="#22c55e"/><stop offset="1" stop-color="#00e5ff"/></linearGradient></defs>
-            <circle cx="32" cy="36" r="18" fill="none" stroke="url(#sc1)" stroke-width="2.5"/>
-            <circle cx="32" cy="36" r="12" fill="url(#sc1)" opacity="0.1"/>
-            <circle cx="32" cy="36" r="6" fill="url(#sc1)" opacity="0.2"/>
-            <path d="M48 28 Q68 20 70 36 Q72 52 52 44" stroke="url(#sc1)" stroke-width="2.5" fill="none"/>
-            <line x1="26" y1="30" x2="38" y2="30" stroke="url(#sc1)" stroke-width="1" opacity="0.5"/>
-            <line x1="24" y1="36" x2="40" y2="36" stroke="url(#sc1)" stroke-width="1" opacity="0.5"/>
-            <line x1="26" y1="42" x2="36" y2="42" stroke="url(#sc1)" stroke-width="1" opacity="0.5"/>
-            <text x="32" y="38" text-anchor="middle" fill="url(#sc1)" font-size="8" font-family="monospace" opacity="0.7">9001</text>
-          </svg>`;
-        default:
-          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="40" cy="40" r="24" fill="rgba(0,229,255,0.15)" stroke="var(--cyan)" stroke-width="2"/>
-            <text x="40" y="46" text-anchor="middle" fill="var(--cyan)" font-size="20" font-weight="bold">?</text>
-          </svg>`;
-      }
+    function getItemImage(item) {
+      const meta = item.metadata || {};
+      const entry = ITEM_IMAGES[item.type];
+      if (!entry) return 'https://dblegends.net/assets/messages/MeChaIco_0001.webp';
+      if (typeof entry === 'string') return entry;
+      return entry[meta.effect] || entry._default;
+    }
+
+    function makeCardVisual(item, size) {
+      const src = getItemImage(item);
+      const s = size || 80;
+      return `<img src="${src}" alt="${escapeHtml(item.name)}" style="width:${s}px;height:${s}px;object-fit:cover;border-radius:8px;filter:drop-shadow(0 4px 16px rgba(0,0,0,0.6));" onerror="this.style.display='none'" />`;
     }
 
     function getPreviewDemo(item) {
@@ -688,7 +571,7 @@
         case 'vegetas_pride':
           return `<div style="text-align:center;font-size:12px;color:var(--text);line-height:1.6;"><span style="font-size:18px;color:var(--pink);font-weight:900;font-family:'Exo 2',sans-serif;">25→75</span> pts<br><span style="font-size:10px;color:var(--muted);">Loss points tripled for one tournament</span></div>`;
         case 'badge':
-          return `<div style="text-align:center;"><div style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:8px;">${makeSVGIcon(item, 32)}<span style="color:var(--gold);font-weight:700;font-family:'Exo 2',sans-serif;font-size:12px;">${escapeHtml(item.name)}</span></div><div style="font-size:10px;color:var(--muted);margin-top:6px;">Displayed on your profile badge wall</div></div>`;
+          return `<div style="text-align:center;"><div style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:8px;">${makeCardVisual(item, 32)}<span style="color:var(--gold);font-weight:700;font-family:'Exo 2',sans-serif;font-size:12px;">${escapeHtml(item.name)}</span></div><div style="font-size:10px;color:var(--muted);margin-top:6px;">Displayed on your profile badge wall</div></div>`;
         default:
           return `<div style="color:var(--muted);font-size:12px;">Preview not available</div>`;
       }
@@ -720,7 +603,7 @@
           ${owned ? '<div class="card-badge" style="background:var(--green);box-shadow:0 0 10px rgba(46,213,115,0.4);">OWNED</div>' : badge}
           <div class="card-visual">
             <div class="card-bg-effect ${rarity === 'legendary' || rarity === 'mythic' ? 'aura-effect' : 'shimmer-effect'}"></div>
-            <div class="card-icon">${makeSVGIcon(item, featured ? 100 : 80)}</div>
+            <div class="card-icon">${makeCardVisual(item, featured ? 100 : 80)}</div>
           </div>
           <div class="card-info">
             <div class="card-name">${escapeHtml(item.name)}</div>
@@ -749,7 +632,7 @@
 
       const visualEl = document.getElementById('modal-visual');
       visualEl.style.background = `linear-gradient(160deg, ${color}22, ${color}08)`;
-      visualEl.innerHTML = `<div class="card-bg-effect aura-effect" style="--rarity-color:${color}"></div><div class="modal-icon">${makeSVGIcon(item, 120)}</div>`;
+      visualEl.innerHTML = `<div class="card-bg-effect aura-effect" style="--rarity-color:${color}"></div><div class="modal-icon">${makeCardVisual(item, 120)}</div>`;
 
       const rarityTag = document.getElementById('modal-rarity');
       rarityTag.textContent = RARITY_LABELS[rarity];
@@ -930,7 +813,7 @@
           const typeLabel = TYPE_LABELS[item.type] || item.type || '';
           html += `
             <div class="inv-card">
-              <div class="inv-card-visual">${makeSVGIcon(item, 60)}</div>
+              <div class="inv-card-visual">${makeCardVisual(item, 60)}</div>
               <div class="inv-card-info">
                 <div class="inv-card-name">${escapeHtml(item.name || 'Unknown')}</div>
                 <div class="inv-card-type">${escapeHtml(typeLabel)}</div>
