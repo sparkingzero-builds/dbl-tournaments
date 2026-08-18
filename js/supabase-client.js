@@ -545,14 +545,20 @@ const db = {
       throw new Error('Insufficient funds');
     }
 
-    const { error: deductError } = await supabaseClient
+    // Optimistic lock: only deduct if balance hasn't changed since we read it
+    const { data: rows, error: deductError } = await supabaseClient
       .from('player_points')
       .update({
         balance: points.balance - cost,
         updated_at: new Date().toISOString()
       })
-      .eq('discord_username', username);
+      .eq('discord_username', username)
+      .eq('balance', points.balance)
+      .select();
     if (deductError) throw deductError;
+    if (!rows || rows.length === 0) {
+      throw new Error('Balance changed, please try again');
+    }
 
     const { error: txError } = await supabaseClient
       .from('point_transactions')

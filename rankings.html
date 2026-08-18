@@ -335,13 +335,16 @@
         <li class="nav-dropdown">
           <a href="#">More ▾</a>
           <div class="nav-dropdown-menu">
+            <div class="dropdown-label">Data</div>
+            <a href="characters.html">Characters</a>
+            <a href="tierlist.html">Tier List</a>
+            <a href="analytics.html">Ban Analytics</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Community</div>
             <a href="compare.html">Compare</a>
             <a href="shop.html">Shop</a>
-            <a href="tierlist.html">Tier List</a>
-            <a href="characters.html">Characters</a>
             <a href="season.html">Season</a>
             <a href="feed.html">Live Feed</a>
-            <a href="analytics.html">Ban Analytics</a>
           </div>
         </li>
       </ul>
@@ -467,9 +470,9 @@
 
     async function loadAccolades() {
       try {
-        let champion = null, mostFeared = null, fanFavorite = null, veteran = null;
+        let champion = null, veteran = null, topElo = null, mostWins = null;
 
-        // Current Champion
+        // Current Champion — winner of final match in most recent completed tournament
         const { data: completedTourneys } = await supabaseClient
           .from('tournaments')
           .select('id, name')
@@ -479,48 +482,33 @@
         if (completedTourneys?.length) {
           const { data: finalMatch } = await supabaseClient
             .from('matches')
-            .select('winner_id, player1:tournament_signups!matches_player1_id_fkey(discord_username), player2:tournament_signups!matches_player2_id_fkey(discord_username)')
+            .select('winner_id, player1:signups!matches_player1_id_fkey(id, discord_username), player2:signups!matches_player2_id_fkey(id, discord_username)')
             .eq('tournament_id', completedTourneys[0].id)
             .not('winner_id', 'is', null)
             .order('round', { ascending: false })
             .limit(1);
           if (finalMatch?.length) {
-            champion = finalMatch[0].winner_id === finalMatch[0].player1?.id
-              ? finalMatch[0].player1?.discord_username
-              : finalMatch[0].player2?.discord_username;
+            const fm = finalMatch[0];
+            champion = fm.winner_id === fm.player1?.id
+              ? fm.player1?.discord_username
+              : fm.player2?.discord_username;
           }
         }
 
-        // Most Feared
-        const { data: fearData } = await supabaseClient
-          .from('power_rankings_votes')
-          .select('voted_for');
-        const fearCounts = {};
-        (fearData || []).forEach(v => { fearCounts[v.voted_for] = (fearCounts[v.voted_for] || 0) + 1; });
-        mostFeared = Object.entries(fearCounts).sort((a,b) => b[1] - a[1])[0]?.[0] || null;
+        // Top ELO — highest rated player
+        if (allPlayers.length > 0) {
+          topElo = allPlayers[0].discord_username;
+        }
 
-        // Fan Favorite
-        const { data: hypeData } = await supabaseClient
-          .from('match_hype')
-          .select('match_id, hype_count');
-        const { data: allMatches } = await supabaseClient
-          .from('matches')
-          .select('id, player1:tournament_signups!matches_player1_id_fkey(discord_username), player2:tournament_signups!matches_player2_id_fkey(discord_username)');
-        const playerHype = {};
-        (hypeData || []).forEach(h => {
-          const m = (allMatches || []).find(mm => mm.id === h.match_id);
-          if (m) {
-            const p1 = m.player1?.discord_username;
-            const p2 = m.player2?.discord_username;
-            if (p1) playerHype[p1] = (playerHype[p1] || 0) + h.hype_count;
-            if (p2) playerHype[p2] = (playerHype[p2] || 0) + h.hype_count;
-          }
-        });
-        fanFavorite = Object.entries(playerHype).sort((a,b) => b[1] - a[1])[0]?.[0] || null;
+        // Most Wins — player with most match wins
+        if (allPlayers.length > 0) {
+          const sorted = [...allPlayers].sort((a, b) => b.wins - a.wins);
+          if (sorted[0]?.wins > 0) mostWins = sorted[0].discord_username;
+        }
 
-        // Veteran
+        // Veteran — most tournament signups
         const { data: allSignups } = await supabaseClient
-          .from('tournament_signups')
+          .from('signups')
           .select('discord_username');
         const signupCounts = {};
         (allSignups || []).forEach(s => { signupCounts[s.discord_username] = (signupCounts[s.discord_username] || 0) + 1; });
@@ -529,8 +517,8 @@
         // Render
         const accoladesList = [
           { icon: '🏆', title: 'Current Champion', player: champion },
-          { icon: '😱', title: 'Most Feared', player: mostFeared },
-          { icon: '🔥', title: 'Fan Favorite', player: fanFavorite },
+          { icon: '👑', title: 'Highest ELO', player: topElo },
+          { icon: '🔥', title: 'Most Wins', player: mostWins },
           { icon: '🎖️', title: 'Veteran', player: veteran },
         ].filter(a => a.player);
 
