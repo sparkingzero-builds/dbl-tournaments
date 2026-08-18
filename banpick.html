@@ -757,13 +757,12 @@
       const content = document.getElementById('ban-content');
       const allBanned = getAllBannedIds();
       const myTeam = mySignup.team || [];
-      repickTeam = myTeam.filter(c => !allBanned.has(String(c.id)));
-      const slotsNeeded = 3 - repickTeam.length;
+      repickTeam = [];
 
       content.innerHTML = `
         <div class="ban-header">
           <h1 class="ban-title" style="color:var(--cyan);">Re-Pick Team</h1>
-          <p class="ban-subtitle">Replace your banned character${slotsNeeded !== 1 ? 's' : ''}. Pick ${slotsNeeded} new character${slotsNeeded !== 1 ? 's' : ''} to complete your team.</p>
+          <p class="ban-subtitle">Build your new 3-character team. Banned characters are greyed out.</p>
         </div>
         <div class="ban-phase-content">
           <div class="ban-sidebar">
@@ -786,8 +785,6 @@
     function renderRepickSlots() {
       const container = document.getElementById('repick-slots');
       if (!container) return;
-      const bannedIds = getBannedCharIds();
-      const keptCount = (mySignup.team || []).filter(t => !bannedIds.has(String(t.id))).length;
       let html = '';
       for (let i = 0; i < 3; i++) {
         if (repickTeam[i]) {
@@ -796,7 +793,7 @@
             <div class="ban-slot filled" style="border-color:var(--cyan);">
               <img class="ban-slot__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
               <span class="ban-slot__name">${c.name}</span>
-              ${i >= keptCount ? `<button class="ban-slot__remove" style="color:var(--cyan);" onclick="removeRepick(${i})">&times;</button>` : ''}
+              <button class="ban-slot__remove" style="color:var(--cyan);" onclick="removeRepick(${i})">&times;</button>
             </div>`;
         } else {
           html += `<div class="ban-slot"><span class="ban-slot__empty">Slot ${i + 1}</span></div>`;
@@ -894,12 +891,10 @@
     }
 
     function toggleRepick(char) {
-      const bannedIds = getBannedCharIds();
-      const keptCount = (mySignup.team || []).filter(t => !bannedIds.has(String(t.id))).length;
       const idx = repickTeam.findIndex(c => c.id === char.id);
-      if (idx !== -1 && idx >= keptCount) {
+      if (idx !== -1) {
         repickTeam.splice(idx, 1);
-      } else if (idx === -1 && repickTeam.length < 3) {
+      } else if (repickTeam.length < 3) {
         repickTeam.push(char);
         playSound('click');
       }
@@ -908,13 +903,9 @@
     }
 
     function removeRepick(index) {
-      const bannedIds = getBannedCharIds();
-      const keptCount = (mySignup.team || []).filter(t => !bannedIds.has(String(t.id))).length;
-      if (index >= keptCount) {
-        repickTeam.splice(index, 1);
-        renderRepickSlots();
-        applyRepickFilters();
-      }
+      repickTeam.splice(index, 1);
+      renderRepickSlots();
+      applyRepickFilters();
     }
 
     async function submitRepick() {
