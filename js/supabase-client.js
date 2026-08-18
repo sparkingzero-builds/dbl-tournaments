@@ -571,10 +571,9 @@ const db = {
         discord_username: username,
         item_id: itemId
       })
-      .select()
-      .single();
+      .select();
     if (invError) throw invError;
-    return data;
+    return data?.[0] || { discord_username: username, item_id: itemId };
   },
 
   async equipItem(username, inventoryId) {

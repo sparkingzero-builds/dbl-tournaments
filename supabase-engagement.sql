@@ -104,6 +104,7 @@ CREATE POLICY "Admins manage shop" ON shop_items FOR ALL USING (is_admin());
 -- Player Inventory
 ALTER TABLE player_inventory ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone can read inventory" ON player_inventory FOR SELECT USING (true);
+CREATE POLICY "Anyone can insert inventory" ON player_inventory FOR INSERT WITH CHECK (true);
 CREATE POLICY "Admins manage inventory" ON player_inventory FOR ALL USING (is_admin());
 
 -- Trash Talk
