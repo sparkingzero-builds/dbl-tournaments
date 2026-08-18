@@ -93,6 +93,7 @@ CREATE POLICY "Admins manage points" ON player_points FOR ALL USING (is_admin())
 -- Point Transactions
 ALTER TABLE point_transactions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone can read transactions" ON point_transactions FOR SELECT USING (true);
+CREATE POLICY "Anyone can insert transactions" ON point_transactions FOR INSERT WITH CHECK (true);
 CREATE POLICY "Admins manage transactions" ON point_transactions FOR ALL USING (is_admin());
 
 -- Shop Items
