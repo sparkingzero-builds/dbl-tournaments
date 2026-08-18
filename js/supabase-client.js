@@ -785,6 +785,29 @@ const db = {
     return data?.[0] || { ...progress, claimed_tiers: newClaimed };
   },
 
+  // ── Bounty Hunters ──────────────────────────────────────────
+
+  async getBountyBoard() {
+    const { data, error } = await supabaseClient
+      .from('bounties')
+      .select('*')
+      .eq('status', 'active')
+      .order('bounty', { ascending: false })
+      .limit(10);
+    if (error) throw error;
+    return data || [];
+  },
+
+  async getPlayerBounty(username) {
+    const { data, error } = await supabaseClient
+      .from('bounties')
+      .select('*')
+      .eq('discord_username', username)
+      .limit(1);
+    if (error) throw error;
+    return data?.[0] || null;
+  },
+
   async getSeasonLeaderboard(seasonId) {
     const { data, error } = await supabaseClient
       .from('season_progress')
