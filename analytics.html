@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ban Analytics — DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    .analytics-header {
+      text-align: center;
+      padding: 40px 0 20px;
+    }
+    .analytics-title {
+      font-size: clamp(24px, 4vw, 36px);
+      color: var(--pink);
+      text-shadow: 0 0 20px rgba(255, 45, 120, 0.3);
+      margin-bottom: 6px;
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      max-width: 800px;
+      margin: 0 auto 32px;
+    }
+    .stat-box {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-box .val {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--pink);
+    }
+    .stat-box .lbl {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+    .ban-section {
+      max-width: 800px;
+      margin: 0 auto 32px;
+    }
+    .ban-section-title {
+      font-size: 16px;
+      color: var(--cyan);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ban-bar-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .ban-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+    }
+    .ban-bar__rank {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--muted);
+      min-width: 24px;
+      text-align: center;
+    }
+    .ban-bar__img {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 2px solid var(--line);
+      flex-shrink: 0;
+    }
+    .ban-bar__info {
+      flex: 1;
+      min-width: 0;
+    }
+    .ban-bar__name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .ban-bar__name a { color: var(--text); }
+    .ban-bar__name a:hover { color: var(--cyan); }
+    .ban-bar__tags {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .ban-bar__meter {
+      flex: 1;
+      max-width: 200px;
+      height: 8px;
+      background: var(--bg-2);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .ban-bar__fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--pink), #ff6b6b);
+      transition: width 0.5s ease;
+    }
+    .ban-bar__count {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--pink);
+      min-width: 40px;
+      text-align: right;
+    }
+    .ban-bar__rate {
+      font-size: 11px;
+      color: var(--muted);
+      min-width: 50px;
+      text-align: right;
+    }
+    .element-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+    }
+    .element-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      text-align: center;
+    }
+    .element-card .el-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin: 0 auto 6px;
+    }
+    .element-card .el-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .element-card .el-count {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--cyan);
+    }
+    .element-card .el-pct {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    @media (max-width: 600px) {
+      .ban-bar { flex-wrap: wrap; }
+      .ban-bar__meter { max-width: 100%; flex: 1 1 100%; order: 10; }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">&#9776;</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+        <li class="nav-dropdown">
+          <a href="#" class="active">More ▾</a>
+          <div class="nav-dropdown-menu">
+            <a href="compare.html">Compare</a>
+            <a href="shop.html">Shop</a>
+            <a href="tierlist.html">Tier List</a>
+            <a href="characters.html">Characters</a>
+            <a href="season.html">Season</a>
+            <a href="feed.html">Live Feed</a>
+            <a href="analytics.html" class="active">Ban Analytics</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="particles-bg" id="particles"></div>
+
+  <main class="page container page-enter">
+    <div class="analytics-header">
+      <h1 class="analytics-title">Ban Analytics</h1>
+      <p class="text-muted">Which characters get targeted most in the ban phase</p>
+    </div>
+
+    <div class="stats-row" id="stats-row">
+      <div class="stat-box"><div class="val" id="stat-total-bans">-</div><div class="lbl">Total Bans</div></div>
+      <div class="stat-box"><div class="val" id="stat-unique-banned">-</div><div class="lbl">Unique Chars Banned</div></div>
+      <div class="stat-box"><div class="val" id="stat-ban-rate">-</div><div class="lbl">Avg Bans / Tournament</div></div>
+      <div class="stat-box"><div class="val" id="stat-most-banned">-</div><div class="lbl">Most Banned</div></div>
+    </div>
+
+    <div class="ban-section">
+      <div class="ban-section-title">Most Banned Characters</div>
+      <div id="ban-rankings" class="ban-bar-list">
+        <div class="loader"><div class="loader-spinner"></div></div>
+      </div>
+    </div>
+
+    <div class="ban-section">
+      <div class="ban-section-title">Bans by Element</div>
+      <div id="element-breakdown" class="element-breakdown"></div>
+    </div>
+
+    <div class="ban-section">
+      <div class="ban-section-title">Bans by Rarity</div>
+      <div id="rarity-breakdown" class="element-breakdown"></div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/particles.js"></script>
+  <script>
+    initParticles(document.getElementById('particles'));
+
+    const elementColors = {
+      'RED': '#ff4757', 'Red': '#ff4757',
+      'BLU': '#3a9bff', 'Blue': '#3a9bff',
+      'GRN': '#2ed573', 'Green': '#2ed573',
+      'PUR': '#a55eea', 'Purple': '#a55eea',
+      'YEL': '#ffd740', 'Yellow': '#ffd740',
+      'LGT': '#d1cce8', 'Light': '#d1cce8'
+    };
+
+    const elementNames = {
+      'Red': 'RED', 'Red+': 'RED', 'Red2': 'RED',
+      'Blue': 'BLU', 'Blue+': 'BLU', 'Blue2': 'BLU',
+      'Green': 'GRN', 'Green+': 'GRN', 'Green2': 'GRN',
+      'Purple': 'PUR', 'Purple+': 'PUR', 'Purple2': 'PUR',
+      'Yellow': 'YEL', 'Yellow+': 'YEL', 'Yellow2': 'YEL',
+      'Light': 'LGT', 'Light+': 'LGT', 'Light2': 'LGT'
+    };
+
+    async function loadAnalytics() {
+      try {
+        const [charResp, { data: tournaments }] = await Promise.all([
+          fetch('data/characters.json'),
+          supabaseClient.from('tournaments').select('id').order('created_at', { ascending: false })
+        ]);
+        const allChars = await charResp.json();
+        const charMap = {};
+        allChars.forEach(c => { charMap[String(c.id)] = c; });
+
+        const banCounts = {};
+        let totalBanEvents = 0;
+        let tournamentsWithBans = 0;
+
+        for (const t of (tournaments || [])) {
+          const { data: signups } = await supabaseClient
+            .from('signups')
+            .select('bans')
+            .eq('tournament_id', t.id);
+
+          let hadBans = false;
+          (signups || []).forEach(s => {
+            if (!s.bans || !Array.isArray(s.bans) || s.bans.length === 0) return;
+            s.bans.forEach(b => {
+              if (!b || !b.id) return;
+              const key = String(b.id);
+              if (!banCounts[key]) banCounts[key] = { id: b.id, name: b.name, image: b.image, count: 0 };
+              banCounts[key].count++;
+              totalBanEvents++;
+              hadBans = true;
+            });
+          });
+          if (hadBans) tournamentsWithBans++;
+        }
+
+        const sorted = Object.values(banCounts).sort((a, b) => b.count - a.count);
+        const maxBans = sorted.length > 0 ? sorted[0].count : 1;
+
+        document.getElementById('stat-total-bans').textContent = totalBanEvents;
+        document.getElementById('stat-unique-banned').textContent = sorted.length;
+        document.getElementById('stat-ban-rate').textContent = tournamentsWithBans > 0 ? (totalBanEvents / tournamentsWithBans).toFixed(1) : '0';
+        document.getElementById('stat-most-banned').textContent = sorted.length > 0 ? (sorted[0].name || 'Unknown').split(' ').slice(0, 2).join(' ') : '-';
+
+        const rankingsEl = document.getElementById('ban-rankings');
+        if (sorted.length === 0) {
+          rankingsEl.innerHTML = '<div class="feed-empty"><h3>No Ban Data Yet</h3><p>Ban analytics will appear after ban phases are completed.</p></div>';
+        } else {
+          rankingsEl.innerHTML = sorted.slice(0, 20).map((b, i) => {
+            const char = charMap[String(b.id)];
+            const tags = char?.tags?.slice(0, 3).join(', ') || '';
+            const pct = ((b.count / totalBanEvents) * 100).toFixed(1);
+            return `<div class="ban-bar">
+              <div class="ban-bar__rank">${i + 1}</div>
+              <img class="ban-bar__img" src="${b.image}" alt="${b.name}" onerror="this.style.display='none'" />
+              <div class="ban-bar__info">
+                <div class="ban-bar__name"><a href="character.html?id=${b.id}">${b.name}</a></div>
+                <div class="ban-bar__tags">${tags}</div>
+              </div>
+              <div class="ban-bar__meter"><div class="ban-bar__fill" style="width:${(b.count / maxBans) * 100}%"></div></div>
+              <div class="ban-bar__count">${b.count}x</div>
+              <div class="ban-bar__rate">${pct}%</div>
+            </div>`;
+          }).join('');
+        }
+
+        // Element breakdown
+        const elCounts = {};
+        sorted.forEach(b => {
+          const char = charMap[String(b.id)];
+          const el = elementNames[char?.element] || 'UNK';
+          elCounts[el] = (elCounts[el] || 0) + b.count;
+        });
+
+        const elEntries = Object.entries(elCounts).sort((a, b) => b[1] - a[1]);
+        document.getElementById('element-breakdown').innerHTML = elEntries.map(([el, count]) => `
+          <div class="element-card">
+            <div class="el-dot" style="background:${elementColors[el] || '#666'}"></div>
+            <div class="el-name">${el}</div>
+            <div class="el-count">${count}</div>
+            <div class="el-pct">${((count / totalBanEvents) * 100).toFixed(1)}%</div>
+          </div>
+        `).join('');
+
+        // Rarity breakdown
+        const rarCounts = {};
+        sorted.forEach(b => {
+          const char = charMap[String(b.id)];
+          const rar = char?.rarity || 'Unknown';
+          rarCounts[rar] = (rarCounts[rar] || 0) + b.count;
+        });
+
+        const rarColors = { ULTRA: '#ff6b6b', LEGEND: '#ffd740', SPARKING: '#00e5ff', EXTREME: '#a55eea', HERO: '#888' };
+        const rarEntries = Object.entries(rarCounts).sort((a, b) => b[1] - a[1]);
+        document.getElementById('rarity-breakdown').innerHTML = rarEntries.map(([rar, count]) => `
+          <div class="element-card">
+            <div class="el-dot" style="background:${rarColors[rar] || '#666'}"></div>
+            <div class="el-name">${rar}</div>
+            <div class="el-count">${count}</div>
+            <div class="el-pct">${((count / totalBanEvents) * 100).toFixed(1)}%</div>
+          </div>
+        `).join('');
+
+        playSound('reveal');
+      } catch (e) {
+        console.error('Analytics error:', e);
+        document.getElementById('ban-rankings').innerHTML = '<div class="feed-empty"><p>Error loading analytics.</p></div>';
+      }
+    }
+
+    loadAnalytics();
+  </script>
+  <script src="js/themes.js"></script>
+  <script src="js/toolbar.js"></script>
+</body>
+</html>

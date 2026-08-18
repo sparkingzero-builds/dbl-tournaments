@@ -94,9 +94,9 @@ const Toolbar = (() => {
     try {
       const { data } = await supabaseClient
         .from('player_points')
-        .select('player_name, total_points, wins, losses')
-        .ilike('player_name', `%${query}%`)
-        .order('total_points', { ascending: false })
+        .select('discord_username, balance, lifetime_earned')
+        .ilike('discord_username', `%${query}%`)
+        .order('lifetime_earned', { ascending: false })
         .limit(10);
 
       if (!data || data.length === 0) {
@@ -105,9 +105,9 @@ const Toolbar = (() => {
       }
 
       results.innerHTML = data.map(p => `
-        <a href="profile.html?player=${encodeURIComponent(p.player_name)}" class="ps-result">
-          <span class="ps-name">${p.player_name}</span>
-          <span class="ps-stats">${p.total_points || 0} pts · ${p.wins || 0}W ${p.losses || 0}L</span>
+        <a href="profile.html?player=${encodeURIComponent(p.discord_username)}" class="ps-result">
+          <span class="ps-name">${p.discord_username}</span>
+          <span class="ps-stats">${p.lifetime_earned || 0} pts earned</span>
         </a>
       `).join('');
     } catch (e) {

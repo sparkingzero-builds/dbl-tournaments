@@ -135,6 +135,8 @@
             <a href="tierlist.html">Tier List</a>
             <a href="characters.html" class="active">Characters</a>
             <a href="season.html">Season</a>
+            <a href="feed.html">Live Feed</a>
+            <a href="analytics.html">Ban Analytics</a>
           </div>
         </li>
       </ul>
@@ -211,7 +213,7 @@
     async function loadUsageStats() {
       try {
         const { data: signups } = await supabaseClient
-          .from('tournament_signups')
+          .from('signups')
           .select('team');
 
         if (!signups || signups.length === 0) return;

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Feed — DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    .feed-header {
+      text-align: center;
+      padding: 40px 0 20px;
+    }
+    .feed-title {
+      font-size: clamp(24px, 4vw, 36px);
+      color: var(--cyan);
+      text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+      margin-bottom: 6px;
+    }
+    .feed-live-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: var(--green);
+      border-radius: 50%;
+      margin-right: 8px;
+      animation: livePulse 1.5s ease infinite;
+    }
+    @keyframes livePulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(46, 213, 115, 0.5); }
+      50% { box-shadow: 0 0 0 8px rgba(46, 213, 115, 0); }
+    }
+    .feed-filters {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .feed-filter {
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 16px;
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .feed-filter:hover { color: var(--text); border-color: var(--muted); }
+    .feed-filter.active { background: var(--cyan); border-color: var(--cyan); color: #000; }
+    .feed-list {
+      max-width: 700px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .feed-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      animation: feedIn 0.3s ease;
+    }
+    @keyframes feedIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .feed-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--bg-2);
+    }
+    .feed-icon.signup { background: rgba(0, 229, 255, 0.15); }
+    .feed-icon.match { background: rgba(255, 215, 64, 0.15); }
+    .feed-icon.ban { background: rgba(255, 45, 120, 0.15); }
+    .feed-icon.tournament { background: rgba(95, 124, 255, 0.15); }
+    .feed-body {
+      flex: 1;
+      min-width: 0;
+    }
+    .feed-text {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.4;
+    }
+    .feed-text a { color: var(--cyan); }
+    .feed-time {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .feed-empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 60px 20px;
+    }
+    @media (max-width: 600px) {
+      .feed-item { padding: 10px 12px; gap: 10px; }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">&#9776;</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+        <li class="nav-dropdown">
+          <a href="#" class="active">More ▾</a>
+          <div class="nav-dropdown-menu">
+            <a href="compare.html">Compare</a>
+            <a href="shop.html">Shop</a>
+            <a href="tierlist.html">Tier List</a>
+            <a href="characters.html">Characters</a>
+            <a href="season.html">Season</a>
+            <a href="feed.html" class="active">Live Feed</a>
+            <a href="analytics.html">Ban Analytics</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="particles-bg" id="particles"></div>
+
+  <main class="page container page-enter">
+    <div class="feed-header">
+      <h1 class="feed-title"><span class="feed-live-dot"></span>Live Feed</h1>
+      <p class="text-muted">Real-time tournament activity</p>
+    </div>
+
+    <div class="feed-filters">
+      <button class="feed-filter active" data-type="all" onclick="filterFeed('all')">All</button>
+      <button class="feed-filter" data-type="signup" onclick="filterFeed('signup')">Signups</button>
+      <button class="feed-filter" data-type="match" onclick="filterFeed('match')">Matches</button>
+      <button class="feed-filter" data-type="ban" onclick="filterFeed('ban')">Bans</button>
+      <button class="feed-filter" data-type="tournament" onclick="filterFeed('tournament')">Tournaments</button>
+    </div>
+
+    <div id="feed-list" class="feed-list">
+      <div class="loader"><div class="loader-spinner"></div></div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/particles.js"></script>
+  <script>
+    initParticles(document.getElementById('particles'));
+
+    let allEvents = [];
+    let activeFilter = 'all';
+
+    function timeAgo(dateStr) {
+      const diff = Date.now() - new Date(dateStr).getTime();
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return 'just now';
+      if (mins < 60) return `${mins}m ago`;
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return `${hrs}h ago`;
+      const days = Math.floor(hrs / 24);
+      return `${days}d ago`;
+    }
+
+    function profileLink(name) {
+      return `<a href="profile.html?player=${encodeURIComponent(name)}">${name}</a>`;
+    }
+
+    function renderFeed() {
+      const list = document.getElementById('feed-list');
+      const filtered = activeFilter === 'all' ? allEvents : allEvents.filter(e => e.type === activeFilter);
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="feed-empty"><h3>No Activity Yet</h3><p>Events will appear here as tournaments run.</p></div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(e => `
+        <div class="feed-item">
+          <div class="feed-icon ${e.type}">${e.icon}</div>
+          <div class="feed-body">
+            <div class="feed-text">${e.text}</div>
+            <div class="feed-time">${timeAgo(e.time)}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterFeed(type) {
+      activeFilter = type;
+      document.querySelectorAll('.feed-filter').forEach(b => b.classList.toggle('active', b.dataset.type === type));
+      renderFeed();
+    }
+
+    async function loadFeed() {
+      try {
+        const events = [];
+
+        const { data: tournaments } = await supabaseClient
+          .from('tournaments')
+          .select('id, name, status, created_at')
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        (tournaments || []).forEach(t => {
+          events.push({
+            type: 'tournament',
+            icon: '&#127942;',
+            text: `Tournament <strong>${t.name}</strong> ${t.status === 'completed' ? 'completed' : t.status === 'signup' ? 'opened for signups' : 'is ' + t.status}`,
+            time: t.created_at
+          });
+        });
+
+        const recentTournaments = (tournaments || []).slice(0, 3);
+        for (const t of recentTournaments) {
+          const { data: signups } = await supabaseClient
+            .from('signups')
+            .select('discord_username, created_at, team')
+            .eq('tournament_id', t.id)
+            .order('created_at', { ascending: false })
+            .limit(20);
+
+          (signups || []).forEach(s => {
+            const teamNames = (s.team || []).map(c => c.name).slice(0, 3).join(', ');
+            events.push({
+              type: 'signup',
+              icon: '&#9998;',
+              text: `${profileLink(s.discord_username)} signed up for <strong>${t.name}</strong>${teamNames ? ` with ${teamNames}` : ''}`,
+              time: s.created_at
+            });
+          });
+
+          const { data: matches } = await supabaseClient
+            .from('matches')
+            .select('*, player1:signups!matches_player1_id_fkey(discord_username), player2:signups!matches_player2_id_fkey(discord_username)')
+            .eq('tournament_id', t.id)
+            .not('winner_id', 'is', null)
+            .order('updated_at', { ascending: false })
+            .limit(20);
+
+          (matches || []).forEach(m => {
+            const winner = m.winner_id === m.player1_id ? m.player1?.discord_username : m.player2?.discord_username;
+            const loser = m.winner_id === m.player1_id ? m.player2?.discord_username : m.player1?.discord_username;
+            if (winner && loser) {
+              events.push({
+                type: 'match',
+                icon: '&#9876;',
+                text: `${profileLink(winner)} defeated ${profileLink(loser)} in Round ${m.round}`,
+                time: m.updated_at || m.created_at
+              });
+            }
+          });
+
+          const { data: bans } = await supabaseClient
+            .from('signups')
+            .select('discord_username, bans, updated_at')
+            .eq('tournament_id', t.id);
+
+          (bans || []).forEach(s => {
+            if (s.bans && Array.isArray(s.bans) && s.bans.length > 0) {
+              const banNames = s.bans.map(b => b.name || 'Unknown').join(', ');
+              events.push({
+                type: 'ban',
+                icon: '&#128683;',
+                text: `${profileLink(s.discord_username)}'s team was hit with bans: <strong>${banNames}</strong>`,
+                time: s.updated_at || s.created_at
+              });
+            }
+          });
+        }
+
+        allEvents = events.sort((a, b) => new Date(b.time) - new Date(a.time));
+        renderFeed();
+
+        // Subscribe to realtime for the most recent tournament
+        if (recentTournaments.length > 0) {
+          const latest = recentTournaments[0];
+          subscribeToChanges(latest.id, {
+            onSignup: () => loadFeed(),
+            onMatch: () => loadFeed(),
+            onTournament: () => loadFeed()
+          });
+        }
+
+      } catch (e) {
+        console.error('Feed error:', e);
+        document.getElementById('feed-list').innerHTML = '<div class="feed-empty"><p>Error loading feed.</p></div>';
+      }
+    }
+
+    loadFeed();
+  </script>
+  <script src="js/themes.js"></script>
+  <script src="js/toolbar.js"></script>
+</body>
+</html>

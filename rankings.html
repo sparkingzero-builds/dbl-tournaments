@@ -26,6 +26,91 @@
       font-size: 14px;
     }
 
+    .view-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .view-tab {
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 20px;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); border-color: var(--muted); }
+    .view-tab.active { background: var(--cyan); border-color: var(--cyan); color: #000; }
+
+    .season-select-row {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .season-select-row select {
+      min-width: 200px;
+    }
+
+    .hall-of-fame {
+      max-width: 800px;
+      margin: 0 auto 32px;
+    }
+    .hof-title {
+      font-size: 18px;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .hof-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .hof-card {
+      background: var(--panel);
+      border: 1px solid var(--gold);
+      border-radius: var(--radius);
+      padding: 18px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hof-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), #ff6b00);
+    }
+    .hof-season {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .hof-player {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--gold);
+    }
+    .hof-player a { color: var(--gold); }
+    .hof-player a:hover { color: #fff; }
+    .hof-xp {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
     .search-bar {
       max-width: 400px;
       margin: 0 auto 24px;
@@ -255,6 +340,8 @@
             <a href="tierlist.html">Tier List</a>
             <a href="characters.html">Characters</a>
             <a href="season.html">Season</a>
+            <a href="feed.html">Live Feed</a>
+            <a href="analytics.html">Ban Analytics</a>
           </div>
         </li>
       </ul>
@@ -269,15 +356,43 @@
       <p class="rankings-subtitle">Competitive leaderboard based on match performance</p>
     </div>
 
-    <div id="accolades-container"></div>
+    <div class="view-tabs">
+      <button class="view-tab active" onclick="switchView('elo')">ELO Rankings</button>
+      <button class="view-tab" onclick="switchView('season')">Season Leaderboard</button>
+      <button class="view-tab" onclick="switchView('hof')">Hall of Fame</button>
+    </div>
 
-    <div class="search-bar">
+    <div id="elo-view">
+      <div id="accolades-container"></div>
+
+      <div class="search-bar">
       <span class="search-icon">&#128269;</span>
       <input type="search" id="player-search" placeholder="Search player..." />
     </div>
 
     <div class="leaderboard" id="leaderboard">
       <div class="loader"><div class="loader-spinner"></div></div>
+    </div>
+    </div>
+
+    <div id="season-view" style="display:none;">
+      <div class="season-select-row">
+        <select id="season-select" class="input" onchange="loadSeasonLeaderboard()">
+          <option value="">Loading seasons...</option>
+        </select>
+      </div>
+      <div class="leaderboard" id="season-leaderboard">
+        <div class="empty-state"><p>Select a season to view its leaderboard.</p></div>
+      </div>
+    </div>
+
+    <div id="hof-view" style="display:none;">
+      <div class="hall-of-fame">
+        <h2 class="hof-title">Hall of Fame</h2>
+        <div id="hof-grid" class="hof-grid">
+          <div class="loader"><div class="loader-spinner"></div></div>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -438,6 +553,106 @@
         `;
       } catch (e) {
         console.warn('Accolades load error:', e);
+      }
+    }
+
+    function switchView(view) {
+      document.querySelectorAll('.view-tab').forEach((t, i) => {
+        t.classList.toggle('active', ['elo', 'season', 'hof'][i] === view);
+      });
+      document.getElementById('elo-view').style.display = view === 'elo' ? '' : 'none';
+      document.getElementById('season-view').style.display = view === 'season' ? '' : 'none';
+      document.getElementById('hof-view').style.display = view === 'hof' ? '' : 'none';
+      if (view === 'season' && !seasonsLoaded) loadSeasons();
+      if (view === 'hof' && !hofLoaded) loadHallOfFame();
+    }
+
+    let seasonsLoaded = false;
+    let hofLoaded = false;
+
+    async function loadSeasons() {
+      try {
+        const seasons = await db.getAllSeasons();
+        const select = document.getElementById('season-select');
+        if (!seasons.length) {
+          select.innerHTML = '<option value="">No seasons yet</option>';
+          seasonsLoaded = true;
+          return;
+        }
+        select.innerHTML = seasons.map(s =>
+          `<option value="${s.id}">${s.name} ${s.status === 'active' ? '(Active)' : ''}</option>`
+        ).join('');
+        seasonsLoaded = true;
+        loadSeasonLeaderboard();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function loadSeasonLeaderboard() {
+      const seasonId = document.getElementById('season-select').value;
+      const container = document.getElementById('season-leaderboard');
+      if (!seasonId) { container.innerHTML = '<div class="empty-state"><p>Select a season.</p></div>'; return; }
+
+      container.innerHTML = '<div class="loader"><div class="loader-spinner"></div></div>';
+      try {
+        const lb = await db.getSeasonLeaderboard(seasonId);
+        if (!lb.length) {
+          container.innerHTML = '<div class="empty-state"><p>No players in this season yet.</p></div>';
+          return;
+        }
+        let html = `<div class="lb-header"><span>#</span><span>Player</span><span>XP</span><span>Tier</span><span></span></div>`;
+        lb.forEach((p, i) => {
+          const rank = i + 1;
+          const topClass = rank === 1 ? 'top-1' : rank === 2 ? 'top-2' : rank === 3 ? 'top-3' : '';
+          const tier = Math.floor(p.xp / 100);
+          html += `<div class="lb-row ${topClass}">
+            <div class="lb-rank">${rank}</div>
+            <div class="lb-player"><a class="lb-name" href="profile.html?player=${encodeURIComponent(p.discord_username)}">${p.discord_username}</a></div>
+            <div class="lb-elo">${p.xp}</div>
+            <div class="lb-record">Tier ${tier}</div>
+            <div class="lb-tourneys">${(p.claimed_tiers || []).length} claimed</div>
+          </div>`;
+        });
+        container.innerHTML = html;
+      } catch (e) {
+        container.innerHTML = '<div class="empty-state"><p>Error loading season data.</p></div>';
+      }
+    }
+
+    async function loadHallOfFame() {
+      try {
+        const seasons = await db.getAllSeasons();
+        const completed = seasons.filter(s => s.status === 'completed');
+        const grid = document.getElementById('hof-grid');
+
+        if (!completed.length) {
+          grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><h3>No Completed Seasons</h3><p>Season champions will be immortalized here.</p></div>';
+          hofLoaded = true;
+          return;
+        }
+
+        const cards = [];
+        for (const s of completed) {
+          const lb = await db.getSeasonLeaderboard(s.id);
+          if (lb.length > 0) {
+            cards.push({ season: s, champion: lb[0] });
+          }
+        }
+
+        grid.innerHTML = cards.length === 0
+          ? '<div class="empty-state" style="grid-column:1/-1;"><p>No season data yet.</p></div>'
+          : cards.map(c => `
+            <div class="hof-card">
+              <div class="hof-season">${c.season.name}</div>
+              <div class="hof-player"><a href="profile.html?player=${encodeURIComponent(c.champion.discord_username)}">${c.champion.discord_username}</a></div>
+              <div class="hof-xp">${c.champion.xp} XP</div>
+            </div>
+          `).join('');
+
+        hofLoaded = true;
+      } catch (e) {
+        document.getElementById('hof-grid').innerHTML = '<div class="empty-state"><p>Error loading hall of fame.</p></div>';
       }
     }
 

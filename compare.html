@@ -225,6 +225,8 @@
             <a href="tierlist.html">Tier List</a>
             <a href="characters.html">Characters</a>
             <a href="season.html">Season</a>
+            <a href="feed.html">Live Feed</a>
+            <a href="analytics.html">Ban Analytics</a>
           </div>
         </li>
       </ul>
@@ -259,7 +261,7 @@
   <script src="js/themes.js"></script>
   <script src="js/particles.js"></script>
   <script>
-    if (typeof initParticles === 'function') initParticles();
+    if (typeof initParticles === 'function') initParticles(document.getElementById('particles'));
 
     async function runCompare() {
       const u1 = document.getElementById('player1-input').value.trim();
