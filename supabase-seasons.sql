@@ -47,4 +47,6 @@ CREATE POLICY "Admins manage season rewards" ON season_rewards FOR ALL USING (is
 
 ALTER TABLE season_progress ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone can read season progress" ON season_progress FOR SELECT USING (true);
+CREATE POLICY "Anyone can insert season progress" ON season_progress FOR INSERT WITH CHECK (true);
+CREATE POLICY "Anyone can update season progress" ON season_progress FOR UPDATE USING (true) WITH CHECK (true);
 CREATE POLICY "Admins manage season progress" ON season_progress FOR ALL USING (is_admin());

@@ -780,10 +780,9 @@ const db = {
       .from('season_progress')
       .update({ claimed_tiers: newClaimed })
       .eq('id', progress.id)
-      .select()
-      .single();
+      .select();
     if (error) throw error;
-    return data;
+    return data?.[0] || { ...progress, claimed_tiers: newClaimed };
   },
 
   async getSeasonLeaderboard(seasonId) {
