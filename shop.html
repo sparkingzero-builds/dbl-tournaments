@@ -671,13 +671,18 @@
       hype_bomb: 'Social',
       profile_bg: 'Backgrounds',
       badge: 'Badges',
-      alt_art: 'Alt Art'
+      alt_art: 'Alt Art',
+      double_down: 'Power-Ups',
+      vegetas_pride: 'Power-Ups',
+      ban_immunity: 'Power-Ups',
+      scouter: 'Power-Ups'
     };
 
     const TYPE_ICONS = {
       flair_border: '🖼️', flair_title: '✨', aura: '🔥', victory_quote: '💬',
       kings_commentary: '👑', golden_name: '⭐', hype_bomb: '💥',
-      profile_bg: '🎨', badge: '🏅'
+      profile_bg: '🎨', badge: '🏅',
+      double_down: '🎲', vegetas_pride: '💪', ban_immunity: '🛡️', scouter: '📡'
     };
 
     const CATEGORY_MAP = {
@@ -690,7 +695,11 @@
       golden_name: 'social',
       hype_bomb: 'effects',
       badge: 'cosmetics',
-      alt_art: 'cosmetics'
+      alt_art: 'cosmetics',
+      double_down: 'effects',
+      vegetas_pride: 'effects',
+      ban_immunity: 'effects',
+      scouter: 'effects'
     };
 
     const CATEGORY_LABELS = {
@@ -728,14 +737,18 @@
         case 'hype_bomb': return '💥';
         case 'profile_bg': return '🌌';
         case 'badge': return meta.icon || '🏅';
+        case 'double_down': return '🎲';
+        case 'vegetas_pride': return '💪';
+        case 'ban_immunity': return '🛡️';
+        case 'scouter': return '📡';
         default: return '🏆';
       }
     }
 
     function getBadge(item) {
       if (item.metadata?.exclusive) return '<div class="card-badge exclusive">EXCLUSIVE</div>';
-      const rarity = getRarity(item);
-      if (rarity === 'legendary') return '<div class="card-badge hot">HOT</div>';
+      if (item.cost >= 2000) return '<div class="card-badge hot">HOT</div>';
+      if (item.cost === 0) return '<div class="card-badge new">FREE</div>';
       return '';
     }
 
