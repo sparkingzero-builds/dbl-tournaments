@@ -436,27 +436,20 @@ const db = {
     const existing = await this.getPoints(username);
     const hasRecord = existing.id !== undefined;
 
-    if (hasRecord) {
-      const updates = {
-        balance: existing.balance + amount,
-        lifetime_earned: amount > 0 ? existing.lifetime_earned + amount : existing.lifetime_earned,
+    const newBalance = (existing.balance || 0) + amount;
+    const newLifetime = amount > 0
+      ? (existing.lifetime_earned || 0) + amount
+      : (existing.lifetime_earned || 0);
+
+    const { error } = await supabaseClient
+      .from('player_points')
+      .upsert({
+        discord_username: username,
+        balance: newBalance,
+        lifetime_earned: newLifetime,
         updated_at: new Date().toISOString()
-      };
-      const { error } = await supabaseClient
-        .from('player_points')
-        .update(updates)
-        .eq('discord_username', username);
-      if (error) throw error;
-    } else {
-      const { error } = await supabaseClient
-        .from('player_points')
-        .insert({
-          discord_username: username,
-          balance: amount,
-          lifetime_earned: Math.max(amount, 0)
-        });
-      if (error) throw error;
-    }
+      }, { onConflict: 'discord_username' });
+    if (error) throw error;
 
     const transaction = {
       discord_username: username,
