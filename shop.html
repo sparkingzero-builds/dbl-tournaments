@@ -10,524 +10,266 @@
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/themes.css" />
   <style>
-    .shop-hero {
-      text-align: center;
-      padding: 30px 0 10px;
-    }
+    .shop-hero { text-align: center; padding: 30px 0 10px; }
     .shop-hero h1 {
       font-size: clamp(28px, 5vw, 48px);
       background: linear-gradient(135deg, var(--cyan), var(--pink), var(--gold));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 4px;
-      letter-spacing: 2px;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: 4px; letter-spacing: 2px;
     }
     .shop-hero .shop-subtitle {
-      color: var(--muted);
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
+      color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.15em;
     }
 
     .wallet-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin: 20px 0 24px;
-      padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+      margin: 20px 0 24px; padding: 14px 20px;
       background: linear-gradient(135deg, rgba(255,215,64,0.08), rgba(0,229,255,0.05));
-      border: 1px solid rgba(255,215,64,0.2);
-      border-radius: var(--radius);
+      border: 1px solid rgba(255,215,64,0.2); border-radius: var(--radius);
     }
-    .wallet-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .wallet-left { display: flex; align-items: center; gap: 12px; }
     .wallet-icon {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, var(--gold), #ff8c00);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      box-shadow: 0 0 16px rgba(255,215,0,0.3);
+      width: 36px; height: 36px; background: linear-gradient(135deg, var(--gold), #ff8c00);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 18px; box-shadow: 0 0 16px rgba(255,215,0,0.3);
     }
-    .wallet-label {
-      font-size: 11px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
+    .wallet-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
     .wallet-amount {
-      font-family: 'Exo 2', sans-serif;
-      font-size: 28px;
-      font-weight: 900;
-      color: var(--gold);
-      text-shadow: 0 0 12px rgba(255,215,0,0.2);
+      font-family: 'Exo 2', sans-serif; font-size: 28px; font-weight: 900;
+      color: var(--gold); text-shadow: 0 0 12px rgba(255,215,0,0.2);
     }
-    .wallet-right {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
+    .wallet-right { display: flex; gap: 8px; align-items: center; }
     .wallet-username {
-      font-size: 13px;
-      color: var(--muted);
-      padding: 6px 14px;
-      background: var(--bg);
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--line);
+      font-size: 13px; color: var(--muted); padding: 6px 14px;
+      background: var(--bg); border-radius: var(--radius-sm); border: 1px solid var(--line);
     }
     .btn-logout {
-      background: none;
-      border: 1px solid var(--line);
-      color: var(--muted);
-      padding: 6px 14px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.2s;
+      background: none; border: 1px solid var(--line); color: var(--muted);
+      padding: 6px 14px; border-radius: var(--radius-sm); cursor: pointer; font-size: 12px; transition: all 0.2s;
     }
-    .btn-logout:hover {
-      border-color: var(--pink);
-      color: var(--pink);
-    }
+    .btn-logout:hover { border-color: var(--pink); color: var(--pink); }
 
     .shop-tabs {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 20px;
-      overflow-x: auto;
-      padding-bottom: 4px;
+      display: flex; gap: 6px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px;
     }
     .shop-tab {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      color: var(--muted);
-      font-family: 'Exo 2', sans-serif;
-      font-weight: 700;
-      font-size: 12px;
-      padding: 10px 18px;
-      border-radius: var(--radius);
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      white-space: nowrap;
-      transition: all 0.2s;
+      background: var(--panel); border: 1px solid var(--line); color: var(--muted);
+      font-family: 'Exo 2', sans-serif; font-weight: 700; font-size: 12px;
+      padding: 10px 18px; border-radius: var(--radius); cursor: pointer;
+      text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; transition: all 0.2s;
     }
-    .shop-tab:hover {
-      border-color: var(--cyan);
-      color: var(--text);
-    }
+    .shop-tab:hover { border-color: var(--cyan); color: var(--text); }
     .shop-tab.active {
       background: linear-gradient(135deg, rgba(0,229,255,0.15), rgba(0,229,255,0.05));
-      border-color: var(--cyan);
-      color: var(--cyan);
-      box-shadow: 0 0 12px rgba(0,229,255,0.15);
+      border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 12px rgba(0,229,255,0.15);
     }
     .shop-tab .tab-count {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 18px;
-      height: 18px;
-      font-size: 10px;
-      font-weight: 800;
-      background: var(--cyan);
-      color: var(--bg);
-      border-radius: 999px;
-      margin-left: 6px;
-      padding: 0 5px;
+      display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px;
+      font-size: 10px; font-weight: 800; background: var(--cyan); color: var(--bg);
+      border-radius: 999px; margin-left: 6px; padding: 0 5px;
     }
 
-    .shop-section-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 28px 0 16px;
-    }
+    .shop-section-header { display: flex; align-items: center; gap: 12px; margin: 28px 0 16px; }
     .shop-section-header:first-child { margin-top: 0; }
-    .shop-section-header h2 {
-      font-size: 16px;
-      color: var(--text);
-      letter-spacing: 0.1em;
-      white-space: nowrap;
-    }
-    .shop-section-header::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(90deg, var(--line), transparent);
-    }
+    .shop-section-header h2 { font-size: 16px; color: var(--text); letter-spacing: 0.1em; white-space: nowrap; }
+    .shop-section-header::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--line), transparent); }
 
-    .item-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 10px;
-      margin-bottom: 24px;
-    }
-    .item-grid.featured {
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 12px;
-    }
+    .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-bottom: 24px; }
+    .item-grid.featured { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
 
     .item-card {
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      aspect-ratio: 3 / 4;
-      display: flex;
-      flex-direction: column;
+      position: relative; border-radius: 12px; overflow: hidden; cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s; aspect-ratio: 3 / 4;
+      display: flex; flex-direction: column;
     }
-    .item-card:hover {
-      transform: translateY(-4px) scale(1.02);
-      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-    }
-    .item-card.featured-card {
-      aspect-ratio: 4 / 5;
-    }
+    .item-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
+    .item-card.featured-card { aspect-ratio: 4 / 5; }
 
     .item-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 12px;
-      padding: 2px;
+      content: ''; position: absolute; inset: 0; border-radius: 12px; padding: 2px;
       background: var(--rarity-gradient);
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      z-index: 2;
-      pointer-events: none;
+      -webkit-mask-composite: xor; mask-composite: exclude; z-index: 2; pointer-events: none;
     }
 
-    .item-card[data-rarity="common"] {
-      --rarity-gradient: linear-gradient(135deg, #6b7280, #9ca3af);
-      --rarity-bg: linear-gradient(160deg, #2a2d35 0%, #1f2228 50%, #2a2d35 100%);
-      --rarity-color: #9ca3af;
-    }
-    .item-card[data-rarity="uncommon"] {
-      --rarity-gradient: linear-gradient(135deg, #22c55e, #16a34a);
-      --rarity-bg: linear-gradient(160deg, #0f2a1a 0%, #0a1f12 50%, #1a3d26 100%);
-      --rarity-color: #22c55e;
-    }
-    .item-card[data-rarity="rare"] {
-      --rarity-gradient: linear-gradient(135deg, #3b82f6, #2563eb);
-      --rarity-bg: linear-gradient(160deg, #0f1a3a 0%, #0a1228 50%, #1a2d55 100%);
-      --rarity-color: #3b82f6;
-    }
-    .item-card[data-rarity="epic"] {
-      --rarity-gradient: linear-gradient(135deg, #a855f7, #7c3aed);
-      --rarity-bg: linear-gradient(160deg, #1f0a3a 0%, #150828 50%, #2d1455 100%);
-      --rarity-color: #a855f7;
-    }
-    .item-card[data-rarity="legendary"] {
-      --rarity-gradient: linear-gradient(135deg, #f59e0b, #d97706, #fbbf24);
-      --rarity-bg: linear-gradient(160deg, #2a1a05 0%, #1f1200 50%, #3d2a0a 100%);
-      --rarity-color: #f59e0b;
-    }
-    .item-card[data-rarity="mythic"] {
-      --rarity-gradient: linear-gradient(135deg, #ff2d78, #ff6b00, #ffd700);
-      --rarity-bg: linear-gradient(160deg, #2a0515 0%, #1f0008 50%, #3d0a20 100%);
-      --rarity-color: #ff2d78;
-    }
+    .item-card[data-rarity="common"] { --rarity-gradient: linear-gradient(135deg, #6b7280, #9ca3af); --rarity-bg: linear-gradient(160deg, #2a2d35 0%, #1f2228 50%, #2a2d35 100%); --rarity-color: #9ca3af; }
+    .item-card[data-rarity="uncommon"] { --rarity-gradient: linear-gradient(135deg, #22c55e, #16a34a); --rarity-bg: linear-gradient(160deg, #0f2a1a 0%, #0a1f12 50%, #1a3d26 100%); --rarity-color: #22c55e; }
+    .item-card[data-rarity="rare"] { --rarity-gradient: linear-gradient(135deg, #3b82f6, #2563eb); --rarity-bg: linear-gradient(160deg, #0f1a3a 0%, #0a1228 50%, #1a2d55 100%); --rarity-color: #3b82f6; }
+    .item-card[data-rarity="epic"] { --rarity-gradient: linear-gradient(135deg, #a855f7, #7c3aed); --rarity-bg: linear-gradient(160deg, #1f0a3a 0%, #150828 50%, #2d1455 100%); --rarity-color: #a855f7; }
+    .item-card[data-rarity="legendary"] { --rarity-gradient: linear-gradient(135deg, #f59e0b, #d97706, #fbbf24); --rarity-bg: linear-gradient(160deg, #2a1a05 0%, #1f1200 50%, #3d2a0a 100%); --rarity-color: #f59e0b; }
+    .item-card[data-rarity="mythic"] { --rarity-gradient: linear-gradient(135deg, #ff2d78, #ff6b00, #ffd700); --rarity-bg: linear-gradient(160deg, #2a0515 0%, #1f0008 50%, #3d0a20 100%); --rarity-color: #ff2d78; }
 
     .card-visual {
-      flex: 1;
-      background: var(--rarity-bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
+      flex: 1; background: var(--rarity-bg); display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
     }
     .card-visual::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 50%;
-      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-      pointer-events: none;
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); pointer-events: none;
     }
-    .card-icon {
-      font-size: 56px;
-      z-index: 1;
-      filter: drop-shadow(0 4px 20px rgba(0,0,0,0.5));
-      transition: transform 0.3s;
-    }
-    .item-card:hover .card-icon {
-      transform: scale(1.15);
-    }
-    .card-icon.featured-icon {
-      font-size: 72px;
-    }
+    .card-icon { z-index: 1; transition: transform 0.3s; }
+    .item-card:hover .card-icon { transform: scale(1.1); }
 
-    .card-bg-effect {
-      position: absolute;
-      inset: 0;
-      opacity: 0.3;
-      z-index: 0;
-    }
-    .card-bg-effect.aura-effect {
-      background: radial-gradient(circle at 50% 60%, var(--rarity-color) 0%, transparent 60%);
-      animation: aura-pulse 3s ease-in-out infinite;
-    }
-    .card-bg-effect.shimmer-effect {
-      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%);
-      background-size: 200% 200%;
-      animation: shimmer 3s ease-in-out infinite;
-    }
-    @keyframes aura-pulse {
-      0%, 100% { opacity: 0.2; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(1.1); }
-    }
-    @keyframes shimmer {
-      0% { background-position: -200% -200%; }
-      100% { background-position: 200% 200%; }
-    }
+    .card-bg-effect { position: absolute; inset: 0; opacity: 0.3; z-index: 0; }
+    .card-bg-effect.aura-effect { background: radial-gradient(circle at 50% 60%, var(--rarity-color) 0%, transparent 60%); animation: aura-pulse 3s ease-in-out infinite; }
+    .card-bg-effect.shimmer-effect { background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%); background-size: 200% 200%; animation: shimmer 3s ease-in-out infinite; }
+    @keyframes aura-pulse { 0%, 100% { opacity: 0.2; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.1); } }
+    @keyframes shimmer { 0% { background-position: -200% -200%; } 100% { background-position: 200% 200%; } }
 
     .card-badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 3;
-      font-family: 'Exo 2', sans-serif;
-      font-size: 9px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      padding: 4px 10px;
-      border-radius: 4px;
-      color: #000;
+      position: absolute; top: 10px; left: 10px; z-index: 3;
+      font-family: 'Exo 2', sans-serif; font-size: 9px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.15em; padding: 4px 10px; border-radius: 4px; color: #000;
     }
-    .card-badge.hot {
-      background: linear-gradient(135deg, #ff4500, #ff8c00);
-      box-shadow: 0 0 10px rgba(255,69,0,0.4);
-    }
-    .card-badge.new {
-      background: linear-gradient(135deg, #00e5ff, #00b8d4);
-      box-shadow: 0 0 10px rgba(0,229,255,0.4);
-    }
-    .card-badge.exclusive {
-      background: linear-gradient(135deg, #ffd700, #ff6b00);
-      box-shadow: 0 0 10px rgba(255,215,0,0.4);
-      animation: badge-glow 2s ease-in-out infinite;
-    }
-    @keyframes badge-glow {
-      0%, 100% { box-shadow: 0 0 6px rgba(255,215,0,0.4); }
-      50% { box-shadow: 0 0 16px rgba(255,215,0,0.8); }
-    }
+    .card-badge.hot { background: linear-gradient(135deg, #ff4500, #ff8c00); box-shadow: 0 0 10px rgba(255,69,0,0.4); }
+    .card-badge.new { background: linear-gradient(135deg, #00e5ff, #00b8d4); box-shadow: 0 0 10px rgba(0,229,255,0.4); }
+    .card-badge.exclusive { background: linear-gradient(135deg, #ffd700, #ff6b00); box-shadow: 0 0 10px rgba(255,215,0,0.4); animation: badge-glow 2s ease-in-out infinite; }
+    @keyframes badge-glow { 0%, 100% { box-shadow: 0 0 6px rgba(255,215,0,0.4); } 50% { box-shadow: 0 0 16px rgba(255,215,0,0.8); } }
 
-    .card-info {
-      background: rgba(10, 8, 20, 0.95);
-      padding: 10px 12px;
-      position: relative;
-      z-index: 1;
-    }
+    .card-info { background: rgba(10,8,20,0.95); padding: 10px 12px; position: relative; z-index: 1; }
     .card-name {
-      font-family: 'Exo 2', sans-serif;
-      font-weight: 800;
-      font-size: 13px;
-      color: var(--text);
-      text-transform: uppercase;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-bottom: 2px;
+      font-family: 'Exo 2', sans-serif; font-weight: 800; font-size: 13px; color: var(--text);
+      text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;
     }
-    .card-type {
-      font-size: 10px;
-      color: var(--rarity-color);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      font-weight: 600;
-    }
+    .card-type { font-size: 10px; color: var(--rarity-color); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
 
     .card-price-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: rgba(10, 8, 20, 0.98);
-      padding: 8px 12px;
-      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(10,8,20,0.98); padding: 8px 12px; border-top: 1px solid rgba(255,255,255,0.05);
     }
-    .card-price {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .card-price { display: flex; align-items: center; gap: 6px; }
     .price-coin {
-      width: 18px;
-      height: 18px;
-      background: linear-gradient(135deg, var(--gold), #ff8c00);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      box-shadow: 0 0 6px rgba(255,215,0,0.3);
+      width: 18px; height: 18px; background: linear-gradient(135deg, var(--gold), #ff8c00);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 10px; box-shadow: 0 0 6px rgba(255,215,0,0.3);
     }
-    .price-value {
-      font-family: 'Exo 2', sans-serif;
-      font-weight: 800;
-      font-size: 15px;
-      color: var(--gold);
-    }
+    .price-value { font-family: 'Exo 2', sans-serif; font-weight: 800; font-size: 15px; color: var(--gold); }
     .price-value.free { color: var(--green); }
     .btn-get {
-      background: var(--cyan);
-      color: #000;
-      border: none;
-      padding: 5px 14px;
-      border-radius: 6px;
-      font-family: 'Exo 2', sans-serif;
-      font-weight: 800;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
+      background: var(--cyan); color: #000; border: none; padding: 5px 14px; border-radius: 6px;
+      font-family: 'Exo 2', sans-serif; font-weight: 800; font-size: 11px;
+      text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s;
     }
-    .btn-get:hover:not(:disabled) {
-      background: #fff;
-      box-shadow: 0 0 12px rgba(0,229,255,0.4);
+    .btn-get:hover:not(:disabled) { background: #fff; box-shadow: 0 0 12px rgba(0,229,255,0.4); }
+    .btn-get:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; }
+
+    /* ===== DETAIL MODAL ===== */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+      align-items: center; justify-content: center; padding: 20px;
     }
-    .btn-get:disabled {
-      background: var(--line);
-      color: var(--muted);
-      cursor: not-allowed;
+    .modal-overlay.open { display: flex; animation: modalFadeIn 0.25s ease-out; }
+    @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal-card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+      max-width: 480px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative;
+      animation: modalSlideUp 0.3s ease-out;
+    }
+    @keyframes modalSlideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .modal-close {
+      position: absolute; top: 12px; right: 12px; z-index: 5;
+      width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line);
+      background: var(--bg); color: var(--muted); font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+    }
+    .modal-close:hover { border-color: var(--pink); color: var(--pink); }
+
+    .modal-visual {
+      height: 220px; display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden; border-radius: 16px 16px 0 0;
+    }
+    .modal-visual .card-bg-effect { position: absolute; inset: 0; opacity: 0.4; }
+    .modal-visual::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 60%;
+      background: linear-gradient(to top, var(--panel), transparent); pointer-events: none;
+    }
+    .modal-icon { z-index: 1; filter: drop-shadow(0 4px 24px rgba(0,0,0,0.5)); }
+
+    .modal-body { padding: 0 24px 24px; }
+
+    .modal-rarity-tag {
+      display: inline-block; font-family: 'Exo 2', sans-serif; font-size: 10px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.15em; padding: 4px 12px; border-radius: 4px;
+      margin-bottom: 8px;
     }
 
-    .login-overlay {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 60vh;
+    .modal-name {
+      font-family: 'Exo 2', sans-serif; font-size: 22px; font-weight: 900;
+      text-transform: uppercase; color: var(--text); margin-bottom: 4px; line-height: 1.2;
     }
+    .modal-type-label {
+      font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 16px;
+    }
+
+    .modal-desc {
+      color: var(--text); font-size: 14px; line-height: 1.6; margin-bottom: 16px;
+      padding: 14px 16px; background: var(--bg-2); border-radius: var(--radius-sm);
+      border-left: 3px solid var(--cyan);
+    }
+
+    .modal-preview-section {
+      margin-bottom: 16px; padding: 16px; background: var(--bg-2); border-radius: var(--radius);
+    }
+    .modal-preview-label {
+      font-family: 'Exo 2', sans-serif; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 10px;
+    }
+    .modal-preview-demo { display: flex; align-items: center; justify-content: center; min-height: 50px; }
+
+    .modal-price-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 0; border-top: 1px solid var(--line); margin-top: 8px;
+    }
+    .modal-price { display: flex; align-items: center; gap: 8px; }
+    .modal-price .price-coin { width: 24px; height: 24px; font-size: 12px; }
+    .modal-price .price-value { font-size: 22px; }
+    .modal-buy-btn {
+      background: var(--cyan); color: #000; border: none; padding: 12px 32px; border-radius: 8px;
+      font-family: 'Exo 2', sans-serif; font-weight: 800; font-size: 14px;
+      text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: all 0.2s;
+    }
+    .modal-buy-btn:hover:not(:disabled) { background: #fff; box-shadow: 0 0 20px rgba(0,229,255,0.4); transform: scale(1.03); }
+    .modal-buy-btn:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; }
+
+    /* Login */
+    .login-overlay { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; }
     .login-card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 48px 40px;
-      max-width: 400px;
-      width: 100%;
-      text-align: center;
+      background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+      padding: 48px 40px; max-width: 400px; width: 100%; text-align: center;
     }
-    .login-card h2 {
-      color: var(--cyan);
-      margin-bottom: 8px;
-      font-size: 22px;
-    }
-    .login-card p {
-      color: var(--muted);
-      font-size: 13px;
-      margin-bottom: 24px;
-    }
+    .login-card h2 { color: var(--cyan); margin-bottom: 8px; font-size: 22px; }
+    .login-card p { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
     .login-card input {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--line);
-      color: var(--text);
-      padding: 12px 16px;
-      border-radius: var(--radius-sm);
-      font-size: 15px;
-      margin-bottom: 12px;
-      text-align: center;
-      font-family: 'Chakra Petch', sans-serif;
+      width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--text);
+      padding: 12px 16px; border-radius: var(--radius-sm); font-size: 15px; margin-bottom: 12px;
+      text-align: center; font-family: 'Chakra Petch', sans-serif;
     }
-    .login-card input:focus {
-      outline: none;
-      border-color: var(--cyan);
-      box-shadow: 0 0 12px rgba(0,229,255,0.15);
-    }
+    .login-card input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 12px rgba(0,229,255,0.15); }
     .login-card .btn { width: 100%; padding: 12px; font-size: 14px; }
 
     .tab-section { display: none; }
     .tab-section.active { display: block; }
 
-    .inv-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 10px;
-    }
-    .inv-card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      overflow: hidden;
-      transition: border-color 0.2s;
-    }
+    .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+    .inv-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; transition: border-color 0.2s; }
     .inv-card:hover { border-color: var(--cyan); }
-    .inv-card-visual {
-      aspect-ratio: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg-2);
-      font-size: 40px;
-    }
+    .inv-card-visual { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: var(--bg-2); }
     .inv-card-info { padding: 10px 12px; }
-    .inv-card-name {
-      font-family: 'Exo 2', sans-serif;
-      font-weight: 700;
-      font-size: 12px;
-      color: var(--text);
-      text-transform: uppercase;
-      margin-bottom: 2px;
-    }
-    .inv-card-type {
-      font-size: 10px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 8px;
-    }
+    .inv-card-name { font-family: 'Exo 2', sans-serif; font-weight: 700; font-size: 12px; color: var(--text); text-transform: uppercase; margin-bottom: 2px; }
+    .inv-card-type { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
     .inv-equip-btn {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--line);
-      color: var(--muted);
-      padding: 6px;
-      border-radius: 6px;
-      font-family: 'Exo 2', sans-serif;
-      font-weight: 700;
-      font-size: 10px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.2s;
+      width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--muted);
+      padding: 6px; border-radius: 6px; font-family: 'Exo 2', sans-serif; font-weight: 700;
+      font-size: 10px; text-transform: uppercase; cursor: pointer; transition: all 0.2s;
     }
     .inv-equip-btn:hover { border-color: var(--cyan); color: var(--cyan); }
-    .inv-equip-btn.equipped {
-      border-color: var(--green);
-      color: var(--green);
-      background: rgba(46,213,115,0.08);
-    }
+    .inv-equip-btn.equipped { border-color: var(--green); color: var(--green); background: rgba(46,213,115,0.08); }
 
-    .tx-list {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    .tx-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--line);
-      font-size: 13px;
-    }
+    .tx-list { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+    .tx-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 13px; }
     .tx-row:last-child { border-bottom: none; }
     .tx-reason { color: var(--text); text-transform: capitalize; }
     .tx-date { color: var(--muted); font-size: 11px; }
@@ -535,12 +277,7 @@
     .tx-amount.positive { color: var(--green); }
     .tx-amount.negative { color: var(--pink); }
 
-    .empty-state {
-      text-align: center;
-      color: var(--muted);
-      padding: 60px 20px;
-      font-size: 14px;
-    }
+    .empty-state { text-align: center; color: var(--muted); padding: 60px 20px; font-size: 14px; }
 
     @media (max-width: 600px) {
       .item-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -550,6 +287,8 @@
       .wallet-right { justify-content: center; }
       .shop-tabs { gap: 4px; }
       .shop-tab { padding: 8px 12px; font-size: 11px; }
+      .modal-card { max-width: 100%; margin: 10px; }
+      .modal-visual { height: 160px; }
     }
     @media (min-width: 900px) {
       .item-grid { grid-template-columns: repeat(5, 1fr); }
@@ -589,6 +328,28 @@
   </nav>
 
   <div class="particles-bg" id="particles"></div>
+
+  <!-- Detail Modal -->
+  <div class="modal-overlay" id="item-modal" onclick="if(event.target===this)closeModal()">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-visual" id="modal-visual"></div>
+      <div class="modal-body">
+        <div class="modal-rarity-tag" id="modal-rarity"></div>
+        <div class="modal-name" id="modal-name"></div>
+        <div class="modal-type-label" id="modal-type"></div>
+        <div class="modal-desc" id="modal-desc"></div>
+        <div class="modal-preview-section" id="modal-preview-section">
+          <div class="modal-preview-label">Preview</div>
+          <div class="modal-preview-demo" id="modal-preview"></div>
+        </div>
+        <div class="modal-price-row">
+          <div class="modal-price" id="modal-price"></div>
+          <button class="modal-buy-btn" id="modal-buy-btn">GET</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <main class="page page-enter">
     <div class="container">
@@ -662,52 +423,45 @@
     let activeCategory = 'all';
 
     const TYPE_LABELS = {
-      flair_border: 'Flair Borders',
-      flair_title: 'Titles',
-      aura: 'Aura Effects',
-      victory_quote: 'Victory Quotes',
-      kings_commentary: 'Social',
-      golden_name: 'Social',
-      hype_bomb: 'Social',
-      profile_bg: 'Backgrounds',
-      badge: 'Badges',
-      alt_art: 'Alt Art',
-      double_down: 'Power-Ups',
-      vegetas_pride: 'Power-Ups',
-      ban_immunity: 'Power-Ups',
-      scouter: 'Power-Ups'
-    };
-
-    const TYPE_ICONS = {
-      flair_border: '🖼️', flair_title: '✨', aura: '🔥', victory_quote: '💬',
-      kings_commentary: '👑', golden_name: '⭐', hype_bomb: '💥',
-      profile_bg: '🎨', badge: '🏅',
-      double_down: '🎲', vegetas_pride: '💪', ban_immunity: '🛡️', scouter: '📡'
+      flair_border: 'Flair Border', flair_title: 'Title', aura: 'Aura Effect',
+      victory_quote: 'Victory Quote', kings_commentary: 'Social Perk',
+      golden_name: 'Social Perk', hype_bomb: 'Social Perk',
+      profile_bg: 'Profile Background', badge: 'Badge', alt_art: 'Alt Art',
+      double_down: 'Power-Up', vegetas_pride: 'Power-Up',
+      ban_immunity: 'Power-Up', scouter: 'Power-Up'
     };
 
     const CATEGORY_MAP = {
-      flair_title: 'cosmetics',
-      flair_border: 'cosmetics',
-      aura: 'effects',
-      profile_bg: 'cosmetics',
-      victory_quote: 'social',
-      kings_commentary: 'social',
-      golden_name: 'social',
-      hype_bomb: 'effects',
-      badge: 'cosmetics',
-      alt_art: 'cosmetics',
-      double_down: 'effects',
-      vegetas_pride: 'effects',
-      ban_immunity: 'effects',
-      scouter: 'effects'
+      flair_title: 'cosmetics', flair_border: 'cosmetics', aura: 'effects',
+      profile_bg: 'cosmetics', victory_quote: 'social', kings_commentary: 'social',
+      golden_name: 'social', hype_bomb: 'effects', badge: 'cosmetics', alt_art: 'cosmetics',
+      double_down: 'effects', vegetas_pride: 'effects', ban_immunity: 'effects', scouter: 'effects'
     };
 
     const CATEGORY_LABELS = {
-      all: '🔥 All Items',
-      cosmetics: '🎨 Cosmetics',
-      effects: '⚡ Effects',
-      social: '💬 Social'
+      all: '🔥 All Items', cosmetics: '🎨 Cosmetics', effects: '⚡ Effects', social: '💬 Social'
     };
+
+    const ITEM_DESCRIPTIONS = {
+      flair_border: 'Adds a custom animated border around your profile card on the Rankings and Profile pages. Other players will see this border whenever they view your stats.',
+      flair_title: 'A special title displayed below your username on your profile page and in tournament brackets. Show off your rank and style.',
+      aura: 'An animated glow effect that surrounds your name in the rankings table and profile card. Different colours for different vibes.',
+      victory_quote: 'A custom quote that appears on your profile and shows up in the Live Feed when you win a match. Talk your trash.',
+      kings_commentary: "Post a pinned commentary message in the Live Feed that appears with a gold crown icon. Your words, broadcast to the whole tournament.",
+      golden_name: 'Your username gets rendered in gold with a glowing effect across the entire site — rankings, brackets, profiles, feed. Everyone will know.',
+      hype_bomb: 'Drop an animated hype explosion in the Live Feed that everyone sees. A burst of energy particles and screen shake when you trigger it.',
+      profile_bg: 'Changes the background theme of your profile page. Each background has unique colours and atmospheric effects.',
+      badge: "A collectible badge displayed on your profile's badge wall. Some are earned, some are bought — all are bragging rights.",
+      double_down: 'Doubles the points you earn from your next tournament. Win points become 200, loss points become 50, champion bonus becomes 1000. One-time use.',
+      vegetas_pride: "When you lose a match, you earn warrior's bonus points (75 instead of 25). Lasts for one full tournament. Pride in defeat.",
+      ban_immunity: 'Protect one character on your team from being banned in the next tournament. Your opponent cannot ban your shielded pick. One-time use.',
+      scouter: "View your next opponent's recent match history and team picks before your match starts. Knowledge is power. One-time use."
+    };
+
+    function getItemDescription(item) {
+      if (item.description) return item.description;
+      return ITEM_DESCRIPTIONS[item.type] || 'A unique item from the DBL Tournament shop.';
+    }
 
     function getRarity(item) {
       const cost = item.cost || 0;
@@ -719,29 +473,216 @@
       return 'common';
     }
 
-    function getCardIcon(item) {
+    const RARITY_LABELS = {
+      common: 'Common', uncommon: 'Uncommon', rare: 'Rare',
+      epic: 'Epic', legendary: 'Legendary', mythic: 'Mythic'
+    };
+
+    const RARITY_COLORS = {
+      common: '#9ca3af', uncommon: '#22c55e', rare: '#3b82f6',
+      epic: '#a855f7', legendary: '#f59e0b', mythic: '#ff2d78'
+    };
+
+    function makeSVGIcon(item, size) {
+      const s = size || 80;
       const meta = item.metadata || {};
-      switch (item.type) {
+      const type = item.type;
+
+      switch(type) {
         case 'flair_border': {
-          const icons = { 'flair-fire': '🔥', 'flair-ice': '❄️', 'flair-royal': '👑', 'flair-shadow': '🌑', 'flair-champion': '🏆' };
-          return icons[meta.effect] || '🖼️';
+          const colors = {
+            'flair-fire': ['#ff4500','#ff8c00','#ffd700'],
+            'flair-ice': ['#00bfff','#e0f7ff','#4dd0e1'],
+            'flair-royal': ['#9b59b6','#ffd700','#e74c3c'],
+            'flair-shadow': ['#1a1a2e','#6c3483','#2c3e50'],
+            'flair-champion': ['#ffd700','#ff6b00','#ff0080']
+          };
+          const c = colors[meta.effect] || ['#00e5ff','#ff2d78','#ffd700'];
+          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="fb1" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+              <stop stop-color="${c[0]}"/><stop offset=".5" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/>
+            </linearGradient></defs>
+            <rect x="6" y="6" width="68" height="68" rx="12" stroke="url(#fb1)" stroke-width="5" fill="none"/>
+            <rect x="14" y="14" width="52" height="52" rx="8" fill="rgba(20,15,40,0.8)" stroke="url(#fb1)" stroke-width="1.5"/>
+            <circle cx="40" cy="40" r="12" fill="url(#fb1)" opacity="0.3"/>
+            <text x="40" y="46" text-anchor="middle" fill="url(#fb1)" font-size="18" font-weight="bold" font-family="sans-serif">P</text>
+          </svg>`;
         }
         case 'aura': {
-          const icons = { 'aura-blue': '💠', 'aura-red': '♦️', 'aura-gold': '✨', 'aura-ui': '💎' };
-          return icons[meta.effect] || '🔮';
+          const colors = {
+            'aura-blue': ['#0078ff','#00c8ff'], 'aura-red': ['#ff2828','#ff6b6b'],
+            'aura-gold': ['#ffd700','#ffaa00'], 'aura-ui': ['#c8c8ff','#8080ff']
+          };
+          const c = colors[meta.effect] || ['#00e5ff','#00b8d4'];
+          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><radialGradient id="ag1" cx="50%" cy="50%"><stop stop-color="${c[0]}" stop-opacity="0.6"/><stop offset="1" stop-color="${c[1]}" stop-opacity="0"/></radialGradient></defs>
+            <circle cx="40" cy="40" r="36" fill="url(#ag1)"/>
+            <circle cx="40" cy="40" r="24" fill="none" stroke="${c[0]}" stroke-width="2" opacity="0.5"/>
+            <circle cx="40" cy="40" r="16" fill="none" stroke="${c[0]}" stroke-width="1.5" opacity="0.7"/>
+            <circle cx="40" cy="40" r="8" fill="${c[0]}" opacity="0.8"/>
+            <path d="M40 12 L44 28 L40 24 L36 28 Z" fill="${c[0]}" opacity="0.6"/>
+            <path d="M40 68 L44 52 L40 56 L36 52 Z" fill="${c[0]}" opacity="0.6"/>
+            <path d="M12 40 L28 36 L24 40 L28 44 Z" fill="${c[0]}" opacity="0.6"/>
+            <path d="M68 40 L52 36 L56 40 L52 44 Z" fill="${c[0]}" opacity="0.6"/>
+          </svg>`;
         }
-        case 'flair_title': return '👤';
-        case 'victory_quote': return '💬';
-        case 'kings_commentary': return '👑';
-        case 'golden_name': return '⭐';
-        case 'hype_bomb': return '💥';
-        case 'profile_bg': return '🌌';
-        case 'badge': return meta.icon || '🏅';
-        case 'double_down': return '🎲';
-        case 'vegetas_pride': return '💪';
-        case 'ban_immunity': return '🛡️';
-        case 'scouter': return '📡';
-        default: return '🏆';
+        case 'flair_title':
+          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="tg1" x1="0" y1="0" x2="80" y2="80"><stop stop-color="#00e5ff"/><stop offset="1" stop-color="#ff2d78"/></linearGradient></defs>
+            <rect x="10" y="24" width="60" height="32" rx="8" fill="rgba(20,15,40,0.9)" stroke="url(#tg1)" stroke-width="2"/>
+            <rect x="14" y="28" width="52" height="24" rx="5" fill="url(#tg1)" opacity="0.15"/>
+            <text x="40" y="45" text-anchor="middle" fill="url(#tg1)" font-size="14" font-weight="900" font-family="sans-serif" letter-spacing="2">${(meta.title || item.name || 'TITLE').substring(0,8).toUpperCase()}</text>
+            <polygon points="32,20 40,12 48,20" fill="url(#tg1)" opacity="0.5"/>
+          </svg>`;
+        case 'victory_quote':
+          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="vq1" x1="0" y1="0" x2="80" y2="80"><stop stop-color="#ffd700"/><stop offset="1" stop-color="#ff8c00"/></linearGradient></defs>
+            <path d="M16 20 H64 Q68 20 68 24 V50 Q68 54 64 54 H44 L34 64 L36 54 H16 Q12 54 12 50 V24 Q12 20 16 20Z" fill="rgba(20,15,40,0.9)" stroke="url(#vq1)" stroke-width="2"/>
+            <text x="40" y="34" text-anchor="middle" fill="url(#vq1)" font-size="22" font-weight="bold" font-family="serif">"</text>
+            <line x1="24" y1="40" x2="56" y2="40" stroke="url(#vq1)" stroke-width="1.5" opacity="0.5"/>
+            <line x1="28" y1="46" x2="48" y2="46" stroke="url(#vq1)" stroke-width="1.5" opacity="0.3"/>
+          </svg>`;
+        case 'kings_commentary':
+          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="kc1" x1="0" y1="0" x2="80" y2="80"><stop stop-color="#ffd700"/><stop offset="1" stop-color="#ff6b00"/></linearGradient></defs>
+            <rect x="12" y="30" width="56" height="36" rx="6" fill="rgba(20,15,40,0.9)" stroke="url(#kc1)" stroke-width="2"/>
+            <rect x="16" y="34" width="48" height="28" rx="4" fill="url(#kc1)" opacity="0.08"/>
+            <path d="M28 18 L40 8 L52 18 L48 22 L40 14 L32 22 Z" fill="url(#kc1)"/>
+            <circle cx="24" cy="18" r="3" fill="url(#kc1)"/>
+            <circle cx="56" cy="18" r="3" fill="url(#kc1)"/>
+            <circle cx="40" cy="6" r="3" fill="url(#kc1)"/>
+            <line x1="20" y1="42" x2="60" y2="42" stroke="url(#kc1)" stroke-width="1.5" opacity="0.4"/>
+            <line x1="20" y1="48" x2="52" y2="48" stroke="url(#kc1)" stroke-width="1.5" opacity="0.3"/>
+            <line x1="20" y1="54" x2="44" y2="54" stroke="url(#kc1)" stroke-width="1.5" opacity="0.2"/>
+          </svg>`;
+        case 'golden_name':
+          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="gn1" x1="0" y1="20" x2="80" y2="60"><stop stop-color="#ffd700"/><stop offset=".5" stop-color="#fff4b0"/><stop offset="1" stop-color="#ff8c00"/></linearGradient></defs>
+            <text x="40" y="50" text-anchor="middle" fill="url(#gn1)" font-size="28" font-weight="900" font-family="sans-serif" letter-spacing="1">NAME</text>
+            <line x1="10" y1="58" x2="70" y2="58" stroke="url(#gn1)" stroke-width="1" opacity="0.4"/>
+            <circle cx="40" cy="22" r="8" fill="none" stroke="url(#gn1)" stroke-width="1.5" opacity="0.5"/>
+            <circle cx="40" cy="22" r="3" fill="url(#gn1)" opacity="0.6"/>
+          </svg>`;
+        case 'hype_bomb':
+          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><radialGradient id="hb1" cx="50%" cy="50%"><stop stop-color="#ff4500"/><stop offset="1" stop-color="#ff8c00" stop-opacity="0"/></radialGradient></defs>
+            <circle cx="40" cy="42" r="30" fill="url(#hb1)" opacity="0.3"/>
+            <circle cx="40" cy="42" r="16" fill="#ff4500" opacity="0.8"/>
+            <circle cx="40" cy="42" r="8" fill="#ffd700"/>
+            <path d="M40 10 L42 26" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M58 16 L50 28" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M68 36 L54 40" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M22 16 L30 28" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M12 36 L26 40" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M24 60 L32 52" stroke="#ff8c00" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+            <path d="M56 60 L48 52" stroke="#ff8c00" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+          </svg>`;
+        case 'profile_bg': {
+          const bgs = {
+            'tournament-arena': ['#14142a','#281440','#a855f7'],
+            'world-of-void': ['#000','#1e0032','#6c3483'],
+            'time-chamber': ['#e8e8ff','#c0c0e0','#14142a']
+          };
+          const c = bgs[meta.bg] || ['#0d0a1a','#1a1535','#00e5ff'];
+          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="pb1" x1="0" y1="0" x2="80" y2="80"><stop stop-color="${c[0]}"/><stop offset=".5" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></linearGradient></defs>
+            <rect x="8" y="14" width="64" height="52" rx="6" fill="url(#pb1)" stroke="${c[2]}" stroke-width="2"/>
+            <rect x="14" y="20" width="20" height="20" rx="10" fill="${c[2]}" opacity="0.3"/>
+            <line x1="14" y1="48" x2="64" y2="48" stroke="${c[2]}" stroke-width="1.5" opacity="0.3"/>
+            <line x1="14" y1="54" x2="50" y2="54" stroke="${c[2]}" stroke-width="1" opacity="0.2"/>
+            <circle cx="58" cy="26" r="4" fill="${c[2]}" opacity="0.2"/>
+          </svg>`;
+        }
+        case 'badge':
+          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="bd1" x1="20" y1="10" x2="60" y2="70"><stop stop-color="#ffd700"/><stop offset="1" stop-color="#ff6b00"/></linearGradient></defs>
+            <circle cx="40" cy="36" r="22" fill="rgba(20,15,40,0.9)" stroke="url(#bd1)" stroke-width="2.5"/>
+            <circle cx="40" cy="36" r="16" fill="url(#bd1)" opacity="0.15"/>
+            <path d="M40 24 L43 32 L52 32 L45 37 L48 46 L40 41 L32 46 L35 37 L28 32 L37 32 Z" fill="url(#bd1)"/>
+            <path d="M30 56 L34 62 L40 68 L46 62 L50 56" stroke="url(#bd1)" stroke-width="2" fill="none" opacity="0.5"/>
+          </svg>`;
+        case 'double_down':
+          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="dd1" x1="0" y1="0" x2="80" y2="80"><stop stop-color="#00e5ff"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs>
+            <rect x="12" y="12" width="56" height="56" rx="10" fill="rgba(20,15,40,0.9)" stroke="url(#dd1)" stroke-width="2"/>
+            <text x="40" y="48" text-anchor="middle" fill="url(#dd1)" font-size="32" font-weight="900" font-family="sans-serif">×2</text>
+            <path d="M20 18 L28 18 L24 24 Z" fill="url(#dd1)" opacity="0.5"/>
+            <path d="M60 18 L52 18 L56 24 Z" fill="url(#dd1)" opacity="0.5"/>
+          </svg>`;
+        case 'vegetas_pride':
+          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="vp1" x1="0" y1="0" x2="80" y2="80"><stop stop-color="#a855f7"/><stop offset="1" stop-color="#ff2d78"/></linearGradient></defs>
+            <path d="M40 10 L48 28 L68 28 L52 40 L58 60 L40 48 L22 60 L28 40 L12 28 L32 28 Z" fill="none" stroke="url(#vp1)" stroke-width="2.5"/>
+            <path d="M40 18 L45 30 L58 30 L48 38 L52 52 L40 44 L28 52 L32 38 L22 30 L35 30 Z" fill="url(#vp1)" opacity="0.2"/>
+            <circle cx="40" cy="36" r="6" fill="url(#vp1)" opacity="0.6"/>
+            <path d="M36 34 L40 28 L44 34" stroke="#fff" stroke-width="1.5" fill="none" opacity="0.8"/>
+          </svg>`;
+        case 'ban_immunity':
+          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="bi1" x1="20" y1="8" x2="60" y2="72"><stop stop-color="#22c55e"/><stop offset="1" stop-color="#00e5ff"/></linearGradient></defs>
+            <path d="M40 8 L64 20 L64 44 Q64 64 40 74 Q16 64 16 44 L16 20 Z" fill="rgba(20,15,40,0.9)" stroke="url(#bi1)" stroke-width="2.5"/>
+            <path d="M40 16 L56 24 L56 42 Q56 58 40 66 Q24 58 24 42 L24 24 Z" fill="url(#bi1)" opacity="0.12"/>
+            <path d="M30 40 L38 48 L52 32" stroke="url(#bi1)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>`;
+        case 'scouter':
+          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="sc1" x1="0" y1="0" x2="80" y2="80"><stop stop-color="#22c55e"/><stop offset="1" stop-color="#00e5ff"/></linearGradient></defs>
+            <circle cx="32" cy="36" r="18" fill="none" stroke="url(#sc1)" stroke-width="2.5"/>
+            <circle cx="32" cy="36" r="12" fill="url(#sc1)" opacity="0.1"/>
+            <circle cx="32" cy="36" r="6" fill="url(#sc1)" opacity="0.2"/>
+            <path d="M48 28 Q68 20 70 36 Q72 52 52 44" stroke="url(#sc1)" stroke-width="2.5" fill="none"/>
+            <line x1="26" y1="30" x2="38" y2="30" stroke="url(#sc1)" stroke-width="1" opacity="0.5"/>
+            <line x1="24" y1="36" x2="40" y2="36" stroke="url(#sc1)" stroke-width="1" opacity="0.5"/>
+            <line x1="26" y1="42" x2="36" y2="42" stroke="url(#sc1)" stroke-width="1" opacity="0.5"/>
+            <text x="32" y="38" text-anchor="middle" fill="url(#sc1)" font-size="8" font-family="monospace" opacity="0.7">9001</text>
+          </svg>`;
+        default:
+          return `<svg width="${s}" height="${s}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="40" r="24" fill="rgba(0,229,255,0.15)" stroke="var(--cyan)" stroke-width="2"/>
+            <text x="40" y="46" text-anchor="middle" fill="var(--cyan)" font-size="20" font-weight="bold">?</text>
+          </svg>`;
+      }
+    }
+
+    function getPreviewDemo(item) {
+      const meta = item.metadata || {};
+      switch(item.type) {
+        case 'flair_border': {
+          const gradients = {
+            'flair-fire': 'conic-gradient(from 0deg, #ff4500, #ff8c00, #ffd700, #ff4500)',
+            'flair-ice': 'conic-gradient(from 0deg, #00bfff, #e0f7ff, #00bfff, #4dd0e1)',
+            'flair-royal': 'conic-gradient(from 0deg, #9b59b6, #ffd700, #9b59b6, #e74c3c)',
+            'flair-shadow': 'conic-gradient(from 0deg, #1a1a2e, #6c3483, #1a1a2e, #2c3e50)',
+            'flair-champion': 'conic-gradient(from 0deg, #ffd700, #ff6b00, #ff0080, #8b00ff, #00d4ff, #ffd700)'
+          };
+          const bg = gradients[meta.effect] || 'var(--line)';
+          return `<div style="width:80px;height:80px;border-radius:14px;background:${bg};padding:3px;">
+            <div style="width:100%;height:100%;background:var(--bg-2);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);">Your<br>Profile</div></div>`;
+        }
+        case 'aura':
+          return `<div style="padding:8px 20px;font-weight:700;color:var(--text);position:relative;font-family:'Exo 2',sans-serif;">YourName<div style="position:absolute;inset:-8px;border-radius:8px;background:radial-gradient(ellipse,${RARITY_COLORS[getRarity(item)]} 0%,transparent 70%);opacity:0.4;z-index:-1;"></div></div>`;
+        case 'flair_title':
+          return `<div style="padding:6px 16px;background:linear-gradient(135deg,var(--cyan),var(--pink));border-radius:999px;font-size:12px;font-weight:700;color:#000;font-family:'Exo 2',sans-serif;">${meta.title || item.name}</div>`;
+        case 'victory_quote':
+          return `<div style="font-style:italic;color:var(--gold);font-size:13px;text-shadow:0 0 6px rgba(255,215,0,0.3);padding:0 10px;text-align:center;">"${meta.quote || item.name}"</div>`;
+        case 'golden_name':
+          return `<div style="font-weight:900;font-size:18px;background:linear-gradient(90deg,#ffd700,#fff4b0,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none;font-family:'Exo 2',sans-serif;">YourName</div>`;
+        case 'hype_bomb':
+          return `<div style="font-size:11px;color:var(--text);text-align:center;line-height:1.6;"><span style="font-size:24px;">💥</span><br>Everyone sees an animated<br>explosion in the feed!</div>`;
+        case 'profile_bg':
+          return `<div style="width:120px;height:60px;border-radius:8px;background:${item.name.includes('Void') ? 'radial-gradient(ellipse,rgba(30,0,50,0.95),#000)' : item.name.includes('Chamber') ? 'linear-gradient(180deg,rgba(255,255,255,0.15),rgba(20,20,40,0.95))' : 'linear-gradient(135deg,rgba(20,20,40,0.95),rgba(40,20,60,0.95))'};border:1px solid var(--line);"></div>`;
+        case 'kings_commentary':
+          return `<div style="padding:8px 12px;background:rgba(255,215,0,0.08);border-left:3px solid var(--gold);border-radius:4px;font-size:11px;color:var(--text);max-width:200px;"><span style="color:var(--gold);font-weight:700;">👑 You:</span> Your message here</div>`;
+        case 'double_down':
+          return `<div style="text-align:center;font-size:12px;color:var(--text);line-height:1.6;"><span style="font-size:18px;color:var(--cyan);font-weight:900;font-family:'Exo 2',sans-serif;">100→200</span> pts<br><span style="font-size:10px;color:var(--muted);">Win points doubled next tournament</span></div>`;
+        case 'ban_immunity':
+          return `<div style="text-align:center;font-size:12px;color:var(--text);line-height:1.6;"><div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:6px;"><span style="color:#22c55e;font-weight:700;">PROTECTED</span></div><br><span style="font-size:10px;color:var(--muted);">One character can't be banned</span></div>`;
+        case 'scouter':
+          return `<div style="text-align:center;font-size:12px;color:var(--text);line-height:1.6;font-family:monospace;"><div style="padding:4px 10px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:4px;font-size:10px;color:#22c55e;">SCANNING OPPONENT...<br>Team: ??? | W/L: ???</div></div>`;
+        case 'vegetas_pride':
+          return `<div style="text-align:center;font-size:12px;color:var(--text);line-height:1.6;"><span style="font-size:18px;color:var(--pink);font-weight:900;font-family:'Exo 2',sans-serif;">25→75</span> pts<br><span style="font-size:10px;color:var(--muted);">Loss points tripled for one tournament</span></div>`;
+        default:
+          return `<div style="color:var(--muted);font-size:12px;">Preview not available</div>`;
       }
     }
 
@@ -755,17 +696,16 @@
     function renderItemCard(item, featured) {
       const rarity = getRarity(item);
       const canBuy = currentBalance >= item.cost;
-      const icon = getCardIcon(item);
-      const typeLabel = TYPE_LABELS[item.type] || item.type;
       const badge = getBadge(item);
-      const escapedName = escapeHtml(item.name).replace(/'/g, "\\'");
+      const typeLabel = TYPE_LABELS[item.type] || item.type;
+      const idx = allItems.indexOf(item);
 
       return `
-        <div class="item-card ${featured ? 'featured-card' : ''}" data-rarity="${rarity}">
+        <div class="item-card ${featured ? 'featured-card' : ''}" data-rarity="${rarity}" onclick="openModal(${idx})">
           ${badge}
           <div class="card-visual">
             <div class="card-bg-effect ${rarity === 'legendary' || rarity === 'mythic' ? 'aura-effect' : 'shimmer-effect'}"></div>
-            <div class="card-icon ${featured ? 'featured-icon' : ''}">${icon}</div>
+            <div class="card-icon">${makeSVGIcon(item, featured ? 100 : 80)}</div>
           </div>
           <div class="card-info">
             <div class="card-name">${escapeHtml(item.name)}</div>
@@ -777,12 +717,61 @@
                 ? `<div class="price-coin">⚡</div><span class="price-value">${item.cost.toLocaleString()}</span>`
                 : '<span class="price-value free">FREE</span>'}
             </div>
-            <button class="btn-get" ${canBuy ? '' : 'disabled'} onclick="event.stopPropagation();buyItem('${item.id}', ${item.cost}, '${escapedName}')">
+            <button class="btn-get" ${canBuy ? '' : 'disabled'} onclick="event.stopPropagation();buyItem('${item.id}', ${item.cost}, '${escapeHtml(item.name).replace(/'/g, "\\'")}')">
               ${canBuy ? 'GET' : 'LOCKED'}
             </button>
           </div>
         </div>`;
     }
+
+    function openModal(idx) {
+      const item = allItems[idx];
+      if (!item) return;
+      const rarity = getRarity(item);
+      const color = RARITY_COLORS[rarity];
+      const canBuy = currentBalance >= item.cost;
+      const typeLabel = TYPE_LABELS[item.type] || item.type;
+
+      const visualEl = document.getElementById('modal-visual');
+      visualEl.style.background = `linear-gradient(160deg, ${color}22, ${color}08)`;
+      visualEl.innerHTML = `<div class="card-bg-effect aura-effect" style="--rarity-color:${color}"></div><div class="modal-icon">${makeSVGIcon(item, 120)}</div>`;
+
+      const rarityTag = document.getElementById('modal-rarity');
+      rarityTag.textContent = RARITY_LABELS[rarity];
+      rarityTag.style.background = color;
+      rarityTag.style.color = '#000';
+
+      document.getElementById('modal-name').textContent = item.name;
+      const typeEl = document.getElementById('modal-type');
+      typeEl.textContent = typeLabel;
+      typeEl.style.color = color;
+
+      document.getElementById('modal-desc').textContent = getItemDescription(item);
+      document.getElementById('modal-preview').innerHTML = getPreviewDemo(item);
+
+      const priceEl = document.getElementById('modal-price');
+      priceEl.innerHTML = item.cost > 0
+        ? `<div class="price-coin">⚡</div><span class="price-value">${item.cost.toLocaleString()}</span>`
+        : '<span class="price-value free">FREE</span>';
+
+      const buyBtn = document.getElementById('modal-buy-btn');
+      buyBtn.disabled = !canBuy;
+      buyBtn.textContent = canBuy ? 'GET' : (currentBalance < item.cost ? `NEED ${(item.cost - currentBalance).toLocaleString()} MORE` : 'LOCKED');
+      buyBtn.onclick = () => {
+        buyItem(item.id, item.cost, item.name);
+        closeModal();
+      };
+
+      document.getElementById('item-modal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('item-modal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
     document.addEventListener('DOMContentLoaded', () => {
       if (shopUsername) {
@@ -794,10 +783,7 @@
     function loginShop() {
       const input = document.getElementById('username-input');
       const name = input.value.trim();
-      if (!name) {
-        NotificationSystem.show('Enter your Discord username', 'error');
-        return;
-      }
+      if (!name) { NotificationSystem.show('Enter your Discord username', 'error'); return; }
       shopUsername = name;
       sessionStorage.setItem('shop_username', shopUsername);
       document.getElementById('login-section').style.display = 'none';
@@ -813,19 +799,14 @@
       document.getElementById('shop-content').style.display = 'none';
     }
 
-    async function loadShop() {
-      await refreshBalance();
-      await loadShopItems();
-    }
+    async function loadShop() { await refreshBalance(); await loadShopItems(); }
 
     async function refreshBalance() {
       try {
         const pts = await db.getPoints(shopUsername);
         currentBalance = pts.balance || 0;
         document.getElementById('balance-value').textContent = currentBalance.toLocaleString();
-      } catch (e) {
-        console.error('Failed to load balance', e);
-      }
+      } catch (e) { console.error('Failed to load balance', e); }
     }
 
     async function loadShopItems() {
@@ -847,55 +828,39 @@
 
     function buildCategoryTabs() {
       const cats = { all: allItems.length };
-      allItems.forEach(item => {
-        const cat = CATEGORY_MAP[item.type] || 'other';
-        cats[cat] = (cats[cat] || 0) + 1;
-      });
+      allItems.forEach(item => { const cat = CATEGORY_MAP[item.type] || 'other'; cats[cat] = (cats[cat] || 0) + 1; });
       const tabsEl = document.getElementById('category-tabs');
       let html = '';
       Object.entries(CATEGORY_LABELS).forEach(([key, label]) => {
-        if (cats[key]) {
-          html += `<button class="shop-tab ${activeCategory === key ? 'active' : ''}" onclick="filterCategory('${key}')">${label}<span class="tab-count">${cats[key]}</span></button>`;
-        }
+        if (cats[key]) html += `<button class="shop-tab ${activeCategory === key ? 'active' : ''}" onclick="filterCategory('${key}')">${label}<span class="tab-count">${cats[key]}</span></button>`;
       });
       tabsEl.innerHTML = html;
     }
 
-    function filterCategory(cat) {
-      activeCategory = cat;
-      buildCategoryTabs();
-      renderShopGrid();
-    }
+    function filterCategory(cat) { activeCategory = cat; buildCategoryTabs(); renderShopGrid(); }
 
     function renderShopGrid() {
       const container = document.getElementById('shop-items-container');
       let items = allItems;
-      if (activeCategory !== 'all') {
-        items = allItems.filter(i => (CATEGORY_MAP[i.type] || 'other') === activeCategory);
-      }
+      if (activeCategory !== 'all') items = allItems.filter(i => (CATEGORY_MAP[i.type] || 'other') === activeCategory);
 
       const featured = items.filter(i => getRarity(i) === 'legendary' || getRarity(i) === 'mythic');
       const regular = items.filter(i => getRarity(i) !== 'legendary' && getRarity(i) !== 'mythic');
 
       let html = '';
-
       if (featured.length) {
         html += '<div class="shop-section-header"><h2>⭐ Featured</h2></div>';
         html += '<div class="item-grid featured">';
         featured.forEach(item => { html += renderItemCard(item, true); });
         html += '</div>';
       }
-
       if (regular.length) {
-        if (featured.length) {
-          html += '<div class="shop-section-header"><h2>🛒 Daily Items</h2></div>';
-        }
+        if (featured.length) html += '<div class="shop-section-header"><h2>🛒 Daily Items</h2></div>';
         html += '<div class="item-grid">';
         regular.sort((a, b) => b.cost - a.cost);
         regular.forEach(item => { html += renderItemCard(item, false); });
         html += '</div>';
       }
-
       container.innerHTML = html;
     }
 
@@ -918,7 +883,6 @@
       });
       document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
       document.getElementById('tab-' + tab).classList.add('active');
-
       if (tab === 'inventory') loadInventory();
       if (tab === 'history') loadTransactions();
       if (tab === 'shop') loadShopItems();
@@ -928,18 +892,14 @@
       const container = document.getElementById('inventory-container');
       try {
         const items = await db.getInventory(shopUsername);
-        if (!items.length) {
-          container.innerHTML = '<div class="empty-state">No items yet — go grab something from the shop!</div>';
-          return;
-        }
+        if (!items.length) { container.innerHTML = '<div class="empty-state">No items yet — go grab something from the shop!</div>'; return; }
         let html = '<div class="inv-grid">';
         items.forEach(inv => {
           const item = inv.item || {};
           const typeLabel = TYPE_LABELS[item.type] || item.type || '';
-          const icon = TYPE_ICONS[item.type] || '🏆';
           html += `
             <div class="inv-card">
-              <div class="inv-card-visual">${icon}</div>
+              <div class="inv-card-visual">${makeSVGIcon(item, 60)}</div>
               <div class="inv-card-info">
                 <div class="inv-card-name">${escapeHtml(item.name || 'Unknown')}</div>
                 <div class="inv-card-type">${escapeHtml(typeLabel)}</div>
@@ -952,63 +912,34 @@
         });
         html += '</div>';
         container.innerHTML = html;
-      } catch (e) {
-        container.innerHTML = '<div class="empty-state">Failed to load inventory.</div>';
-        console.error(e);
-      }
+      } catch (e) { container.innerHTML = '<div class="empty-state">Failed to load inventory.</div>'; console.error(e); }
     }
 
     async function toggleEquip(inventoryId, isEquipped) {
       try {
-        if (isEquipped) {
-          await db.unequipItem(shopUsername, inventoryId); playSound('equip');
-        } else {
-          await db.equipItem(shopUsername, inventoryId); playSound('equip');
-        }
+        if (isEquipped) { await db.unequipItem(shopUsername, inventoryId); playSound('equip'); }
+        else { await db.equipItem(shopUsername, inventoryId); playSound('equip'); }
         await loadInventory();
-      } catch (e) {
-        NotificationSystem.show('Failed to update item', 'error');
-      }
+      } catch (e) { NotificationSystem.show('Failed to update item', 'error'); }
     }
 
     async function loadTransactions() {
       const container = document.getElementById('tx-container');
       try {
         const txs = await db.getPointTransactions(shopUsername);
-        if (!txs.length) {
-          container.innerHTML = '<div class="empty-state">No transactions yet.</div>';
-          return;
-        }
+        if (!txs.length) { container.innerHTML = '<div class="empty-state">No transactions yet.</div>'; return; }
         let html = '<div class="tx-list">';
         txs.forEach(tx => {
           const isPositive = tx.amount >= 0;
-          const date = new Date(tx.created_at).toLocaleDateString('en-GB', {
-            day: 'numeric', month: 'short', year: 'numeric'
-          });
-          html += `
-            <div class="tx-row">
-              <div>
-                <div class="tx-reason">${escapeHtml(tx.reason || 'Unknown')}</div>
-                <div class="tx-date">${date}</div>
-              </div>
-              <div class="tx-amount ${isPositive ? 'positive' : 'negative'}">
-                ${isPositive ? '+' : ''}${tx.amount.toLocaleString()} pts
-              </div>
-            </div>`;
+          const date = new Date(tx.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+          html += `<div class="tx-row"><div><div class="tx-reason">${escapeHtml(tx.reason || 'Unknown')}</div><div class="tx-date">${date}</div></div><div class="tx-amount ${isPositive ? 'positive' : 'negative'}">${isPositive ? '+' : ''}${tx.amount.toLocaleString()} pts</div></div>`;
         });
         html += '</div>';
         container.innerHTML = html;
-      } catch (e) {
-        container.innerHTML = '<div class="empty-state">Failed to load transactions.</div>';
-        console.error(e);
-      }
+      } catch (e) { container.innerHTML = '<div class="empty-state">Failed to load transactions.</div>'; console.error(e); }
     }
 
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
+    function escapeHtml(str) { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
   </script>
   <script src="js/toolbar.js"></script>
 </body>
