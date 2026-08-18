@@ -152,6 +152,11 @@
     }
     .btn-get:hover:not(:disabled) { background: #fff; box-shadow: 0 0 12px rgba(0,229,255,0.4); }
     .btn-get:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; }
+    .btn-get.owned { background: var(--green); color: #000; cursor: default; opacity: 0.8; }
+    .item-card.owned-card { opacity: 0.45; filter: grayscale(0.5); pointer-events: auto; }
+    .item-card.owned-card:hover { transform: none; box-shadow: none; }
+    .item-card.owned-card .card-price-bar { background: rgba(10,8,20,0.98); }
+    .item-card.owned-card .card-bg-effect { animation: none; }
 
     /* ===== DETAIL MODAL ===== */
     .modal-overlay {
@@ -420,6 +425,7 @@
     let shopUsername = sessionStorage.getItem('shop_username') || '';
     let currentBalance = 0;
     let allItems = [];
+    let ownedItemIds = new Set();
     let activeCategory = 'all';
 
     const TYPE_LABELS = {
@@ -697,14 +703,21 @@
 
     function renderItemCard(item, featured) {
       const rarity = getRarity(item);
-      const canBuy = currentBalance >= item.cost;
+      const owned = ownedItemIds.has(item.id);
+      const canBuy = !owned && currentBalance >= item.cost;
       const badge = getBadge(item);
       const typeLabel = TYPE_LABELS[item.type] || item.type;
       const idx = allItems.indexOf(item);
 
+      let btnClass = 'btn-get';
+      let btnText = 'LOCKED';
+      let btnDisabled = true;
+      if (owned) { btnClass += ' owned'; btnText = 'OWNED'; }
+      else if (canBuy) { btnDisabled = false; btnText = 'GET'; }
+
       return `
-        <div class="item-card ${featured ? 'featured-card' : ''}" data-rarity="${rarity}" onclick="openModal(${idx})">
-          ${badge}
+        <div class="item-card ${featured ? 'featured-card' : ''} ${owned ? 'owned-card' : ''}" data-rarity="${rarity}" onclick="openModal(${idx})">
+          ${owned ? '<div class="card-badge" style="background:var(--green);box-shadow:0 0 10px rgba(46,213,115,0.4);">OWNED</div>' : badge}
           <div class="card-visual">
             <div class="card-bg-effect ${rarity === 'legendary' || rarity === 'mythic' ? 'aura-effect' : 'shimmer-effect'}"></div>
             <div class="card-icon">${makeSVGIcon(item, featured ? 100 : 80)}</div>
@@ -719,8 +732,8 @@
                 ? `<div class="price-coin">⚡</div><span class="price-value">${item.cost.toLocaleString()}</span>`
                 : '<span class="price-value free">FREE</span>'}
             </div>
-            <button class="btn-get" ${canBuy ? '' : 'disabled'} onclick="event.stopPropagation();buyItem('${item.id}', ${item.cost}, '${escapeHtml(item.name).replace(/'/g, "\\'")}')">
-              ${canBuy ? 'GET' : 'LOCKED'}
+            <button class="${btnClass}" ${btnDisabled ? 'disabled' : ''} onclick="event.stopPropagation();buyItem('${item.id}', ${item.cost}, '${escapeHtml(item.name).replace(/'/g, "\\'")}')">
+              ${btnText}
             </button>
           </div>
         </div>`;
@@ -756,13 +769,24 @@
         ? `<div class="price-coin">⚡</div><span class="price-value">${item.cost.toLocaleString()}</span>`
         : '<span class="price-value free">FREE</span>';
 
+      const owned = ownedItemIds.has(item.id);
       const buyBtn = document.getElementById('modal-buy-btn');
-      buyBtn.disabled = !canBuy;
-      buyBtn.textContent = canBuy ? 'GET' : (currentBalance < item.cost ? `NEED ${(item.cost - currentBalance).toLocaleString()} MORE` : 'LOCKED');
-      buyBtn.onclick = () => {
-        buyItem(item.id, item.cost, item.name);
-        closeModal();
-      };
+      if (owned) {
+        buyBtn.disabled = true;
+        buyBtn.textContent = 'OWNED';
+        buyBtn.style.background = 'var(--green)';
+        buyBtn.style.color = '#000';
+        buyBtn.onclick = null;
+      } else {
+        buyBtn.disabled = !canBuy;
+        buyBtn.textContent = canBuy ? 'GET' : `NEED ${(item.cost - currentBalance).toLocaleString()} MORE`;
+        buyBtn.style.background = '';
+        buyBtn.style.color = '';
+        buyBtn.onclick = () => {
+          buyItem(item.id, item.cost, item.name);
+          closeModal();
+        };
+      }
 
       document.getElementById('item-modal').classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -814,7 +838,12 @@
     async function loadShopItems() {
       const container = document.getElementById('shop-items-container');
       try {
-        allItems = await db.getShopItems();
+        const [items, inventory] = await Promise.all([
+          db.getShopItems(),
+          db.getInventory(shopUsername)
+        ]);
+        allItems = items;
+        ownedItemIds = new Set(inventory.map(inv => inv.item?.id).filter(Boolean));
         if (!allItems.length) {
           container.innerHTML = '<div class="empty-state">No items available right now. Check back soon!</div>';
           document.getElementById('category-tabs').innerHTML = '';
