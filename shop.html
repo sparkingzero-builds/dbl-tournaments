@@ -491,41 +491,77 @@
     };
 
     const DBGS = 'https://dbgsbuilds.com/wp-content/themes/dbgsquad-lite/asset';
-    const ITEM_IMAGES = {
-      flair_border: {
-        'flair-fire': `${DBGS}/profile-icon/2641_0001BA30FB81F542.png`,
-        'flair-ice': `${DBGS}/profile-icon/2643_0001BA308C86C5D4.png`,
-        'flair-royal': `${DBGS}/profile-icon/2645_0001BA30AFFE632A.png`,
-        'flair-shadow': `${DBGS}/profile-icon/2979_0001BA30743DCB01.png`,
-        'flair-champion': `${DBGS}/profile-icon/2980_0001BA30757A1501.png`,
-        _default: `${DBGS}/profile-icon/2642_0001BA300242223F.png`
-      },
-      aura: {
-        'aura-blue': `${DBGS}/sticker/35918_000000002F300CC1.png`,
-        'aura-red': `${DBGS}/sticker/35924_000000006FC0A40F.png`,
-        'aura-gold': `${DBGS}/sticker/35930_0000000050001778.png`,
-        'aura-ui': `${DBGS}/sticker/35936_00000000958C9C86.png`,
-        _default: `${DBGS}/sticker/35921_000000004ECDCD69.png`
-      },
-      flair_title: `${DBGS}/badge/2745_0001BA3038396091.png`,
-      victory_quote: `${DBGS}/sticker/2702_0001BA306C4CA99C.png`,
-      kings_commentary: `${DBGS}/sticker/2708_0001BA3080275729.png`,
-      golden_name: `${DBGS}/badge/2748_0001BA3067C1A908.png`,
-      hype_bomb: `${DBGS}/sticker/2720_0001BA306727C6B6.png`,
-      profile_bg: `${DBGS}/profile-icon/2981_0001BA3085ADF7F8.png`,
-      badge: `${DBGS}/badge/2750_0001BA30501F593A.png`,
-      double_down: `${DBGS}/helper-icon/12235_00000000FDB12817.png`,
-      vegetas_pride: `${DBGS}/helper-icon/17319_000000001E4B6C74.png`,
-      ban_immunity: `${DBGS}/helper-icon/17450_00000000FF1582B1.png`,
-      scouter: `${DBGS}/helper-icon/17527_00000000D0B69B37.png`
-    };
+    const ASSET_POOL = [
+      `${DBGS}/sticker/2700_0001BA30D0D5FC57.png`,
+      `${DBGS}/sticker/2703_0001BA30DBBE46BC.png`,
+      `${DBGS}/sticker/2706_0001BA3015C66289.png`,
+      `${DBGS}/sticker/2709_0001BA3027E48D05.png`,
+      `${DBGS}/sticker/2712_0001BA30D7AD84D0.png`,
+      `${DBGS}/sticker/2715_0001BA30BC816339.png`,
+      `${DBGS}/sticker/2718_0001BA30F3B653C8.png`,
+      `${DBGS}/sticker/2723_0001BA30BAFAA4CD.png`,
+      `${DBGS}/sticker/2727_0001BA30119243D2.png`,
+      `${DBGS}/sticker/2731_0001BA3094C71506.png`,
+      `${DBGS}/sticker/2735_0001BA3019FCD3D7.png`,
+      `${DBGS}/sticker/2739_0001BA30C43802D1.png`,
+      `${DBGS}/sticker/2741_0001BA306C822C99.png`,
+      `${DBGS}/sticker/35916_00000000C35C2F1D.png`,
+      `${DBGS}/sticker/35919_00000000C83795F6.png`,
+      `${DBGS}/sticker/35922_000000001B4686A9.png`,
+      `${DBGS}/sticker/35925_00000000249F099C.png`,
+      `${DBGS}/sticker/35928_0000000072938705.png`,
+      `${DBGS}/sticker/35931_000000007D6497D5.png`,
+      `${DBGS}/sticker/35934_000000001EA703FD.png`,
+      `${DBGS}/sticker/35937_0000000034AC61BA.png`,
+      `${DBGS}/sticker/35940_00000000DD866A5C.png`,
+      `${DBGS}/sticker/35943_0000000017F2A00E.png`,
+      `${DBGS}/sticker/35946_000000006BE2766A.png`,
+      `${DBGS}/sticker/35949_000000007BF161E8.png`,
+      `${DBGS}/sticker/35954_000000008C257CA7.png`,
+      `${DBGS}/sticker/35958_000000007CD2F8E9.png`,
+      `${DBGS}/sticker/35962_00000000BEAEE371.png`,
+      `${DBGS}/sticker/35966_00000000D337830D.png`,
+      `${DBGS}/sticker/35970_00000000B1275EC3.png`,
+      `${DBGS}/badge/2745_0001BA3038396091.png`,
+      `${DBGS}/badge/2746_0001BA304F3E5007.png`,
+      `${DBGS}/badge/2747_0001BA30D63701BD.png`,
+      `${DBGS}/badge/2748_0001BA3067C1A908.png`,
+      `${DBGS}/badge/2749_0001BA30757406E6.png`,
+      `${DBGS}/badge/2750_0001BA30501F593A.png`,
+      `${DBGS}/badge/2751_0001BA301AC9E682.png`,
+      `${DBGS}/badge/2752_0001BA300137BA11.png`,
+      `${DBGS}/badge/2753_0001BA30191EAE8A.png`,
+      `${DBGS}/badge/2754_0001BA309EEFA4BE.png`,
+      `${DBGS}/profile-icon/2641_0001BA30FB81F542.png`,
+      `${DBGS}/profile-icon/2642_0001BA300242223F.png`,
+      `${DBGS}/profile-icon/2643_0001BA308C86C5D4.png`,
+      `${DBGS}/profile-icon/2644_0001BA309F31BB29.png`,
+      `${DBGS}/profile-icon/2645_0001BA30AFFE632A.png`,
+      `${DBGS}/profile-icon/2646_0001BA3075AAE877.png`,
+      `${DBGS}/profile-icon/2978_0001BA3062F976A4.png`,
+      `${DBGS}/profile-icon/2979_0001BA30743DCB01.png`,
+      `${DBGS}/profile-icon/2980_0001BA30757A1501.png`,
+      `${DBGS}/profile-icon/2981_0001BA3085ADF7F8.png`,
+      `${DBGS}/helper-icon/12235_00000000FDB12817.png`,
+      `${DBGS}/helper-icon/17319_000000001E4B6C74.png`,
+      `${DBGS}/helper-icon/17450_00000000FF1582B1.png`,
+      `${DBGS}/helper-icon/17527_00000000D0B69B37.png`,
+      `${DBGS}/helper-icon/17579_000000003E682E05.png`,
+      `${DBGS}/helper-icon/17631_000000005361F7C9.png`,
+      `${DBGS}/helper-icon/17693_00000000E6B82327.png`,
+      `${DBGS}/helper-icon/17749_000000000716B213.png`,
+      `${DBGS}/helper-icon/17792_0000000073B92729.png`,
+      `${DBGS}/helper-icon/17857_00000000C4BF66B6.png`
+    ];
 
+    const _imageAssignments = {};
+    let _nextPoolIdx = 0;
     function getItemImage(item) {
-      const meta = item.metadata || {};
-      const entry = ITEM_IMAGES[item.type];
-      if (!entry) return 'https://dblegends.net/assets/messages/MeChaIco_0001.webp';
-      if (typeof entry === 'string') return entry;
-      return entry[meta.effect] || entry._default;
+      const key = item.id || item.name;
+      if (_imageAssignments[key]) return _imageAssignments[key];
+      _imageAssignments[key] = ASSET_POOL[_nextPoolIdx % ASSET_POOL.length];
+      _nextPoolIdx++;
+      return _imageAssignments[key];
     }
 
     function makeCardVisual(item, size) {
