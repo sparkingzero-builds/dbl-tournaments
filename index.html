@@ -299,6 +299,33 @@
     .player-record .win { color: var(--green); }
     .player-record .loss { color: var(--red); }
 
+    /* ── Villain Alert ── */
+    @keyframes villain-pulse {
+      0%, 100% { box-shadow: 0 0 12px rgba(180,0,30,0.3); }
+      50% { box-shadow: 0 0 24px rgba(180,0,30,0.6); }
+    }
+    .villain-alert {
+      background: linear-gradient(135deg, rgba(139,0,0,0.2), rgba(74,0,32,0.2));
+      border: 2px solid #8b0000;
+      border-radius: var(--radius, 8px);
+      padding: 14px 20px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: villain-pulse 2.5s ease-in-out infinite;
+    }
+    .villain-alert-icon { font-size: 24px; }
+    .villain-alert-text {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #ff4757;
+    }
+    .villain-alert-text a { color: #ff6b7a; text-decoration: underline; }
+
     /* ── Activity Feed ── */
     .activity-feed {
       display: flex;
@@ -463,7 +490,9 @@
             <div class="dropdown-label">Community</div>
             <a href="compare.html">Compare</a>
             <a href="shop.html">Shop</a>
+            <a href="auction.html">Auction</a>
             <a href="season.html">Season</a>
+            <a href="world-tournament.html">World Tournament</a>
             <a href="feed.html">Live Feed</a>
           </div>
         </li>
@@ -590,7 +619,8 @@
         loadTournament(),
         loadStats(),
         loadTopPlayers(),
-        loadActivity()
+        loadActivity(),
+        loadVillainAlert()
       ]);
     });
 
@@ -841,6 +871,28 @@
       } catch (e) {
         feed.innerHTML = '<div class="activity-empty">Could not load activity</div>';
       }
+    }
+
+    async function loadVillainAlert() {
+      try {
+        const { data: villains } = await supabaseClient
+          .from('bounties')
+          .select('discord_username, streak, bounty')
+          .gte('streak', 5)
+          .order('streak', { ascending: false })
+          .limit(3);
+        if (villains && villains.length > 0) {
+          const feed = document.getElementById('activity-feed');
+          const names = villains.map(v =>
+            `<a href="bounty.html">${escapeHtml(v.discord_username)}</a>`
+          ).join(', ');
+          const alertHtml = `<div class="villain-alert">
+            <div class="villain-alert-icon">&#9760;</div>
+            <div class="villain-alert-text">WANTED: VILLAIN ALERT &mdash; ${names} ${villains.length === 1 ? 'is' : 'are'} on a rampage!</div>
+          </div>`;
+          feed.insertAdjacentHTML('beforebegin', alertHtml);
+        }
+      } catch (e) { /* silent */ }
     }
 
     function timeAgo(dateStr) {

@@ -291,6 +291,54 @@
     .bounty-row.rank-2 { border-color: #c0c0c0; background: rgba(192,192,192,0.05); }
     .bounty-row.rank-3 { border-color: #cd7f32; background: rgba(205,127,50,0.05); }
 
+    /* ── Villain Arc ── */
+    @keyframes villain-pulse {
+      0%, 100% { box-shadow: 0 0 12px rgba(180,0,30,0.4), inset 0 0 8px rgba(180,0,30,0.1); }
+      50% { box-shadow: 0 0 28px rgba(180,0,30,0.7), inset 0 0 14px rgba(180,0,30,0.2); }
+    }
+    .villain-row {
+      border-color: #8b0000 !important;
+      background: rgba(139,0,0,0.12) !important;
+      animation: villain-pulse 2.5s ease-in-out infinite;
+      position: relative;
+    }
+    .villain-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #8b0000, #ff2d2d);
+      color: #fff;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 900;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 3px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .wanted-card.villain-wanted {
+      border-color: #8b0000 !important;
+      box-shadow: 0 0 60px rgba(139,0,0,0.5) !important;
+    }
+    .wanted-card.villain-wanted .wanted-hazard {
+      background: repeating-linear-gradient(-45deg, #8b0000, #8b0000 8px, #1a1535 8px, #1a1535 16px);
+    }
+    .villain-stamp {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-18deg);
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 900;
+      font-size: 42px;
+      color: rgba(139,0,0,0.25);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      pointer-events: none;
+      z-index: 5;
+      white-space: nowrap;
+    }
+
     .bounty-rank {
       font-family: 'Exo 2', sans-serif;
       font-weight: 900;
@@ -767,6 +815,69 @@
       justify-content: center;
       font-size: 72px;
     }
+
+    /* ── Zenkai Boost ── */
+    @keyframes zenkai-glow {
+      0%, 100% { box-shadow: 0 0 8px rgba(0,229,255,0.3), inset 0 0 8px rgba(0,229,255,0.05); }
+      50% { box-shadow: 0 0 20px rgba(0,229,255,0.6), inset 0 0 16px rgba(0,229,255,0.1); }
+    }
+    .zenkai-row {
+      animation: zenkai-glow 2s ease-in-out infinite;
+      border: 1px solid rgba(0,229,255,0.4) !important;
+    }
+    .zenkai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: linear-gradient(135deg, #0077b6, #00e5ff);
+      color: #fff;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 900;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      padding: 2px 7px;
+      border-radius: 3px;
+      margin-left: 8px;
+      text-transform: uppercase;
+      box-shadow: 0 0 8px rgba(0,229,255,0.4);
+      vertical-align: middle;
+    }
+    @keyframes zenkai-celebration {
+      0% { transform: scale(0.5) translateY(20px); opacity: 0; }
+      30% { transform: scale(1.1) translateY(0); opacity: 1; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .zenkai-notification {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #0d0a1a 0%, #0a2a3a 100%);
+      border: 2px solid var(--cyan);
+      border-radius: 12px;
+      padding: 30px 50px;
+      text-align: center;
+      z-index: 10000;
+      animation: zenkai-celebration 0.5s ease-out;
+      box-shadow: 0 0 60px rgba(0,229,255,0.4);
+    }
+    .zenkai-notification h2 {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--cyan);
+      text-shadow: 0 0 20px rgba(0,229,255,0.5);
+      margin-bottom: 8px;
+    }
+    .zenkai-notification p {
+      color: var(--text);
+      font-size: 16px;
+    }
+    .zenkai-notification .bonus {
+      color: var(--gold);
+      font-weight: 900;
+      font-size: 20px;
+    }
   </style>
 </head>
 <body>
@@ -797,7 +908,9 @@
             <div class="dropdown-label">Community</div>
             <a href="compare.html">Compare</a>
             <a href="shop.html">Shop</a>
+            <a href="auction.html">Auction</a>
             <a href="season.html">Season</a>
+            <a href="world-tournament.html">World Tournament</a>
             <a href="feed.html">Live Feed</a>
             <a href="bounty.html" class="active">Bounty</a>
           </div>
@@ -1047,6 +1160,97 @@
       }
     }
     let allBounties = [];
+    let zenkaiCache = {}; // username -> { active, level } for board rendering
+
+    // ── Zenkai Boost System ──
+    function getZenkaiKey(username) {
+      return `dbl_zenkai_${username.toLowerCase()}`;
+    }
+
+    function getZenkaiBoost(username) {
+      try {
+        const raw = localStorage.getItem(getZenkaiKey(username));
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        // Expire after 24 hours
+        if (Date.now() - data.activatedAt > 24 * 60 * 60 * 1000) {
+          localStorage.removeItem(getZenkaiKey(username));
+          return null;
+        }
+        return data.active ? data : null;
+      } catch { return null; }
+    }
+
+    function setZenkaiBoost(username, level) {
+      localStorage.setItem(getZenkaiKey(username), JSON.stringify({
+        active: true,
+        level: level,
+        activatedAt: Date.now()
+      }));
+    }
+
+    function clearZenkaiBoost(username) {
+      localStorage.removeItem(getZenkaiKey(username));
+    }
+
+    function getZenkaiMultiplier(level) {
+      if (level === 1) return 1.25;
+      if (level === 2) return 1.5;
+      return 2.0; // level 3
+    }
+
+    function getZenkaiLevel(consecutiveLosses) {
+      if (consecutiveLosses >= 5) return 3;
+      if (consecutiveLosses === 4) return 2;
+      if (consecutiveLosses === 3) return 1;
+      return 0;
+    }
+
+    async function checkAndActivateZenkai(username) {
+      try {
+        // Get recent completed challenges involving this player
+        const { data: challenges } = await supabaseClient
+          .from('bounty_challenges')
+          .select('winner, challenger, target')
+          .or(`challenger.eq.${username},target.eq.${username}`)
+          .eq('status', 'completed')
+          .order('resolved_at', { ascending: false })
+          .limit(10);
+
+        if (!challenges || !challenges.length) return;
+
+        // Count consecutive losses from most recent
+        let losses = 0;
+        for (const c of challenges) {
+          if (c.winner && c.winner.toLowerCase() !== username.toLowerCase()) {
+            losses++;
+          } else {
+            break; // streak broken
+          }
+        }
+
+        const level = getZenkaiLevel(losses);
+        if (level > 0) {
+          setZenkaiBoost(username, level);
+        } else {
+          clearZenkaiBoost(username);
+        }
+      } catch (e) {
+        console.error('Zenkai check error:', e);
+      }
+    }
+
+    function showZenkaiNotification(bonusCurrency) {
+      const el = document.createElement('div');
+      el.className = 'zenkai-notification';
+      el.innerHTML = `
+        <h2>ZENKAI BOOST!</h2>
+        <p>Your fighting spirit burns bright!</p>
+        <p class="bonus">+${bonusCurrency} bonus currency</p>
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3500);
+    }
 
     async function loadBountyBoard() {
       try {
@@ -1073,11 +1277,15 @@
       }
       grid.innerHTML = bounties.map((b, i) => {
         const rank = String(i + 1).padStart(2, '0');
-        const cls = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
+        const isVillain = (b.streak || 0) >= 5;
+        const zenkai = getZenkaiBoost(b.discord_username);
+        const cls = (i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '') + (isVillain ? ' villain-row' : '') + (zenkai ? ' zenkai-row' : '');
+        const villainBadge = isVillain ? '<span class="villain-badge">VILLAIN</span>' : '';
+        const zenkaiBadge = zenkai ? `<span class="zenkai-badge">ZENKAI Lv${zenkai.level}</span>` : '';
         return `
           <div class="bounty-row ${cls}" onclick="openWanted('${escapeHtml(b.discord_username)}')">
             <div class="bounty-rank">${rank}</div>
-            <div class="bounty-name">${escapeHtml(b.discord_username.toUpperCase())}</div>
+            <div class="bounty-name">${escapeHtml(b.discord_username.toUpperCase())}${villainBadge}${zenkaiBadge}</div>
             <div class="bounty-amount"><span class="z">Z</span> ${formatBounty(b.bounty)}</div>
           </div>
         `;
@@ -1088,9 +1296,22 @@
       const b = allBounties.find(x => x.discord_username === username);
       if (!b) return;
 
-      const threat = calcThreatLevel(b.bounty);
+      const isVillain = (b.streak || 0) >= 5;
+      const threat = isVillain ? 5 : calcThreatLevel(b.bounty);
       const rarity = getThreatRarity(threat);
       const dbCount = getDragonBallCount(b.bounty);
+
+      const wantedCard = document.getElementById('wanted-card');
+      wantedCard.classList.toggle('villain-wanted', isVillain);
+      // Remove old stamp if any
+      const oldStamp = wantedCard.querySelector('.villain-stamp');
+      if (oldStamp) oldStamp.remove();
+      if (isVillain) {
+        const stamp = document.createElement('div');
+        stamp.className = 'villain-stamp';
+        stamp.textContent = 'MOST WANTED';
+        wantedCard.appendChild(stamp);
+      }
 
       document.getElementById('wanted-name').textContent = b.discord_username.toUpperCase();
       document.getElementById('wanted-handle').textContent = '@' + b.discord_username;
@@ -1344,10 +1565,21 @@
       const loser = loserBounties?.[0] || { bounty: 0, streak: 0, wins: 0, losses: 0, peak_bounty: 0 };
 
       // Bounty transfer: winner gets 50% of loser's bounty + streak bonus
+      const loserWasVillain = (loser.streak || 0) >= 5;
       const bountyGain = Math.floor(loser.bounty * 0.5) + (winner.streak + 1) * 500;
       const newWinnerBounty = Math.min(winner.bounty + bountyGain, 100000);
-      const currencyReward = Math.floor(bountyGain * 0.3);
+      let currencyReward = Math.floor(bountyGain * 0.3) * (loserWasVillain ? 2 : 1);
       const eloChange = 15;
+
+      // Zenkai Boost: check if winner has active boost
+      const winnerZenkai = getZenkaiBoost(winnerUsername);
+      let zenkaiBonusCurrency = 0;
+      if (winnerZenkai) {
+        const multiplier = getZenkaiMultiplier(winnerZenkai.level);
+        zenkaiBonusCurrency = Math.floor(currencyReward * (multiplier - 1));
+        currencyReward += zenkaiBonusCurrency;
+        clearZenkaiBoost(winnerUsername);
+      }
 
       // Update winner
       await supabaseClient.from('bounties').update({
@@ -1372,7 +1604,7 @@
 
       // Award currency
       if (currencyReward > 0) {
-        await db.awardPoints(winnerUsername, currencyReward, 'bounty_win', challengeId);
+        await db.awardPoints(winnerUsername, currencyReward, loserWasVillain ? 'villain_slayer' : 'bounty_win', challengeId);
       }
 
       // Adjust ELO
@@ -1388,7 +1620,16 @@
         resolved_at: new Date().toISOString()
       }).eq('id', challengeId);
 
-      alert(`${winnerUsername} wins! Bounty +${bountyGain}, Currency +${currencyReward}, ELO +${eloChange}`);
+      // Check and activate Zenkai for the loser
+      await checkAndActivateZenkai(loserUsername);
+
+      if (zenkaiBonusCurrency > 0) {
+        showZenkaiNotification(zenkaiBonusCurrency);
+      }
+      if (loserWasVillain && typeof NotificationSystem !== 'undefined') {
+        NotificationSystem.show(`VILLAIN SLAYER! ${winnerUsername} defeated the villain ${loserUsername} for 2x rewards!`, 'success');
+      }
+      alert(`${winnerUsername} wins! Bounty +${bountyGain}, Currency +${currencyReward}${loserWasVillain ? ' (2x VILLAIN BONUS)' : ''}${zenkaiBonusCurrency > 0 ? ` (+${zenkaiBonusCurrency} ZENKAI BOOST)` : ''}, ELO +${eloChange}`);
       loadBountyBoard();
       loadMyBounty();
     }
@@ -1467,10 +1708,21 @@
       const winner = winnerBounties?.[0] || { bounty: 0, streak: 0, wins: 0, losses: 0, peak_bounty: 0 };
       const loser = loserBounties?.[0] || { bounty: 0, streak: 0, wins: 0, losses: 0, peak_bounty: 0 };
 
+      const loserWasVillain = (loser.streak || 0) >= 5;
       const bountyGain = Math.floor(loser.bounty * 0.5) + (winner.streak + 1) * 500;
       const newWinnerBounty = Math.min(winner.bounty + bountyGain, 100000);
-      const currencyReward = Math.floor(bountyGain * 0.3);
+      let currencyReward = Math.floor(bountyGain * 0.3) * (loserWasVillain ? 2 : 1);
       const eloChange = 15;
+
+      // Zenkai Boost: check if winner has active boost
+      const winnerZenkai = getZenkaiBoost(winnerUsername);
+      let zenkaiBonusCurrency = 0;
+      if (winnerZenkai) {
+        const multiplier = getZenkaiMultiplier(winnerZenkai.level);
+        zenkaiBonusCurrency = Math.floor(currencyReward * (multiplier - 1));
+        currencyReward += zenkaiBonusCurrency;
+        clearZenkaiBoost(winnerUsername);
+      }
 
       await supabaseClient.from('bounties').update({
         bounty: newWinnerBounty,
@@ -1492,7 +1744,15 @@
       }).eq('discord_username', loserUsername);
 
       if (currencyReward > 0) {
-        await db.awardPoints(winnerUsername, currencyReward, 'bounty_win', challengeId);
+        await db.awardPoints(winnerUsername, currencyReward, loserWasVillain ? 'villain_slayer' : 'bounty_win', challengeId);
+      }
+
+      if (loserWasVillain && typeof NotificationSystem !== 'undefined') {
+        NotificationSystem.show(`VILLAIN SLAYER! ${winnerUsername} defeated the villain ${loserUsername} for 2x rewards!`, 'success');
+      }
+
+      if (zenkaiBonusCurrency > 0) {
+        showZenkaiNotification(zenkaiBonusCurrency);
       }
 
       await db.updateElo(winnerUsername, eloChange, true);
@@ -1505,6 +1765,9 @@
         currency_reward: currencyReward,
         resolved_at: new Date().toISOString()
       }).eq('id', challengeId);
+
+      // Check and activate Zenkai for the loser
+      await checkAndActivateZenkai(loserUsername);
     }
 
     async function loadReportableChallenges() {
@@ -1612,6 +1875,10 @@
           selfInput.value = currentUser;
           selfInput.readOnly = true;
           selfInput.style.opacity = '0.7';
+        }
+        // Check/activate Zenkai for current user on page load
+        if (currentUser) {
+          await checkAndActivateZenkai(currentUser);
         }
         await loadBountyBoard();
         await loadMyBounty();

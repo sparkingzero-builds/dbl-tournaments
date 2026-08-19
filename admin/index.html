@@ -494,6 +494,45 @@
               <input type="text" id="t-max" placeholder="16" />
             </div>
           </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Format</label>
+              <select id="t-format" onchange="toggleDraftOptions()">
+                <option value="standard">Standard</option>
+                <option value="draft">Draft</option>
+                <option value="fight_night">Fight Night</option>
+              </select>
+            </div>
+          </div>
+          <div id="draft-options" style="display:none; border:1px solid var(--line); border-radius:8px; padding:16px; margin-bottom:16px; background:rgba(0,229,255,0.03);">
+            <h4 style="color:var(--cyan); margin-bottom:12px; font-size:13px; text-transform:uppercase; letter-spacing:0.08em;">Draft Settings</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Draft Order</label>
+                <select id="t-draft-order">
+                  <option value="random">Random</option>
+                  <option value="elo">By ELO (highest picks last)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Characters Per Player</label>
+                <select id="t-draft-picks">
+                  <option value="3" selected>3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Time Per Pick</label>
+                <select id="t-draft-time">
+                  <option value="30">30 seconds</option>
+                  <option value="60" selected>60 seconds</option>
+                  <option value="90">90 seconds</option>
+                  <option value="120">120 seconds</option>
+                </select>
+              </div>
+            </div>
+          </div>
           <div class="form-group">
             <label>Description / Rules</label>
             <textarea id="t-desc" rows="3" placeholder="Tournament rules and theme info..."></textarea>
@@ -569,6 +608,8 @@
           <div class="flex gap-1">
             <button class="btn btn-sm btn-primary" onclick="generateBracket()">Generate Bracket</button>
             <button class="btn btn-sm btn-secondary" onclick="resetBracket()">Reset Bracket</button>
+            <button class="btn btn-sm btn-gold" id="btn-start-draft" style="display:none;" onclick="startDraft()">Start Draft</button>
+            <button class="btn btn-sm btn-danger" id="btn-reset-draft" style="display:none;" onclick="resetDraft()">Reset Draft</button>
           </div>
         </div>
         <p class="text-muted mt-1">Generate a bracket from current signups. Click on matches to set winners.</p>
@@ -1119,6 +1160,18 @@
         </div>
         <p class="text-muted mt-1">Currently watching the bracket page.</p>
       </div>
+
+      <!-- World Tournament -->
+      <div class="card mt-3">
+        <h3 class="mb-2" style="color:var(--gold);">World Tournament</h3>
+        <p class="text-muted mb-2" style="font-size:13px;">Start an end-of-season World Tournament with the top 8 qualified players.</p>
+        <div class="flex gap-1 mb-2">
+          <button class="btn btn-sm btn-gold" onclick="startWorldTournament()" id="btn-start-wt">Start World Tournament</button>
+          <button class="btn btn-sm btn-danger" onclick="endWorldTournament()" id="btn-end-wt" style="display:none;">End World Tournament</button>
+        </div>
+        <div id="wt-status" class="text-muted" style="font-size:13px;"></div>
+        <div id="wt-qualifiers" class="mt-2"></div>
+      </div>
     </div>
     <!-- Bounty Tab -->
     <div class="tab-content" id="tab-bounty">
@@ -1260,6 +1313,37 @@
     let matches = [];
     let editingId = null;
 
+    function toggleDraftOptions() {
+      const fmt = document.getElementById('t-format').value;
+      document.getElementById('draft-options').style.display = fmt === 'draft' ? '' : 'none';
+    }
+
+    // Draft admin controls
+    async function startDraft() {
+      if (!currentTournament) return NotificationSystem.show('No tournament selected', 'error');
+      if (currentTournament.format !== 'draft') return NotificationSystem.show('Tournament is not a draft format', 'error');
+      try {
+        await supabaseClient.from('tournaments').update({ status: 'drafting' }).eq('id', currentTournament.id);
+        currentTournament.status = 'drafting';
+        NotificationSystem.show('Draft started! Players can now pick characters.', 'success');
+        loadActiveTournament();
+      } catch (e) { NotificationSystem.show('Error: ' + e.message, 'error'); }
+    }
+
+    async function resetDraft() {
+      if (!currentTournament) return;
+      if (!confirm('Reset all draft picks for this tournament? This cannot be undone.')) return;
+      try {
+        await supabaseClient.from('draft_picks').delete().eq('tournament_id', currentTournament.id);
+        // Clear teams from signups
+        const sups = await db.getSignups(currentTournament.id);
+        for (const s of sups) {
+          await supabaseClient.from('signups').update({ team: [] }).eq('id', s.id);
+        }
+        NotificationSystem.show('Draft reset. All picks cleared.', 'success');
+      } catch (e) { NotificationSystem.show('Error: ' + e.message, 'error'); }
+    }
+
     // Season XP helper
     let _activeSeason = null;
     async function getActiveSeason() {
@@ -1392,13 +1476,21 @@
         return;
       }
 
+      const format = document.getElementById('t-format').value;
       const data = {
         name,
         max_players: maxPlayers,
         description: desc,
         allowed_characters: [...selectedCharIds],
-        status: 'signup'
+        status: 'signup',
+        format
       };
+
+      if (format === 'draft') {
+        data.draft_order = document.getElementById('t-draft-order').value;
+        data.draft_picks_per_player = parseInt(document.getElementById('t-draft-picks').value);
+        data.draft_time_per_pick = parseInt(document.getElementById('t-draft-time').value);
+      }
 
       try {
         if (editingId) {
@@ -1459,6 +1551,13 @@
         document.getElementById('t-desc').value = t.description || '';
         selectedCharIds = new Set(t.allowed_characters || []);
         applyAdminFilters();
+        document.getElementById('t-format').value = t.format || 'standard';
+        toggleDraftOptions();
+        if (t.format === 'draft') {
+          document.getElementById('t-draft-order').value = t.draft_order || 'random';
+          document.getElementById('t-draft-picks').value = t.draft_picks_per_player || 3;
+          document.getElementById('t-draft-time').value = t.draft_time_per_pick || 60;
+        }
         document.getElementById('form-title').textContent = 'Edit Tournament';
         document.getElementById('save-btn-text').textContent = 'Update Tournament';
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1477,6 +1576,13 @@
       } catch (e) {
         currentTournament = null;
       }
+
+      // Show/hide draft buttons
+      const isDraft = currentTournament && currentTournament.format === 'draft';
+      const draftStartBtn = document.getElementById('btn-start-draft');
+      const draftResetBtn = document.getElementById('btn-reset-draft');
+      if (draftStartBtn) draftStartBtn.style.display = isDraft && currentTournament.status === 'active' ? '' : 'none';
+      if (draftResetBtn) draftResetBtn.style.display = isDraft ? '' : 'none';
     }
 
     // Players
@@ -3872,5 +3978,86 @@
     };
   </script>
   <script src="../js/toolbar.js"></script>
+<script>
+// World Tournament Admin
+async function startWorldTournament() {
+  if (!confirm('Start a World Tournament with the top 8 qualifiers?')) return;
+  try {
+    // Get top 8 by ELO
+    const { data: players } = await supabaseClient.from('player_elo').select('*').order('elo', { ascending: false }).limit(8);
+    if (!players || players.length < 2) { alert('Not enough qualified players'); return; }
+
+    // Create world tournament
+    const { data: t, error } = await supabaseClient.from('tournaments').insert({
+      name: 'World Tournament ' + new Date().getFullYear(),
+      status: 'signup',
+      type: 'world_tournament',
+      max_players: 8
+    }).select().single();
+
+    if (error) { alert('Error: ' + error.message); return; }
+
+    // Auto-sign up qualifiers
+    for (const p of players) {
+      await supabaseClient.from('signups').insert({ tournament_id: t.id, discord_name: p.discord_name });
+    }
+
+    alert('World Tournament created with ' + players.length + ' qualifiers!');
+    loadWorldTournamentStatus();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function endWorldTournament() {
+  if (!confirm('End the active World Tournament and archive results?')) return;
+  try {
+    const { data: wt } = await supabaseClient.from('tournaments')
+      .select('*').eq('type', 'world_tournament').neq('status', 'completed').single();
+    if (!wt) { alert('No active World Tournament'); return; }
+
+    await supabaseClient.from('tournaments').update({ status: 'completed' }).eq('id', wt.id);
+
+    // Archive to localStorage
+    const archive = JSON.parse(localStorage.getItem('dbl_world_tournaments') || '[]');
+    archive.push({
+      name: wt.name,
+      date: new Date().toISOString().split('T')[0],
+      champion: 'TBD',
+      runnerUp: 'TBD',
+      participantCount: 8
+    });
+    localStorage.setItem('dbl_world_tournaments', JSON.stringify(archive));
+
+    alert('World Tournament archived!');
+    loadWorldTournamentStatus();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function loadWorldTournamentStatus() {
+  const statusEl = document.getElementById('wt-status');
+  const startBtn = document.getElementById('btn-start-wt');
+  const endBtn = document.getElementById('btn-end-wt');
+  if (!statusEl) return;
+  try {
+    const { data: wt } = await supabaseClient.from('tournaments')
+      .select('*').eq('type', 'world_tournament').neq('status', 'completed').maybeSingle();
+    if (wt) {
+      statusEl.innerHTML = 'Active: <strong style="color:var(--gold)">' + wt.name + '</strong> — Status: ' + wt.status;
+      startBtn.style.display = 'none';
+      endBtn.style.display = '';
+    } else {
+      statusEl.textContent = 'No active World Tournament';
+      startBtn.style.display = '';
+      endBtn.style.display = 'none';
+    }
+  } catch(e) { statusEl.textContent = 'Could not load status'; }
+}
+
+// Load on settings tab
+const _origLoadSettings3 = loadSettings;
+loadSettings = function() {
+  _origLoadSettings3();
+  loadWorldTournamentStatus();
+};
+</script>
 </body>
 </html>

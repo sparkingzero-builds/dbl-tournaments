@@ -187,7 +187,9 @@
             <div class="dropdown-label">Community</div>
             <a href="compare.html">Compare</a>
             <a href="shop.html">Shop</a>
+            <a href="auction.html">Auction</a>
             <a href="season.html">Season</a>
+            <a href="world-tournament.html">World Tournament</a>
             <a href="feed.html">Live Feed</a>
           </div>
         </li>
@@ -252,8 +254,14 @@
       return rank === 1 ? 'top-1' : rank === 2 ? 'top-2' : rank === 3 ? 'top-3' : '';
     }
 
+    function isVillain(name) {
+      const b = data.bounty.find(p => p.discord_username === name);
+      return b && (b.streak || 0) >= 5;
+    }
+
     function playerLink(name) {
-      return `<a class="lb-name" href="profile.html?player=${encodeURIComponent(name)}">${name}</a>`;
+      const skull = isVillain(name) ? ' <span title="Villain" style="color:#8b0000;font-size:14px;">&#9760;</span>' : '';
+      return `<a class="lb-name" href="profile.html?player=${encodeURIComponent(name)}">${name}</a>${skull}`;
     }
 
     /* ── Data Loading ── */

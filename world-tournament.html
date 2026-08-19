@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Tournament — DBL Tournaments</title>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;800;900&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/bracket.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    /* ── World Tournament Styles ── */
+
+    .wt-hero {
+      text-align: center;
+      padding: 80px 20px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wt-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at center, rgba(255, 215, 64, 0.08) 0%, transparent 60%);
+      animation: heroGlow 6s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes heroGlow {
+      0% { opacity: 0.4; transform: scale(1); }
+      100% { opacity: 1; transform: scale(1.1); }
+    }
+
+    .wt-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: clamp(2.4rem, 7vw, 5rem);
+      font-weight: 900;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #ffd740 0%, #ffab00 30%, #ff6d00 60%, #ff2d78 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+      margin-bottom: 12px;
+      animation: titleFlame 3s ease-in-out infinite alternate;
+      filter: drop-shadow(0 0 30px rgba(255, 215, 64, 0.4));
+    }
+
+    @keyframes titleFlame {
+      0% { filter: drop-shadow(0 0 20px rgba(255, 215, 64, 0.3)); }
+      50% { filter: drop-shadow(0 0 40px rgba(255, 109, 0, 0.5)); }
+      100% { filter: drop-shadow(0 0 25px rgba(255, 45, 120, 0.4)); }
+    }
+
+    .wt-subtitle {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 1.3rem;
+      color: var(--gold);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      opacity: 0.85;
+      margin-bottom: 20px;
+    }
+
+    .wt-status {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+
+    .wt-status .active-name {
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    /* ── Section base ── */
+
+    .wt-section {
+      max-width: 1100px;
+      margin: 0 auto 60px;
+      padding: 0 20px;
+    }
+
+    .wt-section-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 8px;
+      position: relative;
+    }
+
+    .wt-section-title::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 10px auto 30px;
+    }
+
+    /* ── Qualifier Cards ── */
+
+    .qualifiers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .qualifier-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 24px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .qualifier-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .qualifier-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      padding: 2px;
+      background: linear-gradient(135deg, var(--line), var(--line));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .qualifier-card.rank-1::before {
+      background: linear-gradient(135deg, #ffd740, #ff6d00, #ffd740, #ff6d00);
+      background-size: 300% 300%;
+      animation: flameBorder 2s ease-in-out infinite;
+    }
+    .qualifier-card.rank-1 { box-shadow: 0 0 25px rgba(255, 215, 64, 0.25); }
+
+    .qualifier-card.rank-2::before {
+      background: linear-gradient(135deg, #b0bec5, #eceff1, #b0bec5, #78909c);
+      background-size: 300% 300%;
+      animation: flameBorder 2.5s ease-in-out infinite;
+    }
+    .qualifier-card.rank-2 { box-shadow: 0 0 20px rgba(176, 190, 197, 0.2); }
+
+    .qualifier-card.rank-3::before {
+      background: linear-gradient(135deg, #ff8a65, #cd6d3e, #ff8a65, #bf6030);
+      background-size: 300% 300%;
+      animation: flameBorder 3s ease-in-out infinite;
+    }
+    .qualifier-card.rank-3 { box-shadow: 0 0 20px rgba(205, 109, 62, 0.2); }
+
+    @keyframes flameBorder {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .qualifier-rank {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--muted);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .rank-1 .qualifier-rank { color: var(--gold); }
+    .rank-2 .qualifier-rank { color: #b0bec5; }
+    .rank-3 .qualifier-rank { color: #cd6d3e; }
+
+    .qualifier-name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .qualifier-name a {
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .qualifier-name a:hover { color: var(--cyan); }
+
+    .qualifier-stats {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .qualifier-stats span { display: flex; align-items: center; gap: 4px; }
+
+    .qualifier-composite {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    /* ── Prize Cards ── */
+
+    .prizes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 20px;
+    }
+
+    .prize-card {
+      background: var(--panel);
+      border-radius: 12px;
+      padding: 28px 20px;
+      text-align: center;
+      position: relative;
+      border: 1px solid var(--line);
+      transition: transform 0.3s;
+    }
+
+    .prize-card:hover { transform: translateY(-3px); }
+
+    .prize-card.gold {
+      border-color: var(--gold);
+      box-shadow: 0 0 30px rgba(255, 215, 64, 0.15);
+    }
+
+    .prize-card.silver {
+      border-color: #b0bec5;
+      box-shadow: 0 0 20px rgba(176, 190, 197, 0.1);
+    }
+
+    .prize-card.bronze {
+      border-color: #cd6d3e;
+      box-shadow: 0 0 20px rgba(205, 109, 62, 0.1);
+    }
+
+    .prize-emoji { font-size: 2.8rem; margin-bottom: 10px; }
+
+    .prize-place {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+    }
+
+    .prize-card.gold .prize-place { color: var(--gold); }
+    .prize-card.silver .prize-place { color: #b0bec5; }
+    .prize-card.bronze .prize-place { color: #cd6d3e; }
+
+    .prize-amount {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .prize-title-badge {
+      font-size: 0.85rem;
+      color: var(--cyan);
+      font-weight: 600;
+    }
+
+    /* ── Rules ── */
+
+    .rules-list {
+      list-style: none;
+      padding: 0;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .rule-item {
+      background: var(--panel);
+      border-left: 3px solid var(--gold);
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.95rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .rule-item:hover {
+      border-left-color: var(--cyan);
+      background: rgba(26, 21, 53, 0.8);
+    }
+
+    .rule-number {
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--gold);
+      min-width: 28px;
+    }
+
+    /* ── History ── */
+
+    .history-table-wrap {
+      overflow-x: auto;
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .history-table th {
+      font-family: 'Chakra Petch', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 0.75rem;
+      color: var(--gold);
+      padding: 12px 16px;
+      border-bottom: 2px solid var(--line);
+      text-align: left;
+    }
+
+    .history-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .history-empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 40px 20px;
+      font-size: 1rem;
+    }
+
+    /* ── Countdown ── */
+
+    .countdown-wrap {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .countdown-label {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1rem;
+      color: var(--gold);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .countdown-timer {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .countdown-unit {
+      background: var(--panel);
+      border: 1px solid var(--gold);
+      border-radius: 10px;
+      padding: 16px 20px;
+      min-width: 80px;
+      box-shadow: 0 0 15px rgba(255, 215, 64, 0.1);
+    }
+
+    .countdown-value {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .countdown-unit-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    .countdown-ended {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1.2rem;
+      color: var(--pink);
+      letter-spacing: 2px;
+    }
+
+    /* ── Flame particle accents ── */
+
+    .flame-particle {
+      position: fixed;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      animation: particleFloat 4s ease-in-out infinite;
+      opacity: 0;
+    }
+
+    @keyframes particleFloat {
+      0% { opacity: 0; transform: translateY(0) scale(1); }
+      20% { opacity: 0.6; }
+      80% { opacity: 0.3; }
+      100% { opacity: 0; transform: translateY(-120px) scale(0.3); }
+    }
+
+    /* ── Responsive ── */
+
+    @media (max-width: 600px) {
+      .wt-title { letter-spacing: 3px; }
+      .qualifiers-grid, .prizes-grid { grid-template-columns: 1fr; }
+      .countdown-timer { gap: 10px; }
+      .countdown-unit { min-width: 65px; padding: 12px 14px; }
+      .countdown-value { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+        <li><a href="bounty.html">Bounty</a></li>
+        <li><a href="matches.html">Matches</a></li>
+        <li class="nav-dropdown">
+          <a href="#">More ▾</a>
+          <div class="nav-dropdown-menu">
+            <div class="dropdown-label">Data</div>
+            <a href="characters.html">Characters</a>
+            <a href="tierlist.html">Tier List</a>
+            <a href="analytics.html">Ban Analytics</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Community</div>
+            <a href="compare.html">Compare</a>
+            <a href="shop.html">Shop</a>
+            <a href="auction.html">Auction</a>
+            <a href="season.html">Season</a>
+            <a href="world-tournament.html">World Tournament</a>
+            <a href="feed.html">Live Feed</a>
+          </div>
+        </li>
+        <div id="auth-nav"></div>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="wt-hero">
+    <h1 class="wt-title">World Tournament Arc</h1>
+    <p class="wt-subtitle">The Ultimate Championship</p>
+    <p class="wt-status" id="wt-status">Loading...</p>
+  </section>
+
+  <!-- Countdown -->
+  <section class="wt-section" id="countdown-section">
+    <div class="countdown-wrap" id="countdown-wrap">
+      <p class="countdown-label">Qualifications Lock In</p>
+      <div class="countdown-timer" id="countdown-timer"></div>
+    </div>
+  </section>
+
+  <!-- Qualifiers -->
+  <section class="wt-section" id="qualifiers-section">
+    <h2 class="wt-section-title">Top 8 Qualifiers</h2>
+    <div class="qualifiers-grid" id="qualifiers-grid">
+      <p class="history-empty">Loading qualifiers...</p>
+    </div>
+  </section>
+
+  <!-- Prizes -->
+  <section class="wt-section" id="prizes-section">
+    <h2 class="wt-section-title">Prize Pool</h2>
+    <div class="prizes-grid">
+      <div class="prize-card gold">
+        <div class="prize-emoji">🏆</div>
+        <div class="prize-place">1st Place</div>
+        <div class="prize-amount">5,000</div>
+        <div class="prize-title-badge">"World Champion" Title + Special Border</div>
+      </div>
+      <div class="prize-card silver">
+        <div class="prize-emoji">🥈</div>
+        <div class="prize-place">2nd Place</div>
+        <div class="prize-amount">3,000</div>
+        <div class="prize-title-badge">"Grand Finalist" Title</div>
+      </div>
+      <div class="prize-card bronze">
+        <div class="prize-emoji">🥉</div>
+        <div class="prize-place">3rd — 4th</div>
+        <div class="prize-amount">1,500</div>
+        <div class="prize-title-badge">"Elite Four" Badge</div>
+      </div>
+      <div class="prize-card">
+        <div class="prize-emoji">🎖️</div>
+        <div class="prize-place">5th — 8th</div>
+        <div class="prize-amount">500</div>
+        <div class="prize-title-badge">"World Contender" Badge</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rules -->
+  <section class="wt-section" id="rules-section">
+    <h2 class="wt-section-title">Tournament Rules</h2>
+    <ul class="rules-list">
+      <li class="rule-item"><span class="rule-number">01</span> Best of 3 matches per round</li>
+      <li class="rule-item"><span class="rule-number">02</span> Double elimination bracket</li>
+      <li class="rule-item"><span class="rule-number">03</span> Each player bans 3 characters (no community vote)</li>
+      <li class="rule-item"><span class="rule-number">04</span> No character repeats across sets</li>
+      <li class="rule-item"><span class="rule-number">05</span> Matches must be completed within 48 hours</li>
+    </ul>
+  </section>
+
+  <!-- Hall of Champions -->
+  <section class="wt-section" id="history-section">
+    <h2 class="wt-section-title">Hall of Champions</h2>
+    <div id="history-content">
+      <p class="history-empty">Loading history...</p>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/activity-alerts.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+
+  <script>
+    /* ── World Tournament Page Logic ── */
+
+    function waitForSupabase() {
+      return new Promise(resolve => {
+        if (typeof supabaseClient !== 'undefined' && supabaseClient) return resolve();
+        document.addEventListener('supabaseReady', () => resolve());
+        setTimeout(resolve, 3000);
+      });
+    }
+
+    async function loadWorldTournamentStatus() {
+      const el = document.getElementById('wt-status');
+      try {
+        const { data } = await supabaseClient
+          .from('tournaments')
+          .select('name, status')
+          .eq('type', 'world_tournament')
+          .neq('status', 'completed')
+          .limit(1)
+          .maybeSingle();
+
+        if (data) {
+          el.innerHTML = `<span class="active-name">${data.name}</span> — Status: ${data.status}`;
+        } else {
+          el.textContent = 'Next World Tournament: End of Season';
+        }
+      } catch {
+        el.textContent = 'Next World Tournament: End of Season';
+      }
+    }
+
+    async function loadQualifiers() {
+      const grid = document.getElementById('qualifiers-grid');
+      try {
+        /* Fetch ELO data */
+        const { data: eloData, error: eloErr } = await supabaseClient
+          .from('player_elo')
+          .select('player_name, elo')
+          .order('elo', { ascending: false })
+          .limit(30);
+
+        if (eloErr || !eloData || eloData.length === 0) {
+          grid.innerHTML = '<p class="history-empty">No qualifier data available yet.</p>';
+          return;
+        }
+
+        const maxElo = Math.max(...eloData.map(p => p.elo)) || 1;
+        const playerNames = eloData.map(p => p.player_name);
+
+        /* Fetch bounty wins */
+        let bountyMap = {};
+        try {
+          const { data: bounties } = await supabaseClient
+            .from('bounties')
+            .select('target_name')
+            .eq('status', 'completed')
+            .in('target_name', playerNames);
+
+          if (bounties) {
+            /* Count how many bounties each player completed (was the target that got claimed) —
+               actually count how many times a player appears as claimer. Adjust field name as needed. */
+            for (const b of bounties) {
+              const n = b.target_name;
+              bountyMap[n] = (bountyMap[n] || 0) + 1;
+            }
+          }
+        } catch { /* table may not exist */ }
+
+        /* Fetch tournament wins */
+        let winsMap = {};
+        try {
+          const { data: signups } = await supabaseClient
+            .from('signups')
+            .select('player_name, tournament_id');
+          const { data: tournaments } = await supabaseClient
+            .from('tournaments')
+            .select('id, winner')
+            .eq('status', 'completed');
+
+          if (tournaments) {
+            for (const t of tournaments) {
+              if (t.winner && playerNames.includes(t.winner)) {
+                winsMap[t.winner] = (winsMap[t.winner] || 0) + 1;
+              }
+            }
+          }
+        } catch { /* graceful */ }
+
+        /* Fetch season XP */
+        let xpMap = {};
+        try {
+          const { data: xpData } = await supabaseClient
+            .from('season_xp')
+            .select('player_name, xp')
+            .in('player_name', playerNames);
+
+          if (xpData) {
+            for (const x of xpData) xpMap[x.player_name] = x.xp || 0;
+          }
+        } catch { /* table may not exist */ }
+
+        const maxBounty = Math.max(...Object.values(bountyMap), 1);
+        const maxWins = Math.max(...Object.values(winsMap), 1);
+        const maxXp = Math.max(...Object.values(xpMap), 1);
+
+        /* Compute composite */
+        const scored = eloData.map(p => {
+          const eloNorm = p.elo / maxElo;
+          const bountyNorm = (bountyMap[p.player_name] || 0) / maxBounty;
+          const winsNorm = (winsMap[p.player_name] || 0) / maxWins;
+          const xpNorm = (xpMap[p.player_name] || 0) / maxXp;
+          const composite = (eloNorm * 0.4) + (bountyNorm * 0.3) + (winsNorm * 0.2) + (xpNorm * 0.1);
+          return { ...p, bounties: bountyMap[p.player_name] || 0, wins: winsMap[p.player_name] || 0, composite };
+        });
+
+        scored.sort((a, b) => b.composite - a.composite);
+        const top8 = scored.slice(0, 8);
+
+        grid.innerHTML = top8.map((p, i) => {
+          const rank = i + 1;
+          const rankClass = rank <= 3 ? ` rank-${rank}` : '';
+          const medal = rank === 1 ? '👑' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+          return `
+            <div class="qualifier-card${rankClass}">
+              <div class="qualifier-rank">${medal}</div>
+              <div class="qualifier-name">
+                <a href="profile.html?name=${encodeURIComponent(p.player_name)}">${p.player_name}</a>
+              </div>
+              <div class="qualifier-stats">
+                <span>ELO ${p.elo}</span>
+                <span>🎯 ${p.bounties}</span>
+                <span>🏆 ${p.wins}</span>
+              </div>
+              <div class="qualifier-composite">${(p.composite * 100).toFixed(1)} PTS</div>
+            </div>`;
+        }).join('');
+
+      } catch (err) {
+        console.error('Qualifier load error:', err);
+        grid.innerHTML = '<p class="history-empty">Could not load qualifier data.</p>';
+      }
+    }
+
+    async function loadCountdown() {
+      const wrap = document.getElementById('countdown-timer');
+      try {
+        const { data } = await supabaseClient
+          .from('seasons')
+          .select('ends_at')
+          .gt('ends_at', new Date().toISOString())
+          .order('ends_at', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+
+        if (!data || !data.ends_at) {
+          wrap.innerHTML = '<p class="countdown-ended">No active season</p>';
+          return;
+        }
+
+        const endDate = new Date(data.ends_at);
+
+        function tick() {
+          const now = Date.now();
+          const diff = endDate.getTime() - now;
+
+          if (diff <= 0) {
+            wrap.innerHTML = '<p class="countdown-ended">QUALIFICATIONS LOCKED</p>';
+            return;
+          }
+
+          const d = Math.floor(diff / 86400000);
+          const h = Math.floor((diff % 86400000) / 3600000);
+          const m = Math.floor((diff % 3600000) / 60000);
+          const s = Math.floor((diff % 60000) / 1000);
+
+          wrap.innerHTML = [
+            { v: d, l: 'Days' },
+            { v: h, l: 'Hours' },
+            { v: m, l: 'Mins' },
+            { v: s, l: 'Secs' }
+          ].map(u => `
+            <div class="countdown-unit">
+              <div class="countdown-value">${String(u.v).padStart(2, '0')}</div>
+              <div class="countdown-unit-label">${u.l}</div>
+            </div>`).join('');
+        }
+
+        tick();
+        setInterval(tick, 1000);
+
+      } catch {
+        wrap.innerHTML = '<p class="countdown-ended">Season data unavailable</p>';
+      }
+    }
+
+    function loadHistory() {
+      const el = document.getElementById('history-content');
+      try {
+        const history = JSON.parse(localStorage.getItem('dbl_world_tournaments') || '[]');
+
+        if (!history.length) {
+          el.innerHTML = '<p class="history-empty">No World Tournaments have been held yet.</p>';
+          return;
+        }
+
+        el.innerHTML = `
+          <div class="history-table-wrap">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Tournament</th>
+                  <th>Date</th>
+                  <th>Champion</th>
+                  <th>Runner-Up</th>
+                  <th>Players</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${history.map(t => `
+                  <tr>
+                    <td>${t.name || '—'}</td>
+                    <td>${t.date || '—'}</td>
+                    <td style="color:var(--gold);font-weight:700">${t.champion || '—'}</td>
+                    <td>${t.runnerUp || '—'}</td>
+                    <td>${t.participantCount || '—'}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>`;
+      } catch {
+        el.innerHTML = '<p class="history-empty">No World Tournaments have been held yet.</p>';
+      }
+    }
+
+    /* ── Flame particles ── */
+    function spawnParticles() {
+      const colors = ['#ffd740', '#ff6d00', '#ff2d78', '#ffab00'];
+      for (let i = 0; i < 12; i++) {
+        const p = document.createElement('div');
+        p.className = 'flame-particle';
+        p.style.left = Math.random() * 100 + 'vw';
+        p.style.bottom = '-10px';
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.animationDelay = (Math.random() * 4) + 's';
+        p.style.animationDuration = (3 + Math.random() * 3) + 's';
+        document.body.appendChild(p);
+      }
+    }
+
+    /* ── Init ── */
+    (async function init() {
+      spawnParticles();
+      loadHistory();
+
+      await waitForSupabase();
+      if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+        document.getElementById('wt-status').textContent = 'Next World Tournament: End of Season';
+        document.getElementById('qualifiers-grid').innerHTML = '<p class="history-empty">Could not connect to database.</p>';
+        document.getElementById('countdown-timer').innerHTML = '<p class="countdown-ended">Unavailable</p>';
+        return;
+      }
+
+      loadWorldTournamentStatus();
+      loadQualifiers();
+      loadCountdown();
+    })();
+  </script>
+
+  <script src="js/themes.js"></script>
+  <script src="js/toolbar.js"></script>
+</body>
+</html>
