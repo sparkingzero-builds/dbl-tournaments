@@ -126,6 +126,72 @@
     .placement.silver { color: #c0c0c0; }
     .placement.normal { color: var(--muted); }
 
+    /* Bounty Section */
+    .bounty-profile-card {
+      background: linear-gradient(135deg, rgba(255,215,64,0.08), rgba(255,140,0,0.04));
+      border: 1px solid rgba(255,215,64,0.25);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 12px;
+    }
+    .bounty-profile-card h3 {
+      font-size: 14px;
+      color: var(--gold);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255,215,64,0.2);
+    }
+    .bounty-stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .b-stat {
+      text-align: center;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: 12px 6px;
+    }
+    .b-stat-val {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 900;
+      font-size: 1.3rem;
+      line-height: 1;
+    }
+    .b-stat-lbl {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+    .bounty-challenge-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+    .bounty-challenge-row.won { border-left: 3px solid var(--green); }
+    .bounty-challenge-row.lost { border-left: 3px solid var(--red); }
+    .bc-result {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      width: 20px;
+    }
+    .bounty-challenge-row.won .bc-result { color: var(--green); }
+    .bounty-challenge-row.lost .bc-result { color: var(--red); }
+    .bc-opponent { flex: 1; font-weight: 600; color: var(--text); text-decoration: none; }
+    .bc-opponent:hover { color: var(--cyan); }
+    .bc-bounty { color: var(--gold); font-weight: 700; font-size: 12px; }
+    .bc-currency { color: var(--green); font-weight: 700; font-size: 12px; }
+
     /* Rival / character rows */
     .rival-row, .char-row {
       display: flex;
@@ -912,6 +978,78 @@
             </div>
           </div>
         `;
+
+        // ── Bounty Hunter Section ──
+        try {
+          const { data: bountyData } = await supabaseClient
+            .from('bounties')
+            .select('*')
+            .eq('discord_username', playerName)
+            .limit(1);
+
+          const { data: challengeData } = await supabaseClient
+            .from('bounty_challenges')
+            .select('*')
+            .eq('status', 'completed')
+            .or(`challenger.eq.${playerName},target.eq.${playerName}`)
+            .order('resolved_at', { ascending: false })
+            .limit(20);
+
+          const b = bountyData?.[0];
+          const challenges = challengeData || [];
+
+          if (b || challenges.length) {
+            const sectionsEl = document.querySelector('.profile-sections');
+            const bountyHtml = `
+              <div class="profile-section full-width bounty-profile-card">
+                <h3>Bounty Hunter</h3>
+                ${b ? `
+                  <div class="bounty-stats-row">
+                    <div class="b-stat">
+                      <div class="b-stat-val" style="color:var(--gold);">Z ${(b.bounty || 0).toLocaleString()}</div>
+                      <div class="b-stat-lbl">Current Bounty</div>
+                    </div>
+                    <div class="b-stat">
+                      <div class="b-stat-val" style="color:var(--cyan);">${b.streak || 0}</div>
+                      <div class="b-stat-lbl">Win Streak</div>
+                    </div>
+                    <div class="b-stat">
+                      <div class="b-stat-val" style="color:var(--green);">${b.wins || 0}</div>
+                      <div class="b-stat-lbl">Bounty Wins</div>
+                    </div>
+                    <div class="b-stat">
+                      <div class="b-stat-val" style="color:var(--red);">${b.losses || 0}</div>
+                      <div class="b-stat-lbl">Bounty Losses</div>
+                    </div>
+                  </div>
+                  ${b.peak_bounty ? `<div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Peak Bounty: <span style="color:var(--gold);font-weight:700;">Z ${b.peak_bounty.toLocaleString()}</span></div>` : ''}
+                ` : ''}
+                ${challenges.length ? `
+                  <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:8px;">Recent Bounty Matches</div>
+                  <div style="max-height:200px;overflow-y:auto;">
+                    ${challenges.map(c => {
+                      const won = c.winner === playerName;
+                      const opponent = c.challenger === playerName ? c.target : c.challenger;
+                      return `<div class="bounty-challenge-row ${won ? 'won' : 'lost'}">
+                        <span class="bc-result">${won ? 'W' : 'L'}</span>
+                        <span style="color:var(--muted);font-size:11px;">vs</span>
+                        <a href="profile.html?player=${encodeURIComponent(opponent)}" class="bc-opponent">${opponent}</a>
+                        ${c.currency_reward && won ? `<span class="bc-currency">+${c.currency_reward}</span>` : ''}
+                        <span class="bc-bounty">Z ${(c.bounty_at_stake || 0).toLocaleString()}</span>
+                      </div>`;
+                    }).join('')}
+                  </div>
+                ` : '<div style="font-size:13px;color:var(--muted);font-style:italic;">No bounty matches yet.</div>'}
+                <div style="margin-top:12px;">
+                  <a href="bounty.html" style="color:var(--gold);font-size:13px;font-weight:700;text-decoration:none;">View Bounty Board →</a>
+                </div>
+              </div>
+            `;
+            if (sectionsEl) sectionsEl.insertAdjacentHTML('beforeend', bountyHtml);
+          }
+        } catch (e) {
+          console.error('Bounty profile error:', e);
+        }
 
         // Load ELO rating
         try {

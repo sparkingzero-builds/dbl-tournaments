@@ -838,6 +838,13 @@
       <div class="pending-list" id="pending-list"></div>
     </div>
 
+    <!-- ═══ REPORT MATCH RESULTS ═══ -->
+    <div id="report-section" style="display:none;">
+      <h3 style="font-family:'Exo 2',sans-serif;font-size:16px;text-transform:uppercase;color:var(--cyan);margin-bottom:12px;">Report Match Results</h3>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Report the outcome of your accepted challenges. When both players agree on the winner, the result is auto-resolved. If reports conflict, the match is flagged for admin review.</p>
+      <div class="pending-list" id="report-list"></div>
+    </div>
+
     <!-- ═══ BOUNTY BOARD ═══ -->
     <section id="bounty-board">
       <div class="board-header">
@@ -1134,20 +1141,67 @@
         const section = document.getElementById('pending-section');
         const list = document.getElementById('pending-list');
 
-        if (data && data.length > 0) {
+        // Also load accepted challenges involving this user (as challenger or target)
+        const { data: acceptedAsTarget } = await supabaseClient
+          .from('bounty_challenges')
+          .select('*')
+          .eq('target', currentUser)
+          .eq('status', 'accepted');
+
+        const { data: acceptedAsChallenger } = await supabaseClient
+          .from('bounty_challenges')
+          .select('*')
+          .eq('challenger', currentUser)
+          .eq('status', 'accepted');
+
+        const accepted = [...(acceptedAsTarget || []), ...(acceptedAsChallenger || [])];
+        const acceptedSeen = new Set();
+        const uniqueAccepted = accepted.filter(c => {
+          if (acceptedSeen.has(c.id)) return false;
+          acceptedSeen.add(c.id);
+          return true;
+        });
+
+        if ((data && data.length > 0) || uniqueAccepted.length > 0) {
           section.style.display = 'block';
-          list.innerHTML = data.map(c => `
-            <div class="pending-card">
-              <div class="pending-info">
-                <strong>${escapeHtml(c.challenger)}</strong> challenges you!
-                Bounty at stake: <span style="color:var(--gold);font-weight:700;">Z ${formatBounty(c.bounty_at_stake)}</span>
+          let html = '';
+
+          // Pending challenges (need accept/decline)
+          if (data && data.length > 0) {
+            html += data.map(c => `
+              <div class="pending-card">
+                <div class="pending-info">
+                  <strong>${escapeHtml(c.challenger)}</strong> challenges you!
+                  Bounty at stake: <span style="color:var(--gold);font-weight:700;">Z ${formatBounty(c.bounty_at_stake)}</span>
+                </div>
+                <div class="pending-actions">
+                  <button class="btn-accept" onclick="acceptChallenge('${c.id}')">Accept</button>
+                  <button class="btn-decline" onclick="declineChallenge('${c.id}')">Decline</button>
+                </div>
               </div>
-              <div class="pending-actions">
-                <button class="btn-accept" onclick="acceptChallenge('${c.id}')">Accept</button>
-                <button class="btn-decline" onclick="declineChallenge('${c.id}')">Decline</button>
-              </div>
-            </div>
-          `).join('');
+            `).join('');
+          }
+
+          // Accepted challenges (need result reporting)
+          if (uniqueAccepted.length > 0) {
+            html += uniqueAccepted.map(c => {
+              const opponent = c.challenger.toLowerCase() === currentUser.toLowerCase() ? c.target : c.challenger;
+              return `
+                <div class="pending-card" style="border-color:var(--cyan);">
+                  <div class="pending-info">
+                    <strong>${escapeHtml(c.challenger)}</strong> vs <strong>${escapeHtml(c.target)}</strong>
+                    — <span style="color:var(--cyan);font-weight:700;">ACCEPTED</span>
+                    — Stake: <span style="color:var(--gold);font-weight:700;">Z ${formatBounty(c.bounty_at_stake)}</span>
+                  </div>
+                  <div class="pending-actions">
+                    <button class="btn-accept" onclick="document.getElementById('report-section').scrollIntoView({behavior:'smooth'})">Report Results</button>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+
+          list.innerHTML = html;
         } else {
           section.style.display = 'none';
         }
@@ -1245,6 +1299,215 @@
       loadMyBounty();
     }
 
+    // ── Self-Reporting System ──
+    function getReportKey(challengeId, username) {
+      return `bounty_report_${challengeId}_${username.toLowerCase()}`;
+    }
+
+    function getStoredReport(challengeId, username) {
+      return localStorage.getItem(getReportKey(challengeId, username));
+    }
+
+    async function reportResult(challengeId, reporter, claimedWinner) {
+      // Store this player's report in localStorage
+      localStorage.setItem(getReportKey(challengeId, reporter), claimedWinner);
+
+      // Fetch the challenge to find the other player
+      const { data: challenge } = await supabaseClient
+        .from('bounty_challenges')
+        .select('*')
+        .eq('id', challengeId)
+        .single();
+      if (!challenge) return alert('Challenge not found.');
+
+      const otherPlayer = reporter.toLowerCase() === challenge.challenger.toLowerCase()
+        ? challenge.target
+        : challenge.challenger;
+
+      const otherReport = getStoredReport(challengeId, otherPlayer);
+
+      if (!otherReport) {
+        alert('Your result has been recorded. Waiting for the other player to report.');
+        loadReportableChallenges();
+        return;
+      }
+
+      // Both players have reported — check agreement
+      if (otherReport.toLowerCase() === claimedWinner.toLowerCase()) {
+        // They agree — auto-resolve using the same logic as resolveChallenge
+        await autoResolveChallenge(challengeId, claimedWinner);
+        // Clean up localStorage
+        localStorage.removeItem(getReportKey(challengeId, reporter));
+        localStorage.removeItem(getReportKey(challengeId, otherPlayer));
+        alert(`Both players agreed: ${claimedWinner} wins! Match resolved.`);
+      } else {
+        // Disagreement — flag as disputed (using 'expired' status)
+        await supabaseClient.from('bounty_challenges').update({
+          status: 'expired'
+        }).eq('id', challengeId);
+        alert('Reports conflict! This match has been flagged for admin review.');
+        // Clean up localStorage
+        localStorage.removeItem(getReportKey(challengeId, reporter));
+        localStorage.removeItem(getReportKey(challengeId, otherPlayer));
+      }
+      loadReportableChallenges();
+      loadBountyBoard();
+      loadMyBounty();
+    }
+
+    async function autoResolveChallenge(challengeId, winnerUsername) {
+      const { data: challenge } = await supabaseClient
+        .from('bounty_challenges')
+        .select('*')
+        .eq('id', challengeId)
+        .single();
+      if (!challenge) return;
+
+      const loserUsername = winnerUsername.toLowerCase() === challenge.challenger.toLowerCase()
+        ? challenge.target
+        : challenge.challenger;
+
+      const { data: winnerBounties } = await supabaseClient.from('bounties').select('*').eq('discord_username', winnerUsername).limit(1);
+      const { data: loserBounties } = await supabaseClient.from('bounties').select('*').eq('discord_username', loserUsername).limit(1);
+
+      const winner = winnerBounties?.[0] || { bounty: 0, streak: 0, wins: 0, losses: 0, peak_bounty: 0 };
+      const loser = loserBounties?.[0] || { bounty: 0, streak: 0, wins: 0, losses: 0, peak_bounty: 0 };
+
+      const bountyGain = Math.floor(loser.bounty * 0.5) + (winner.streak + 1) * 500;
+      const newWinnerBounty = Math.min(winner.bounty + bountyGain, 100000);
+      const currencyReward = Math.floor(bountyGain * 0.3);
+      const eloChange = 15;
+
+      await supabaseClient.from('bounties').update({
+        bounty: newWinnerBounty,
+        streak: winner.streak + 1,
+        wins: winner.wins + 1,
+        peak_bounty: Math.max(winner.peak_bounty || 0, newWinnerBounty),
+        threat_level: calcThreatLevel(newWinnerBounty),
+        last_active: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }).eq('discord_username', winnerUsername);
+
+      await supabaseClient.from('bounties').update({
+        bounty: 0,
+        streak: 0,
+        losses: loser.losses + 1,
+        status: 'claimed',
+        last_active: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }).eq('discord_username', loserUsername);
+
+      if (currencyReward > 0) {
+        await db.awardPoints(winnerUsername, currencyReward, 'bounty_win', challengeId);
+      }
+
+      await db.updateElo(winnerUsername, eloChange, true);
+      await db.updateElo(loserUsername, -eloChange, false);
+
+      await supabaseClient.from('bounty_challenges').update({
+        winner: winnerUsername,
+        status: 'completed',
+        elo_change: eloChange,
+        currency_reward: currencyReward,
+        resolved_at: new Date().toISOString()
+      }).eq('id', challengeId);
+    }
+
+    async function loadReportableChallenges() {
+      if (!currentUser) return;
+      try {
+        // Load accepted challenges where current user is challenger or target
+        const { data: asChallenger } = await supabaseClient
+          .from('bounty_challenges')
+          .select('*')
+          .eq('challenger', currentUser)
+          .eq('status', 'accepted');
+
+        const { data: asTarget } = await supabaseClient
+          .from('bounty_challenges')
+          .select('*')
+          .eq('target', currentUser)
+          .eq('status', 'accepted');
+
+        const challenges = [...(asChallenger || []), ...(asTarget || [])];
+        // Deduplicate by id
+        const seen = new Set();
+        const unique = challenges.filter(c => {
+          if (seen.has(c.id)) return false;
+          seen.add(c.id);
+          return true;
+        });
+
+        // Also load disputed (expired) challenges for display
+        const { data: disputedAsChallenger } = await supabaseClient
+          .from('bounty_challenges')
+          .select('*')
+          .eq('challenger', currentUser)
+          .eq('status', 'expired');
+
+        const { data: disputedAsTarget } = await supabaseClient
+          .from('bounty_challenges')
+          .select('*')
+          .eq('target', currentUser)
+          .eq('status', 'expired');
+
+        const disputed = [...(disputedAsChallenger || []), ...(disputedAsTarget || [])];
+        const disputedSeen = new Set();
+        const uniqueDisputed = disputed.filter(c => {
+          if (disputedSeen.has(c.id)) return false;
+          disputedSeen.add(c.id);
+          return true;
+        });
+
+        const section = document.getElementById('report-section');
+        const list = document.getElementById('report-list');
+
+        if (unique.length > 0 || uniqueDisputed.length > 0) {
+          section.style.display = 'block';
+          let html = '';
+
+          // Accepted challenges awaiting reports
+          html += unique.map(c => {
+            const opponent = c.challenger.toLowerCase() === currentUser.toLowerCase() ? c.target : c.challenger;
+            const myReport = getStoredReport(c.id, currentUser);
+            const reportedText = myReport
+              ? `<span style="color:var(--green);font-weight:700;font-size:12px;">You reported: ${escapeHtml(myReport)} won. Waiting for opponent.</span>`
+              : '';
+
+            return `
+              <div class="pending-card">
+                <div class="pending-info">
+                  <strong>${escapeHtml(c.challenger)}</strong> vs <strong>${escapeHtml(c.target)}</strong>
+                  — Stake: <span style="color:var(--gold);font-weight:700;">Z ${formatBounty(c.bounty_at_stake)}</span>
+                  ${reportedText}
+                </div>
+                <div class="pending-actions" ${myReport ? 'style="display:none;"' : ''}>
+                  <button class="btn-accept" onclick="reportResult('${c.id}','${escapeHtml(currentUser)}','${escapeHtml(currentUser)}')">I Won</button>
+                  <button class="btn-decline" onclick="reportResult('${c.id}','${escapeHtml(currentUser)}','${escapeHtml(opponent)}')">They Won</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          // Disputed challenges
+          html += uniqueDisputed.map(c => `
+            <div class="pending-card" style="border-color:var(--gold);background:rgba(255,215,64,0.05);">
+              <div class="pending-info">
+                <strong>${escapeHtml(c.challenger)}</strong> vs <strong>${escapeHtml(c.target)}</strong>
+                — <span style="color:var(--gold);font-weight:700;">DISPUTED</span> — Awaiting admin review
+              </div>
+            </div>
+          `).join('');
+
+          list.innerHTML = html;
+        } else {
+          section.style.display = 'none';
+        }
+      } catch (e) {
+        console.error('Failed to load reportable challenges:', e);
+      }
+    }
+
     // ── Init ──
     document.addEventListener('DOMContentLoaded', async () => {
       if (currentUser) {
@@ -1253,6 +1516,7 @@
       await loadBountyBoard();
       await loadMyBounty();
       await loadPendingChallenges();
+      await loadReportableChallenges();
     });
   </script>
 
