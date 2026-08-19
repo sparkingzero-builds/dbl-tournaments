@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Draft Lobby — DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/roster.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    .draft-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .draft-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .draft-status-item {
+      text-align: center;
+    }
+    .draft-status-item .label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
+    .draft-status-item .value {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--cyan);
+    }
+    .draft-status-item .value.active-turn {
+      color: var(--gold);
+      text-shadow: 0 0 12px rgba(255, 215, 64, 0.4);
+    }
+
+    .draft-timer {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--cyan);
+      min-width: 80px;
+      text-align: center;
+    }
+    .draft-timer.urgent {
+      color: var(--red);
+      animation: pulse-text 0.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulse-text {
+      from { opacity: 1; }
+      to { opacity: 0.5; }
+    }
+
+    /* Draft order sidebar */
+    .draft-order-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      overflow-y: auto;
+      max-height: calc(100vh - 200px);
+      position: sticky;
+      top: 80px;
+    }
+    .draft-order-panel h3 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--cyan);
+      margin-bottom: 12px;
+    }
+
+    .draft-player-entry {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      margin-bottom: 4px;
+      font-size: 13px;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .draft-player-entry.current {
+      border-color: var(--gold);
+      background: rgba(255, 215, 64, 0.08);
+    }
+    .draft-player-entry.done {
+      opacity: 0.5;
+    }
+    .draft-player-entry .pick-num {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 11px;
+      color: var(--muted);
+      min-width: 24px;
+    }
+    .draft-player-entry .player-name {
+      flex: 1;
+      font-weight: 600;
+    }
+    .draft-player-entry .picked-char {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--line);
+    }
+
+    /* Character pool */
+    .draft-pool-section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .draft-pool-filters {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .draft-pool-filters input {
+      flex: 1;
+      min-width: 180px;
+    }
+    .draft-pool-filters select {
+      min-width: 100px;
+    }
+
+    .draft-char-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 8px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .draft-char-card {
+      position: relative;
+      background: rgba(30, 25, 60, 0.6);
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      padding: 4px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .draft-char-card:hover:not(.drafted):not(.disabled) {
+      border-color: var(--cyan);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 229, 255, 0.2);
+    }
+    .draft-char-card.drafted {
+      opacity: 0.25;
+      cursor: not-allowed;
+      filter: grayscale(1);
+    }
+    .draft-char-card.disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+    .draft-char-card.selected {
+      border-color: var(--gold);
+      box-shadow: 0 0 12px rgba(255, 215, 64, 0.3);
+    }
+    .draft-char-card img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .draft-char-card .char-name {
+      font-size: 9px;
+      color: var(--text);
+      margin-top: 2px;
+      line-height: 1.2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .draft-char-card .char-element {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      font-size: 8px;
+      font-weight: 800;
+      padding: 1px 4px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+
+    /* Your team panel */
+    .draft-your-team {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-top: 20px;
+    }
+    .draft-your-team h3 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--cyan);
+      margin-bottom: 12px;
+    }
+    .draft-team-slots {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .draft-team-slot {
+      width: 90px;
+      height: 110px;
+      border: 2px dashed var(--line);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .draft-team-slot.filled {
+      border-style: solid;
+      border-color: var(--cyan);
+      background: rgba(0, 229, 255, 0.05);
+    }
+    .draft-team-slot img {
+      width: 60px;
+      height: 60px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+    .draft-team-slot .slot-name {
+      font-size: 9px;
+      margin-top: 4px;
+      text-align: center;
+      max-width: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Draft log */
+    .draft-log {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .draft-log h3 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--cyan);
+      margin-bottom: 12px;
+    }
+    .draft-log-entry {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(46, 39, 85, 0.3);
+      font-size: 12px;
+    }
+    .draft-log-entry:last-child { border-bottom: none; }
+    .draft-log-entry .log-pick {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 10px;
+      color: var(--muted);
+      min-width: 30px;
+    }
+    .draft-log-entry .log-player {
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .draft-log-entry .log-char {
+      color: var(--cyan);
+    }
+
+    .draft-confirm-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: rgba(0, 229, 255, 0.05);
+      border: 1px solid var(--cyan);
+      border-radius: 8px;
+    }
+    .draft-confirm-bar .selected-name {
+      flex: 1;
+      font-weight: 600;
+      color: var(--cyan);
+    }
+
+    .draft-waiting {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .draft-waiting h2 {
+      color: var(--cyan);
+      margin-bottom: 12px;
+    }
+
+    /* Element color badges */
+    .el-RED { background: #ff4757; color: #fff; }
+    .el-BLU { background: #3b82f6; color: #fff; }
+    .el-GRN { background: #2ed573; color: #000; }
+    .el-PUR { background: #a855f7; color: #fff; }
+    .el-YEL { background: #ffd740; color: #000; }
+    .el-LGT { background: #e8e4f8; color: #000; }
+    .el-DRK { background: #6b21a8; color: #fff; }
+
+    @media (max-width: 768px) {
+      .draft-layout {
+        grid-template-columns: 1fr;
+      }
+      .draft-order-panel {
+        position: static;
+        max-height: 200px;
+      }
+      .draft-char-grid {
+        grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">&#9776;</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+        <li><a href="bounty.html">Bounty</a></li>
+        <li><a href="matches.html">Matches</a></li>
+        <li class="nav-dropdown">
+          <a href="#">More &#9662;</a>
+          <div class="nav-dropdown-menu">
+            <div class="dropdown-label">Data</div>
+            <a href="characters.html">Characters</a>
+            <a href="tierlist.html">Tier List</a>
+            <a href="analytics.html">Ban Analytics</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Community</div>
+            <a href="compare.html">Compare</a>
+            <a href="shop.html">Shop</a>
+            <a href="season.html">Season</a>
+            <a href="world-tournament.html">World Tournament</a>
+            <a href="feed.html">Live Feed</a>
+          </div>
+        </li>
+        <div id="auth-nav"></div>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="particles-bg" id="particles"></div>
+
+  <main class="page container page-enter">
+    <div id="draft-loading" class="draft-waiting">
+      <div class="loader"><div class="loader-spinner"></div></div>
+      <p class="text-muted mt-2">Loading draft...</p>
+    </div>
+
+    <div id="draft-not-started" class="draft-waiting" style="display:none;">
+      <h2>Draft Not Started</h2>
+      <p class="text-muted">The draft hasn't started yet. Please wait for the admin to begin.</p>
+    </div>
+
+    <div id="draft-complete-msg" class="draft-waiting" style="display:none;">
+      <h2 style="color:var(--gold);">Draft Complete!</h2>
+      <p class="text-muted">All picks are in. The tournament will begin shortly.</p>
+      <a href="tournament.html" class="btn btn-primary mt-2">Back to Tournament</a>
+    </div>
+
+    <div id="draft-main" style="display:none;">
+      <!-- Status Bar -->
+      <div class="draft-status-bar">
+        <div class="draft-status-item">
+          <div class="label">Round</div>
+          <div class="value" id="ds-round">-</div>
+        </div>
+        <div class="draft-status-item">
+          <div class="label">Pick</div>
+          <div class="value" id="ds-pick">-</div>
+        </div>
+        <div class="draft-status-item">
+          <div class="label">Current Turn</div>
+          <div class="value active-turn" id="ds-turn">-</div>
+        </div>
+        <div class="draft-timer" id="ds-timer">--</div>
+      </div>
+
+      <div class="draft-layout">
+        <!-- Sidebar: Draft Order -->
+        <div class="draft-order-panel">
+          <h3>Draft Order</h3>
+          <div id="draft-order-list"></div>
+        </div>
+
+        <!-- Main area -->
+        <div>
+          <!-- Character Pool -->
+          <div class="draft-pool-section">
+            <div class="draft-pool-filters">
+              <input type="text" id="draft-search" placeholder="Search characters..." oninput="renderPool()" />
+              <select id="draft-el-filter" onchange="renderPool()">
+                <option value="">All Elements</option>
+                <option value="RED">RED</option>
+                <option value="BLU">BLU</option>
+                <option value="GRN">GRN</option>
+                <option value="PUR">PUR</option>
+                <option value="YEL">YEL</option>
+                <option value="LGT">LGT</option>
+                <option value="DRK">DRK</option>
+              </select>
+              <select id="draft-rarity-filter" onchange="renderPool()">
+                <option value="">All Rarities</option>
+                <option value="LEGEND">LEGEND</option>
+                <option value="SPARKING">SPARKING</option>
+                <option value="EXTREME">EXTREME</option>
+              </select>
+            </div>
+            <div class="draft-char-grid" id="draft-char-grid"></div>
+
+            <div class="draft-confirm-bar" id="draft-confirm" style="display:none;">
+              <span class="selected-name" id="confirm-char-name">-</span>
+              <button class="btn btn-primary btn-sm" onclick="confirmPick()">Confirm Pick</button>
+              <button class="btn btn-secondary btn-sm" onclick="cancelSelection()">Cancel</button>
+            </div>
+          </div>
+
+          <!-- Your Team -->
+          <div class="draft-your-team">
+            <h3>Your Team</h3>
+            <div class="draft-team-slots" id="draft-team-slots"></div>
+          </div>
+
+          <!-- Draft Log -->
+          <div class="draft-log">
+            <h3>Draft Log</h3>
+            <div id="draft-log-entries">
+              <p class="text-muted">No picks yet.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/characters.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/themes.js"></script>
+  <script>
+    let tournament = null;
+    let allCharacters = [];
+    let draftPicks = [];      // All picks so far
+    let draftOrder = [];       // Snake order array of { pickNumber, round, playerName }
+    let players = [];          // Signup list
+    let selectedCharId = null; // Currently highlighted char in pool
+    let myUsername = null;
+    let pollInterval = null;
+    let timerInterval = null;
+    let pickDeadline = null;
+
+    // ── Init ──────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', async () => {
+      await AUTH.init();
+      AUTH.renderNav();
+      await CharacterManager.load();
+      allCharacters = CharacterManager.getAll();
+      myUsername = AUTH.getDiscordUsername();
+
+      // Get tournament ID from URL
+      const params = new URLSearchParams(window.location.search);
+      const tid = params.get('id');
+      if (!tid) {
+        showError('No tournament ID specified.');
+        return;
+      }
+
+      try {
+        const { data, error } = await supabaseClient.from('tournaments').select('*').eq('id', tid).single();
+        if (error || !data) throw new Error('Tournament not found');
+        tournament = data;
+      } catch (e) {
+        showError('Could not load tournament: ' + e.message);
+        return;
+      }
+
+      if (tournament.format !== 'draft') {
+        showError('This tournament is not a draft format.');
+        return;
+      }
+
+      // Load signups
+      const { data: sups } = await supabaseClient.from('signups').select('*').eq('tournament_id', tournament.id);
+      players = sups || [];
+
+      if (tournament.status !== 'drafting') {
+        document.getElementById('draft-loading').style.display = 'none';
+        document.getElementById('draft-not-started').style.display = '';
+        // Poll until status changes
+        pollInterval = setInterval(async () => {
+          const { data: t } = await supabaseClient.from('tournaments').select('status').eq('id', tournament.id).single();
+          if (t && t.status === 'drafting') {
+            clearInterval(pollInterval);
+            tournament.status = 'drafting';
+            startDraftUI();
+          }
+        }, 3000);
+        return;
+      }
+
+      startDraftUI();
+    });
+
+    function showError(msg) {
+      document.getElementById('draft-loading').innerHTML = `<h2 style="color:var(--red);">Error</h2><p class="text-muted">${msg}</p>`;
+    }
+
+    // ── Snake Order Generation ────────────────────────────
+    function generateSnakeOrder(playerNames, picksPerPlayer) {
+      const order = [];
+      let pickNum = 0;
+      for (let round = 0; round < picksPerPlayer; round++) {
+        const ordered = round % 2 === 0 ? [...playerNames] : [...playerNames].reverse();
+        for (const name of ordered) {
+          order.push({ pickNumber: pickNum, round: round + 1, playerName: name });
+          pickNum++;
+        }
+      }
+      return order;
+    }
+
+    // ── Start Draft UI ────────────────────────────────────
+    async function startDraftUI() {
+      document.getElementById('draft-loading').style.display = 'none';
+      document.getElementById('draft-not-started').style.display = 'none';
+      document.getElementById('draft-main').style.display = '';
+
+      // Determine player order
+      let playerNames = players.map(p => p.discord_name);
+      if (tournament.draft_order === 'elo') {
+        // Sort by ELO ascending (highest picks last)
+        try {
+          const { data: elos } = await supabaseClient.from('player_elo').select('discord_name, elo');
+          if (elos) {
+            const eloMap = {};
+            elos.forEach(e => eloMap[e.discord_name] = e.elo || 1000);
+            playerNames.sort((a, b) => (eloMap[b] || 1000) - (eloMap[a] || 1000));
+          }
+        } catch (e) { /* keep random order */ }
+      } else {
+        // Shuffle for random
+        for (let i = playerNames.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [playerNames[i], playerNames[j]] = [playerNames[j], playerNames[i]];
+        }
+        // Use stored order if draft already has picks (to keep consistent)
+      }
+
+      const picksPerPlayer = tournament.draft_picks_per_player || 3;
+      draftOrder = generateSnakeOrder(playerNames, picksPerPlayer);
+
+      // Load existing picks
+      await loadPicks();
+
+      // If draft already had picks, we need consistent ordering.
+      // Re-derive player order from first round picks if they exist.
+      if (draftPicks.length > 0) {
+        const firstRoundPicks = draftPicks.filter(p => p.round === 1).sort((a, b) => a.pick_number - b.pick_number);
+        if (firstRoundPicks.length > 0) {
+          const derivedOrder = firstRoundPicks.map(p => p.discord_username);
+          // Fill in any remaining players
+          playerNames.forEach(n => { if (!derivedOrder.includes(n)) derivedOrder.push(n); });
+          draftOrder = generateSnakeOrder(derivedOrder, picksPerPlayer);
+        }
+      }
+
+      renderAll();
+      startPolling();
+    }
+
+    async function loadPicks() {
+      const { data } = await supabaseClient
+        .from('draft_picks')
+        .select('*')
+        .eq('tournament_id', tournament.id)
+        .order('pick_number', { ascending: true });
+      draftPicks = data || [];
+    }
+
+    // ── Rendering ─────────────────────────────────────────
+    function renderAll() {
+      renderStatus();
+      renderDraftOrder();
+      renderPool();
+      renderMyTeam();
+      renderLog();
+      checkDraftComplete();
+    }
+
+    function getCurrentPick() {
+      return draftOrder[draftPicks.length] || null;
+    }
+
+    function isMyTurn() {
+      const cp = getCurrentPick();
+      return cp && myUsername && cp.playerName.toLowerCase() === myUsername.toLowerCase();
+    }
+
+    function renderStatus() {
+      const cp = getCurrentPick();
+      document.getElementById('ds-round').textContent = cp ? cp.round : '-';
+      document.getElementById('ds-pick').textContent = cp ? (draftPicks.length + 1) + '/' + draftOrder.length : '-';
+      document.getElementById('ds-turn').textContent = cp ? cp.playerName : 'Draft Complete';
+    }
+
+    function renderDraftOrder() {
+      const container = document.getElementById('draft-order-list');
+      const currentIdx = draftPicks.length;
+      let html = '';
+
+      draftOrder.forEach((slot, i) => {
+        const pick = draftPicks[i];
+        const isCurrent = i === currentIdx;
+        const isDone = i < currentIdx;
+        let charImg = '';
+        if (pick) {
+          const char = allCharacters.find(c => String(c.id) === String(pick.character_id));
+          if (char) charImg = `<img class="picked-char" src="${char.image}" alt="${char.name}" />`;
+        }
+        html += `
+          <div class="draft-player-entry ${isCurrent ? 'current' : ''} ${isDone ? 'done' : ''}">
+            <span class="pick-num">#${i + 1}</span>
+            <span class="player-name">${slot.playerName}</span>
+            ${charImg}
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function renderPool() {
+      const grid = document.getElementById('draft-char-grid');
+      const search = document.getElementById('draft-search').value.toLowerCase();
+      const elFilter = document.getElementById('draft-el-filter').value;
+      const rarityFilter = document.getElementById('draft-rarity-filter').value;
+      const draftedIds = new Set(draftPicks.map(p => String(p.character_id)));
+
+      // Filter to allowed characters
+      const allowedIds = tournament.allowed_characters ? new Set(tournament.allowed_characters.map(String)) : null;
+      const myTurn = isMyTurn();
+
+      let chars = allCharacters.filter(c => {
+        if (allowedIds && !allowedIds.has(String(c.id))) return false;
+        if (search && !c.name.toLowerCase().includes(search)) return false;
+        if (elFilter && c.element !== elFilter) return false;
+        if (rarityFilter && c.rarity !== rarityFilter) return false;
+        return true;
+      });
+
+      grid.innerHTML = chars.map(c => {
+        const isDrafted = draftedIds.has(String(c.id));
+        const isDisabled = !myTurn || isDrafted;
+        const isSelected = String(c.id) === String(selectedCharId);
+        return `
+          <div class="draft-char-card ${isDrafted ? 'drafted' : ''} ${isDisabled && !isDrafted ? 'disabled' : ''} ${isSelected ? 'selected' : ''}"
+               onclick="${!isDisabled ? `selectChar('${c.id}', '${c.name.replace(/'/g, "\\'")}')` : ''}">
+            <span class="char-element el-${c.element}">${c.element}</span>
+            <img src="${c.image}" alt="${c.name}" loading="lazy" />
+            <div class="char-name">${c.name}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderMyTeam() {
+      const container = document.getElementById('draft-team-slots');
+      const picksPerPlayer = tournament.draft_picks_per_player || 3;
+      const myPicks = draftPicks.filter(p => myUsername && p.discord_username.toLowerCase() === myUsername.toLowerCase());
+
+      let html = '';
+      for (let i = 0; i < picksPerPlayer; i++) {
+        const pick = myPicks[i];
+        if (pick) {
+          const char = allCharacters.find(c => String(c.id) === String(pick.character_id));
+          html += `
+            <div class="draft-team-slot filled">
+              <img src="${char ? char.image : ''}" alt="${char ? char.name : ''}" />
+              <div class="slot-name">${char ? char.name : 'Unknown'}</div>
+            </div>
+          `;
+        } else {
+          html += `<div class="draft-team-slot">Pick ${i + 1}</div>`;
+        }
+      }
+      container.innerHTML = html;
+    }
+
+    function renderLog() {
+      const container = document.getElementById('draft-log-entries');
+      if (!draftPicks.length) {
+        container.innerHTML = '<p class="text-muted">No picks yet.</p>';
+        return;
+      }
+
+      container.innerHTML = draftPicks.map(p => {
+        const char = allCharacters.find(c => String(c.id) === String(p.character_id));
+        return `
+          <div class="draft-log-entry">
+            <span class="log-pick">#${p.pick_number + 1}</span>
+            <span class="log-player">${p.discord_username}</span>
+            <span class="text-muted">drafted</span>
+            <span class="log-char">${char ? char.name : p.character_id}</span>
+          </div>
+        `;
+      }).join('');
+
+      // Scroll to bottom
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // ── Character Selection & Confirm ─────────────────────
+    function selectChar(charId, charName) {
+      if (!isMyTurn()) return;
+      selectedCharId = charId;
+      document.getElementById('confirm-char-name').textContent = charName;
+      document.getElementById('draft-confirm').style.display = '';
+      renderPool(); // re-render to show selected state
+    }
+
+    function cancelSelection() {
+      selectedCharId = null;
+      document.getElementById('draft-confirm').style.display = 'none';
+      renderPool();
+    }
+
+    async function confirmPick() {
+      if (!isMyTurn() || !selectedCharId) return;
+
+      const cp = getCurrentPick();
+      const btn = document.querySelector('#draft-confirm .btn-primary');
+      btn.disabled = true;
+      btn.textContent = 'Picking...';
+
+      try {
+        // Insert draft pick
+        const { error } = await supabaseClient.from('draft_picks').insert({
+          tournament_id: tournament.id,
+          discord_username: myUsername,
+          character_id: String(selectedCharId),
+          pick_number: cp.pickNumber,
+          round: cp.round
+        });
+
+        if (error) throw error;
+
+        // Update signup team
+        const signup = players.find(p => p.discord_name.toLowerCase() === myUsername.toLowerCase());
+        if (signup) {
+          const char = allCharacters.find(c => String(c.id) === String(selectedCharId));
+          const currentTeam = signup.team || [];
+          currentTeam.push(char || { id: selectedCharId });
+          await supabaseClient.from('signups').update({ team: currentTeam }).eq('id', signup.id);
+        }
+
+        selectedCharId = null;
+        document.getElementById('draft-confirm').style.display = 'none';
+        await loadPicks();
+        renderAll();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Confirm Pick';
+      }
+    }
+
+    // ── Polling ───────────────────────────────────────────
+    function startPolling() {
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(async () => {
+        const prevCount = draftPicks.length;
+        await loadPicks();
+        if (draftPicks.length !== prevCount) {
+          renderAll();
+        }
+      }, 3000);
+    }
+
+    // ── Timer ─────────────────────────────────────────────
+    function startTimer() {
+      // Timer is informational - no auto-skip
+      const timerEl = document.getElementById('ds-timer');
+      const seconds = tournament.draft_time_per_pick || 60;
+      pickDeadline = Date.now() + seconds * 1000;
+
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        const remaining = Math.max(0, Math.ceil((pickDeadline - Date.now()) / 1000));
+        timerEl.textContent = remaining + 's';
+        timerEl.classList.toggle('urgent', remaining <= 10);
+        if (remaining <= 0) {
+          clearInterval(timerInterval);
+          timerEl.textContent = '0s';
+        }
+      }, 250);
+    }
+
+    function checkDraftComplete() {
+      if (draftPicks.length >= draftOrder.length && draftOrder.length > 0) {
+        document.getElementById('draft-main').style.display = 'none';
+        document.getElementById('draft-complete-msg').style.display = '';
+        if (pollInterval) clearInterval(pollInterval);
+        if (timerInterval) clearInterval(timerInterval);
+      }
+    }
+  </script>
+  <script src="js/toolbar.js"></script>
+</body>
+</html>
