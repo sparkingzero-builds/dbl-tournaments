@@ -3,10 +3,40 @@ const AUTH = {
   session: null,
 
   async init() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) {
-      this.session = session;
-      this.user = session.user;
+    // If URL has auth hash fragment, let Supabase exchange it first
+    if (window.location.hash && window.location.hash.includes('access_token')) {
+      try {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        if (accessToken && refreshToken) {
+          const { data, error } = await supabaseClient.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+          if (data?.session) {
+            this.session = data.session;
+            this.user = data.session.user;
+          }
+          // Clean the hash from URL
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+      } catch (e) {
+        console.error('Auth hash processing error:', e);
+      }
+    }
+
+    // Fallback: check existing session
+    if (!this.user) {
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session) {
+          this.session = session;
+          this.user = session.user;
+        }
+      } catch (e) {
+        console.error('Get session error:', e);
+      }
     }
 
     supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -44,7 +74,7 @@ const AUTH = {
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'discord',
       options: {
-        redirectTo: window.location.href
+        redirectTo: window.location.origin + window.location.pathname
       }
     });
     if (error) {
@@ -87,19 +117,11 @@ const AUTH = {
     }
 
     document.querySelectorAll('[data-auth-required]').forEach(el => {
-      if (this.isLoggedIn()) {
-        el.style.display = '';
-      } else {
-        el.style.display = 'none';
-      }
+      el.style.display = this.isLoggedIn() ? '' : 'none';
     });
 
     document.querySelectorAll('[data-auth-hide]').forEach(el => {
-      if (this.isLoggedIn()) {
-        el.style.display = 'none';
-      } else {
-        el.style.display = '';
-      }
+      el.style.display = this.isLoggedIn() ? 'none' : '';
     });
   },
 
