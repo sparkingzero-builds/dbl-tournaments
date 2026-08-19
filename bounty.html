@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -722,6 +722,8 @@
             <a href="bounty.html" class="active">Bounty</a>
           </div>
         </li>
+      
+        <div id="auth-nav"></div>
       </ul>
     </div>
   </nav>
@@ -884,6 +886,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-client.js"></script>
+  <script src="js/auth.js"></script>
   <script>
     const DBGS = 'https://dbgsbuilds.com/wp-content/themes/dbgsquad-lite/asset';
     const CHARACTER_ARTS = [
@@ -953,7 +956,15 @@
       return n.toLocaleString();
     }
 
-    let currentUser = localStorage.getItem('bounty_username') || '';
+    let currentUser = '';
+    function initCurrentUser() {
+      if (typeof AUTH !== 'undefined' && AUTH.isLoggedIn()) {
+        currentUser = AUTH.getDiscordUsername() || '';
+      }
+      if (!currentUser) {
+        currentUser = localStorage.getItem('bounty_username') || '';
+      }
+    }
     let allBounties = [];
 
     async function loadBountyBoard() {
@@ -1040,23 +1051,25 @@
     }
 
     async function challengeFromPoster() {
+      if (typeof AUTH !== 'undefined' && !AUTH.isLoggedIn()) {
+        return AUTH.requireLogin('send a bounty challenge');
+      }
+      initCurrentUser();
       const btn = document.getElementById('wanted-challenge-btn');
       const target = btn.dataset.target;
-      if (!currentUser) {
-        currentUser = prompt('Enter your Discord username:');
-        if (!currentUser) return;
-        localStorage.setItem('bounty_username', currentUser);
-      }
+      if (!currentUser) return alert('Could not determine your username. Please log in with Discord.');
       await submitChallenge(currentUser, target);
     }
 
     async function sendChallenge() {
-      const self = document.getElementById('challenge-self').value.trim();
+      if (typeof AUTH !== 'undefined' && !AUTH.isLoggedIn()) {
+        return AUTH.requireLogin('send a bounty challenge');
+      }
+      initCurrentUser();
+      const self = currentUser || document.getElementById('challenge-self').value.trim();
       const target = document.getElementById('challenge-target').value.trim();
       if (!self || !target) return alert('Fill in both usernames.');
       if (self.toLowerCase() === target.toLowerCase()) return alert("You can't challenge yourself!");
-
-      localStorage.setItem('bounty_username', self);
       currentUser = self;
       await submitChallenge(self, target);
     }
@@ -1510,13 +1523,20 @@
 
     // ── Init ──
     document.addEventListener('DOMContentLoaded', async () => {
-      if (currentUser) {
-        document.getElementById('challenge-self').value = currentUser;
-      }
-      await loadBountyBoard();
-      await loadMyBounty();
-      await loadPendingChallenges();
-      await loadReportableChallenges();
+      // Wait a tick for AUTH to init
+      setTimeout(async () => {
+        initCurrentUser();
+        const selfInput = document.getElementById('challenge-self');
+        if (currentUser && selfInput) {
+          selfInput.value = currentUser;
+          selfInput.readOnly = true;
+          selfInput.style.opacity = '0.7';
+        }
+        await loadBountyBoard();
+        await loadMyBounty();
+        await loadPendingChallenges();
+        await loadReportableChallenges();
+      }, 200);
     });
   </script>
 

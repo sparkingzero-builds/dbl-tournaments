@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -330,6 +330,8 @@
             <a href="feed.html">Live Feed</a>
           </div>
         </li>
+      
+        <div id="auth-nav"></div>
       </ul>
     </div>
   </nav>
@@ -419,6 +421,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-client.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/notifications.js"></script>
   <script src="js/sounds.js"></script>
   <script src="js/themes.js"></script>
@@ -692,16 +695,29 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
     document.addEventListener('DOMContentLoaded', () => {
-      if (shopUsername) {
-        document.getElementById('username-input').value = shopUsername;
-        loginShop();
-      }
+      setTimeout(() => {
+        if (typeof AUTH !== 'undefined' && AUTH.isLoggedIn()) {
+          const discordName = AUTH.getDiscordUsername();
+          if (discordName) {
+            document.getElementById('username-input').value = discordName;
+            loginShop();
+            return;
+          }
+        }
+        if (shopUsername) {
+          document.getElementById('username-input').value = shopUsername;
+          loginShop();
+        }
+      }, 200);
     });
 
     function loginShop() {
+      if (typeof AUTH !== 'undefined' && !AUTH.isLoggedIn()) {
+        return AUTH.requireLogin('access the shop');
+      }
       const input = document.getElementById('username-input');
-      const name = input.value.trim();
-      if (!name) { NotificationSystem.show('Enter your Discord username', 'error'); return; }
+      const name = (typeof AUTH !== 'undefined' && AUTH.isLoggedIn()) ? AUTH.getDiscordUsername() : input.value.trim();
+      if (!name) { NotificationSystem.show('Login with Discord to access the shop', 'error'); return; }
       shopUsername = name;
       sessionStorage.setItem('shop_username', shopUsername);
       document.getElementById('login-section').style.display = 'none';
@@ -715,6 +731,7 @@
       shopUsername = '';
       document.getElementById('login-section').style.display = '';
       document.getElementById('shop-content').style.display = 'none';
+      if (typeof AUTH !== 'undefined') AUTH.logout();
     }
 
     async function loadShop() { await refreshBalance(); await loadShopItems(); }
