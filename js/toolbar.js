@@ -105,7 +105,7 @@ const Toolbar = (() => {
       }
 
       results.innerHTML = data.map(p => `
-        <a href="profile.html?player=${encodeURIComponent(p.discord_username)}" class="ps-result">
+        <a href="${window.location.pathname.includes('/admin/') ? '../' : ''}profile.html?player=${encodeURIComponent(p.discord_username)}" class="ps-result">
           <span class="ps-name">${p.discord_username}</span>
           <span class="ps-stats">${p.lifetime_earned || 0} pts earned</span>
         </a>
