@@ -204,6 +204,13 @@
         grid-column: 1 / -1;
       }
     }
+
+    @media (max-width: 480px) {
+      .ban-phase-content { gap: 12px; }
+      .ban-sidebar { grid-template-columns: 1fr; }
+      .ban-phase-content input,
+      .ban-phase-content button { min-height: 44px; font-size: 16px; }
+    }
   </style>
 </head>
 <body class="scanlines">

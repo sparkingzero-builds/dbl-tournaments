@@ -663,9 +663,89 @@
 
     /* ── Responsive ── */
     @media (max-width: 768px) {
-      .bounty-hero { grid-template-columns: 1fr; text-align: center; }
+      .bounty-hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding: 30px 0 20px;
+        min-height: auto;
+        gap: 24px;
+      }
       .bounty-grid { grid-template-columns: 1fr; }
       .board-header { flex-direction: column; text-align: center; }
+      .rule-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+        padding: 14px 16px;
+      }
+      .rule-label { min-width: auto; }
+      .cta-row {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+      }
+      .cta-btn {
+        width: 100%;
+        text-align: center;
+        padding: 14px 20px;
+        font-size: 12px;
+        min-height: 44px;
+      }
+      .bounty-row {
+        padding: 12px 14px;
+        gap: 10px;
+      }
+      .bounty-name { font-size: 13px; }
+      .bounty-amount { font-size: 14px; }
+      .bounty-rank { font-size: 20px; min-width: 32px; }
+      .wanted-art { height: 200px; }
+      .wanted-player-name { font-size: 24px; }
+      .wanted-bounty-bar { padding: 12px 16px; flex-wrap: wrap; justify-content: center; }
+      .bounty-bar-value { font-size: 22px; }
+      .challenge-form {
+        flex-direction: column;
+      }
+      .challenge-form input {
+        min-width: 100%;
+        min-height: 44px;
+      }
+      .challenge-section { padding: 16px; }
+      .my-bounty {
+        flex-direction: column;
+        text-align: center;
+        padding: 16px;
+      }
+      .my-bounty-info { flex-direction: column; gap: 8px; }
+      .my-bounty-value { font-size: 24px; }
+      .pending-card {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        gap: 10px;
+        padding: 12px 14px;
+      }
+      .pending-actions { justify-content: center; }
+      .btn-accept, .btn-decline {
+        min-height: 44px;
+        padding: 10px 18px;
+      }
+      .dragon-ball { width: 28px; height: 28px; }
+      .how-title { font-size: 22px; }
+      .hero-intro { font-size: 14px; }
+    }
+
+    @media (max-width: 480px) {
+      .bounty-title { font-size: clamp(36px, 8vw, 60px); }
+      .board-title { font-size: clamp(28px, 5vw, 40px); }
+      .wanted-card { max-width: 100%; }
+      .wanted-art { height: 160px; }
+      .wanted-player-name { font-size: 20px; }
+      .bounty-bar-value { font-size: 20px; }
+      .event-tag { font-size: 10px; padding: 5px 14px; }
+      .challenge-btn {
+        min-height: 44px;
+        font-size: 12px;
+      }
     }
 
     /* ── Loading ── */

@@ -281,4 +281,46 @@
   .countdown-separator {
     font-size: 1rem;
   }
+
+  .match-player {
+    min-height: 44px;
+  }
+
+  .countdown-unit {
+    min-width: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bracket-round {
+    min-width: 150px;
+  }
+
+  .match-player {
+    padding: 8px;
+  }
+
+  .player-match-name {
+    font-size: 11px;
+  }
+
+  .match-team-icons img {
+    width: 16px;
+    height: 16px;
+  }
+
+  .champion-card {
+    padding: 14px;
+    min-width: 120px;
+  }
+
+  .champion-name {
+    font-size: 1rem;
+  }
+
+  .countdown-digit {
+    font-size: 1.2rem;
+    min-width: 38px;
+    padding: 4px 6px;
+  }
 }

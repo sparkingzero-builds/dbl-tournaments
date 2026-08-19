@@ -237,10 +237,199 @@
       background: var(--cyan-dim);
     }
 
+    /* Player search & expand */
+    .player-search-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .player-search-bar input {
+      flex: 1;
+    }
+    .player-expand-row {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      margin: 4px 0 10px;
+      animation: slideDown 0.2s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; max-height: 0; }
+      to { opacity: 1; max-height: 600px; }
+    }
+    .player-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .player-detail-stat {
+      text-align: center;
+      padding: 10px;
+      background: var(--panel);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--line);
+    }
+    .player-detail-stat .val {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+    .player-detail-stat .lbl {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    /* Bounty tab */
+    .bounty-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    /* Audit log */
+    .audit-entry {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(46, 39, 85, 0.3);
+      font-size: 13px;
+    }
+    .audit-entry:hover {
+      background: rgba(0, 229, 255, 0.03);
+    }
+    .audit-time {
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+      min-width: 130px;
+    }
+    .audit-icon {
+      font-size: 16px;
+      min-width: 24px;
+      text-align: center;
+    }
+    .audit-msg {
+      flex: 1;
+    }
+    .audit-type {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    /* CSS bar chart */
+    .bar-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .bar-chart-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .bar-chart-label {
+      min-width: 120px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .bar-chart-track {
+      flex: 1;
+      height: 22px;
+      background: var(--bg);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .bar-chart-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.6s ease;
+      display: flex;
+      align-items: center;
+      padding-left: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #000;
+      min-width: 30px;
+    }
+
+    /* Maintenance banner */
+    .maintenance-banner-preview {
+      background: linear-gradient(90deg, var(--red), var(--pink));
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 13px;
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    /* Announcement card */
+    .announcement-item {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+    .announcement-item .ann-title {
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .announcement-item .ann-body {
+      font-size: 13px;
+      color: var(--text);
+    }
+    .announcement-item .ann-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* Bulk actions bar */
+    .bulk-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--panel);
+      border: 1px solid var(--cyan);
+      border-radius: var(--radius-sm);
+      margin-bottom: 14px;
+    }
+    .bulk-bar .bulk-count {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      color: var(--cyan);
+    }
+
     @media (max-width: 768px) {
       .form-row { grid-template-columns: 1fr; }
       #stats-overview { grid-template-columns: repeat(2, 1fr) !important; }
       #tab-stats > div:last-child { grid-template-columns: 1fr !important; }
+      .bounty-stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .player-detail-grid { grid-template-columns: repeat(2, 1fr); }
+      .player-search-bar { flex-direction: column; }
     }
   </style>
 </head>
@@ -286,6 +475,8 @@
       <button class="tab" data-tab="stats">Stats</button>
       <button class="tab" data-tab="settings">Settings</button>
       <button class="tab" data-tab="economy">Economy</button>
+      <button class="tab" data-tab="bounty">Bounty</button>
+      <button class="tab" data-tab="audit">Audit Log</button>
     </div>
 
     <!-- Tournament Tab -->
@@ -336,10 +527,22 @@
           <h3>Registered Players</h3>
           <span class="text-muted" id="player-total">0 players</span>
         </div>
+        <div class="player-search-bar">
+          <input type="text" id="player-search-input" placeholder="Search players..." oninput="filterPlayersTable()" />
+          <button class="btn btn-sm btn-secondary" onclick="loadPlayers()">Refresh</button>
+        </div>
+        <!-- Bulk actions -->
+        <div class="bulk-bar" id="bulk-bar" style="display:none;">
+          <input type="checkbox" id="bulk-select-all" onchange="toggleBulkSelectAll()" />
+          <span class="bulk-count" id="bulk-count">0 selected</span>
+          <button class="btn btn-sm btn-primary" onclick="bulkAwardPoints()">Award Points</button>
+          <button class="btn btn-sm btn-secondary" onclick="bulkClearSelection()">Clear</button>
+        </div>
         <div style="overflow-x:auto;">
           <table class="signup-table" id="signup-table">
             <thead>
               <tr>
+                <th style="width:30px;"><input type="checkbox" id="header-bulk-check" onchange="toggleBulkSelectAll()" /></th>
                 <th>#</th>
                 <th>Discord</th>
                 <th>Team</th>
@@ -354,6 +557,8 @@
           <p>No players registered yet.</p>
         </div>
       </div>
+      <!-- Player detail expand panel (inserted dynamically) -->
+      <div id="player-detail-panel"></div>
     </div>
 
     <!-- Bracket Tab -->
@@ -411,6 +616,70 @@
           <h3 class="mb-2" style="color:var(--green);">Most Banned Characters</h3>
           <div id="stat-banned-chars"><p class="text-muted">Loading...</p></div>
         </div>
+      </div>
+
+      <!-- Bounty Stats -->
+      <div class="card mt-3">
+        <h3 class="mb-2" style="color:var(--pink);">Bounty Stats</h3>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px;" id="bounty-stats-overview">
+          <div style="text-align:center;padding:14px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--line);">
+            <div style="font-family:'Exo 2',sans-serif;font-size:1.5rem;font-weight:900;color:var(--pink);" id="stat-bounty-active">-</div>
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;font-weight:600;">Active Bounties</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--line);">
+            <div style="font-family:'Exo 2',sans-serif;font-size:1.5rem;font-weight:900;color:var(--cyan);" id="stat-bounty-challenges">-</div>
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;font-weight:600;">Total Challenges</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--line);">
+            <div style="font-family:'Exo 2',sans-serif;font-size:1.5rem;font-weight:900;color:var(--gold);" id="stat-bounty-highest">-</div>
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;font-weight:600;">Highest Bounty</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div>
+            <h4 class="mb-2 text-muted">Top Bounty Hunters</h4>
+            <div id="stat-top-hunters"><p class="text-muted">Loading...</p></div>
+          </div>
+          <div>
+            <h4 class="mb-2 text-muted">Highest Bounties</h4>
+            <div id="stat-highest-bounties"><p class="text-muted">Loading...</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Economy Stats -->
+      <div class="card mt-3">
+        <h3 class="mb-2" style="color:var(--gold);">Economy Stats</h3>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px;" id="economy-stats-overview">
+          <div style="text-align:center;padding:14px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--line);">
+            <div style="font-family:'Exo 2',sans-serif;font-size:1.5rem;font-weight:900;color:var(--gold);" id="stat-total-currency">-</div>
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;font-weight:600;">Total In Circulation</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--line);">
+            <div style="font-family:'Exo 2',sans-serif;font-size:1.5rem;font-weight:900;color:var(--green);" id="stat-total-purchases">-</div>
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;font-weight:600;">Total Purchases</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--line);">
+            <div style="font-family:'Exo 2',sans-serif;font-size:1.5rem;font-weight:900;color:var(--pink);" id="stat-total-spent">-</div>
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;font-weight:600;">Total Spent</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div>
+            <h4 class="mb-2 text-muted">Top Spenders</h4>
+            <div id="stat-top-spenders"><p class="text-muted">Loading...</p></div>
+          </div>
+          <div>
+            <h4 class="mb-2 text-muted">Most Purchased Items</h4>
+            <div id="stat-most-purchased"><p class="text-muted">Loading...</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Player Activity Bar Chart -->
+      <div class="card mt-3">
+        <h3 class="mb-2" style="color:var(--cyan);">Player Activity (Top 8)</h3>
+        <div id="stat-activity-chart"><p class="text-muted">Loading...</p></div>
       </div>
     </div>
 
@@ -754,6 +1023,58 @@
         </div>
       </div>
 
+      <!-- Maintenance Mode -->
+      <div class="card mt-3">
+        <h3 class="mb-2" style="color:var(--red);">Maintenance Mode</h3>
+        <p class="text-muted mb-2" style="font-size:13px;">When enabled, a banner is shown on all public pages warning users the site is under maintenance.</p>
+        <div class="form-group">
+          <div class="toggle-switch" onclick="toggleMaintenanceMode()">
+            <div class="toggle-track" id="maintenance-toggle"></div>
+            <span>Enable Maintenance Mode</span>
+          </div>
+        </div>
+        <div id="maintenance-preview" style="display:none;">
+          <div class="maintenance-banner-preview">Site is currently under maintenance. Some features may be unavailable.</div>
+        </div>
+        <div class="form-group mt-2">
+          <label>Custom Message (optional)</label>
+          <input type="text" id="maintenance-message" placeholder="Custom maintenance message..." onchange="updateMaintenanceMessage()" />
+        </div>
+      </div>
+
+      <!-- Announcements -->
+      <div class="card mt-3">
+        <h3 class="mb-2" style="color:var(--gold);">Announcements</h3>
+        <p class="text-muted mb-2" style="font-size:13px;">Create site-wide announcements visible on public pages.</p>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="ann-title" placeholder="Announcement title..." />
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea id="ann-body" rows="3" placeholder="Announcement content..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type</label>
+            <select id="ann-type">
+              <option value="info">Info</option>
+              <option value="warning">Warning</option>
+              <option value="success">Success</option>
+              <option value="event">Event</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Expires (optional)</label>
+            <input type="datetime-local" id="ann-expires" />
+          </div>
+        </div>
+        <button class="btn btn-primary btn-charge" onclick="createAnnouncement()">Post Announcement</button>
+        <div class="divider" style="margin:16px 0;"></div>
+        <h4 class="mb-2">Active Announcements</h4>
+        <div id="announcements-list"><p class="text-muted">No announcements.</p></div>
+      </div>
+
       <!-- ELO Update -->
       <div class="card mt-3">
         <h3 class="mb-2">ELO Rankings</h3>
@@ -797,6 +1118,124 @@
           <span class="text-cyan" id="spectator-count" style="font-family:'Exo 2',sans-serif;font-weight:800;font-size:1.2rem;">0</span>
         </div>
         <p class="text-muted mt-1">Currently watching the bracket page.</p>
+      </div>
+    </div>
+    <!-- Bounty Tab -->
+    <div class="tab-content" id="tab-bounty">
+      <!-- Bounty overview stats -->
+      <div class="bounty-stats-grid">
+        <div class="card" style="text-align:center;padding:20px;">
+          <div style="font-family:'Exo 2',sans-serif;font-size:2rem;font-weight:900;color:var(--pink);line-height:1;" id="bounty-total-active">-</div>
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:6px;font-weight:600;">Active Bounties</div>
+        </div>
+        <div class="card" style="text-align:center;padding:20px;">
+          <div style="font-family:'Exo 2',sans-serif;font-size:2rem;font-weight:900;color:var(--cyan);line-height:1;" id="bounty-total-challenges">-</div>
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:6px;font-weight:600;">Total Challenges</div>
+        </div>
+        <div class="card" style="text-align:center;padding:20px;">
+          <div style="font-family:'Exo 2',sans-serif;font-size:2rem;font-weight:900;color:var(--gold);line-height:1;" id="bounty-total-disputes">-</div>
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:6px;font-weight:600;">Disputes Pending</div>
+        </div>
+        <div class="card" style="text-align:center;padding:20px;">
+          <div style="font-family:'Exo 2',sans-serif;font-size:2rem;font-weight:900;color:var(--green);line-height:1;" id="bounty-highest-val">-</div>
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:6px;font-weight:600;">Highest Bounty</div>
+        </div>
+      </div>
+
+      <!-- Adjust Bounty -->
+      <div class="card">
+        <h3 class="mb-3" style="color:var(--pink);">Adjust Player Bounty</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Discord Username</label>
+            <input type="text" id="bounty-adj-username" placeholder="e.g. Player#1234" />
+          </div>
+          <div class="form-group">
+            <label>New Bounty Amount</label>
+            <input type="number" id="bounty-adj-amount" placeholder="500" />
+          </div>
+        </div>
+        <button class="btn btn-primary btn-charge" onclick="adjustBounty()">Set Bounty</button>
+      </div>
+
+      <!-- Active Bounties -->
+      <div class="card mt-3">
+        <div class="flex justify-between items-center mb-2">
+          <h3 style="color:var(--cyan);">Active Bounties</h3>
+          <button class="btn btn-sm btn-secondary" onclick="loadBountyTab()">Refresh</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="signup-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Player</th>
+                <th>Bounty</th>
+                <th>W/L</th>
+                <th>Streak</th>
+                <th>Peak</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="bounty-list-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="no-bounties">
+          <p>No active bounties.</p>
+        </div>
+      </div>
+
+      <!-- Disputed Challenges -->
+      <div class="card mt-3">
+        <h3 class="mb-2" style="color:var(--red);">Disputed Challenges</h3>
+        <p class="text-muted mb-2" style="font-size:13px;">Challenges with status "expired" are treated as disputes. Resolve by picking a winner or cancelling.</p>
+        <div id="disputed-challenges-list"><p class="text-muted">No disputes.</p></div>
+      </div>
+
+      <!-- Recent Challenges -->
+      <div class="card mt-3">
+        <h3 class="mb-2" style="color:var(--gold);">Recent Challenges</h3>
+        <div style="overflow-x:auto;">
+          <table class="signup-table">
+            <thead>
+              <tr>
+                <th>Challenger</th>
+                <th>Target</th>
+                <th>Status</th>
+                <th>Winner</th>
+                <th>Reward</th>
+                <th>ELO +/-</th>
+              </tr>
+            </thead>
+            <tbody id="challenges-list-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="no-challenges">
+          <p>No challenges yet.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audit Log Tab -->
+    <div class="tab-content" id="tab-audit">
+      <div class="card">
+        <div class="flex justify-between items-center mb-2">
+          <h3>Admin Audit Log</h3>
+          <div class="flex gap-1">
+            <select id="audit-filter" onchange="renderAuditLog()" style="max-width:180px;">
+              <option value="">All Actions</option>
+              <option value="tournament">Tournament</option>
+              <option value="player">Player</option>
+              <option value="points">Points</option>
+              <option value="elo">ELO</option>
+              <option value="bounty">Bounty</option>
+              <option value="settings">Settings</option>
+              <option value="economy">Economy</option>
+            </select>
+            <button class="btn btn-sm btn-secondary" onclick="clearAuditLog()">Clear Log</button>
+          </div>
+        </div>
+        <div id="audit-log-entries"><p class="text-muted">No actions logged yet.</p></div>
       </div>
     </div>
   </main>
@@ -2579,6 +3018,809 @@
         tbody.innerHTML = '';
       }
     }
+    // ── AdminLog Utility ──────────────────────────────────────
+    const AdminLog = {
+      _key: 'dbl_admin_audit_log',
+      _icons: {
+        tournament: '\u{1F3C6}', player: '\u{1F464}', points: '\u{1FA99}',
+        elo: '\u{1F4CA}', bounty: '\u{1F4B0}', settings: '⚙️',
+        economy: '\u{1F6D2}', general: '\u{1F4DD}'
+      },
+      log(type, message, details = null) {
+        const logs = this.getAll();
+        logs.unshift({
+          id: Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          type, message, details,
+          timestamp: new Date().toISOString()
+        });
+        // Keep last 500
+        if (logs.length > 500) logs.length = 500;
+        localStorage.setItem(this._key, JSON.stringify(logs));
+      },
+      getAll() {
+        try { return JSON.parse(localStorage.getItem(this._key) || '[]'); }
+        catch { return []; }
+      },
+      clear() {
+        localStorage.removeItem(this._key);
+      },
+      getIcon(type) {
+        return this._icons[type] || this._icons.general;
+      }
+    };
+
+    function renderAuditLog() {
+      const container = document.getElementById('audit-log-entries');
+      const filter = document.getElementById('audit-filter')?.value || '';
+      let logs = AdminLog.getAll();
+      if (filter) logs = logs.filter(l => l.type === filter);
+
+      if (!logs.length) {
+        container.innerHTML = '<p class="text-muted">No actions logged yet.</p>';
+        return;
+      }
+
+      const typeColors = {
+        tournament: 'var(--cyan)', player: 'var(--green)', points: 'var(--gold)',
+        elo: 'var(--pink)', bounty: 'var(--red)', settings: 'var(--muted)',
+        economy: 'var(--gold)', general: 'var(--text)'
+      };
+
+      container.innerHTML = logs.slice(0, 100).map(l => {
+        const d = new Date(l.timestamp);
+        const time = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const color = typeColors[l.type] || 'var(--text)';
+        return `<div class="audit-entry">
+          <span class="audit-time">${time}</span>
+          <span class="audit-icon">${AdminLog.getIcon(l.type)}</span>
+          <span class="audit-msg">${l.message}</span>
+          <span class="audit-type" style="color:${color};border:1px solid ${color};">${l.type}</span>
+        </div>`;
+      }).join('');
+    }
+
+    function clearAuditLog() {
+      if (!confirm('Clear all audit log entries?')) return;
+      AdminLog.clear();
+      renderAuditLog();
+      NotificationSystem.show('Audit log cleared', 'info');
+    }
+
+    // ── Wrap existing functions to add audit logging ──────────
+    const _origSaveTournament = saveTournament;
+    saveTournament = async function() {
+      await _origSaveTournament();
+      const name = document.getElementById('t-name').value.trim();
+      AdminLog.log('tournament', editingId ? `Updated tournament "${name}"` : `Created tournament "${name}"`);
+    };
+
+    const _origDeleteTournament = deleteTournament;
+    deleteTournament = async function(id, name) {
+      await _origDeleteTournament(id, name);
+      AdminLog.log('tournament', `Deleted tournament "${name}"`);
+    };
+
+    const _origSetStatus = setStatus;
+    setStatus = async function(status) {
+      await _origSetStatus(status);
+      AdminLog.log('settings', `Changed tournament status to "${status}"`);
+    };
+
+    const _origRemovePlayer = removePlayer;
+    removePlayer = async function(id) {
+      const player = signups.find(s => s.id === id);
+      await _origRemovePlayer(id);
+      if (player) AdminLog.log('player', `Removed player "${player.discord_username}"`);
+    };
+
+    const _origBlacklistPlayer = blacklistPlayer;
+    blacklistPlayer = async function(username) {
+      await _origBlacklistPlayer(username);
+      AdminLog.log('player', `Blacklisted player "${username}"`);
+    };
+
+    const _origAwardPointsAdmin = awardPointsAdmin;
+    awardPointsAdmin = async function() {
+      const username = document.getElementById('eco-username').value.trim();
+      const amount = document.getElementById('eco-amount').value;
+      await _origAwardPointsAdmin();
+      if (username && amount) AdminLog.log('points', `Awarded ${amount} points to "${username}"`);
+    };
+
+    const _origUpdateAllElo = updateAllElo;
+    updateAllElo = async function() {
+      await _origUpdateAllElo();
+      AdminLog.log('elo', 'Recalculated all ELO ratings');
+    };
+
+    // ── Enhanced Players Tab ──────────────────────────────────
+    let bulkSelectedPlayers = new Set();
+
+    function filterPlayersTable() {
+      const query = (document.getElementById('player-search-input')?.value || '').toLowerCase();
+      const rows = document.querySelectorAll('#signup-tbody tr');
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+      });
+    }
+
+    function toggleBulkSelectAll() {
+      const checked = document.getElementById('header-bulk-check')?.checked;
+      bulkSelectedPlayers.clear();
+      document.querySelectorAll('.bulk-player-check').forEach(cb => {
+        cb.checked = checked;
+        if (checked) bulkSelectedPlayers.add(cb.dataset.username);
+      });
+      updateBulkBar();
+    }
+
+    function toggleBulkPlayer(username) {
+      if (bulkSelectedPlayers.has(username)) {
+        bulkSelectedPlayers.delete(username);
+      } else {
+        bulkSelectedPlayers.add(username);
+      }
+      updateBulkBar();
+    }
+
+    function updateBulkBar() {
+      const bar = document.getElementById('bulk-bar');
+      const count = document.getElementById('bulk-count');
+      if (bulkSelectedPlayers.size > 0) {
+        bar.style.display = 'flex';
+        count.textContent = bulkSelectedPlayers.size + ' selected';
+      } else {
+        bar.style.display = 'none';
+      }
+    }
+
+    function bulkClearSelection() {
+      bulkSelectedPlayers.clear();
+      document.querySelectorAll('.bulk-player-check').forEach(cb => cb.checked = false);
+      document.getElementById('header-bulk-check').checked = false;
+      updateBulkBar();
+    }
+
+    async function bulkAwardPoints() {
+      if (!bulkSelectedPlayers.size) return;
+      const amount = prompt(`Award how many points to ${bulkSelectedPlayers.size} player(s)?`);
+      if (!amount || isNaN(parseInt(amount))) return;
+      const pts = parseInt(amount);
+      let awarded = 0;
+      for (const username of bulkSelectedPlayers) {
+        try {
+          await db.awardPoints(username, pts, 'bonus');
+          const _s = await getActiveSeason();
+          if (_s && pts > 0) await db.addSeasonXP(_s.id, username, pts);
+          awarded++;
+        } catch (e) { console.error(e); }
+      }
+      AdminLog.log('points', `Bulk awarded ${pts} points to ${awarded} players`);
+      NotificationSystem.show(`Awarded ${pts} points to ${awarded} player(s)`, 'success');
+      bulkClearSelection();
+    }
+
+    async function expandPlayerDetails(username) {
+      const panel = document.getElementById('player-detail-panel');
+      // Toggle off if same player
+      if (panel.dataset.current === username) {
+        panel.innerHTML = '';
+        panel.dataset.current = '';
+        return;
+      }
+      panel.dataset.current = username;
+
+      let elo = '-', wins = 0, losses = 0, peakElo = '-';
+      let balance = 0, bountyAmt = '-';
+      let matchHistory = [];
+
+      try {
+        const { data: eloData } = await supabaseClient.from('elo_ratings').select('*').eq('discord_username', username).single();
+        if (eloData) { elo = eloData.elo; wins = eloData.wins || 0; losses = eloData.losses || 0; peakElo = eloData.peak_elo || elo; }
+      } catch (e) {}
+
+      try {
+        const { data: ptsData } = await supabaseClient.from('player_points').select('balance').eq('discord_username', username).single();
+        if (ptsData) balance = ptsData.balance || 0;
+      } catch (e) {}
+
+      try {
+        const { data: bountyData } = await supabaseClient.from('bounties').select('amount').eq('discord_username', username).single();
+        if (bountyData) bountyAmt = bountyData.amount;
+      } catch (e) {}
+
+      try {
+        const { data: txns } = await supabaseClient.from('point_transactions').select('amount, reason, created_at').eq('discord_username', username).order('created_at', { ascending: false }).limit(10);
+        if (txns) matchHistory = txns;
+      } catch (e) {}
+
+      panel.innerHTML = `
+        <div class="card mt-2 player-expand-row">
+          <div class="flex justify-between items-center mb-2">
+            <h3>${username}</h3>
+            <div class="flex gap-1">
+              <button class="btn btn-sm btn-primary" onclick="quickAwardPoints('${username.replace(/'/g,"\\'")}')">Award Points</button>
+              <button class="btn btn-sm btn-secondary" onclick="quickAdjustElo('${username.replace(/'/g,"\\'")}')">Adjust ELO</button>
+              <button class="btn btn-sm btn-secondary" onclick="quickResetBounty('${username.replace(/'/g,"\\'")}')">Reset Bounty</button>
+              <a class="btn btn-sm btn-secondary" href="../profile.html?player=${encodeURIComponent(username)}" target="_blank">View Profile</a>
+            </div>
+          </div>
+          <div class="player-detail-grid">
+            <div class="player-detail-stat"><div class="val" style="color:var(--cyan);">${elo}</div><div class="lbl">ELO</div></div>
+            <div class="player-detail-stat"><div class="val" style="color:var(--gold);">${peakElo}</div><div class="lbl">Peak ELO</div></div>
+            <div class="player-detail-stat"><div class="val" style="color:var(--green);">${wins}</div><div class="lbl">Wins</div></div>
+            <div class="player-detail-stat"><div class="val" style="color:var(--red);">${losses}</div><div class="lbl">Losses</div></div>
+            <div class="player-detail-stat"><div class="val" style="color:var(--gold);">${balance}</div><div class="lbl">Points</div></div>
+            <div class="player-detail-stat"><div class="val" style="color:var(--pink);">${bountyAmt}</div><div class="lbl">Bounty</div></div>
+          </div>
+          ${matchHistory.length ? `
+            <h4 class="mb-1 text-muted">Recent Transactions</h4>
+            ${matchHistory.map(t => `
+              <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(46,39,85,0.2);font-size:12px;">
+                <span>${t.reason}</span>
+                <span style="color:${t.amount >= 0 ? 'var(--green)' : 'var(--red)'};font-weight:700;">${t.amount >= 0 ? '+' : ''}${t.amount}</span>
+              </div>
+            `).join('')}
+          ` : ''}
+        </div>`;
+    }
+
+    async function quickAwardPoints(username) {
+      const amount = prompt(`Award points to ${username}:`);
+      if (!amount || isNaN(parseInt(amount))) return;
+      try {
+        await db.awardPoints(username, parseInt(amount), 'bonus');
+        const _s = await getActiveSeason();
+        if (_s && parseInt(amount) > 0) await db.addSeasonXP(_s.id, username, parseInt(amount));
+        AdminLog.log('points', `Awarded ${amount} points to "${username}" (quick action)`);
+        NotificationSystem.show(`Awarded ${amount} points to ${username}`, 'success');
+        expandPlayerDetails(username); // refresh
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function quickAdjustElo(username) {
+      const newElo = prompt(`Set ELO for ${username} (current will be overwritten):`);
+      if (!newElo || isNaN(parseInt(newElo))) return;
+      try {
+        await supabaseClient.from('elo_ratings').upsert({
+          discord_username: username,
+          elo: parseInt(newElo),
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'discord_username' });
+        AdminLog.log('elo', `Set ELO for "${username}" to ${newElo}`);
+        NotificationSystem.show(`ELO set to ${newElo} for ${username}`, 'success');
+        expandPlayerDetails(username);
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function quickResetBounty(username) {
+      if (!confirm(`Reset bounty for ${username} to 0?`)) return;
+      try {
+        await supabaseClient.from('bounties').upsert({
+          discord_username: username,
+          amount: 0, wins: 0, losses: 0, streak: 0
+        }, { onConflict: 'discord_username' });
+        AdminLog.log('bounty', `Reset bounty for "${username}"`);
+        NotificationSystem.show(`Bounty reset for ${username}`, 'success');
+        expandPlayerDetails(username);
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    // Override loadPlayers to add bulk checkboxes and click-to-expand
+    const _origLoadPlayers = loadPlayers;
+    loadPlayers = async function() {
+      if (!currentTournament) return;
+      try {
+        signups = await db.getSignups(currentTournament.id);
+        const tbody = document.getElementById('signup-tbody');
+        const noPlayers = document.getElementById('no-players');
+        const total = document.getElementById('player-total');
+
+        total.textContent = signups.length + ' players';
+        bulkSelectedPlayers.clear();
+        updateBulkBar();
+
+        if (!signups.length) {
+          tbody.innerHTML = '';
+          noPlayers.classList.remove('hidden');
+          return;
+        }
+
+        noPlayers.classList.add('hidden');
+        tbody.innerHTML = signups.map((s, i) => {
+          const teamHtml = s.team ? s.team.map(c =>
+            `<img src="${c.image}" alt="${c.name}" title="${c.name}" style="width:30px;height:30px;border-radius:4px;border:1px solid var(--border-color);" onerror="this.style.display='none'" />`
+          ).join('') : '<span class="text-muted">—</span>';
+          const date = new Date(s.created_at).toLocaleDateString();
+          const safeUser = s.discord_username.replace(/'/g,"\\'");
+          return `
+            <tr>
+              <td><input type="checkbox" class="bulk-player-check" data-username="${s.discord_username}" onchange="toggleBulkPlayer('${safeUser}')" /></td>
+              <td>${i + 1}</td>
+              <td><strong style="cursor:pointer;text-decoration:underline dotted;" onclick="expandPlayerDetails('${safeUser}')">${s.discord_username}</strong></td>
+              <td><div class="flex gap-1">${teamHtml}</div></td>
+              <td class="text-muted">${date}</td>
+              <td>
+                <div class="flex gap-1">
+                  <button class="action-btn btn-advance" onclick="replacePlayer('${s.id}','${safeUser}')">Replace</button>
+                  <button class="action-btn" onclick="removePlayer('${s.id}')">Remove</button>
+                  <button class="action-btn" style="border-color:var(--red);color:var(--red);" onclick="blacklistPlayer('${safeUser}')">Blacklist</button>
+                </div>
+              </td>
+            </tr>`;
+        }).join('');
+      } catch (e) {
+        document.getElementById('signup-tbody').innerHTML = '';
+      }
+    };
+
+    // ── Bounty Tab ──────────────────────────────────────────
+    async function loadBountyTab() {
+      // Load bounties
+      try {
+        const { data: bounties, error } = await supabaseClient
+          .from('bounties')
+          .select('*')
+          .order('amount', { ascending: false });
+
+        const tbody = document.getElementById('bounty-list-tbody');
+        const empty = document.getElementById('no-bounties');
+
+        if (error) throw error;
+
+        const activeBounties = (bounties || []).filter(b => b.amount > 0);
+        document.getElementById('bounty-total-active').textContent = activeBounties.length;
+        document.getElementById('bounty-highest-val').textContent = activeBounties.length ? activeBounties[0].amount : 0;
+
+        if (!bounties || !bounties.length) {
+          tbody.innerHTML = '';
+          empty.classList.remove('hidden');
+        } else {
+          empty.classList.add('hidden');
+          tbody.innerHTML = bounties.map((b, i) => `
+            <tr>
+              <td>${i + 1}</td>
+              <td><strong>${b.discord_username}</strong></td>
+              <td style="color:var(--pink);font-family:'Exo 2',sans-serif;font-weight:700;">${b.amount || 0}</td>
+              <td style="color:var(--green);">${b.wins || 0}W / <span style="color:var(--red);">${b.losses || 0}L</span></td>
+              <td style="color:var(--cyan);font-family:'Exo 2',sans-serif;font-weight:700;">${b.streak || 0}</td>
+              <td style="color:var(--gold);font-family:'Exo 2',sans-serif;font-weight:700;">${b.peak_bounty || b.amount || 0}</td>
+              <td>
+                <button class="action-btn btn-advance" onclick="editBountyInline('${b.discord_username.replace(/'/g,"\\'")}', ${b.amount || 0})">Edit</button>
+              </td>
+            </tr>
+          `).join('');
+        }
+      } catch (e) {
+        console.error('Bounty load error:', e);
+      }
+
+      // Load challenges
+      try {
+        const { data: challenges, error } = await supabaseClient
+          .from('bounty_challenges')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (error) throw error;
+
+        document.getElementById('bounty-total-challenges').textContent = challenges ? challenges.length : 0;
+
+        const disputes = (challenges || []).filter(c => c.status === 'expired');
+        document.getElementById('bounty-total-disputes').textContent = disputes.length;
+
+        // Render disputes
+        const disputeList = document.getElementById('disputed-challenges-list');
+        if (!disputes.length) {
+          disputeList.innerHTML = '<p class="text-muted">No disputes.</p>';
+        } else {
+          disputeList.innerHTML = disputes.map(d => `
+            <div class="player-row" style="margin-bottom:8px;padding:10px;background:var(--bg);border:1px solid var(--red);border-radius:var(--radius-sm);">
+              <div class="player-info">
+                <span class="player-name" style="color:var(--cyan);">${d.challenger}</span>
+                <span class="text-muted" style="margin:0 6px;">vs</span>
+                <span class="player-name" style="color:var(--pink);">${d.target}</span>
+              </div>
+              <div class="flex gap-1">
+                <button class="btn btn-sm btn-primary" onclick="resolveDispute('${d.id}','${d.challenger.replace(/'/g,"\\'")}')">Win: ${d.challenger}</button>
+                <button class="btn btn-sm btn-pink" style="background:var(--pink);color:#fff;" onclick="resolveDispute('${d.id}','${d.target.replace(/'/g,"\\'")}')">Win: ${d.target}</button>
+                <button class="btn btn-sm btn-secondary" onclick="cancelDispute('${d.id}')">Cancel</button>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        // Render recent challenges
+        const challTbody = document.getElementById('challenges-list-tbody');
+        const challEmpty = document.getElementById('no-challenges');
+        if (!challenges || !challenges.length) {
+          challTbody.innerHTML = '';
+          challEmpty.classList.remove('hidden');
+        } else {
+          challEmpty.classList.add('hidden');
+          challTbody.innerHTML = challenges.map(c => {
+            const statusColor = { completed: 'var(--green)', pending: 'var(--gold)', accepted: 'var(--cyan)', expired: 'var(--red)', cancelled: 'var(--muted)' };
+            return `
+              <tr>
+                <td><strong>${c.challenger}</strong></td>
+                <td><strong>${c.target}</strong></td>
+                <td><span style="color:${statusColor[c.status] || 'var(--muted)'};font-weight:700;text-transform:uppercase;font-size:11px;">${c.status}</span></td>
+                <td>${c.winner || '—'}</td>
+                <td style="color:var(--gold);font-family:'Exo 2',sans-serif;font-weight:700;">${c.currency_reward || 0}</td>
+                <td style="font-family:'Exo 2',sans-serif;font-weight:700;">${c.elo_change ? (c.elo_change > 0 ? '+' : '') + c.elo_change : '—'}</td>
+              </tr>`;
+          }).join('');
+        }
+      } catch (e) {
+        console.error('Challenges load error:', e);
+      }
+    }
+
+    function editBountyInline(username, currentAmount) {
+      const newAmount = prompt(`Set bounty for ${username} (currently ${currentAmount}):`);
+      if (newAmount === null || isNaN(parseInt(newAmount))) return;
+      adjustBountyFor(username, parseInt(newAmount));
+    }
+
+    async function adjustBounty() {
+      const username = document.getElementById('bounty-adj-username').value.trim();
+      const amount = parseInt(document.getElementById('bounty-adj-amount').value);
+      if (!username) { NotificationSystem.show('Enter a username', 'error'); return; }
+      if (isNaN(amount) || amount < 0) { NotificationSystem.show('Enter a valid amount', 'error'); return; }
+      await adjustBountyFor(username, amount);
+      document.getElementById('bounty-adj-username').value = '';
+      document.getElementById('bounty-adj-amount').value = '';
+    }
+
+    async function adjustBountyFor(username, amount) {
+      try {
+        const { error } = await supabaseClient.from('bounties').upsert({
+          discord_username: username,
+          amount: amount
+        }, { onConflict: 'discord_username' });
+        if (error) throw error;
+        AdminLog.log('bounty', `Set bounty for "${username}" to ${amount}`);
+        NotificationSystem.show(`Bounty for ${username} set to ${amount}`, 'success');
+        loadBountyTab();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function resolveDispute(id, winner) {
+      try {
+        const { error } = await supabaseClient.from('bounty_challenges')
+          .update({ status: 'completed', winner: winner })
+          .eq('id', id);
+        if (error) throw error;
+        AdminLog.log('bounty', `Resolved dispute #${id.slice(0,8)} — winner: ${winner}`);
+        NotificationSystem.show(`Dispute resolved. Winner: ${winner}`, 'success');
+        loadBountyTab();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function cancelDispute(id) {
+      try {
+        const { error } = await supabaseClient.from('bounty_challenges')
+          .update({ status: 'cancelled' })
+          .eq('id', id);
+        if (error) throw error;
+        AdminLog.log('bounty', `Cancelled dispute #${id.slice(0,8)}`);
+        NotificationSystem.show('Dispute cancelled', 'warning');
+        loadBountyTab();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    // ── Enhanced Stats ──────────────────────────────────────
+    const _origLoadStats = loadStats;
+    loadStats = async function() {
+      await _origLoadStats();
+      await loadBountyStats();
+      await loadEconomyStats();
+      loadActivityChart();
+    };
+
+    async function loadBountyStats() {
+      try {
+        const { data: bounties } = await supabaseClient.from('bounties').select('*').order('amount', { ascending: false });
+        const { data: challenges } = await supabaseClient.from('bounty_challenges').select('*');
+
+        const active = (bounties || []).filter(b => b.amount > 0);
+        document.getElementById('stat-bounty-active').textContent = active.length;
+        document.getElementById('stat-bounty-challenges').textContent = (challenges || []).length;
+        document.getElementById('stat-bounty-highest').textContent = active.length ? active[0].amount : 0;
+
+        // Top hunters (most wins)
+        const hunters = (bounties || []).filter(b => b.wins > 0).sort((a, b) => b.wins - a.wins).slice(0, 5);
+        document.getElementById('stat-top-hunters').innerHTML = hunters.length
+          ? hunters.map((h, i) => `<div class="player-row" style="margin-bottom:4px;">
+              <div class="player-info"><span style="color:var(--cyan);font-weight:800;margin-right:8px;">${i+1}.</span><span class="player-name">${h.discord_username}</span></div>
+              <span style="font-family:'Exo 2',sans-serif;font-weight:800;color:var(--green);">${h.wins} wins</span>
+            </div>`).join('')
+          : '<p class="text-muted">No data yet.</p>';
+
+        // Highest bounties
+        document.getElementById('stat-highest-bounties').innerHTML = active.length
+          ? active.slice(0, 5).map((b, i) => `<div class="player-row" style="margin-bottom:4px;">
+              <div class="player-info"><span style="color:var(--pink);font-weight:800;margin-right:8px;">${i+1}.</span><span class="player-name">${b.discord_username}</span></div>
+              <span style="font-family:'Exo 2',sans-serif;font-weight:800;color:var(--pink);">${b.amount}</span>
+            </div>`).join('')
+          : '<p class="text-muted">No bounties yet.</p>';
+      } catch (e) {
+        console.error('Bounty stats error:', e);
+      }
+    }
+
+    async function loadEconomyStats() {
+      try {
+        const { data: points } = await supabaseClient.from('player_points').select('balance, lifetime_earned, discord_username');
+        const { data: purchases } = await supabaseClient.from('purchases').select('discord_username, cost, item_name');
+
+        const totalCirculation = (points || []).reduce((sum, p) => sum + (p.balance || 0), 0);
+        const totalSpent = (purchases || []).reduce((sum, p) => sum + (p.cost || 0), 0);
+
+        document.getElementById('stat-total-currency').textContent = totalCirculation.toLocaleString();
+        document.getElementById('stat-total-purchases').textContent = (purchases || []).length;
+        document.getElementById('stat-total-spent').textContent = totalSpent.toLocaleString();
+
+        // Top spenders
+        const spenderMap = {};
+        (purchases || []).forEach(p => {
+          spenderMap[p.discord_username] = (spenderMap[p.discord_username] || 0) + (p.cost || 0);
+        });
+        const topSpenders = Object.entries(spenderMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        document.getElementById('stat-top-spenders').innerHTML = topSpenders.length
+          ? topSpenders.map(([name, spent], i) => `<div class="player-row" style="margin-bottom:4px;">
+              <div class="player-info"><span style="color:var(--gold);font-weight:800;margin-right:8px;">${i+1}.</span><span class="player-name">${name}</span></div>
+              <span style="font-family:'Exo 2',sans-serif;font-weight:800;color:var(--gold);">${spent}</span>
+            </div>`).join('')
+          : '<p class="text-muted">No purchases yet.</p>';
+
+        // Most purchased
+        const itemMap = {};
+        (purchases || []).forEach(p => {
+          if (p.item_name) itemMap[p.item_name] = (itemMap[p.item_name] || 0) + 1;
+        });
+        const topItems = Object.entries(itemMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        document.getElementById('stat-most-purchased').innerHTML = topItems.length
+          ? topItems.map(([name, count], i) => `<div class="player-row" style="margin-bottom:4px;">
+              <div class="player-info"><span style="color:var(--pink);font-weight:800;margin-right:8px;">${i+1}.</span><span class="player-name">${name}</span></div>
+              <span style="font-family:'Exo 2',sans-serif;font-weight:800;color:var(--pink);">${count}x</span>
+            </div>`).join('')
+          : '<p class="text-muted">No purchases yet.</p>';
+      } catch (e) {
+        console.error('Economy stats error:', e);
+        document.getElementById('stat-total-currency').textContent = '-';
+        document.getElementById('stat-total-purchases').textContent = '-';
+        document.getElementById('stat-total-spent').textContent = '-';
+      }
+    }
+
+    function loadActivityChart() {
+      // Build bar chart from playerCounts (already computed in loadStats)
+      const container = document.getElementById('stat-activity-chart');
+      // Re-derive from signups count in stats overview
+      // Use the same data from loadStats — recollect
+      // We'll grab from the "Most Active" section data
+      const rows = document.querySelectorAll('#stat-most-active .player-row');
+      if (!rows.length) {
+        container.innerHTML = '<p class="text-muted">No activity data yet.</p>';
+        return;
+      }
+
+      const data = [];
+      rows.forEach(row => {
+        const name = row.querySelector('.player-name')?.textContent || '';
+        const countText = row.querySelector('[style*="font-weight:800"]')?.textContent || '';
+        const count = parseInt(countText) || 0;
+        if (name && count) data.push({ name, count });
+      });
+
+      if (!data.length) {
+        container.innerHTML = '<p class="text-muted">No activity data yet.</p>';
+        return;
+      }
+
+      const max = Math.max(...data.map(d => d.count));
+      const colors = ['var(--cyan)', 'var(--pink)', 'var(--gold)', 'var(--green)', 'var(--red)'];
+      container.innerHTML = `<div class="bar-chart">${data.map((d, i) => {
+        const pct = max > 0 ? (d.count / max * 100) : 0;
+        const color = colors[i % colors.length];
+        return `<div class="bar-chart-row">
+          <span class="bar-chart-label">${d.name}</span>
+          <div class="bar-chart-track">
+            <div class="bar-chart-fill" style="width:${pct}%;background:${color};">${d.count}</div>
+          </div>
+        </div>`;
+      }).join('')}</div>`;
+    }
+
+    // ── Maintenance Mode ──────────────────────────────────────
+    function loadMaintenanceState() {
+      const enabled = localStorage.getItem('dbl_maintenance_mode') === 'true';
+      const toggle = document.getElementById('maintenance-toggle');
+      const preview = document.getElementById('maintenance-preview');
+      const msgInput = document.getElementById('maintenance-message');
+
+      if (enabled) {
+        toggle.classList.add('active');
+        preview.style.display = '';
+      } else {
+        toggle.classList.remove('active');
+        preview.style.display = 'none';
+      }
+
+      const msg = localStorage.getItem('dbl_maintenance_message') || '';
+      if (msgInput) msgInput.value = msg;
+    }
+
+    function toggleMaintenanceMode() {
+      const toggle = document.getElementById('maintenance-toggle');
+      const enabled = !toggle.classList.contains('active');
+      toggle.classList.toggle('active');
+      localStorage.setItem('dbl_maintenance_mode', enabled);
+      document.getElementById('maintenance-preview').style.display = enabled ? '' : 'none';
+
+      // Also store in Supabase for public pages to read
+      try {
+        supabaseClient.from('site_settings').upsert({
+          key: 'maintenance_mode',
+          value: enabled,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'key' });
+      } catch (e) {}
+
+      AdminLog.log('settings', enabled ? 'Enabled maintenance mode' : 'Disabled maintenance mode');
+      NotificationSystem.show(enabled ? 'Maintenance mode enabled' : 'Maintenance mode disabled', enabled ? 'warning' : 'success');
+    }
+
+    function updateMaintenanceMessage() {
+      const msg = document.getElementById('maintenance-message').value.trim();
+      localStorage.setItem('dbl_maintenance_message', msg);
+      try {
+        supabaseClient.from('site_settings').upsert({
+          key: 'maintenance_message',
+          value: msg,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'key' });
+      } catch (e) {}
+
+      const preview = document.getElementById('maintenance-preview');
+      if (preview) {
+        preview.querySelector('.maintenance-banner-preview').textContent =
+          msg || 'Site is currently under maintenance. Some features may be unavailable.';
+      }
+    }
+
+    // ── Announcements ──────────────────────────────────────
+    async function createAnnouncement() {
+      const title = document.getElementById('ann-title').value.trim();
+      const body = document.getElementById('ann-body').value.trim();
+      const type = document.getElementById('ann-type').value;
+      const expires = document.getElementById('ann-expires').value;
+
+      if (!title || !body) {
+        NotificationSystem.show('Title and message are required', 'error');
+        return;
+      }
+
+      // Try Supabase first, fallback to localStorage
+      try {
+        const { error } = await supabaseClient.from('announcements').insert({
+          title, body, type,
+          expires_at: expires ? new Date(expires).toISOString() : null,
+          active: true,
+          created_at: new Date().toISOString()
+        });
+        if (error) throw error;
+      } catch (e) {
+        // Fallback: localStorage
+        const anns = JSON.parse(localStorage.getItem('dbl_announcements') || '[]');
+        anns.unshift({
+          id: Date.now().toString(),
+          title, body, type,
+          expires_at: expires ? new Date(expires).toISOString() : null,
+          active: true,
+          created_at: new Date().toISOString()
+        });
+        localStorage.setItem('dbl_announcements', JSON.stringify(anns));
+      }
+
+      AdminLog.log('settings', `Created announcement: "${title}"`);
+      NotificationSystem.show('Announcement posted', 'success');
+      document.getElementById('ann-title').value = '';
+      document.getElementById('ann-body').value = '';
+      document.getElementById('ann-expires').value = '';
+      loadAnnouncements();
+    }
+
+    async function loadAnnouncements() {
+      const container = document.getElementById('announcements-list');
+      let anns = [];
+
+      try {
+        const { data, error } = await supabaseClient
+          .from('announcements')
+          .select('*')
+          .eq('active', true)
+          .order('created_at', { ascending: false })
+          .limit(20);
+        if (!error && data) anns = data;
+      } catch (e) {}
+
+      // Also check localStorage fallback
+      if (!anns.length) {
+        try {
+          anns = JSON.parse(localStorage.getItem('dbl_announcements') || '[]').filter(a => a.active);
+        } catch (e) {}
+      }
+
+      if (!anns.length) {
+        container.innerHTML = '<p class="text-muted">No announcements.</p>';
+        return;
+      }
+
+      const typeColors = { info: 'var(--cyan)', warning: 'var(--gold)', success: 'var(--green)', event: 'var(--pink)' };
+
+      container.innerHTML = anns.map(a => `
+        <div class="announcement-item">
+          <div class="flex justify-between items-center">
+            <div class="ann-title" style="color:${typeColors[a.type] || 'var(--gold)'};">${a.title}</div>
+            <button class="action-btn" onclick="deleteAnnouncement('${a.id}')">Remove</button>
+          </div>
+          <div class="ann-body">${a.body}</div>
+          <div class="ann-meta">
+            <span style="text-transform:uppercase;font-weight:700;">${a.type}</span>
+            &middot; ${new Date(a.created_at).toLocaleDateString()}
+            ${a.expires_at ? ' &middot; Expires: ' + new Date(a.expires_at).toLocaleDateString() : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function deleteAnnouncement(id) {
+      try {
+        await supabaseClient.from('announcements').update({ active: false }).eq('id', id);
+      } catch (e) {
+        // localStorage fallback
+        const anns = JSON.parse(localStorage.getItem('dbl_announcements') || '[]');
+        const idx = anns.findIndex(a => a.id === id);
+        if (idx !== -1) { anns[idx].active = false; localStorage.setItem('dbl_announcements', JSON.stringify(anns)); }
+      }
+      AdminLog.log('settings', 'Removed an announcement');
+      NotificationSystem.show('Announcement removed', 'success');
+      loadAnnouncements();
+    }
+
+    // ── Update tab switching to handle new tabs ──────────────
+    // Extend the existing tab handler by updating the DOMContentLoaded + tab click
+    const _origTabHandler = true; // marker
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        if (tab.dataset.tab === 'bounty') loadBountyTab();
+        if (tab.dataset.tab === 'audit') renderAuditLog();
+      });
+    });
+
+    // Also extend loadSettings to load new sections
+    const _origLoadSettings2 = loadSettings;
+    loadSettings = function() {
+      _origLoadSettings2();
+      loadMaintenanceState();
+      loadAnnouncements();
+    };
   </script>
   <script src="../js/toolbar.js"></script>
 </body>

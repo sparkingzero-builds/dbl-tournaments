@@ -285,16 +285,34 @@
 
     .empty-state { text-align: center; color: var(--muted); padding: 60px 20px; font-size: 14px; }
 
-    @media (max-width: 600px) {
-      .item-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-      .item-grid.featured { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 768px) {
       .wallet-bar { flex-direction: column; text-align: center; }
       .wallet-left { justify-content: center; }
-      .wallet-right { justify-content: center; }
-      .shop-tabs { gap: 4px; }
-      .shop-tab { padding: 8px 12px; font-size: 11px; }
+      .wallet-right { justify-content: center; flex-wrap: wrap; }
+      .wallet-amount { font-size: 24px; }
+      .shop-tabs { gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .shop-tab { padding: 10px 14px; font-size: 11px; min-height: 44px; white-space: nowrap; }
       .modal-card { max-width: 100%; margin: 10px; }
-      .modal-visual { height: 160px; }
+      .modal-visual { height: 180px; }
+      .modal-body { padding: 0 16px 16px; }
+      .modal-name { font-size: 18px; }
+      .modal-buy-btn { padding: 12px 24px; min-height: 44px; width: 100%; }
+      .modal-price-row { flex-direction: column; gap: 12px; align-items: stretch; }
+      .btn-get { min-height: 36px; padding: 6px 14px; }
+      .inv-grid { grid-template-columns: repeat(2, 1fr); }
+      .tx-row { flex-direction: column; gap: 4px; align-items: flex-start; padding: 10px 14px; }
+      .login-card { padding: 32px 24px; }
+    }
+    @media (max-width: 480px) {
+      .item-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+      .item-grid.featured { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .modal-visual { height: 140px; }
+      .modal-name { font-size: 16px; }
+      .card-name { font-size: 11px; }
+      .card-info { padding: 8px 10px; }
+      .card-price-bar { padding: 6px 10px; }
+      .inv-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+      .shop-section-header h2 { font-size: 14px; }
     }
     @media (min-width: 900px) {
       .item-grid { grid-template-columns: repeat(5, 1fr); }

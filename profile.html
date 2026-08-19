@@ -372,6 +372,96 @@
       line-height: 1.3;
     }
 
+    /* Milestone tier dots */
+    .badge-tier-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      position: absolute;
+      top: 5px; left: 5px;
+      border: 1px solid rgba(0,0,0,0.3);
+    }
+    .badge-tier-dot.tier-bronze { background: #cd7f32; }
+    .badge-tier-dot.tier-silver { background: #c0c0c0; }
+    .badge-tier-dot.tier-gold   { background: var(--gold); box-shadow: 0 0 6px rgba(255,215,0,0.5); }
+
+    /* Progress bar on locked badges */
+    .badge-progress {
+      margin-top: 5px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px;
+      height: 4px;
+      overflow: hidden;
+    }
+    .badge-progress-fill {
+      height: 100%;
+      background: var(--cyan);
+      border-radius: 3px;
+      transition: width 0.6s ease;
+    }
+    .badge-progress-label {
+      font-size: 8px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Unlock animation on newly earned badges */
+    @keyframes badgeUnlock {
+      0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+      60%  { transform: scale(1.2) rotate(3deg); opacity: 1; }
+      80%  { transform: scale(0.95) rotate(-1deg); }
+      100% { transform: scale(1) rotate(0); }
+    }
+    @keyframes badgeGlow {
+      0%, 100% { box-shadow: 0 0 12px rgba(0,229,255,0.15); }
+      50%      { box-shadow: 0 0 30px rgba(0,229,255,0.6), 0 0 60px rgba(0,229,255,0.2); }
+    }
+    .badge-card.newly-unlocked {
+      animation: badgeUnlock 0.6s ease forwards, badgeGlow 1.5s ease 0.6s 2;
+    }
+
+    /* Unlock celebration modal */
+    .badge-unlock-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; animation: fadeInOverlay 0.3s ease forwards;
+    }
+    @keyframes fadeInOverlay { to { opacity: 1; } }
+    .badge-unlock-modal {
+      background: var(--panel);
+      border: 2px solid var(--cyan);
+      border-radius: 16px;
+      padding: 32px 40px;
+      text-align: center;
+      max-width: 320px;
+      animation: badgeUnlock 0.5s ease forwards;
+      box-shadow: 0 0 40px rgba(0,229,255,0.3);
+    }
+    .badge-unlock-modal .unlock-icon {
+      font-size: 56px;
+      margin-bottom: 12px;
+    }
+    .badge-unlock-modal .unlock-label {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+    .badge-unlock-modal .unlock-name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+    .badge-unlock-modal .unlock-desc {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
     /* ── Player Card ── */
     @keyframes cardBorderRotate {
       0% { --card-angle: 0deg; }
@@ -1170,34 +1260,107 @@
 
         // --- Achievement Badges ---
         try {
+          // -- Fetch extra data for new badges --
+          let bountyWinCount = 0;
+          let totalSpent = 0;
+          let inventoryCount = 0;
+          let playerPeakElo = 0;
+          let playerCurrentElo = 0;
+
+          try {
+            const { data: bWins } = await supabaseClient
+              .from('bounty_challenges')
+              .select('id', { count: 'exact', head: true })
+              .eq('winner', playerName);
+            bountyWinCount = bWins ? bWins.length : 0;
+            // fallback: use count
+            const { count: bCount } = await supabaseClient
+              .from('bounty_challenges')
+              .select('id', { count: 'exact', head: true })
+              .eq('winner', playerName);
+            if (bCount !== null) bountyWinCount = bCount;
+          } catch (_) {}
+
+          try {
+            const { data: spendRows } = await supabaseClient
+              .from('point_transactions')
+              .select('amount')
+              .eq('discord_username', playerName)
+              .eq('type', 'spend');
+            if (spendRows) totalSpent = spendRows.reduce((s, r) => s + Math.abs(r.amount || 0), 0);
+          } catch (_) {}
+
+          try {
+            const { count: invCount } = await supabaseClient
+              .from('player_inventory')
+              .select('id', { count: 'exact', head: true })
+              .eq('discord_username', playerName);
+            if (invCount !== null) inventoryCount = invCount;
+          } catch (_) {}
+
+          try {
+            const eloInfo = await db.getPlayerElo(playerName);
+            if (eloInfo) {
+              playerCurrentElo = eloInfo.elo || 0;
+              playerPeakElo = eloInfo.peak_elo || eloInfo.elo || 0;
+            }
+          } catch (_) {}
+
+          // -- Badge definitions with tiers --
           const badgeDefs = [
-            { id: 'champion',     icon: '🏆', name: 'Champion',     desc: 'Won a tournament',                     gold: true },
-            { id: 'on_fire',      icon: '🔥', name: 'On Fire',      desc: 'Won 3+ matches in a row',              gold: false },
-            { id: 'veteran',      icon: '⚔️', name: 'Veteran',      desc: 'Played in 3+ tournaments',             gold: false },
-            { id: 'sharpshooter', icon: '🎯', name: 'Sharpshooter', desc: '75%+ win rate (min 4 matches)',         gold: false },
-            { id: 'dynasty',      icon: '👑', name: 'Dynasty',      desc: 'Won 2+ tournaments',                   gold: true },
-            { id: 'iron_wall',    icon: '🛡️', name: 'Iron Wall',    desc: 'Never lost in a tournament (min 2)',    gold: false },
-            { id: 'first_blood',  icon: '🌟', name: 'First Blood',  desc: 'Won their first ever match',           gold: false },
-            { id: 'underdog',     icon: '💀', name: 'Underdog',     desc: 'Beat a player with higher ELO',        gold: false },
+            { id: 'first_blood',    icon: '🌟', name: 'First Blood',    desc: 'Won their first ever match' },
+            { id: 'champion',       icon: '🏆', name: 'Champion',       desc: 'Won a tournament',                  tiers: [1, 3, 5], tierLabel: 'tournament wins' },
+            { id: 'dynasty',        icon: '👑', name: 'Dynasty',        desc: 'Won 2+ tournaments',                gold: true },
+            { id: 'on_fire',        icon: '🔥', name: 'On Fire',        desc: 'Won 3+ matches in a row',           tiers: [3, 5, 10], tierLabel: 'win streak' },
+            { id: 'streak_master',  icon: '⚡', name: 'Streak Master',  desc: 'Won 5+ matches in a row' },
+            { id: 'veteran',        icon: '⚔️', name: 'Veteran',        desc: 'Played in 3+ tournaments',          tiers: [3, 7, 15], tierLabel: 'tournaments' },
+            { id: 'socialite',      icon: '🤝', name: 'Socialite',      desc: 'Played in 5+ tournaments' },
+            { id: 'sharpshooter',   icon: '🎯', name: 'Sharpshooter',   desc: '75%+ win rate (min 4 matches)' },
+            { id: 'iron_wall',      icon: '🛡️', name: 'Iron Wall',      desc: 'Never lost in a tournament (min 2)' },
+            { id: 'underdog',       icon: '💀', name: 'Underdog',       desc: 'Beat a player with higher ELO' },
+            { id: 'rising_star',    icon: '⭐', name: 'Rising Star',    desc: 'Reached 1100+ ELO' },
+            { id: 'elite',          icon: '💎', name: 'Elite',          desc: 'Reached 1300+ ELO' },
+            { id: 'bounty_hunter',  icon: '💰', name: 'Bounty Hunter',  desc: 'Won 5+ bounty matches',             tiers: [5, 15, 30], tierLabel: 'bounty wins' },
+            { id: 'bounty_king',    icon: '🤑', name: 'Bounty King',    desc: 'Won 15+ bounty matches' },
+            { id: 'big_spender',    icon: '🛒', name: 'Big Spender',    desc: 'Spent 1000+ points total' },
+            { id: 'collector',      icon: '📦', name: 'Collector',      desc: 'Own 5+ shop items' },
+            { id: 'perfect_season', icon: '✨', name: 'Perfect Season', desc: 'Won a tournament without losing' },
+            { id: 'tenacious',      icon: '🔄', name: 'Tenacious',      desc: 'Lost 3+ but still won the tournament' },
           ];
 
           const earned = new Set();
+          const badgeProgress = {}; // id -> { current, target }
+          const badgeTierLevel = {}; // id -> 'bronze'|'silver'|'gold'
 
-          // Count tournament wins (Champion placements)
+          // Helper: compute tier for a badge
+          function computeTier(id, value, tiers) {
+            if (!tiers) return;
+            if (value >= tiers[2])      badgeTierLevel[id] = 'gold';
+            else if (value >= tiers[1]) badgeTierLevel[id] = 'silver';
+            else if (value >= tiers[0]) badgeTierLevel[id] = 'bronze';
+          }
+
+          // Count tournament wins
           const tourneyWins = tournamentDetails.filter(td => td.placement === 'Champion').length;
           if (tourneyWins >= 1) earned.add('champion');
           if (tourneyWins >= 2) earned.add('dynasty');
+          computeTier('champion', tourneyWins, [1, 3, 5]);
+          badgeProgress['champion'] = { current: tourneyWins, target: 1 };
 
-          // Veteran: 3+ tournaments
+          // Veteran / Socialite
           if (tournamentIds.length >= 3) earned.add('veteran');
+          if (tournamentIds.length >= 5) earned.add('socialite');
+          computeTier('veteran', tournamentIds.length, [3, 7, 15]);
+          badgeProgress['veteran'] = { current: tournamentIds.length, target: 3 };
+          badgeProgress['socialite'] = { current: tournamentIds.length, target: 5 };
 
-          // Sharpshooter: 75%+ win rate, min 4 matches
+          // Sharpshooter
           if (totalMatches >= 4 && winRate >= 75) earned.add('sharpshooter');
 
-          // First Blood: won at least one match
+          // First Blood
           if (wins >= 1) earned.add('first_blood');
 
-          // Iron Wall: undefeated in at least one tournament (min 2 matches in that tournament)
+          // Iron Wall + Perfect Season + Tenacious
           for (const tid of tournamentIds) {
             const playerSignup = signups.find(s => s.tournament_id === tid);
             if (!playerSignup) continue;
@@ -1207,23 +1370,36 @@
             const completedInT = tMatches.filter(m => m.winner_id);
             if (completedInT.length >= 2) {
               const lostAny = completedInT.some(m => m.winner_id !== playerSignup.id);
-              if (!lostAny) { earned.add('iron_wall'); break; }
+              const lossesInT = completedInT.filter(m => m.winner_id !== playerSignup.id).length;
+              if (!lostAny) earned.add('iron_wall');
+              // Perfect Season: won tournament + no losses
+              const td = tournamentDetails.find(t => t.id === tid);
+              if (td && td.placement === 'Champion') {
+                if (!lostAny) earned.add('perfect_season');
+                if (lossesInT >= 3) earned.add('tenacious');
+              }
             }
           }
 
-          // On Fire: 3+ consecutive wins (ordered by match id as proxy for time)
+          // On Fire / Streak Master: consecutive wins
           const sortedMatches = [...matches].filter(m => m.winner_id).sort((a, b) => a.id - b.id);
           let streak = 0;
+          let maxStreak = 0;
           for (const m of sortedMatches) {
             if (signupIds.includes(m.winner_id)) {
               streak++;
-              if (streak >= 3) { earned.add('on_fire'); break; }
+              if (streak > maxStreak) maxStreak = streak;
             } else {
               streak = 0;
             }
           }
+          if (maxStreak >= 3) earned.add('on_fire');
+          if (maxStreak >= 5) earned.add('streak_master');
+          computeTier('on_fire', maxStreak, [3, 5, 10]);
+          badgeProgress['on_fire'] = { current: maxStreak, target: 3 };
+          badgeProgress['streak_master'] = { current: maxStreak, target: 5 };
 
-          // Underdog: beat a player with higher ELO
+          // Underdog
           try {
             const playerElo = await db.getPlayerElo(playerName);
             if (playerElo) {
@@ -1244,25 +1420,119 @@
             }
           } catch (_) {}
 
+          // ELO-based badges
+          const peakForBadges = Math.max(playerCurrentElo, playerPeakElo);
+          if (peakForBadges >= 1100) earned.add('rising_star');
+          if (peakForBadges >= 1300) earned.add('elite');
+          badgeProgress['rising_star'] = { current: peakForBadges, target: 1100 };
+          badgeProgress['elite'] = { current: peakForBadges, target: 1300 };
+
+          // Bounty badges
+          if (bountyWinCount >= 5) earned.add('bounty_hunter');
+          if (bountyWinCount >= 15) earned.add('bounty_king');
+          computeTier('bounty_hunter', bountyWinCount, [5, 15, 30]);
+          badgeProgress['bounty_hunter'] = { current: bountyWinCount, target: 5 };
+          badgeProgress['bounty_king'] = { current: bountyWinCount, target: 15 };
+
+          // Economy badges
+          if (totalSpent >= 1000) earned.add('big_spender');
+          badgeProgress['big_spender'] = { current: totalSpent, target: 1000 };
+          if (inventoryCount >= 5) earned.add('collector');
+          badgeProgress['collector'] = { current: inventoryCount, target: 5 };
+
+          // -- Detect newly unlocked badges --
+          const storageKey = `dbl_badges_${playerName}`;
+          const previousBadges = JSON.parse(localStorage.getItem(storageKey) || '[]');
+          const previousSet = new Set(previousBadges);
+          const newlyUnlocked = [...earned].filter(id => !previousSet.has(id));
+          // Save current earned set
+          localStorage.setItem(storageKey, JSON.stringify([...earned]));
+
           // Render badges
           const badgesHtml = badgeDefs.map(b => {
             const isEarned = earned.has(b.id);
-            const cls = isEarned
-              ? `badge-card earned${b.gold ? ' tier-gold-badge' : ''}`
+            const isNew = newlyUnlocked.includes(b.id);
+            const tier = badgeTierLevel[b.id];
+            let cls = isEarned
+              ? `badge-card earned${b.gold ? ' tier-gold-badge' : ''}${isNew ? ' newly-unlocked' : ''}`
               : 'badge-card locked';
-            return `<div class="${cls}" title="${b.desc}">
+
+            // Tier dot
+            let tierDot = '';
+            if (isEarned && tier) {
+              tierDot = `<div class="badge-tier-dot tier-${tier}" title="${tier}"></div>`;
+            }
+
+            // Progress bar (only on locked progressive badges)
+            let progressHtml = '';
+            if (!isEarned && badgeProgress[b.id]) {
+              const p = badgeProgress[b.id];
+              const pct = Math.min(100, Math.round((p.current / p.target) * 100));
+              if (p.current > 0) {
+                progressHtml = `
+                  <div class="badge-progress"><div class="badge-progress-fill" style="width:${pct}%"></div></div>
+                  <div class="badge-progress-label">${p.current}/${p.target}</div>`;
+              }
+            }
+
+            return `<div class="${cls}" title="${b.desc}" data-badge-id="${b.id}">
+              ${tierDot}
               <div class="badge-icon">${b.icon}</div>
               <div class="badge-name">${b.name}</div>
               <div class="badge-desc">${b.desc}</div>
+              ${progressHtml}
             </div>`;
           }).join('');
 
           document.getElementById('achievements-section').innerHTML = `
             <div class="achievements-section">
-              <div class="achievements-title">Achievements</div>
+              <div class="achievements-title">Achievements <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:8px;">${earned.size}/${badgeDefs.length}</span></div>
               <div class="badges-grid">${badgesHtml}</div>
             </div>
           `;
+
+          // -- Show unlock celebration for new badges --
+          if (newlyUnlocked.length > 0) {
+            let unlockIndex = 0;
+            function showNextUnlock() {
+              if (unlockIndex >= newlyUnlocked.length) return;
+              const bId = newlyUnlocked[unlockIndex];
+              const bDef = badgeDefs.find(d => d.id === bId);
+              if (!bDef) { unlockIndex++; showNextUnlock(); return; }
+
+              const overlay = document.createElement('div');
+              overlay.className = 'badge-unlock-overlay';
+              overlay.innerHTML = `
+                <div class="badge-unlock-modal">
+                  <div class="unlock-label">Achievement Unlocked!</div>
+                  <div class="unlock-icon">${bDef.icon}</div>
+                  <div class="unlock-name">${bDef.name}</div>
+                  <div class="unlock-desc">${bDef.desc}</div>
+                </div>
+              `;
+              document.body.appendChild(overlay);
+              try { playSound('claim'); } catch (_) {}
+
+              overlay.addEventListener('click', () => {
+                overlay.remove();
+                unlockIndex++;
+                if (unlockIndex < newlyUnlocked.length) {
+                  setTimeout(showNextUnlock, 300);
+                }
+              });
+              // Auto-dismiss after 3s
+              setTimeout(() => {
+                if (overlay.parentNode) {
+                  overlay.remove();
+                  unlockIndex++;
+                  if (unlockIndex < newlyUnlocked.length) {
+                    setTimeout(showNextUnlock, 300);
+                  }
+                }
+              }, 3000);
+            }
+            setTimeout(showNextUnlock, 800);
+          }
         } catch (e) {
           console.error('Badges error:', e);
         }
@@ -1322,14 +1592,24 @@
 
           // Earned badges (reuse the earned Set from above)
           const badgeDefs = [
-            { id: 'champion',     icon: '🏆' },
-            { id: 'on_fire',      icon: '🔥' },
-            { id: 'veteran',      icon: '⚔️' },
-            { id: 'sharpshooter', icon: '🎯' },
-            { id: 'dynasty',      icon: '👑' },
-            { id: 'iron_wall',    icon: '🛡️' },
-            { id: 'first_blood',  icon: '🌟' },
-            { id: 'underdog',     icon: '💀' },
+            { id: 'first_blood',    icon: '🌟' },
+            { id: 'champion',       icon: '🏆' },
+            { id: 'dynasty',        icon: '👑' },
+            { id: 'on_fire',        icon: '🔥' },
+            { id: 'streak_master',  icon: '⚡' },
+            { id: 'veteran',        icon: '⚔️' },
+            { id: 'socialite',      icon: '🤝' },
+            { id: 'sharpshooter',   icon: '🎯' },
+            { id: 'iron_wall',      icon: '🛡️' },
+            { id: 'underdog',       icon: '💀' },
+            { id: 'rising_star',    icon: '⭐' },
+            { id: 'elite',          icon: '💎' },
+            { id: 'bounty_hunter',  icon: '💰' },
+            { id: 'bounty_king',    icon: '🤑' },
+            { id: 'big_spender',    icon: '🛒' },
+            { id: 'collector',      icon: '📦' },
+            { id: 'perfect_season', icon: '✨' },
+            { id: 'tenacious',      icon: '🔄' },
           ];
           const earnedBadgeIcons = badgeDefs.filter(b => earned.has(b.id)).map(b => b.icon);
 

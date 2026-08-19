@@ -279,6 +279,328 @@
       0%, 100% { box-shadow: 0 0 4px rgba(255, 215, 0, 0.4); }
       50% { box-shadow: 0 0 12px rgba(255, 215, 0, 0.8); }
     }
+
+    /* Countdown Timer */
+    .season-countdown {
+      text-align: center;
+      margin-bottom: 20px;
+      font-family: 'Exo 2', sans-serif;
+    }
+    .countdown-display {
+      display: inline-flex;
+      gap: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px 24px;
+    }
+    .countdown-unit {
+      text-align: center;
+    }
+    .countdown-unit .cd-val {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--cyan);
+      display: block;
+      line-height: 1;
+    }
+    .countdown-unit .cd-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .countdown-urgent .countdown-display {
+      border-color: var(--red);
+      animation: countdown-pulse 1.5s ease-in-out infinite;
+    }
+    .countdown-urgent .cd-val {
+      color: var(--red) !important;
+    }
+    @keyframes countdown-pulse {
+      0%, 100% { box-shadow: 0 0 8px rgba(255, 71, 87, 0.3); }
+      50% { box-shadow: 0 0 24px rgba(255, 71, 87, 0.7); }
+    }
+
+    /* Premium Pass */
+    .premium-upgrade-bar {
+      max-width: 900px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, rgba(255,215,64,0.08), rgba(255,107,0,0.08));
+      border: 1px solid var(--gold);
+      border-radius: var(--radius);
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .premium-upgrade-bar .premium-info {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+    }
+    .premium-upgrade-bar .premium-info strong {
+      color: var(--gold);
+      font-size: 15px;
+    }
+    .premium-upgrade-bar .premium-info p {
+      color: var(--muted);
+      margin: 2px 0 0;
+      font-size: 12px;
+    }
+    .btn-premium-upgrade {
+      background: linear-gradient(135deg, #ffd700, #ff6b00);
+      color: #000;
+      border: none;
+      padding: 10px 24px;
+      border-radius: var(--radius-sm);
+      font-weight: 800;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-premium-upgrade:hover { filter: brightness(1.15); transform: scale(1.03); }
+    .premium-active-badge {
+      color: var(--gold);
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .reward-card.premium-shimmer {
+      animation: gold-shimmer 2.5s ease-in-out infinite;
+    }
+    @keyframes gold-shimmer {
+      0%, 100% { box-shadow: 0 0 8px rgba(255,215,64,0.3); }
+      50% { box-shadow: 0 0 24px rgba(255,215,64,0.6), inset 0 0 12px rgba(255,215,64,0.1); }
+    }
+    .lb-premium-badge {
+      display: inline-block;
+      font-size: 8px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      background: var(--gold);
+      color: #000;
+      padding: 1px 5px;
+      border-radius: 999px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    /* Season Stats Panel */
+    .season-stats-panel {
+      max-width: 900px;
+      margin: 0 auto 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .stat-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-card .stat-value {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 24px;
+      color: var(--cyan);
+      display: block;
+    }
+    .stat-card .stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 4px;
+    }
+    .stat-card .stat-avg {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    /* Challenges */
+    .challenges-section {
+      max-width: 900px;
+      margin: 0 auto 30px;
+    }
+    .challenges-section h3 {
+      color: var(--cyan);
+      margin-bottom: 14px;
+      font-family: 'Chakra Petch', sans-serif;
+    }
+    .challenge-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .challenge-tab {
+      padding: 6px 16px;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .challenge-tab.active {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(0,229,255,0.08);
+    }
+    .challenge-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .challenge-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      transition: all 0.2s;
+    }
+    .challenge-card.completed {
+      border-color: var(--green);
+      opacity: 0.7;
+    }
+    .challenge-card .ch-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .challenge-card .ch-name {
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .challenge-card .ch-xp {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 12px;
+      color: var(--cyan);
+      white-space: nowrap;
+    }
+    .challenge-card .ch-desc {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .challenge-card .ch-progress-bar {
+      height: 6px;
+      background: var(--bg);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .challenge-card .ch-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+    .challenge-card .ch-progress-text {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+      text-align: right;
+    }
+    .challenge-card.completed .ch-progress-fill {
+      background: var(--green);
+    }
+
+    /* Season Archive */
+    .season-archive {
+      max-width: 900px;
+      margin: 30px auto;
+    }
+    .season-archive h3 {
+      color: var(--cyan);
+      margin-bottom: 14px;
+      font-family: 'Chakra Petch', sans-serif;
+    }
+    .archive-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 12px;
+    }
+    .archive-card .arc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .archive-card .arc-name {
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--gold);
+    }
+    .archive-card .arc-dates {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'Exo 2', sans-serif;
+    }
+    .archive-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .archive-stats .arc-stat {
+      text-align: center;
+    }
+    .archive-stats .arc-stat-val {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--cyan);
+    }
+    .archive-stats .arc-stat-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .archive-podium {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .archive-podium .podium-entry {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-family: 'Exo 2', sans-serif;
+    }
+    .podium-entry .podium-medal {
+      font-size: 18px;
+    }
+    .podium-entry .podium-name {
+      font-weight: 700;
+    }
+    .podium-entry .podium-xp {
+      color: var(--muted);
+      font-size: 11px;
+    }
   </style>
 </head>
 <body class="scanlines">
@@ -332,6 +654,20 @@
 
     <!-- Content (hidden until loaded) -->
     <div id="season-content" style="display:none;">
+      <!-- Countdown Timer -->
+      <div class="season-countdown" id="season-countdown" style="display:none;">
+        <div class="countdown-display" id="countdown-display"></div>
+      </div>
+
+      <!-- Premium Upgrade Bar -->
+      <div class="premium-upgrade-bar" id="premium-bar" style="display:none;">
+        <div class="premium-info">
+          <strong>Premium Season Pass</strong>
+          <p>Unlock exclusive gold-tier rewards and the Premium badge</p>
+        </div>
+        <button class="btn-premium-upgrade" id="btn-premium" onclick="togglePremium()">Upgrade to Premium</button>
+      </div>
+
       <!-- XP Bar -->
       <div class="xp-bar-wrapper">
         <div class="xp-bar-header">
@@ -350,6 +686,19 @@
       <!-- Reward Track -->
       <div class="reward-track-wrapper">
         <div class="reward-track" id="reward-track"></div>
+      </div>
+
+      <!-- Season Stats Panel -->
+      <div class="season-stats-panel" id="season-stats-panel"></div>
+
+      <!-- Challenges -->
+      <div class="challenges-section card" id="challenges-section">
+        <h3>Season Challenges</h3>
+        <div class="challenge-tabs">
+          <button class="challenge-tab active" onclick="showChallengeTab('daily', this)">Daily</button>
+          <button class="challenge-tab" onclick="showChallengeTab('weekly', this)">Weekly</button>
+        </div>
+        <div class="challenge-grid" id="challenge-grid"></div>
       </div>
 
       <!-- Leaderboard -->
@@ -375,6 +724,12 @@
     <div class="no-season" id="no-season" style="display:none;">
       <h2>No Active Season</h2>
       <p>Check back later for the next season pass!</p>
+    </div>
+
+    <!-- Season Archive -->
+    <div class="season-archive" id="season-archive" style="display:none;">
+      <h3>Past Seasons</h3>
+      <div id="archive-list"></div>
     </div>
   </div>
 
@@ -421,9 +776,297 @@
     let seasonRewards = [];
     let myProgress = null;
     let myUsername = null;
+    let countdownInterval = null;
+    let currentChallengeTab = 'daily';
 
+    /* ── Challenge Definitions (hardcoded) ── */
+    const CHALLENGE_DEFS = {
+      daily: [
+        { id: 'daily_bounty_2', name: 'Bounty Hunter', desc: 'Win 2 bounty matches', xp: 50, goal: 2 },
+        { id: 'daily_tournament_1', name: 'Tournament Fighter', desc: 'Complete a tournament match', xp: 30, goal: 1 },
+        { id: 'daily_visit_5', name: 'Explorer', desc: 'Visit 5 different pages', xp: 10, goal: 5 },
+        { id: 'daily_login', name: 'Daily Check-In', desc: 'Log into the season pass', xp: 5, goal: 1 },
+      ],
+      weekly: [
+        { id: 'weekly_bounty_10', name: 'Bounty Veteran', desc: 'Win 10 bounty matches this week', xp: 200, goal: 10 },
+        { id: 'weekly_tournament_5', name: 'Arena Regular', desc: 'Complete 5 tournament matches', xp: 150, goal: 5 },
+        { id: 'weekly_claim_3', name: 'Reward Collector', desc: 'Claim 3 season rewards', xp: 100, goal: 3 },
+        { id: 'weekly_xp_500', name: 'XP Grinder', desc: 'Earn 500 total XP this week', xp: 250, goal: 500 },
+      ]
+    };
+
+    function getChallengeKey(challengeId) {
+      if (!activeSeason || !myUsername) return null;
+      return `season_challenge_${activeSeason.id}_${myUsername}_${challengeId}`;
+    }
+
+    function getDailyReset() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    }
+
+    function getWeeklyReset() {
+      const now = new Date();
+      const day = now.getDay();
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(now.setDate(diff));
+      return `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,'0')}-${String(monday.getDate()).padStart(2,'0')}`;
+    }
+
+    function getChallengeProgress(challenge, type) {
+      const key = getChallengeKey(challenge.id);
+      if (!key) return { progress: 0, completed: false };
+      const stored = localStorage.getItem(key);
+      if (!stored) return { progress: 0, completed: false };
+      try {
+        const data = JSON.parse(stored);
+        const resetKey = type === 'daily' ? getDailyReset() : getWeeklyReset();
+        if (data.period !== resetKey) return { progress: 0, completed: false };
+        return { progress: data.progress || 0, completed: data.completed || false };
+      } catch { return { progress: 0, completed: false }; }
+    }
+
+    function setChallengeProgress(challenge, type, progress, completed) {
+      const key = getChallengeKey(challenge.id);
+      if (!key) return;
+      const resetKey = type === 'daily' ? getDailyReset() : getWeeklyReset();
+      localStorage.setItem(key, JSON.stringify({ period: resetKey, progress, completed }));
+    }
+
+    /* ── Premium Pass ── */
+    function isPremium() {
+      if (!activeSeason || !myUsername) return false;
+      return localStorage.getItem(`premium_pass_${activeSeason.id}_${myUsername}`) === 'true';
+    }
+
+    function togglePremium() {
+      if (!activeSeason || !myUsername) return;
+      const key = `premium_pass_${activeSeason.id}_${myUsername}`;
+      if (isPremium()) {
+        localStorage.removeItem(key);
+        NotificationSystem.show('Premium Pass deactivated', 'info');
+      } else {
+        localStorage.setItem(key, 'true');
+        NotificationSystem.show('Premium Pass activated! Gold rewards unlocked', 'ko');
+        try { playSound('claim'); } catch(e) {}
+      }
+      renderPremiumBar();
+      renderRewardTrack();
+      loadSeasonLeaderboard();
+    }
+
+    function renderPremiumBar() {
+      const bar = document.getElementById('premium-bar');
+      bar.style.display = 'flex';
+      const btn = document.getElementById('btn-premium');
+      if (isPremium()) {
+        btn.outerHTML = '<span class="premium-active-badge" id="btn-premium" onclick="togglePremium()" style="cursor:pointer;">👑 PREMIUM ACTIVE <span style="font-size:10px;color:var(--muted);font-weight:400;">(click to deactivate)</span></span>';
+      } else {
+        const existing = document.getElementById('btn-premium');
+        if (existing.tagName !== 'BUTTON') {
+          existing.outerHTML = '<button class="btn-premium-upgrade" id="btn-premium" onclick="togglePremium()">Upgrade to Premium</button>';
+        }
+      }
+    }
+
+    /* ── Countdown Timer ── */
+    function startCountdown() {
+      if (!activeSeason || !activeSeason.ends_at) return;
+      const container = document.getElementById('season-countdown');
+      container.style.display = 'block';
+
+      function update() {
+        const end = new Date(activeSeason.ends_at).getTime();
+        const now = Date.now();
+        const diff = end - now;
+        if (diff <= 0) {
+          document.getElementById('countdown-display').innerHTML = '<span style="color:var(--red);font-weight:700;">Season has ended!</span>';
+          clearInterval(countdownInterval);
+          return;
+        }
+        const days = Math.floor(diff / (1000*60*60*24));
+        const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+        const mins = Math.floor((diff % (1000*60*60)) / (1000*60));
+        const secs = Math.floor((diff % (1000*60)) / 1000);
+
+        document.getElementById('countdown-display').innerHTML = `
+          <div class="countdown-unit"><span class="cd-val">${days}</span><span class="cd-label">Days</span></div>
+          <div class="countdown-unit"><span class="cd-val">${String(hours).padStart(2,'0')}</span><span class="cd-label">Hours</span></div>
+          <div class="countdown-unit"><span class="cd-val">${String(mins).padStart(2,'0')}</span><span class="cd-label">Min</span></div>
+          <div class="countdown-unit"><span class="cd-val">${String(secs).padStart(2,'0')}</span><span class="cd-label">Sec</span></div>
+        `;
+
+        if (days < 3) {
+          container.classList.add('countdown-urgent');
+        } else {
+          container.classList.remove('countdown-urgent');
+        }
+      }
+      update();
+      countdownInterval = setInterval(update, 1000);
+    }
+
+    /* ── Season Stats Panel ── */
+    async function renderSeasonStats() {
+      const panel = document.getElementById('season-stats-panel');
+      const xp = myProgress ? myProgress.xp : 0;
+      const tier = getCurrentTier(xp);
+      const started = new Date(activeSeason.started_at);
+      const daysSinceStart = Math.floor((Date.now() - started.getTime()) / (1000*60*60*24)) + 1;
+
+      // Get leaderboard for averages
+      let avgXP = 0, avgTier = 0, totalPlayers = 0;
+      try {
+        const lb = await db.getSeasonLeaderboard(activeSeason.id);
+        totalPlayers = lb.length;
+        if (totalPlayers > 0) {
+          const totalXP = lb.reduce((s, p) => s + (p.xp || 0), 0);
+          avgXP = Math.round(totalXP / totalPlayers);
+          avgTier = Math.round(lb.reduce((s, p) => s + getCurrentTier(p.xp || 0), 0) / totalPlayers * 10) / 10;
+        }
+      } catch(e) { console.error(e); }
+
+      const matchesPlayed = myProgress?.matches_played || 0;
+      const bountyWins = myProgress?.bounty_wins || 0;
+
+      panel.innerHTML = `
+        <div class="stat-card">
+          <span class="stat-value">${xp}</span>
+          <span class="stat-label">Total XP</span>
+          <div class="stat-avg">Avg: ${avgXP} XP</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">${tier}</span>
+          <span class="stat-label">Current Tier</span>
+          <div class="stat-avg">Avg: ${avgTier}</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">${matchesPlayed}</span>
+          <span class="stat-label">Matches Played</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">${bountyWins}</span>
+          <span class="stat-label">Bounty Wins</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">${daysSinceStart}</span>
+          <span class="stat-label">Days Active</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">${totalPlayers}</span>
+          <span class="stat-label">Participants</span>
+        </div>
+      `;
+    }
+
+    /* ── Challenges ── */
+    function showChallengeTab(tab, btn) {
+      currentChallengeTab = tab;
+      document.querySelectorAll('.challenge-tab').forEach(t => t.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderChallenges();
+    }
+
+    function renderChallenges() {
+      const grid = document.getElementById('challenge-grid');
+      const defs = CHALLENGE_DEFS[currentChallengeTab] || [];
+
+      // Auto-complete the daily login challenge
+      if (currentChallengeTab === 'daily') {
+        const loginChallenge = defs.find(c => c.id === 'daily_login');
+        if (loginChallenge) {
+          const prog = getChallengeProgress(loginChallenge, 'daily');
+          if (!prog.completed) {
+            setChallengeProgress(loginChallenge, 'daily', 1, true);
+          }
+        }
+      }
+
+      grid.innerHTML = defs.map(ch => {
+        const { progress, completed } = getChallengeProgress(ch, currentChallengeTab);
+        const pct = Math.min((progress / ch.goal) * 100, 100);
+        return `
+          <div class="challenge-card${completed ? ' completed' : ''}">
+            <div class="ch-header">
+              <span class="ch-name">${completed ? '✅ ' : ''}${ch.name}</span>
+              <span class="ch-xp">+${ch.xp} XP</span>
+            </div>
+            <div class="ch-desc">${ch.desc}</div>
+            <div class="ch-progress-bar">
+              <div class="ch-progress-fill" style="width:${pct}%"></div>
+            </div>
+            <div class="ch-progress-text">${progress} / ${ch.goal}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ── Season Archive ── */
+    async function loadSeasonArchive() {
+      const container = document.getElementById('season-archive');
+      const list = document.getElementById('archive-list');
+      try {
+        const { data, error } = await supabaseClient
+          .from('seasons')
+          .select('*')
+          .eq('status', 'completed')
+          .order('ended_at', { ascending: false })
+          .limit(10);
+        if (error || !data || data.length === 0) return;
+
+        container.style.display = 'block';
+        const medals = ['🥇', '🥈', '🥉'];
+
+        let archiveHtml = '';
+        for (const season of data) {
+          const start = new Date(season.started_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+          const end = season.ended_at ? new Date(season.ended_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '?';
+
+          // Get top 3 and stats
+          let top3 = [], totalParticipants = 0, totalXP = 0;
+          try {
+            const { data: lb } = await supabaseClient
+              .from('season_progress')
+              .select('discord_username, xp')
+              .eq('season_id', season.id)
+              .order('xp', { ascending: false })
+              .limit(50);
+            if (lb) {
+              totalParticipants = lb.length;
+              totalXP = lb.reduce((s, p) => s + (p.xp || 0), 0);
+              top3 = lb.slice(0, 3);
+            }
+          } catch(e) {}
+
+          archiveHtml += `
+            <div class="archive-card">
+              <div class="arc-header">
+                <span class="arc-name">${season.name || 'Season'}</span>
+                <span class="arc-dates">${start} — ${end}</span>
+              </div>
+              <div class="archive-stats">
+                <div class="arc-stat"><div class="arc-stat-val">${totalParticipants}</div><div class="arc-stat-label">Participants</div></div>
+                <div class="arc-stat"><div class="arc-stat-val">${totalXP.toLocaleString()}</div><div class="arc-stat-label">Total XP</div></div>
+                <div class="arc-stat"><div class="arc-stat-val">${season.total_tiers || 20}</div><div class="arc-stat-label">Tiers</div></div>
+              </div>
+              ${top3.length > 0 ? `<div class="archive-podium">${top3.map((p, i) => `
+                <div class="podium-entry">
+                  <span class="podium-medal">${medals[i]}</span>
+                  <span class="podium-name">${p.discord_username}</span>
+                  <span class="podium-xp">${p.xp} XP</span>
+                </div>
+              `).join('')}</div>` : ''}
+            </div>
+          `;
+        }
+        list.innerHTML = archiveHtml;
+      } catch (e) {
+        console.error('Archive error:', e);
+      }
+    }
+
+    /* ── Init ── */
     document.addEventListener('DOMContentLoaded', async () => {
-      // Restore saved username
       const saved = sessionStorage.getItem('season_username');
       if (saved) {
         document.getElementById('season-username').value = saved;
@@ -438,6 +1081,7 @@
       if (!activeSeason) {
         document.getElementById('no-season').style.display = 'block';
         document.getElementById('season-login').style.display = 'none';
+        loadSeasonArchive();
         return;
       }
 
@@ -450,7 +1094,7 @@
       // Load rewards
       seasonRewards = await db.getSeasonRewards(activeSeason.id);
 
-      // Auto-login from Discord auth or saved session
+      // Auto-login
       setTimeout(async () => {
         if (typeof AUTH !== 'undefined' && AUTH.isLoggedIn()) {
           const name = AUTH.getDiscordUsername();
@@ -485,9 +1129,14 @@
       document.getElementById('season-login').style.display = 'none';
       document.getElementById('season-content').style.display = 'block';
 
+      startCountdown();
+      renderPremiumBar();
       renderXPBar();
       renderRewardTrack();
+      renderSeasonStats();
+      renderChallenges();
       await loadSeasonLeaderboard();
+      loadSeasonArchive();
     }
 
     function renderXPBar() {
@@ -511,6 +1160,7 @@
       const xp = myProgress ? myProgress.xp : 0;
       const claimed = myProgress ? (myProgress.claimed_tiers || []) : [];
       const currentTier = getCurrentTier(xp);
+      const hasPremium = isPremium();
 
       let html = '';
       for (let t = 1; t <= 20; t++) {
@@ -529,13 +1179,16 @@
         if (isCurrent) classes += ' current';
         if (unlocked && !isClaimed) classes += trackType === 'premium' ? ' unlocked-premium' : ' unlocked-free';
         if (!unlocked && !isCurrent) classes += ' locked';
+        if (trackType === 'premium' && hasPremium && !isClaimed) classes += ' premium-shimmer';
 
         let btnHtml = '';
         if (reward && unlocked && !isClaimed) {
           if (trackType === 'free') {
             btnHtml = `<button class="btn-claim free" onclick="claimReward(${t})">Claim</button>`;
+          } else if (hasPremium) {
+            btnHtml = `<button class="btn-claim premium" onclick="claimReward(${t})">Claim</button>`;
           } else {
-            btnHtml = `<button class="btn-claim premium" onclick="claimReward(${t})">${cost} pts</button>`;
+            btnHtml = `<button class="btn-claim premium" onclick="claimReward(${t})" style="opacity:0.5;" title="Premium Pass required">${cost} pts</button>`;
           }
         }
 
@@ -554,7 +1207,6 @@
       }
       track.innerHTML = html;
 
-      // Scroll to current tier
       const currentCard = track.querySelector('.reward-card.current') || track.querySelector('.reward-card.unlocked-free:last-of-type');
       if (currentCard) {
         setTimeout(() => currentCard.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }), 300);
@@ -582,11 +1234,22 @@
           tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);text-align:center;">No players yet</td></tr>';
           return;
         }
+
+        // Check which players have premium (from localStorage scan)
+        const premiumUsers = new Set();
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith(`premium_pass_${activeSeason.id}_`) && localStorage.getItem(k) === 'true') {
+            premiumUsers.add(k.replace(`premium_pass_${activeSeason.id}_`, ''));
+          }
+        }
+
         tbody.innerHTML = data.map((p, i) => {
           const tier = getCurrentTier(p.xp);
+          const premBadge = premiumUsers.has(p.discord_username) ? '<span class="lb-premium-badge">PRO</span>' : '';
           return `<tr>
             <td style="font-family:'Exo 2',sans-serif;font-weight:700;">${i + 1}</td>
-            <td><strong>${p.discord_username}</strong></td>
+            <td><strong>${p.discord_username}</strong>${premBadge}</td>
             <td style="color:var(--cyan);font-family:'Exo 2',sans-serif;font-weight:700;">${p.xp}</td>
             <td style="color:var(--gold);font-family:'Exo 2',sans-serif;font-weight:700;">${tier}</td>
           </tr>`;

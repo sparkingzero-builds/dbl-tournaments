@@ -167,9 +167,18 @@
       50% { transform: translateY(-2px); }
     }
 
-    @media(max-width:500px){
-      .shoutbox-panel{width:calc(100vw - 20px);right:10px;bottom:60px;}
-      .shoutbox-toggle{right:10px;bottom:10px;padding:8px 14px;font-size:.8rem;}
+    @media(max-width:768px){
+      .shoutbox-panel{width:calc(100vw - 20px);right:10px;bottom:60px;max-height:380px;}
+      .shoutbox-toggle{right:10px;bottom:10px;padding:10px 16px;font-size:.8rem;min-height:44px;}
+      .shoutbox-input-area input{min-height:44px;font-size:16px;}
+      .shoutbox-input-area button{min-height:44px;}
+      .shoutbox-username input{min-height:44px;font-size:16px;}
+      .shoutbox-username button{min-height:44px;}
+      .hype-btn{min-width:44px;min-height:44px;font-size:1.2rem;}
+    }
+    @media(max-width:480px){
+      .shoutbox-panel{width:calc(100vw - 16px);right:8px;bottom:56px;}
+      .shoutbox-toggle{right:8px;bottom:8px;}
     }
   </style>
 </head>

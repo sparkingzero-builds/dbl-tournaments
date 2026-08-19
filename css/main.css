@@ -752,11 +752,28 @@ textarea:focus {
   }
 
   .flex.gap-1 { gap: 6px; flex-wrap: wrap; }
-  .flex.gap-2 { gap: 10px; }
+  .flex.gap-2 { gap: 10px; flex-wrap: wrap; }
 
   .status {
     font-size: 10px;
     padding: 4px 10px;
+  }
+
+  /* Table scroll wrappers */
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Stat grids */
+  .stats-row,
+  .stat-grid {
+    flex-wrap: wrap;
+  }
+
+  /* Ensure no horizontal body scroll */
+  body {
+    overflow-x: hidden;
   }
 }
 
