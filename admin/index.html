@@ -3450,7 +3450,7 @@
         } else {
           challEmpty.classList.add('hidden');
           challTbody.innerHTML = challenges.map(c => {
-            const statusColor = { completed: 'var(--green)', pending: 'var(--gold)', accepted: 'var(--cyan)', expired: 'var(--red)', cancelled: 'var(--muted)' };
+            const statusColor = { completed: 'var(--green)', pending: 'var(--gold)', accepted: 'var(--cyan)', expired: 'var(--red)', declined: 'var(--muted)' };
             return `
               <tr>
                 <td><strong>${c.challenger}</strong></td>
@@ -3532,7 +3532,7 @@
       if (!confirm('Cancel this challenge?')) return;
       try {
         const { error } = await supabaseClient.from('bounty_challenges')
-          .update({ status: 'cancelled' })
+          .update({ status: 'declined' })
           .eq('id', id);
         if (error) throw error;
         AdminLog.log('bounty', `Cancelled challenge #${id.slice(0,8)}`);
@@ -3561,7 +3561,7 @@
     async function cancelDispute(id) {
       try {
         const { error } = await supabaseClient.from('bounty_challenges')
-          .update({ status: 'cancelled' })
+          .update({ status: 'declined' })
           .eq('id', id);
         if (error) throw error;
         AdminLog.log('bounty', `Cancelled dispute #${id.slice(0,8)}`);
