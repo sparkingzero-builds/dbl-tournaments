@@ -613,7 +613,18 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', loadBracket);
+    document.addEventListener('DOMContentLoaded', () => {
+      loadBracket();
+      setTimeout(() => {
+        if (typeof AUTH !== 'undefined' && AUTH.isLoggedIn()) {
+          const name = AUTH.getDiscordUsername() || '';
+          ['chat-username-input', 'report-username'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el && !el.value) el.value = name;
+          });
+        }
+      }, 300);
+    });
 
     // --- Chat ---
     let chatChannel = null;

@@ -668,7 +668,17 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', loadTournament);
+    document.addEventListener('DOMContentLoaded', () => {
+      loadTournament();
+      setTimeout(() => {
+        if (typeof AUTH !== 'undefined' && AUTH.isLoggedIn()) {
+          const discordInput = document.getElementById('discord-input');
+          if (discordInput && !discordInput.value) {
+            discordInput.value = AUTH.getDiscordUsername() || '';
+          }
+        }
+      }, 300);
+    });
 
     function initCountdown(container, deadline, label) {
       if (!container || !deadline) return;

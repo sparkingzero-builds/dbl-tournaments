@@ -448,10 +448,20 @@
       // Load rewards
       seasonRewards = await db.getSeasonRewards(activeSeason.id);
 
-      // Auto-login if saved
-      if (saved) {
-        await loginSeason();
-      }
+      // Auto-login from Discord auth or saved session
+      setTimeout(async () => {
+        if (typeof AUTH !== 'undefined' && AUTH.isLoggedIn()) {
+          const name = AUTH.getDiscordUsername();
+          if (name) {
+            document.getElementById('season-username').value = name;
+            await loginSeason();
+            return;
+          }
+        }
+        if (saved) {
+          await loginSeason();
+        }
+      }, 250);
     });
 
     async function loginSeason() {
