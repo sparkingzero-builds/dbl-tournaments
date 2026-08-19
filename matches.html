@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Match History — DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    .matches-header {
+      text-align: center;
+      padding: 40px 0 30px;
+    }
+
+    .matches-title {
+      font-size: clamp(24px, 4vw, 36px);
+      color: var(--cyan);
+      text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+      margin-bottom: 8px;
+    }
+
+    .matches-subtitle {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* Stats summary */
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px 24px;
+      text-align: center;
+      min-width: 140px;
+    }
+
+    .stat-value {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 900;
+      font-size: 24px;
+      color: var(--cyan);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Filters */
+    .filters-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 28px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .filters-bar input,
+    .filters-bar select {
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 9px 14px;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 13px;
+      min-width: 180px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .filters-bar input:focus,
+    .filters-bar select:focus {
+      border-color: var(--cyan);
+    }
+
+    .filters-bar input::placeholder {
+      color: var(--muted);
+    }
+
+    /* Match list */
+    .match-list {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .match-card {
+      display: grid;
+      grid-template-columns: 6px 1fr auto;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+
+    .match-card:hover {
+      border-color: var(--cyan);
+    }
+
+    .match-indicator {
+      width: 6px;
+    }
+
+    .match-indicator.win {
+      background: var(--green);
+    }
+
+    .match-indicator.loss {
+      background: var(--red);
+    }
+
+    .match-indicator.neutral {
+      background: var(--line);
+    }
+
+    .match-body {
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .match-players {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .match-players a {
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .match-players a:hover {
+      color: var(--cyan);
+    }
+
+    .match-players a.winner {
+      color: var(--green);
+    }
+
+    .match-vs {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .match-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .match-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .match-badge {
+      padding: 6px 14px;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      align-self: center;
+      margin-right: 14px;
+      border-radius: var(--radius-sm);
+      min-width: 40px;
+      text-align: center;
+    }
+
+    .match-badge.win {
+      background: rgba(46, 213, 115, 0.15);
+      color: var(--green);
+    }
+
+    .match-badge.loss {
+      background: rgba(255, 71, 87, 0.15);
+      color: var(--red);
+    }
+
+    .match-badge.neutral {
+      background: rgba(144, 136, 184, 0.1);
+      color: var(--muted);
+    }
+
+    .load-more-row {
+      text-align: center;
+      margin: 24px 0 40px;
+    }
+
+    .load-more-btn {
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: var(--cyan);
+      padding: 12px 32px;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .load-more-btn:hover {
+      border-color: var(--cyan);
+      background: var(--panel);
+    }
+
+    .load-more-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    @media (max-width: 600px) {
+      .match-card {
+        grid-template-columns: 5px 1fr;
+      }
+      .match-badge {
+        display: none;
+      }
+      .filters-bar input,
+      .filters-bar select {
+        min-width: 140px;
+        flex: 1;
+      }
+      .stat-card {
+        min-width: 100px;
+        padding: 12px 16px;
+      }
+      .stat-value { font-size: 20px; }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">&#9776;</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+        <li><a href="bounty.html">Bounty</a></li>
+        <li class="nav-dropdown">
+          <a href="#">More &#9662;</a>
+          <div class="nav-dropdown-menu">
+            <div class="dropdown-label">Data</div>
+            <a href="characters.html">Characters</a>
+            <a href="tierlist.html">Tier List</a>
+            <a href="analytics.html">Ban Analytics</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Community</div>
+            <a href="compare.html">Compare</a>
+            <a href="shop.html">Shop</a>
+            <a href="season.html">Season</a>
+            <a href="feed.html">Live Feed</a>
+            <a href="matches.html" class="active">Matches</a>
+          </div>
+        </li>
+
+        <div id="auth-nav"></div>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="particles-bg" id="particles"></div>
+
+  <main class="page container page-enter">
+    <div class="matches-header">
+      <h1 class="matches-title">Match History</h1>
+      <p class="matches-subtitle">Every battle across all tournaments</p>
+    </div>
+
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-total">--</div>
+        <div class="stat-label">Total Matches</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-players">--</div>
+        <div class="stat-label">Unique Players</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-active">--</div>
+        <div class="stat-label">Most Active</div>
+      </div>
+    </div>
+
+    <div class="filters-bar">
+      <input type="search" id="filter-player" placeholder="Search player..." />
+      <select id="filter-tournament">
+        <option value="">All Tournaments</option>
+      </select>
+      <select id="filter-result">
+        <option value="">All Results</option>
+        <option value="win">Wins Only</option>
+        <option value="loss">Losses Only</option>
+      </select>
+      <select id="filter-sort">
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+      </select>
+    </div>
+
+    <div class="match-list" id="match-list">
+      <div class="loader"><div class="loader-spinner"></div></div>
+    </div>
+
+    <div class="load-more-row" id="load-more-row" style="display:none;">
+      <button class="load-more-btn" id="load-more-btn" onclick="loadMore()">Load More</button>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/auth.js"></script>
+    <script src="js/activity-alerts.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/particles.js"></script>
+  <script>
+    initParticles(document.getElementById('particles'));
+
+    const PAGE_SIZE = 50;
+    let allMatches = [];
+    let filteredMatches = [];
+    let displayedCount = 0;
+    let tournaments = {};
+    let playerMap = {};
+    let searchPlayer = '';
+
+    async function init() {
+      try {
+        // Load tournaments for filter dropdown and name lookup
+        const { data: tourneys } = await supabaseClient
+          .from('tournaments')
+          .select('id, name')
+          .order('created_at', { ascending: false });
+
+        const select = document.getElementById('filter-tournament');
+        (tourneys || []).forEach(t => {
+          tournaments[t.id] = t.name;
+          const opt = document.createElement('option');
+          opt.value = t.id;
+          opt.textContent = t.name;
+          select.appendChild(opt);
+        });
+
+        // Load all matches with player info via foreign keys
+        const { data: matches } = await supabaseClient
+          .from('matches')
+          .select('id, player1_id, player2_id, winner_id, round, tournament_id, created_at, player1:signups!matches_player1_id_fkey(id, discord_username), player2:signups!matches_player2_id_fkey(id, discord_username)')
+          .not('player1_id', 'is', null)
+          .not('player2_id', 'is', null)
+          .order('created_at', { ascending: false });
+
+        allMatches = matches || [];
+
+        // Build stats
+        const uniquePlayers = new Set();
+        const playerCounts = {};
+        allMatches.forEach(m => {
+          const p1 = m.player1?.discord_username;
+          const p2 = m.player2?.discord_username;
+          if (p1) { uniquePlayers.add(p1); playerCounts[p1] = (playerCounts[p1] || 0) + 1; }
+          if (p2) { uniquePlayers.add(p2); playerCounts[p2] = (playerCounts[p2] || 0) + 1; }
+        });
+
+        document.getElementById('stat-total').textContent = allMatches.length;
+        document.getElementById('stat-players').textContent = uniquePlayers.size;
+
+        const mostActive = Object.entries(playerCounts).sort((a, b) => b[1] - a[1])[0];
+        document.getElementById('stat-active').textContent = mostActive ? mostActive[0] : '--';
+
+        applyFilters();
+      } catch (e) {
+        console.error('Match history load error:', e);
+        document.getElementById('match-list').innerHTML = '<div class="empty-state"><p>Error loading match history.</p></div>';
+      }
+    }
+
+    function applyFilters() {
+      const playerQuery = document.getElementById('filter-player').value.toLowerCase().trim();
+      const tournamentId = document.getElementById('filter-tournament').value;
+      const resultFilter = document.getElementById('filter-result').value;
+      const sortOrder = document.getElementById('filter-sort').value;
+      searchPlayer = playerQuery;
+
+      filteredMatches = allMatches.filter(m => {
+        const p1 = (m.player1?.discord_username || '').toLowerCase();
+        const p2 = (m.player2?.discord_username || '').toLowerCase();
+
+        // Player search
+        if (playerQuery && !p1.includes(playerQuery) && !p2.includes(playerQuery)) return false;
+
+        // Tournament filter
+        if (tournamentId && m.tournament_id !== tournamentId) return false;
+
+        // Result filter — relative to searched player
+        if (resultFilter && playerQuery) {
+          const isP1 = p1.includes(playerQuery);
+          const matchedPlayerId = isP1 ? m.player1?.id : m.player2?.id;
+          const isWin = m.winner_id === matchedPlayerId;
+          if (resultFilter === 'win' && !isWin) return false;
+          if (resultFilter === 'loss' && isWin) return false;
+        }
+
+        return true;
+      });
+
+      // Sort
+      filteredMatches.sort((a, b) => {
+        const da = new Date(a.created_at);
+        const db = new Date(b.created_at);
+        return sortOrder === 'oldest' ? da - db : db - da;
+      });
+
+      displayedCount = 0;
+      document.getElementById('match-list').innerHTML = '';
+      loadMore();
+    }
+
+    function loadMore() {
+      const container = document.getElementById('match-list');
+      const end = Math.min(displayedCount + PAGE_SIZE, filteredMatches.length);
+
+      if (displayedCount === 0 && filteredMatches.length === 0) {
+        container.innerHTML = '<div class="empty-state"><h3>No Matches Found</h3><p>Try adjusting your filters.</p></div>';
+        document.getElementById('load-more-row').style.display = 'none';
+        return;
+      }
+
+      let html = '';
+      for (let i = displayedCount; i < end; i++) {
+        const m = filteredMatches[i];
+        const p1Name = m.player1?.discord_username || 'Unknown';
+        const p2Name = m.player2?.discord_username || 'Unknown';
+        const p1Url = 'profile.html?player=' + encodeURIComponent(p1Name);
+        const p2Url = 'profile.html?player=' + encodeURIComponent(p2Name);
+        const tourneyName = tournaments[m.tournament_id] || 'Unknown';
+        const date = m.created_at ? new Date(m.created_at).toLocaleDateString() : '';
+
+        const p1IsWinner = m.winner_id === m.player1?.id;
+        const p2IsWinner = m.winner_id === m.player2?.id;
+
+        // Determine perspective for the left indicator
+        let indicatorClass = 'neutral';
+        let badgeClass = 'neutral';
+        let badgeText = '--';
+
+        if (searchPlayer) {
+          const p1Lower = p1Name.toLowerCase();
+          const isP1 = p1Lower.includes(searchPlayer);
+          const matchedIsWinner = isP1 ? p1IsWinner : p2IsWinner;
+          if (m.winner_id) {
+            indicatorClass = matchedIsWinner ? 'win' : 'loss';
+            badgeClass = matchedIsWinner ? 'win' : 'loss';
+            badgeText = matchedIsWinner ? 'W' : 'L';
+          }
+        } else if (m.winner_id) {
+          indicatorClass = 'win';
+          badgeClass = 'win';
+          badgeText = 'W';
+        }
+
+        html += `
+          <div class="match-card stagger">
+            <div class="match-indicator ${indicatorClass}"></div>
+            <div class="match-body">
+              <div class="match-players">
+                <a href="${p1Url}" class="${p1IsWinner ? 'winner' : ''}">${p1Name}</a>
+                <span class="match-vs">vs</span>
+                <a href="${p2Url}" class="${p2IsWinner ? 'winner' : ''}">${p2Name}</a>
+              </div>
+              <div class="match-meta">
+                <span>${tourneyName}</span>
+                <span>Round ${m.round || '?'}</span>
+                <span>${date}</span>
+              </div>
+            </div>
+            <div class="match-badge ${badgeClass}">${badgeText}</div>
+          </div>
+        `;
+      }
+
+      container.insertAdjacentHTML('beforeend', html);
+      displayedCount = end;
+
+      const loadMoreRow = document.getElementById('load-more-row');
+      if (displayedCount < filteredMatches.length) {
+        loadMoreRow.style.display = '';
+        document.getElementById('load-more-btn').textContent = `Load More (${filteredMatches.length - displayedCount} remaining)`;
+      } else {
+        loadMoreRow.style.display = 'none';
+      }
+    }
+
+    // Filter event listeners
+    document.getElementById('filter-player').addEventListener('input', applyFilters);
+    document.getElementById('filter-tournament').addEventListener('change', applyFilters);
+    document.getElementById('filter-result').addEventListener('change', applyFilters);
+    document.getElementById('filter-sort').addEventListener('change', applyFilters);
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+  <script src="js/toolbar.js"></script>
+</body>
+</html>

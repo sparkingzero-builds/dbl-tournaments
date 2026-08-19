@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -9,314 +9,135 @@
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/themes.css" />
   <style>
-    .rankings-header {
-      text-align: center;
-      padding: 40px 0 30px;
-    }
-
+    .rankings-header { text-align: center; padding: 40px 0 20px; }
     .rankings-title {
       font-size: clamp(24px, 4vw, 36px);
       color: var(--cyan);
       text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
       margin-bottom: 8px;
     }
-
-    .rankings-subtitle {
+    .rankings-subtitle { color: var(--muted); font-size: 14px; }
+    .player-count {
+      display: inline-block;
+      margin-top: 10px;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
       color: var(--muted);
-      font-size: 14px;
-    }
-
-    .view-tabs {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-    .view-tab {
       background: var(--bg-2);
       border: 1px solid var(--line);
       border-radius: 999px;
-      padding: 7px 20px;
-      font-size: 13px;
-      color: var(--muted);
-      cursor: pointer;
-      font-weight: 700;
-      transition: all 0.15s;
+      padding: 4px 14px;
+    }
+    .player-count strong { color: var(--cyan); }
+
+    /* Tabs */
+    .view-tabs {
+      display: flex; justify-content: center; gap: 8px;
+      margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .view-tab {
+      background: var(--bg-2); border: 1px solid var(--line);
+      border-radius: 999px; padding: 7px 18px; font-size: 13px;
+      color: var(--muted); cursor: pointer; font-weight: 700;
+      transition: all 0.15s; font-family: 'Chakra Petch', sans-serif;
     }
     .view-tab:hover { color: var(--text); border-color: var(--muted); }
     .view-tab.active { background: var(--cyan); border-color: var(--cyan); color: #000; }
 
-    .season-select-row {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-    .season-select-row select {
-      min-width: 200px;
-    }
-
-    .hall-of-fame {
-      max-width: 800px;
-      margin: 0 auto 32px;
-    }
-    .hof-title {
-      font-size: 18px;
-      color: var(--gold);
-      text-align: center;
-      margin-bottom: 16px;
-    }
-    .hof-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 12px;
-    }
-    .hof-card {
-      background: var(--panel);
-      border: 1px solid var(--gold);
-      border-radius: var(--radius);
-      padding: 18px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .hof-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--gold), #ff6b00);
-    }
-    .hof-season {
-      font-family: 'Exo 2', sans-serif;
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-    .hof-player {
-      font-family: 'Exo 2', sans-serif;
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--gold);
-    }
-    .hof-player a { color: var(--gold); }
-    .hof-player a:hover { color: #fff; }
-    .hof-xp {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
+    /* Search */
     .search-bar {
-      max-width: 400px;
-      margin: 0 auto 24px;
-      position: relative;
+      max-width: 420px; margin: 0 auto 24px; position: relative;
     }
-
-    .search-bar input {
-      width: 100%;
-      padding-left: 36px;
-    }
-
+    .search-bar input { width: 100%; padding-left: 36px; }
     .search-bar .search-icon {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--muted);
-      font-size: 14px;
-      pointer-events: none;
+      position: absolute; left: 12px; top: 50%;
+      transform: translateY(-50%); color: var(--muted);
+      font-size: 14px; pointer-events: none;
     }
 
-    .leaderboard {
-      max-width: 800px;
-      margin: 0 auto;
+    /* Leaderboard */
+    .leaderboard { max-width: 900px; margin: 0 auto; }
+
+    .lb-header {
+      display: grid; padding: 8px 16px; margin-bottom: 8px;
+    }
+    .lb-header span {
+      font-family: 'Exo 2', sans-serif; font-size: 10px;
+      font-weight: 800; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
     }
 
     .lb-row {
-      display: grid;
-      grid-template-columns: 50px 1fr 100px 100px 80px;
-      align-items: center;
-      padding: 12px 16px;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      margin-bottom: 6px;
-      transition: all 0.15s;
+      display: grid; align-items: center;
+      padding: 12px 16px; background: var(--panel);
+      border: 1px solid var(--line); border-radius: var(--radius);
+      margin-bottom: 6px; transition: all 0.15s;
     }
+    .lb-row:hover { border-color: var(--cyan); background: var(--panel-2); }
+    .lb-row.top-1 { border-color: var(--gold); box-shadow: 0 0 16px rgba(255, 215, 0, 0.15); }
+    .lb-row.top-2 { border-color: #c0c0c0; box-shadow: 0 0 12px rgba(192, 192, 192, 0.1); }
+    .lb-row.top-3 { border-color: #cd7f32; box-shadow: 0 0 12px rgba(205, 127, 50, 0.1); }
 
-    .lb-row:hover {
-      border-color: var(--cyan);
-      background: var(--panel-2);
-    }
-
-    .lb-row.top-1 {
-      border-color: var(--gold);
-      box-shadow: 0 0 16px rgba(255, 215, 0, 0.15);
-    }
-
-    .lb-row.top-2 {
-      border-color: #c0c0c0;
-      box-shadow: 0 0 12px rgba(192, 192, 192, 0.1);
-    }
-
-    .lb-row.top-3 {
-      border-color: #cd7f32;
-      box-shadow: 0 0 12px rgba(205, 127, 50, 0.1);
-    }
-
-    .lb-header {
-      display: grid;
-      grid-template-columns: 50px 1fr 100px 100px 80px;
-      padding: 8px 16px;
-      margin-bottom: 8px;
-    }
-
-    .lb-header span {
-      font-family: 'Exo 2', sans-serif;
-      font-size: 10px;
-      font-weight: 800;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
+    /* Grid layouts per tab */
+    .grid-overall .lb-header, .grid-overall .lb-row { grid-template-columns: 44px 1fr 80px 90px 90px 90px; }
+    .grid-elo .lb-header, .grid-elo .lb-row { grid-template-columns: 44px 1fr 90px 100px; }
+    .grid-bounty .lb-header, .grid-bounty .lb-row { grid-template-columns: 44px 1fr 100px 80px 80px; }
+    .grid-currency .lb-header, .grid-currency .lb-row { grid-template-columns: 44px 1fr 110px 120px; }
+    .grid-winrate .lb-header, .grid-winrate .lb-row { grid-template-columns: 44px 1fr 80px 100px; }
 
     .lb-rank {
-      font-family: 'Exo 2', sans-serif;
-      font-weight: 900;
-      font-size: 16px;
-      color: var(--muted);
+      font-family: 'Exo 2', sans-serif; font-weight: 900;
+      font-size: 16px; color: var(--muted);
     }
-
     .top-1 .lb-rank { color: var(--gold); font-size: 20px; }
     .top-2 .lb-rank { color: #c0c0c0; font-size: 18px; }
     .top-3 .lb-rank { color: #cd7f32; font-size: 18px; }
 
-    .lb-player {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
+    .lb-player { display: flex; align-items: center; gap: 10px; }
     .lb-name {
-      font-weight: 700;
-      font-size: 14px;
-      color: var(--text);
-      text-decoration: none;
-      transition: color 0.15s;
+      font-weight: 700; font-size: 14px; color: var(--text);
+      text-decoration: none; transition: color 0.15s;
     }
-
-    .lb-name:hover {
-      color: var(--cyan);
-    }
+    .lb-name:hover { color: var(--cyan); }
 
     .lb-tier {
-      font-size: 9px;
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 2px 6px;
-      border-radius: 3px;
-      line-height: 1;
+      font-size: 9px; font-weight: 800; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 2px 6px;
+      border-radius: 3px; line-height: 1;
     }
-
     .tier-diamond { background: rgba(185, 242, 255, 0.15); color: #b9f2ff; }
     .tier-platinum { background: rgba(229, 228, 226, 0.15); color: #e5e4e2; }
     .tier-gold { background: rgba(255, 215, 0, 0.15); color: var(--gold); }
     .tier-silver { background: rgba(192, 192, 192, 0.15); color: #c0c0c0; }
     .tier-bronze { background: rgba(205, 127, 50, 0.15); color: #cd7f32; }
 
-    .lb-elo {
-      font-family: 'Exo 2', sans-serif;
-      font-weight: 900;
-      font-size: 16px;
-      color: var(--cyan);
+    .lb-stat {
+      font-family: 'Exo 2', sans-serif; font-weight: 900;
+      font-size: 15px; color: var(--cyan);
     }
+    .lb-stat.gold { color: var(--gold); }
+    .lb-stat.green { color: var(--green); }
+    .lb-stat.pink { color: var(--pink); }
 
-    .lb-record {
-      font-size: 13px;
-      color: var(--muted);
-    }
+    .lb-secondary { font-size: 13px; color: var(--muted); }
+    .lb-secondary .w { color: var(--green); font-weight: 700; }
+    .lb-secondary .l { color: var(--red); font-weight: 700; }
 
-    .lb-record .w { color: var(--green, #4caf50); font-weight: 700; }
-    .lb-record .l { color: var(--red, #f44336); font-weight: 700; }
-
-    .lb-tourneys {
-      font-size: 13px;
-      color: var(--muted);
-      text-align: center;
-    }
-
-    .accolades-section {
-      margin-bottom: 30px;
-    }
-    .accolades-section h2 {
-      font-family: 'Exo 2', sans-serif;
-      font-size: 18px;
-      color: var(--cyan);
-      margin-bottom: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-    .accolades-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 12px;
-    }
-    .accolade-card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 16px;
-      text-align: center;
-      transition: border-color 0.2s;
-    }
-    .accolade-card:hover {
-      border-color: var(--gold);
-    }
-    .accolade-icon {
-      font-size: 32px;
-      margin-bottom: 6px;
-    }
-    .accolade-title {
-      font-family: 'Exo 2', sans-serif;
-      font-weight: 800;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--gold);
-      margin-bottom: 4px;
-    }
-    .accolade-player {
-      font-weight: 700;
-      font-size: 15px;
-      color: var(--text);
-    }
-    .accolade-player a {
-      color: var(--text);
-      text-decoration: none;
-    }
-    .accolade-player a:hover {
-      color: var(--cyan);
-    }
-
-    @media (max-width: 600px) {
-      .lb-row, .lb-header {
-        grid-template-columns: 36px 1fr 70px 70px;
+    @media (max-width: 700px) {
+      .grid-overall .lb-header, .grid-overall .lb-row {
+        grid-template-columns: 36px 1fr 60px 70px;
       }
-      .lb-tourneys, .lb-header span:last-child {
-        display: none;
-      }
-      .lb-row {
-        padding: 10px 12px;
-      }
-      .lb-elo {
-        font-size: 14px;
-      }
+      .grid-overall .hide-mobile { display: none; }
+      .grid-elo .lb-header, .grid-elo .lb-row { grid-template-columns: 36px 1fr 70px 80px; }
+      .grid-bounty .lb-header, .grid-bounty .lb-row { grid-template-columns: 36px 1fr 80px; }
+      .grid-bounty .hide-mobile { display: none; }
+      .grid-currency .lb-header, .grid-currency .lb-row { grid-template-columns: 36px 1fr 90px; }
+      .grid-currency .hide-mobile { display: none; }
+      .grid-winrate .lb-header, .grid-winrate .lb-row { grid-template-columns: 36px 1fr 70px; }
+      .grid-winrate .hide-mobile { display: none; }
+      .lb-row { padding: 10px 12px; }
+      .lb-stat { font-size: 13px; }
     }
   </style>
 </head>
@@ -333,6 +154,7 @@
         <li><a href="bracket.html">Bracket</a></li>
         <li><a href="history.html">History</a></li>
         <li><a href="bounty.html">Bounty</a></li>
+        <li><a href="matches.html">Matches</a></li>
         <li class="nav-dropdown">
           <a href="#">More ▾</a>
           <div class="nav-dropdown-menu">
@@ -358,20 +180,20 @@
 
   <main class="page container page-enter">
     <div class="rankings-header">
-      <h1 class="rankings-title">ELO Rankings</h1>
-      <p class="rankings-subtitle">Competitive leaderboard based on match performance</p>
+      <h1 class="rankings-title">Leaderboard</h1>
+      <p class="rankings-subtitle">Combined competitive rankings across all stats</p>
+      <div class="player-count" id="player-count"></div>
     </div>
 
     <div class="view-tabs">
-      <button class="view-tab active" onclick="switchView('elo')">ELO Rankings</button>
-      <button class="view-tab" onclick="switchView('season')">Season Leaderboard</button>
-      <button class="view-tab" onclick="switchView('hof')">Hall of Fame</button>
+      <button class="view-tab active" data-tab="overall">Overall</button>
+      <button class="view-tab" data-tab="elo">ELO</button>
+      <button class="view-tab" data-tab="bounty">Bounty</button>
+      <button class="view-tab" data-tab="currency">Currency</button>
+      <button class="view-tab" data-tab="winrate">Win Rate</button>
     </div>
 
-    <div id="elo-view">
-      <div id="accolades-container"></div>
-
-      <div class="search-bar">
+    <div class="search-bar">
       <span class="search-icon">&#128269;</span>
       <input type="search" id="player-search" placeholder="Search player..." />
     </div>
@@ -379,32 +201,12 @@
     <div class="leaderboard" id="leaderboard">
       <div class="loader"><div class="loader-spinner"></div></div>
     </div>
-    </div>
-
-    <div id="season-view" style="display:none;">
-      <div class="season-select-row">
-        <select id="season-select" class="input" onchange="loadSeasonLeaderboard()">
-          <option value="">Loading seasons...</option>
-        </select>
-      </div>
-      <div class="leaderboard" id="season-leaderboard">
-        <div class="empty-state"><p>Select a season to view its leaderboard.</p></div>
-      </div>
-    </div>
-
-    <div id="hof-view" style="display:none;">
-      <div class="hall-of-fame">
-        <h2 class="hof-title">Hall of Fame</h2>
-        <div id="hof-grid" class="hof-grid">
-          <div class="loader"><div class="loader-spinner"></div></div>
-        </div>
-      </div>
-    </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-client.js"></script>
   <script src="js/auth.js"></script>
+    <script src="js/activity-alerts.js"></script>
   <script src="js/notifications.js"></script>
   <script src="js/sounds.js"></script>
   <script src="js/themes.js"></script>
@@ -412,8 +214,11 @@
   <script>
     initParticles(document.getElementById('particles'));
 
-    let allPlayers = [];
+    /* ── State ── */
+    let currentTab = 'overall';
+    let data = { elo: [], bounty: [], currency: [], matches: [] };
 
+    /* ── Helpers ── */
     function getTier(elo) {
       if (elo >= 1400) return { name: 'Diamond', cls: 'tier-diamond' };
       if (elo >= 1200) return { name: 'Platinum', cls: 'tier-platinum' };
@@ -422,237 +227,211 @@
       return { name: 'Bronze', cls: 'tier-bronze' };
     }
 
-    function renderLeaderboard(players) {
-      const container = document.getElementById('leaderboard');
+    function topClass(rank) {
+      return rank === 1 ? 'top-1' : rank === 2 ? 'top-2' : rank === 3 ? 'top-3' : '';
+    }
 
-      if (!players.length) {
-        container.innerHTML = '<div class="empty-state"><h3>No Rankings Yet</h3><p>Rankings will appear after tournament matches are processed.</p></div>';
-        return;
+    function playerLink(name) {
+      return `<a class="lb-name" href="profile.html?player=${encodeURIComponent(name)}">${name}</a>`;
+    }
+
+    /* ── Data Loading ── */
+    async function loadAllData() {
+      const [eloRes, bountyRes, currencyRes, matchRes] = await Promise.all([
+        supabaseClient.from('player_elo').select('discord_username, elo, peak_elo'),
+        supabaseClient.from('bounties').select('discord_username, bounty, wins, losses, streak'),
+        supabaseClient.from('player_points').select('discord_username, balance, lifetime_earned'),
+        supabaseClient.from('matches').select('player1_id, player2_id, winner_id'),
+      ]);
+
+      data.elo = (eloRes.data || []).sort((a, b) => b.elo - a.elo);
+      data.bounty = (bountyRes.data || []).sort((a, b) => b.bounty - a.bounty);
+      data.currency = (currencyRes.data || []).sort((a, b) => b.balance - a.balance);
+      data.matches = matchRes.data || [];
+
+      // Build win/loss map from matches
+      const wl = {};
+      data.matches.forEach(m => {
+        if (!m.winner_id) return;
+        [m.player1_id, m.player2_id].forEach(pid => {
+          if (!pid) return;
+          if (!wl[pid]) wl[pid] = { w: 0, l: 0 };
+        });
+        if (wl[m.winner_id]) wl[m.winner_id].w++;
+        const loser = m.winner_id === m.player1_id ? m.player2_id : m.player1_id;
+        if (loser && wl[loser]) wl[loser].l++;
+      });
+      data.winLossById = wl;
+
+      // Also build win/loss by username from bounties table (has wins/losses columns)
+      data.wlByName = {};
+      data.bounty.forEach(b => {
+        data.wlByName[b.discord_username] = { w: b.wins || 0, l: b.losses || 0 };
+      });
+
+      // Unique player count
+      const allNames = new Set();
+      data.elo.forEach(p => allNames.add(p.discord_username));
+      data.bounty.forEach(p => allNames.add(p.discord_username));
+      data.currency.forEach(p => allNames.add(p.discord_username));
+      document.getElementById('player-count').innerHTML = `<strong>${allNames.size}</strong> Players Tracked`;
+    }
+
+    /* ── Build datasets per tab ── */
+    function getOverallData() {
+      // Merge all players, compute composite score
+      const map = {};
+      data.elo.forEach(p => {
+        if (!map[p.discord_username]) map[p.discord_username] = {};
+        map[p.discord_username].elo = p.elo;
+      });
+      data.bounty.forEach(p => {
+        if (!map[p.discord_username]) map[p.discord_username] = {};
+        map[p.discord_username].bounty = p.bounty || 0;
+        map[p.discord_username].wins = p.wins || 0;
+        map[p.discord_username].losses = p.losses || 0;
+      });
+      data.currency.forEach(p => {
+        if (!map[p.discord_username]) map[p.discord_username] = {};
+        map[p.discord_username].balance = p.balance || 0;
+      });
+
+      return Object.entries(map).map(([name, d]) => {
+        const w = d.wins || 0, l = d.losses || 0;
+        const wr = (w + l) >= 4 ? w / (w + l) : 0;
+        // Composite: weighted ELO (40%) + win rate (25%) + bounty (20%) + currency (15%)
+        const eloNorm = ((d.elo || 1000) - 800) / 600; // 800-1400 → 0-1
+        const bountyNorm = Math.min((d.bounty || 0) / 5000, 1);
+        const currNorm = Math.min((d.balance || 0) / 10000, 1);
+        const score = eloNorm * 0.4 + wr * 0.25 + bountyNorm * 0.2 + currNorm * 0.15;
+        return { name, elo: d.elo || 1000, wins: w, losses: l, bounty: d.bounty || 0, balance: d.balance || 0, score };
+      }).sort((a, b) => b.score - a.score);
+    }
+
+    function getWinRateData() {
+      const players = [];
+      data.bounty.forEach(p => {
+        const w = p.wins || 0, l = p.losses || 0;
+        if (w + l < 4) return;
+        players.push({ name: p.discord_username, wins: w, losses: l, rate: w / (w + l) });
+      });
+      return players.sort((a, b) => b.rate - a.rate);
+    }
+
+    /* ── Render ── */
+    function render(searchQuery) {
+      const container = document.getElementById('leaderboard');
+      const q = (searchQuery || '').toLowerCase().trim();
+      let html = '';
+
+      if (currentTab === 'overall') {
+        let rows = getOverallData();
+        if (q) rows = rows.filter(r => r.name.toLowerCase().includes(q));
+        container.className = 'leaderboard grid-overall';
+        html = `<div class="lb-header"><span>#</span><span>Player</span><span>ELO</span><span>W/L</span><span class="hide-mobile">Bounty</span><span class="hide-mobile">Currency</span></div>`;
+        rows.forEach((p, i) => {
+          const rank = i + 1;
+          const tier = getTier(p.elo);
+          html += `<div class="lb-row ${topClass(rank)} stagger">
+            <div class="lb-rank">${rank}</div>
+            <div class="lb-player">${playerLink(p.name)} <span class="lb-tier ${tier.cls}">${tier.name}</span></div>
+            <div class="lb-stat">${p.elo}</div>
+            <div class="lb-secondary"><span class="w">${p.wins}</span>W / <span class="l">${p.losses}</span>L</div>
+            <div class="lb-stat gold hide-mobile">${p.bounty.toLocaleString()}</div>
+            <div class="lb-stat green hide-mobile">${p.balance.toLocaleString()}</div>
+          </div>`;
+        });
+
+      } else if (currentTab === 'elo') {
+        let rows = [...data.elo];
+        if (q) rows = rows.filter(r => r.discord_username.toLowerCase().includes(q));
+        container.className = 'leaderboard grid-elo';
+        html = `<div class="lb-header"><span>#</span><span>Player</span><span>ELO</span><span>Peak</span></div>`;
+        rows.forEach((p, i) => {
+          const rank = i + 1;
+          const tier = getTier(p.elo);
+          html += `<div class="lb-row ${topClass(rank)} stagger">
+            <div class="lb-rank">${rank}</div>
+            <div class="lb-player">${playerLink(p.discord_username)} <span class="lb-tier ${tier.cls}">${tier.name}</span></div>
+            <div class="lb-stat">${p.elo}</div>
+            <div class="lb-secondary">${p.peak_elo || p.elo}</div>
+          </div>`;
+        });
+
+      } else if (currentTab === 'bounty') {
+        let rows = [...data.bounty];
+        if (q) rows = rows.filter(r => r.discord_username.toLowerCase().includes(q));
+        container.className = 'leaderboard grid-bounty';
+        html = `<div class="lb-header"><span>#</span><span>Player</span><span>Bounty</span><span class="hide-mobile">W/L</span><span class="hide-mobile">Streak</span></div>`;
+        rows.forEach((p, i) => {
+          const rank = i + 1;
+          html += `<div class="lb-row ${topClass(rank)} stagger">
+            <div class="lb-rank">${rank}</div>
+            <div class="lb-player">${playerLink(p.discord_username)}</div>
+            <div class="lb-stat gold">${(p.bounty || 0).toLocaleString()}</div>
+            <div class="lb-secondary hide-mobile"><span class="w">${p.wins || 0}</span>W / <span class="l">${p.losses || 0}</span>L</div>
+            <div class="lb-secondary hide-mobile">${p.streak || 0}</div>
+          </div>`;
+        });
+
+      } else if (currentTab === 'currency') {
+        let rows = [...data.currency];
+        if (q) rows = rows.filter(r => r.discord_username.toLowerCase().includes(q));
+        container.className = 'leaderboard grid-currency';
+        html = `<div class="lb-header"><span>#</span><span>Player</span><span>Balance</span><span class="hide-mobile">Lifetime</span></div>`;
+        rows.forEach((p, i) => {
+          const rank = i + 1;
+          html += `<div class="lb-row ${topClass(rank)} stagger">
+            <div class="lb-rank">${rank}</div>
+            <div class="lb-player">${playerLink(p.discord_username)}</div>
+            <div class="lb-stat green">${(p.balance || 0).toLocaleString()}</div>
+            <div class="lb-secondary hide-mobile">${(p.lifetime_earned || 0).toLocaleString()}</div>
+          </div>`;
+        });
+
+      } else if (currentTab === 'winrate') {
+        let rows = getWinRateData();
+        if (q) rows = rows.filter(r => r.name.toLowerCase().includes(q));
+        container.className = 'leaderboard grid-winrate';
+        html = `<div class="lb-header"><span>#</span><span>Player</span><span>Win %</span><span class="hide-mobile">Record</span></div>`;
+        rows.forEach((p, i) => {
+          const rank = i + 1;
+          html += `<div class="lb-row ${topClass(rank)} stagger">
+            <div class="lb-rank">${rank}</div>
+            <div class="lb-player">${playerLink(p.name)}</div>
+            <div class="lb-stat pink">${(p.rate * 100).toFixed(1)}%</div>
+            <div class="lb-secondary hide-mobile"><span class="w">${p.wins}</span>W / <span class="l">${p.losses}</span>L</div>
+          </div>`;
+        });
       }
 
-      let html = `
-        <div class="lb-header">
-          <span>#</span>
-          <span>Player</span>
-          <span>ELO</span>
-          <span>Record</span>
-          <span>Tourneys</span>
-        </div>
-      `;
-
-      players.forEach((p, i) => {
-        const rank = i + 1;
-        const tier = getTier(p.elo);
-        const topClass = rank === 1 ? 'top-1' : rank === 2 ? 'top-2' : rank === 3 ? 'top-3' : '';
-
-        html += `
-          <div class="lb-row ${topClass} stagger">
-            <div class="lb-rank">${rank}</div>
-            <div class="lb-player">
-              <a class="lb-name" href="profile.html?player=${encodeURIComponent(p.discord_username)}">${p.discord_username}</a>
-              <span class="lb-tier ${tier.cls}">${tier.name}</span>
-            </div>
-            <div class="lb-elo">${p.elo}</div>
-            <div class="lb-record"><span class="w">${p.wins}</span>W / <span class="l">${p.losses}</span>L</div>
-            <div class="lb-tourneys">${p.tournaments_played || 0}</div>
-          </div>
-        `;
-      });
+      if (!html || html.indexOf('lb-row') === -1) {
+        html += '<div class="empty-state"><h3>No Rankings Yet</h3><p>Rankings will appear after tournament matches are processed.</p></div>';
+      }
 
       container.innerHTML = html;
     }
 
-    document.getElementById('player-search').addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase().trim();
-      if (!q) {
-        renderLeaderboard(allPlayers);
-        return;
-      }
-      const filtered = allPlayers.filter(p => p.discord_username.toLowerCase().includes(q));
-      renderLeaderboard(filtered);
+    /* ── Tab switching ── */
+    document.querySelectorAll('.view-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        currentTab = btn.dataset.tab;
+        render(document.getElementById('player-search').value);
+      });
     });
 
-    async function loadAccolades() {
-      try {
-        let champion = null, veteran = null, topElo = null, mostWins = null;
+    /* ── Search ── */
+    document.getElementById('player-search').addEventListener('input', (e) => {
+      render(e.target.value);
+    });
 
-        // Current Champion — winner of final match in most recent completed tournament
-        const { data: completedTourneys } = await supabaseClient
-          .from('tournaments')
-          .select('id, name')
-          .eq('status', 'completed')
-          .order('created_at', { ascending: false })
-          .limit(1);
-        if (completedTourneys?.length) {
-          const { data: finalMatch } = await supabaseClient
-            .from('matches')
-            .select('winner_id, player1:signups!matches_player1_id_fkey(id, discord_username), player2:signups!matches_player2_id_fkey(id, discord_username)')
-            .eq('tournament_id', completedTourneys[0].id)
-            .not('winner_id', 'is', null)
-            .order('round', { ascending: false })
-            .limit(1);
-          if (finalMatch?.length) {
-            const fm = finalMatch[0];
-            champion = fm.winner_id === fm.player1?.id
-              ? fm.player1?.discord_username
-              : fm.player2?.discord_username;
-          }
-        }
-
-        // Top ELO — highest rated player
-        if (allPlayers.length > 0) {
-          topElo = allPlayers[0].discord_username;
-        }
-
-        // Most Wins — player with most match wins
-        if (allPlayers.length > 0) {
-          const sorted = [...allPlayers].sort((a, b) => b.wins - a.wins);
-          if (sorted[0]?.wins > 0) mostWins = sorted[0].discord_username;
-        }
-
-        // Veteran — most tournament signups
-        const { data: allSignups } = await supabaseClient
-          .from('signups')
-          .select('discord_username');
-        const signupCounts = {};
-        (allSignups || []).forEach(s => { signupCounts[s.discord_username] = (signupCounts[s.discord_username] || 0) + 1; });
-        veteran = Object.entries(signupCounts).sort((a,b) => b[1] - a[1])[0]?.[0] || null;
-
-        // Render
-        const accoladesList = [
-          { icon: '🏆', title: 'Current Champion', player: champion },
-          { icon: '👑', title: 'Highest ELO', player: topElo },
-          { icon: '🔥', title: 'Most Wins', player: mostWins },
-          { icon: '🎖️', title: 'Veteran', player: veteran },
-        ].filter(a => a.player);
-
-        if (accoladesList.length === 0) return;
-
-        const container = document.getElementById('accolades-container');
-        container.innerHTML = `
-          <div class="accolades-section">
-            <h2>Accolades</h2>
-            <div class="accolades-grid">
-              ${accoladesList.map(a => `
-                <div class="accolade-card">
-                  <div class="accolade-icon">${a.icon}</div>
-                  <div class="accolade-title">${a.title}</div>
-                  <div class="accolade-player"><a href="profile.html?player=${encodeURIComponent(a.player)}">${a.player}</a></div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        `;
-      } catch (e) {
-        console.warn('Accolades load error:', e);
-      }
-    }
-
-    function switchView(view) {
-      document.querySelectorAll('.view-tab').forEach((t, i) => {
-        t.classList.toggle('active', ['elo', 'season', 'hof'][i] === view);
-      });
-      document.getElementById('elo-view').style.display = view === 'elo' ? '' : 'none';
-      document.getElementById('season-view').style.display = view === 'season' ? '' : 'none';
-      document.getElementById('hof-view').style.display = view === 'hof' ? '' : 'none';
-      if (view === 'season' && !seasonsLoaded) loadSeasons();
-      if (view === 'hof' && !hofLoaded) loadHallOfFame();
-    }
-
-    let seasonsLoaded = false;
-    let hofLoaded = false;
-
-    async function loadSeasons() {
-      try {
-        const seasons = await db.getAllSeasons();
-        const select = document.getElementById('season-select');
-        if (!seasons.length) {
-          select.innerHTML = '<option value="">No seasons yet</option>';
-          seasonsLoaded = true;
-          return;
-        }
-        select.innerHTML = seasons.map(s =>
-          `<option value="${s.id}">${s.name} ${s.status === 'active' ? '(Active)' : ''}</option>`
-        ).join('');
-        seasonsLoaded = true;
-        loadSeasonLeaderboard();
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    async function loadSeasonLeaderboard() {
-      const seasonId = document.getElementById('season-select').value;
-      const container = document.getElementById('season-leaderboard');
-      if (!seasonId) { container.innerHTML = '<div class="empty-state"><p>Select a season.</p></div>'; return; }
-
-      container.innerHTML = '<div class="loader"><div class="loader-spinner"></div></div>';
-      try {
-        const lb = await db.getSeasonLeaderboard(seasonId);
-        if (!lb.length) {
-          container.innerHTML = '<div class="empty-state"><p>No players in this season yet.</p></div>';
-          return;
-        }
-        let html = `<div class="lb-header"><span>#</span><span>Player</span><span>XP</span><span>Tier</span><span></span></div>`;
-        lb.forEach((p, i) => {
-          const rank = i + 1;
-          const topClass = rank === 1 ? 'top-1' : rank === 2 ? 'top-2' : rank === 3 ? 'top-3' : '';
-          const tier = Math.floor(p.xp / 100);
-          html += `<div class="lb-row ${topClass}">
-            <div class="lb-rank">${rank}</div>
-            <div class="lb-player"><a class="lb-name" href="profile.html?player=${encodeURIComponent(p.discord_username)}">${p.discord_username}</a></div>
-            <div class="lb-elo">${p.xp}</div>
-            <div class="lb-record">Tier ${tier}</div>
-            <div class="lb-tourneys">${(p.claimed_tiers || []).length} claimed</div>
-          </div>`;
-        });
-        container.innerHTML = html;
-      } catch (e) {
-        container.innerHTML = '<div class="empty-state"><p>Error loading season data.</p></div>';
-      }
-    }
-
-    async function loadHallOfFame() {
-      try {
-        const seasons = await db.getAllSeasons();
-        const completed = seasons.filter(s => s.status === 'completed');
-        const grid = document.getElementById('hof-grid');
-
-        if (!completed.length) {
-          grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><h3>No Completed Seasons</h3><p>Season champions will be immortalized here.</p></div>';
-          hofLoaded = true;
-          return;
-        }
-
-        const cards = [];
-        for (const s of completed) {
-          const lb = await db.getSeasonLeaderboard(s.id);
-          if (lb.length > 0) {
-            cards.push({ season: s, champion: lb[0] });
-          }
-        }
-
-        grid.innerHTML = cards.length === 0
-          ? '<div class="empty-state" style="grid-column:1/-1;"><p>No season data yet.</p></div>'
-          : cards.map(c => `
-            <div class="hof-card">
-              <div class="hof-season">${c.season.name}</div>
-              <div class="hof-player"><a href="profile.html?player=${encodeURIComponent(c.champion.discord_username)}">${c.champion.discord_username}</a></div>
-              <div class="hof-xp">${c.champion.xp} XP</div>
-            </div>
-          `).join('');
-
-        hofLoaded = true;
-      } catch (e) {
-        document.getElementById('hof-grid').innerHTML = '<div class="empty-state"><p>Error loading hall of fame.</p></div>';
-      }
-    }
-
+    /* ── Init ── */
     document.addEventListener('DOMContentLoaded', async () => {
       try {
-        allPlayers = await db.getLeaderboard();
-        renderLeaderboard(allPlayers);
-        await loadAccolades();
+        await loadAllData();
+        render();
       } catch (e) {
         console.error('Rankings load error:', e);
         document.getElementById('leaderboard').innerHTML = '<div class="empty-state"><p>Error loading rankings.</p></div>';

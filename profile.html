@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -719,6 +719,94 @@
       .badges-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
       .player-card { width: 100%; max-width: 350px; }
       .card-char { width: 65px; height: 65px; }
+      .cosmetic-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+    }
+
+    .cosmetic-collection {
+      max-width: 900px;
+      margin: 28px auto;
+    }
+    .cosmetic-collection h3 {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--cyan);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+    .cosmetic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px;
+    }
+    .cosmetic-item {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      text-align: center;
+      position: relative;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .cosmetic-item.equipped {
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+    }
+    .cosmetic-item .cosmetic-preview {
+      width: 80px;
+      height: 50px;
+      margin: 0 auto 10px;
+      border-radius: 6px;
+      position: relative;
+    }
+    .cosmetic-item .cosmetic-preview.border-preview {
+      border: 3px solid transparent;
+      background-clip: padding-box;
+    }
+    .cosmetic-preview.flair-fire { background: conic-gradient(from 0deg, #ff4500, #ff8c00, #ffd700, #ff4500); }
+    .cosmetic-preview.flair-ice { background: conic-gradient(from 0deg, #00bfff, #e0f7ff, #00bfff, #4dd0e1); }
+    .cosmetic-preview.flair-royal { background: conic-gradient(from 0deg, #9b59b6, #ffd700, #9b59b6, #e74c3c); }
+    .cosmetic-preview.flair-shadow { background: conic-gradient(from 0deg, #1a1a2e, #6c3483, #1a1a2e, #2c3e50); }
+    .cosmetic-preview.flair-champion { background: conic-gradient(from 0deg, #ffd700, #ff6b00, #ff0080, #8b00ff, #00d4ff, #ffd700); }
+    .cosmetic-preview.bg-preview { border-radius: 6px; min-height: 50px; }
+    .cosmetic-preview.tournament-arena { background: linear-gradient(135deg, rgba(20,20,40,0.95), rgba(40,20,60,0.95)); }
+    .cosmetic-preview.world-of-void { background: radial-gradient(ellipse at center, rgba(30,0,50,0.95) 0%, #000 100%); }
+    .cosmetic-preview.time-chamber { background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(20,20,40,0.95) 100%); }
+    .cosmetic-name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .cosmetic-type {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .cosmetic-equipped-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--cyan);
+      background: rgba(0, 229, 255, 0.12);
+      padding: 1px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .cosmetic-title-preview {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gold);
+      text-shadow: 0 0 6px rgba(255, 215, 0, 0.3);
+      margin-top: 4px;
     }
   </style>
 </head>
@@ -735,6 +823,7 @@
         <li><a href="bracket.html">Bracket</a></li>
         <li><a href="history.html">History</a></li>
         <li><a href="bounty.html">Bounty</a></li>
+        <li><a href="matches.html">Matches</a></li>
         <li class="nav-dropdown">
           <a href="#">More ▾</a>
           <div class="nav-dropdown-menu">
@@ -767,6 +856,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-client.js"></script>
   <script src="js/auth.js"></script>
+    <script src="js/activity-alerts.js"></script>
   <script src="js/notifications.js"></script>
   <script src="js/sounds.js"></script>
   <script src="js/particles.js"></script>
@@ -1336,6 +1426,49 @@
                 div.className = 'card-accolades';
                 div.innerHTML = accolades.map(a => `<span class="card-accolade" title="${a.label}">${a.icon}</span>`).join('');
                 wrap.appendChild(div);
+              }
+            }
+          } catch (_) {}
+
+          // Cosmetic Collection
+          try {
+            const { data: inventory } = await supabaseClient
+              .from('player_inventory')
+              .select('*, item:shop_items(*)')
+              .eq('discord_username', playerName);
+            if (inventory?.length) {
+              const cosmetics = inventory.filter(inv => {
+                const t = inv.item?.type || inv.item?.item_type || '';
+                return ['flair_border', 'flair_title', 'profile_bg'].includes(t);
+              });
+              if (cosmetics.length) {
+                let html = '<div class="cosmetic-collection"><h3>Cosmetic Collection</h3><div class="cosmetic-grid">';
+                for (const inv of cosmetics) {
+                  const t = inv.item?.type || inv.item?.item_type;
+                  const meta = inv.item?.metadata || {};
+                  const name = inv.item?.name || 'Unknown';
+                  const isEquipped = inv.equipped;
+                  let previewHtml = '';
+                  if (t === 'flair_border') {
+                    const effect = meta.effect || inv.item?.effect || '';
+                    previewHtml = `<div class="cosmetic-preview border-preview ${effect}"></div>`;
+                  } else if (t === 'profile_bg') {
+                    const bg = meta.bg || '';
+                    previewHtml = `<div class="cosmetic-preview bg-preview ${bg}"></div>`;
+                  } else if (t === 'flair_title') {
+                    const title = meta.title || inv.item?.effect || '';
+                    previewHtml = `<div class="cosmetic-title-preview">"${title}"</div>`;
+                  }
+                  const typeLabel = t === 'flair_border' ? 'Border' : t === 'flair_title' ? 'Title' : 'Background';
+                  html += `<div class="cosmetic-item ${isEquipped ? 'equipped' : ''}">
+                    ${isEquipped ? '<span class="cosmetic-equipped-badge">Equipped</span>' : ''}
+                    ${previewHtml}
+                    <div class="cosmetic-name">${name}</div>
+                    <div class="cosmetic-type">${typeLabel}</div>
+                  </div>`;
+                }
+                html += '</div></div>';
+                content.insertAdjacentHTML('beforeend', html);
               }
             }
           } catch (_) {}
