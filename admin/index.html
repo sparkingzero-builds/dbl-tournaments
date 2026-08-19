@@ -3228,7 +3228,7 @@
 
       try {
         const { data: bountyData } = await supabaseClient.from('bounties').select('amount').eq('discord_username', username).single();
-        if (bountyData) bountyAmt = bountyData.amount;
+        if (bountyData) bountyAmt = bountyData.bounty;
       } catch (e) {}
 
       try {
@@ -3304,7 +3304,7 @@
       try {
         await supabaseClient.from('bounties').upsert({
           discord_username: username,
-          amount: 0, wins: 0, losses: 0, streak: 0
+          bounty: 0, wins: 0, losses: 0, streak: 0
         }, { onConflict: 'discord_username' });
         AdminLog.log('bounty', `Reset bounty for "${username}"`);
         NotificationSystem.show(`Bounty reset for ${username}`, 'success');
@@ -3376,9 +3376,9 @@
 
         if (error) throw error;
 
-        const activeBounties = (bounties || []).filter(b => b.amount > 0);
+        const activeBounties = (bounties || []).filter(b => b.bounty > 0);
         document.getElementById('bounty-total-active').textContent = activeBounties.length;
-        document.getElementById('bounty-highest-val').textContent = activeBounties.length ? activeBounties[0].amount : 0;
+        document.getElementById('bounty-highest-val').textContent = activeBounties.length ? activeBounties[0].bounty : 0;
 
         if (!bounties || !bounties.length) {
           tbody.innerHTML = '';
@@ -3389,12 +3389,12 @@
             <tr>
               <td>${i + 1}</td>
               <td><strong>${b.discord_username}</strong></td>
-              <td style="color:var(--pink);font-family:'Exo 2',sans-serif;font-weight:700;">${b.amount || 0}</td>
+              <td style="color:var(--pink);font-family:'Exo 2',sans-serif;font-weight:700;">${b.bounty || 0}</td>
               <td style="color:var(--green);">${b.wins || 0}W / <span style="color:var(--red);">${b.losses || 0}L</span></td>
               <td style="color:var(--cyan);font-family:'Exo 2',sans-serif;font-weight:700;">${b.streak || 0}</td>
-              <td style="color:var(--gold);font-family:'Exo 2',sans-serif;font-weight:700;">${b.peak_bounty || b.amount || 0}</td>
+              <td style="color:var(--gold);font-family:'Exo 2',sans-serif;font-weight:700;">${b.peak_bounty || b.bounty || 0}</td>
               <td>
-                <button class="action-btn btn-advance" onclick="editBountyInline('${b.discord_username.replace(/'/g,"\\'")}', ${b.amount || 0})">Edit</button>
+                <button class="action-btn btn-advance" onclick="editBountyInline('${b.discord_username.replace(/'/g,"\\'")}', ${b.bounty || 0})">Edit</button>
                 <button class="action-btn" onclick="resetBountyPlayer('${b.discord_username.replace(/'/g,"\\'")}')">Reset</button>
                 <button class="action-btn" style="border-color:var(--red);color:var(--red);" onclick="removeBounty('${b.discord_username.replace(/'/g,"\\'")}')">Remove</button>
               </td>
@@ -3488,7 +3488,7 @@
       try {
         const { error } = await supabaseClient.from('bounties').upsert({
           discord_username: username,
-          amount: amount
+          bounty: amount
         }, { onConflict: 'discord_username' });
         if (error) throw error;
         AdminLog.log('bounty', `Set bounty for "${username}" to ${amount}`);
@@ -3517,7 +3517,7 @@
       if (!confirm(`Reset all bounty stats for "${username}"? This sets bounty to 0, resets wins/losses/streak.`)) return;
       try {
         const { error } = await supabaseClient.from('bounties')
-          .update({ amount: 0, wins: 0, losses: 0, streak: 0 })
+          .update({ bounty: 0, wins: 0, losses: 0, streak: 0 })
           .eq('discord_username', username);
         if (error) throw error;
         AdminLog.log('bounty', `Reset all bounty stats for "${username}"`);
@@ -3586,10 +3586,10 @@
         const { data: bounties } = await supabaseClient.from('bounties').select('*').order('amount', { ascending: false });
         const { data: challenges } = await supabaseClient.from('bounty_challenges').select('*');
 
-        const active = (bounties || []).filter(b => b.amount > 0);
+        const active = (bounties || []).filter(b => b.bounty > 0);
         document.getElementById('stat-bounty-active').textContent = active.length;
         document.getElementById('stat-bounty-challenges').textContent = (challenges || []).length;
-        document.getElementById('stat-bounty-highest').textContent = active.length ? active[0].amount : 0;
+        document.getElementById('stat-bounty-highest').textContent = active.length ? active[0].bounty : 0;
 
         // Top hunters (most wins)
         const hunters = (bounties || []).filter(b => b.wins > 0).sort((a, b) => b.wins - a.wins).slice(0, 5);
@@ -3604,7 +3604,7 @@
         document.getElementById('stat-highest-bounties').innerHTML = active.length
           ? active.slice(0, 5).map((b, i) => `<div class="player-row" style="margin-bottom:4px;">
               <div class="player-info"><span style="color:var(--pink);font-weight:800;margin-right:8px;">${i+1}.</span><span class="player-name">${b.discord_username}</span></div>
-              <span style="font-family:'Exo 2',sans-serif;font-weight:800;color:var(--pink);">${b.amount}</span>
+              <span style="font-family:'Exo 2',sans-serif;font-weight:800;color:var(--pink);">${b.bounty}</span>
             </div>`).join('')
           : '<p class="text-muted">No bounties yet.</p>';
       } catch (e) {
