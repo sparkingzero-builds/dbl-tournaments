@@ -1205,6 +1205,7 @@
                 <th>Winner</th>
                 <th>Reward</th>
                 <th>ELO +/-</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="challenges-list-tbody"></tbody>
@@ -3394,6 +3395,8 @@
               <td style="color:var(--gold);font-family:'Exo 2',sans-serif;font-weight:700;">${b.peak_bounty || b.amount || 0}</td>
               <td>
                 <button class="action-btn btn-advance" onclick="editBountyInline('${b.discord_username.replace(/'/g,"\\'")}', ${b.amount || 0})">Edit</button>
+                <button class="action-btn" onclick="resetBountyPlayer('${b.discord_username.replace(/'/g,"\\'")}')">Reset</button>
+                <button class="action-btn" style="border-color:var(--red);color:var(--red);" onclick="removeBounty('${b.discord_username.replace(/'/g,"\\'")}')">Remove</button>
               </td>
             </tr>
           `).join('');
@@ -3456,6 +3459,7 @@
                 <td>${c.winner || '—'}</td>
                 <td style="color:var(--gold);font-family:'Exo 2',sans-serif;font-weight:700;">${c.currency_reward || 0}</td>
                 <td style="font-family:'Exo 2',sans-serif;font-weight:700;">${c.elo_change ? (c.elo_change > 0 ? '+' : '') + c.elo_change : '—'}</td>
+                <td>${c.status === 'pending' || c.status === 'accepted' ? `<button class="action-btn" style="border-color:var(--red);color:var(--red);" onclick="cancelChallenge('${c.id}')">Cancel</button>` : ''}</td>
               </tr>`;
           }).join('');
         }
@@ -3503,6 +3507,51 @@
         if (error) throw error;
         AdminLog.log('bounty', `Resolved dispute #${id.slice(0,8)} — winner: ${winner}`);
         NotificationSystem.show(`Dispute resolved. Winner: ${winner}`, 'success');
+        loadBountyTab();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function resetBountyPlayer(username) {
+      if (!confirm(`Reset all bounty stats for "${username}"? This sets bounty to 0, resets wins/losses/streak.`)) return;
+      try {
+        const { error } = await supabaseClient.from('bounties')
+          .update({ amount: 0, wins: 0, losses: 0, streak: 0 })
+          .eq('discord_username', username);
+        if (error) throw error;
+        AdminLog.log('bounty', `Reset all bounty stats for "${username}"`);
+        NotificationSystem.show(`Bounty stats reset for ${username}`, 'warning');
+        loadBountyTab();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function cancelChallenge(id) {
+      if (!confirm('Cancel this challenge?')) return;
+      try {
+        const { error } = await supabaseClient.from('bounty_challenges')
+          .update({ status: 'cancelled' })
+          .eq('id', id);
+        if (error) throw error;
+        AdminLog.log('bounty', `Cancelled challenge #${id.slice(0,8)}`);
+        NotificationSystem.show('Challenge cancelled', 'warning');
+        loadBountyTab();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function removeBounty(username) {
+      if (!confirm(`Permanently remove bounty entry for "${username}"?`)) return;
+      try {
+        const { error } = await supabaseClient.from('bounties')
+          .delete()
+          .eq('discord_username', username);
+        if (error) throw error;
+        AdminLog.log('bounty', `Removed bounty for "${username}"`);
+        NotificationSystem.show(`Bounty removed for ${username}`, 'ko');
         loadBountyTab();
       } catch (e) {
         NotificationSystem.show('Error: ' + e.message, 'error');
