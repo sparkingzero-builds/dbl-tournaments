@@ -12,6 +12,11 @@ function initSupabase() {
       sessionStorage.setItem('admin_key', adminKey);
       options.global = { headers: { 'x-admin-key': adminKey } };
     }
+    options.auth = {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    };
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, options);
   } else {
     console.error('Supabase SDK not loaded');
