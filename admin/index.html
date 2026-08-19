@@ -3369,7 +3369,7 @@
         const { data: bounties, error } = await supabaseClient
           .from('bounties')
           .select('*')
-          .order('amount', { ascending: false });
+          .order('bounty', { ascending: false });
 
         const tbody = document.getElementById('bounty-list-tbody');
         const empty = document.getElementById('no-bounties');
@@ -3583,7 +3583,7 @@
 
     async function loadBountyStats() {
       try {
-        const { data: bounties } = await supabaseClient.from('bounties').select('*').order('amount', { ascending: false });
+        const { data: bounties } = await supabaseClient.from('bounties').select('*').order('bounty', { ascending: false });
         const { data: challenges } = await supabaseClient.from('bounty_challenges').select('*');
 
         const active = (bounties || []).filter(b => b.bounty > 0);
