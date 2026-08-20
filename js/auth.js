@@ -43,20 +43,29 @@ const AUTH = {
       this.session = session;
       this.user = session?.user || null;
       this.updateUI();
+      if (session?.user) this.syncPlayerIdentity();
     });
 
     this.updateUI();
+    if (this.user) this.syncPlayerIdentity();
     return this.user;
   },
 
   getDiscordUsername() {
     if (!this.user) return null;
     const meta = this.user.user_metadata;
-    return meta?.custom_claims?.global_name
+    return meta?.preferred_username
+      || meta?.user_name
+      || meta?.custom_claims?.global_name
       || meta?.full_name
       || meta?.name
-      || meta?.preferred_username
-      || meta?.user_name
+      || null;
+  },
+
+  getDiscordId() {
+    if (!this.user) return null;
+    return this.user.user_metadata?.provider_id
+      || this.user.user_metadata?.sub
       || null;
   },
 
@@ -123,6 +132,46 @@ const AUTH = {
     document.querySelectorAll('[data-auth-hide]').forEach(el => {
       el.style.display = this.isLoggedIn() ? 'none' : '';
     });
+  },
+
+  async syncPlayerIdentity() {
+    try {
+      const discordId = this.getDiscordId();
+      const username = this.getDiscordUsername();
+      if (!discordId || !username) return;
+
+      const tables = ['player_points', 'elo_ratings', 'bounties'];
+      for (const table of tables) {
+        const { data } = await supabaseClient
+          .from(table)
+          .select('discord_username, discord_id')
+          .eq('discord_id', discordId)
+          .limit(1)
+          .maybeSingle();
+
+        if (data && data.discord_username !== username) {
+          await supabaseClient
+            .from(table)
+            .update({ discord_username: username })
+            .eq('discord_id', discordId);
+        } else if (!data) {
+          const { data: byName } = await supabaseClient
+            .from(table)
+            .select('discord_username, discord_id')
+            .ilike('discord_username', username)
+            .limit(1)
+            .maybeSingle();
+          if (byName && !byName.discord_id) {
+            await supabaseClient
+              .from(table)
+              .update({ discord_id: discordId })
+              .ilike('discord_username', username);
+          }
+        }
+      }
+    } catch (e) {
+      // Non-critical — don't block login
+    }
   },
 
   requireLogin(action) {

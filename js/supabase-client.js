@@ -114,13 +114,17 @@ const db = {
   },
 
   async signup(tournamentId, discordUsername, team) {
+    const insertData = {
+      tournament_id: tournamentId,
+      discord_username: discordUsername,
+      team: team
+    };
+    if (typeof AUTH !== 'undefined' && AUTH.getDiscordId()) {
+      insertData.discord_id = AUTH.getDiscordId();
+    }
     const { data, error } = await supabaseClient
       .from('signups')
-      .insert({
-        tournament_id: tournamentId,
-        discord_username: discordUsername,
-        team: team
-      })
+      .insert(insertData)
       .select()
       .single();
     if (error) throw error;
@@ -308,9 +312,9 @@ const db = {
     const { data, error } = await supabaseClient
       .from('elo_ratings')
       .select('*')
-      .eq('discord_username', discordUsername)
-      .single();
-    if (error && error.code === 'PGRST116') return null;
+      .ilike('discord_username', discordUsername)
+      .limit(1)
+      .maybeSingle();
     if (error) throw error;
     return data;
   },
@@ -430,11 +434,11 @@ const db = {
     const { data, error } = await supabaseClient
       .from('player_points')
       .select('*')
-      .eq('discord_username', username)
-      .single();
-    if (error && error.code === 'PGRST116') return { balance: 0, lifetime_earned: 0 };
+      .ilike('discord_username', username)
+      .limit(1)
+      .maybeSingle();
     if (error) throw error;
-    return data;
+    return data || { balance: 0, lifetime_earned: 0 };
   },
 
   async awardPoints(username, amount, reason, referenceId) {
@@ -532,7 +536,7 @@ const db = {
     const { data, error } = await supabaseClient
       .from('player_inventory')
       .select('*, item:shop_items(*)')
-      .eq('discord_username', username);
+      .ilike('discord_username', username);
     if (error) throw error;
     return data || [];
   },
@@ -609,7 +613,7 @@ const db = {
     const { data, error } = await supabaseClient
       .from('player_inventory')
       .select('*, item:shop_items(*)')
-      .eq('discord_username', username)
+      .ilike('discord_username', username)
       .eq('equipped', true);
     if (error) throw error;
     return data || [];
@@ -807,7 +811,7 @@ const db = {
     const { data, error } = await supabaseClient
       .from('bounties')
       .select('*')
-      .eq('discord_username', username)
+      .ilike('discord_username', username)
       .limit(1);
     if (error) throw error;
     return data?.[0] || null;
