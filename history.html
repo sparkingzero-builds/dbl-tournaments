@@ -359,8 +359,13 @@
           tournamentData.push({ tournament: t, signups, matches, champion, championSignup });
         }
 
-        // Stats
-        const uniquePlayers = new Set(allSignups.map(s => s.discord_username.toLowerCase()));
+        // Stats — count from signups OR matches
+        const allMatchPlayers = new Set();
+        tournamentData.forEach(td => td.matches.forEach(m => {
+          if (m.player1?.discord_username) allMatchPlayers.add(m.player1.discord_username.toLowerCase());
+          if (m.player2?.discord_username) allMatchPlayers.add(m.player2.discord_username.toLowerCase());
+        }));
+        const uniquePlayers = allMatchPlayers.size > 0 ? allMatchPlayers : new Set(allSignups.map(s => s.discord_username.toLowerCase()));
         document.getElementById('stat-total').textContent = tournaments.length;
         document.getElementById('stat-players').textContent = uniquePlayers.size;
 
@@ -376,7 +381,12 @@
         listEl.innerHTML = tournamentData.map((td, idx) => {
           const t = td.tournament;
           const date = new Date(t.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-          const playerCount = td.signups.length;
+          const matchPlayers = new Set();
+          td.matches.forEach(m => {
+            if (m.player1?.discord_username) matchPlayers.add(m.player1.discord_username);
+            if (m.player2?.discord_username) matchPlayers.add(m.player2.discord_username);
+          });
+          const playerCount = td.signups.length || matchPlayers.size;
 
           const champHtml = td.champion
             ? `<div class="champion-tag">
