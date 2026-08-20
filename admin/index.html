@@ -1476,20 +1476,25 @@
         return;
       }
 
-      const format = document.getElementById('t-format').value;
+      const formatEl = document.getElementById('t-format');
+      const format = formatEl ? formatEl.value : 'standard';
       const data = {
         name,
         max_players: maxPlayers,
         description: desc,
         allowed_characters: [...selectedCharIds],
-        status: 'signup',
-        format
+        status: 'signup'
       };
 
-      if (format === 'draft') {
-        data.draft_order = document.getElementById('t-draft-order').value;
-        data.draft_picks_per_player = parseInt(document.getElementById('t-draft-picks').value);
-        data.draft_time_per_pick = parseInt(document.getElementById('t-draft-time').value);
+      const { data: colCheck } = await supabaseClient.from('tournaments').select('format').limit(0);
+      const hasFormatCol = colCheck !== null;
+      if (hasFormatCol) {
+        data.format = format;
+        if (format === 'draft') {
+          data.draft_order = document.getElementById('t-draft-order').value;
+          data.draft_picks_per_player = parseInt(document.getElementById('t-draft-picks').value);
+          data.draft_time_per_pick = parseInt(document.getElementById('t-draft-time').value);
+        }
       }
 
       try {
