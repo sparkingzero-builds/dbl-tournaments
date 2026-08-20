@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>History Ã¢â‚¬â€ DBL Tournaments</title>
+  <title>History â€” DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
@@ -260,7 +260,7 @@
         <li><a href="bounty.html">Bounty</a></li>
         <li><a href="matches.html">Matches</a></li>
         <li class="nav-dropdown">
-          <a href="#">More Ã¢â€“Â¾</a>
+          <a href="#">More â–¾</a>
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Data</div>
             <a href="characters.html">Characters</a>
@@ -367,7 +367,7 @@
           tournamentData.push({ tournament: t, signups, matches, champion, championSignup });
         }
 
-        // Stats â€” count from signups OR matches
+        // Stats — count from signups OR matches
         const allMatchPlayers = new Set();
         tournamentData.forEach(td => td.matches.forEach(m => {
           if (m.player1?.discord_username) allMatchPlayers.add(m.player1.discord_username.toLowerCase());

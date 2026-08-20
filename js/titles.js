@@ -1,6 +1,6 @@
-const TitleManager = {
+﻿const TitleManager = {
   TITLES: {
-    // ── Earned Titles ──
+    // -- Earned Titles --
     rookie:          { id: 'rookie',          name: 'Rookie',            description: 'Default title for new players',               color: '#9ca3af', source: 'earned', price: 0 },
     rising_star:     { id: 'rising_star',     name: 'Rising Star',       description: 'Win 3 tournament matches',                    color: '#00e5ff', source: 'earned', price: 0 },
     veteran:         { id: 'veteran',         name: 'Veteran',           description: 'Play in 5+ tournaments',                      color: '#a855f7', source: 'earned', price: 0 },
@@ -12,7 +12,7 @@ const TitleManager = {
     whale:           { id: 'whale',           name: 'Whale',             description: 'Spend 5000+ total currency',                  color: '#3b82f6', source: 'earned', price: 0 },
     gambler:         { id: 'gambler',         name: 'Gambler',           description: 'Win 10+ bets',                                color: '#22c55e', source: 'earned', price: 0 },
 
-    // ── Purchasable Titles ──
+    // -- Purchasable Titles --
     the_chosen_one:      { id: 'the_chosen_one',      name: 'The Chosen One',      description: 'A title of destiny',                   color: '#00e5ff', source: 'shop', price: 500 },
     shadow_monarch:      { id: 'shadow_monarch',      name: 'Shadow Monarch',      description: 'Ruler of the shadows',                 color: '#7c3aed', source: 'shop', price: 750 },
     ultra_instinct:      { id: 'ultra_instinct',      name: 'Ultra Instinct',      description: 'Transcend your limits',                color: '#c0c0ff', source: 'shop', price: 1000 },

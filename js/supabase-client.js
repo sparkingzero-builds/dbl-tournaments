@@ -1,4 +1,4 @@
-const SUPABASE_URL = 'https://egbcfgwdcvokptughqct.supabase.co';
+﻿const SUPABASE_URL = 'https://egbcfgwdcvokptughqct.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_dn8ctzhr9lUT4AfW7NYyDw_qiUHgCvY';
 
 let supabaseClient;
@@ -644,7 +644,7 @@ const db = {
     });
   },
 
-  // ── Seasons ──────────────────────────────────────────────────
+  // -- Seasons --------------------------------------------------
 
   async getActiveSeason() {
     const { data, error } = await supabaseClient
@@ -790,7 +790,7 @@ const db = {
     return data?.[0] || { ...progress, claimed_tiers: newClaimed };
   },
 
-  // ── Bounty Hunters ──────────────────────────────────────────
+  // -- Bounty Hunters ------------------------------------------
 
   async getBountyBoard() {
     const { data, error } = await supabaseClient

@@ -1,4 +1,4 @@
-const Toolbar = (() => {
+﻿const Toolbar = (() => {
   let soundMuted = localStorage.getItem('dbl_sound_muted') === 'true';
   let currentTheme = localStorage.getItem('dbl_theme') || 'cyberpunk';
 
@@ -38,10 +38,10 @@ const Toolbar = (() => {
   function updateIcons() {
     const soundBtn = document.getElementById('tb-sound');
     const themeBtn = document.getElementById('tb-theme');
-    if (soundBtn) soundBtn.textContent = soundMuted ? '🔇' : '🔊';
+    if (soundBtn) soundBtn.textContent = soundMuted ? '??' : '??';
     if (themeBtn) {
       const all = ThemeManager.getAll();
-      themeBtn.textContent = all[currentTheme]?.icon || '🌆';
+      themeBtn.textContent = all[currentTheme]?.icon || '??';
       themeBtn.title = 'Theme: ' + (all[currentTheme]?.name || 'Cyberpunk');
     }
   }
@@ -127,9 +127,9 @@ const Toolbar = (() => {
     const bar = document.createElement('div');
     bar.className = 'site-toolbar';
     bar.innerHTML = `
-      <button id="tb-search" class="tb-btn" onclick="Toolbar.openSearch()" title="Find Player">🔍</button>
-      <button id="tb-theme" class="tb-btn" onclick="Toolbar.cycleTheme()" title="Cycle Theme">🌆</button>
-      <button id="tb-sound" class="tb-btn" onclick="Toolbar.toggleSound()" title="Toggle Sound">🔊</button>
+      <button id="tb-search" class="tb-btn" onclick="Toolbar.openSearch()" title="Find Player">??</button>
+      <button id="tb-theme" class="tb-btn" onclick="Toolbar.cycleTheme()" title="Cycle Theme">??</button>
+      <button id="tb-sound" class="tb-btn" onclick="Toolbar.toggleSound()" title="Toggle Sound">??</button>
     `;
     document.body.appendChild(bar);
     updateIcons();

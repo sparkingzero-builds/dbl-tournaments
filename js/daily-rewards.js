@@ -1,4 +1,4 @@
-// Daily Login Rewards System
+﻿// Daily Login Rewards System
 const DailyRewards = (() => {
   const REWARDS = [50, 75, 100, 125, 150, 200, 500];
   const LOCAL_KEY = 'dbl_daily_reward_shown';
@@ -198,7 +198,7 @@ const DailyRewards = (() => {
       if (i < streak) cls += ' completed';
       else if (i === streak) cls += ' current';
       if (i === 7) cls += ' weekly';
-      daysHTML += `<div class="${cls}">${i === 7 ? '★' : i}</div>`;
+      daysHTML += `<div class="${cls}">${i === 7 ? '?' : i}</div>`;
     }
 
     const bonusHTML = isWeekly ? '<div class="dr-bonus">WEEKLY BONUS! Chance at a random cosmetic!</div>' : '';
@@ -208,7 +208,7 @@ const DailyRewards = (() => {
     overlay.innerHTML = `
       <div class="dr-modal">
         <button class="dr-close">&times;</button>
-        <div class="dr-title">${streak >= 3 ? '🔥 ' : ''}Daily Reward!</div>
+        <div class="dr-title">${streak >= 3 ? '?? ' : ''}Daily Reward!</div>
         <div class="dr-streak${fireClass}">Day ${streak} Streak</div>
         <div class="dr-days">${daysHTML}</div>
         <div class="dr-amount">+${amount}</div>

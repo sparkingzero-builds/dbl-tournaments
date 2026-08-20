@@ -1,4 +1,4 @@
-const ActivityAlerts = (() => {
+﻿const ActivityAlerts = (() => {
   const LAST_CHECK_KEY = 'dbl_last_alert_check';
 
   async function check() {
@@ -110,9 +110,9 @@ const ActivityAlerts = (() => {
         const oldElo = parseInt(stored);
         const diff = current.elo - oldElo;
         if (diff > 0) {
-          NotificationSystem.show(`Your ELO increased by +${diff} → ${current.elo}`, 'success', 6000);
+          NotificationSystem.show(`Your ELO increased by +${diff} ? ${current.elo}`, 'success', 6000);
         } else if (diff < 0) {
-          NotificationSystem.show(`Your ELO dropped by ${diff} → ${current.elo}`, 'warning', 6000);
+          NotificationSystem.show(`Your ELO dropped by ${diff} ? ${current.elo}`, 'warning', 6000);
         }
         if (current.elo === current.peak_elo && diff > 0) {
           NotificationSystem.show(`New peak ELO: ${current.peak_elo}!`, 'ko', 8000);

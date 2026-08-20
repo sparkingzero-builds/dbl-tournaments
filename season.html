@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Season Pass â€” DBL Tournaments</title>
+  <title>Season Pass — DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/bracket.css" />
@@ -607,7 +607,7 @@
   <nav class="navbar">
     <div class="container">
       <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
-      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">â˜°</button>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
       <ul class="navbar-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="tournament.html">Tournament</a></li>
@@ -618,7 +618,7 @@
         <li><a href="bounty.html">Bounty</a></li>
         <li><a href="matches.html">Matches</a></li>
         <li class="nav-dropdown">
-          <a href="#" class="active">More â–¾</a>
+          <a href="#" class="active">More ▾</a>
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Data</div>
             <a href="characters.html">Characters</a>
@@ -752,9 +752,9 @@
   <script src="js/sounds.js"></script>
   <script>
     const REWARD_ICONS = {
-      points: 'ðŸ’Ž', flair_border: 'ðŸ–¼ï¸', flair_title: 'âœ¨', badge: 'ðŸ…',
-      profile_bg: 'ðŸŽ¨', aura: 'ðŸ”¥', victory_quote: 'ðŸ’¬',
-      kings_commentary: 'ðŸ‘‘', golden_name: 'â­', hype_bomb: 'ðŸ’¥'
+      points: '💎', flair_border: '🖼️', flair_title: '✨', badge: '🏅',
+      profile_bg: '🎨', aura: '🔥', victory_quote: '💬',
+      kings_commentary: '👑', golden_name: '⭐', hype_bomb: '💥'
     };
 
     function getRewardTooltip(reward) {
@@ -769,7 +769,7 @@
         case 'points': detail = `${meta.amount || 0} points`; break;
         case 'profile_bg': detail = 'Profile background'; break;
         case 'kings_commentary': detail = 'Gold trash talk'; break;
-        case 'badge': detail = `${meta.icon || 'ðŸ…'} Badge`; break;
+        case 'badge': detail = `${meta.icon || '🏅'} Badge`; break;
         default: detail = reward.description || '';
       }
       return detail;
@@ -790,7 +790,7 @@
     let countdownInterval = null;
     let currentChallengeTab = 'daily';
 
-    /* â”€â”€ Challenge Definitions (hardcoded) â”€â”€ */
+    /* ── Challenge Definitions (hardcoded) ── */
     const CHALLENGE_DEFS = {
       daily: [
         { id: 'daily_bounty_2', name: 'Bounty Hunter', desc: 'Win 2 bounty matches', xp: 50, goal: 2 },
@@ -844,7 +844,7 @@
       localStorage.setItem(key, JSON.stringify({ period: resetKey, progress, completed }));
     }
 
-    /* â”€â”€ Premium Pass â”€â”€ */
+    /* ── Premium Pass ── */
     function isPremium() {
       if (!activeSeason || !myUsername) return false;
       return localStorage.getItem(`premium_pass_${activeSeason.id}_${myUsername}`) === 'true';
@@ -871,7 +871,7 @@
       bar.style.display = 'flex';
       const btn = document.getElementById('btn-premium');
       if (isPremium()) {
-        btn.outerHTML = '<span class="premium-active-badge" id="btn-premium" onclick="togglePremium()" style="cursor:pointer;">ðŸ‘‘ PREMIUM ACTIVE <span style="font-size:10px;color:var(--muted);font-weight:400;">(click to deactivate)</span></span>';
+        btn.outerHTML = '<span class="premium-active-badge" id="btn-premium" onclick="togglePremium()" style="cursor:pointer;">👑 PREMIUM ACTIVE <span style="font-size:10px;color:var(--muted);font-weight:400;">(click to deactivate)</span></span>';
       } else {
         const existing = document.getElementById('btn-premium');
         if (existing.tagName !== 'BUTTON') {
@@ -880,7 +880,7 @@
       }
     }
 
-    /* â”€â”€ Countdown Timer â”€â”€ */
+    /* ── Countdown Timer ── */
     function startCountdown() {
       if (!activeSeason || !activeSeason.ends_at) return;
       const container = document.getElementById('season-countdown');
@@ -917,7 +917,7 @@
       countdownInterval = setInterval(update, 1000);
     }
 
-    /* â”€â”€ Season Stats Panel â”€â”€ */
+    /* ── Season Stats Panel ── */
     async function renderSeasonStats() {
       const panel = document.getElementById('season-stats-panel');
       const xp = myProgress ? myProgress.xp : 0;
@@ -970,7 +970,7 @@
       `;
     }
 
-    /* â”€â”€ Challenges â”€â”€ */
+    /* ── Challenges ── */
     function showChallengeTab(tab, btn) {
       currentChallengeTab = tab;
       document.querySelectorAll('.challenge-tab').forEach(t => t.classList.remove('active'));
@@ -999,7 +999,7 @@
         return `
           <div class="challenge-card${completed ? ' completed' : ''}">
             <div class="ch-header">
-              <span class="ch-name">${completed ? 'âœ… ' : ''}${ch.name}</span>
+              <span class="ch-name">${completed ? '✅ ' : ''}${ch.name}</span>
               <span class="ch-xp">+${ch.xp} XP</span>
             </div>
             <div class="ch-desc">${ch.desc}</div>
@@ -1012,7 +1012,7 @@
       }).join('');
     }
 
-    /* â”€â”€ Season Archive â”€â”€ */
+    /* ── Season Archive ── */
     async function loadSeasonArchive() {
       const container = document.getElementById('season-archive');
       const list = document.getElementById('archive-list');
@@ -1026,7 +1026,7 @@
         if (error || !data || data.length === 0) return;
 
         container.style.display = 'block';
-        const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
+        const medals = ['🥇', '🥈', '🥉'];
 
         let archiveHtml = '';
         for (const season of data) {
@@ -1053,7 +1053,7 @@
             <div class="archive-card">
               <div class="arc-header">
                 <span class="arc-name">${season.name || 'Season'}</span>
-                <span class="arc-dates">${start} â€” ${end}</span>
+                <span class="arc-dates">${start} — ${end}</span>
               </div>
               <div class="archive-stats">
                 <div class="arc-stat"><div class="arc-stat-val">${totalParticipants}</div><div class="arc-stat-label">Participants</div></div>
@@ -1076,7 +1076,7 @@
       }
     }
 
-    /* â”€â”€ Init â”€â”€ */
+    /* ── Init ── */
     document.addEventListener('DOMContentLoaded', async () => {
       const saved = sessionStorage.getItem('season_username');
       if (saved) {
@@ -1100,7 +1100,7 @@
       const started = new Date(activeSeason.started_at);
       const days = Math.floor((Date.now() - started.getTime()) / (1000 * 60 * 60 * 24));
       document.getElementById('season-meta').textContent =
-        `${activeSeason.name} â€¢ Day ${days + 1} â€¢ ${activeSeason.total_tiers || 20} Tiers`;
+        `${activeSeason.name} • Day ${days + 1} • ${activeSeason.total_tiers || 20} Tiers`;
 
       // Load rewards
       seasonRewards = await db.getSeasonRewards(activeSeason.id);
@@ -1180,7 +1180,7 @@
         const isCurrent = t === currentTier + 1;
         const isClaimed = claimed.includes(t);
         const reward = seasonRewards.find(r => r.tier === t);
-        const icon = reward ? (REWARD_ICONS[reward.type] || 'ðŸ†') : 'ðŸ”’';
+        const icon = reward ? (REWARD_ICONS[reward.type] || '🏆') : '🔒';
         const name = reward ? reward.name : 'No reward';
         const trackType = reward ? reward.track : 'free';
         const cost = reward ? reward.premium_cost : 0;

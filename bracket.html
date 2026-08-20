@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bracket â€” DBL Tournaments</title>
+  <title>Bracket — DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/bracket.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/themes.css" />
   <style>
-    /* â”€â”€ Trash Talk Shoutbox â”€â”€ */
+    /* ── Trash Talk Shoutbox ── */
     .shoutbox-toggle{position:fixed;bottom:20px;right:20px;z-index:1000;background:var(--panel);border:1px solid var(--cyan);color:var(--cyan);padding:10px 18px;border-radius:var(--radius);cursor:pointer;font-family:'Exo 2',sans-serif;font-weight:700;font-size:.9rem;box-shadow:0 0 12px rgba(0,229,255,.25);transition:all .2s;}
     .shoutbox-toggle:hover{box-shadow:0 0 20px rgba(0,229,255,.5);transform:translateY(-2px);}
     .shoutbox-badge{background:var(--pink);color:#fff;font-size:.7rem;padding:2px 6px;border-radius:10px;margin-left:6px;display:none;animation:badge-pulse .6s ease-in-out;}
@@ -33,7 +33,7 @@
     .shoutbox-username input{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);padding:8px 10px;border-radius:var(--radius-sm);font-size:.85rem;margin-bottom:6px;}
     .shoutbox-username button{width:100%;background:var(--pink);color:#fff;border:none;padding:8px;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;}
 
-    /* â”€â”€ Hype Meter â”€â”€ */
+    /* ── Hype Meter ── */
     .hype-btn{background:none;border:none;cursor:pointer;font-size:1.1rem;padding:4px 8px;border-radius:var(--radius-sm);transition:transform .15s;position:relative;}
     .hype-btn:hover{transform:scale(1.15);}
     .hype-btn:active{transform:scale(1.35);}
@@ -44,7 +44,7 @@
     .match-card.most-hyped{border:1px solid var(--gold) !important;box-shadow:0 0 16px rgba(255,215,0,.35) !important;position:relative;}
     .most-hyped-label{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--bg);font-family:'Exo 2',sans-serif;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap;z-index:2;}
 
-    /* â”€â”€ Aura Effects â”€â”€ */
+    /* ── Aura Effects ── */
     .aura-blue .player-match-name {
       animation: aura-pulse-blue 2s ease-in-out infinite;
     }
@@ -74,7 +74,7 @@
       50% { text-shadow: 0 0 20px rgba(200, 200, 255, 0.9), 0 0 50px rgba(200, 200, 255, 0.5); color: #fff; }
     }
 
-    /* â”€â”€ Victory Quotes â”€â”€ */
+    /* ── Victory Quotes ── */
     .victory-quote {
       font-style: italic;
       font-size: 10px;
@@ -89,7 +89,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* â”€â”€ Win Streak Badges â”€â”€ */
+    /* ── Win Streak Badges ── */
     .streak-badge {
       display: inline-flex;
       align-items: center;
@@ -114,7 +114,7 @@
       50% { box-shadow: 0 0 12px rgba(255, 69, 0, 0.7); }
     }
 
-    /* â”€â”€ Rivalry Badge â”€â”€ */
+    /* ── Rivalry Badge ── */
     .rivalry-badge {
       text-align: center;
       padding: 2px 0;
@@ -136,7 +136,7 @@
       50% { background: rgba(255, 0, 128, 0.05); }
     }
 
-    /* â”€â”€ King Kai's Commentary â”€â”€ */
+    /* ── King Kai's Commentary ── */
     .shoutbox-msg.kai {
       border-left: 3px solid var(--gold);
       background: rgba(255, 215, 0, 0.08);
@@ -186,7 +186,7 @@
   <nav class="navbar">
     <div class="container">
       <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
-      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">â˜°</button>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
       <ul class="navbar-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="tournament.html">Tournament</a></li>
@@ -197,7 +197,7 @@
         <li><a href="bounty.html">Bounty</a></li>
         <li><a href="matches.html">Matches</a></li>
         <li class="nav-dropdown">
-          <a href="#">More â–¾</a>
+          <a href="#">More ▾</a>
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Data</div>
             <a href="characters.html">Characters</a>
@@ -244,7 +244,7 @@
         <div class="chat-header" onclick="toggleChat()">
           <h3 style="margin:0;font-family:'Exo 2',sans-serif;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
             <span>Match Chat</span>
-            <span id="chat-toggle-icon" style="font-size:0.8rem;color:var(--muted);">â–¼</span>
+            <span id="chat-toggle-icon" style="font-size:0.8rem;color:var(--muted);">▼</span>
           </h3>
         </div>
         <div id="chat-body" style="display:none;">
@@ -315,12 +315,12 @@
 
   <!-- Trash Talk Shoutbox Widget -->
   <button class="shoutbox-toggle" id="shoutbox-toggle" onclick="toggleShoutbox()">
-    <span>ðŸ’¬ Trash Talk</span><span class="shoutbox-badge" id="shoutbox-badge">0</span>
+    <span>💬 Trash Talk</span><span class="shoutbox-badge" id="shoutbox-badge">0</span>
   </button>
   <div class="shoutbox-panel" id="shoutbox-panel">
     <div class="shoutbox-header">
-      <span>ðŸ’¬ Trash Talk</span>
-      <button onclick="toggleShoutbox()">âœ•</button>
+      <span>💬 Trash Talk</span>
+      <button onclick="toggleShoutbox()">✕</button>
     </div>
     <div class="shoutbox-messages" id="shoutbox-messages"></div>
     <div id="shoutbox-username-area" class="shoutbox-username">
@@ -396,7 +396,7 @@
           setInterval(() => db.trackSpectator(tournament.id, 'bracket').catch(() => {}), 60000);
           const count = await db.getSpectatorCount(tournament.id);
           if (count > 0) {
-            document.getElementById('bracket-sub').textContent += ` â€” ${count} watching live`;
+            document.getElementById('bracket-sub').textContent += ` — ${count} watching live`;
           }
         } catch (e) {}
 
@@ -435,7 +435,7 @@
         bannedCharIds
       });
 
-      // â”€â”€ Aura Effects & Victory Quotes â”€â”€
+      // ── Aura Effects & Victory Quotes ──
       try {
         const allPlayers = signups.map(s => s.discord_username);
         const auraMap = {};
@@ -482,7 +482,7 @@
         console.warn('Aura/quote load error:', e);
       }
 
-      // â”€â”€ Win Streak Badges â”€â”€
+      // ── Win Streak Badges ──
       try {
         const { data: streakData } = await supabaseClient
           .from('player_points')
@@ -501,7 +501,7 @@
             badge.className = 'streak-badge';
             if (streak >= 5) badge.classList.add('mega');
             badge.title = `${streak} win streak!`;
-            badge.textContent = `ðŸ”¥${streak}`;
+            badge.textContent = `🔥${streak}`;
             nameEl.after(badge);
           }
         });
@@ -509,7 +509,7 @@
         console.warn('Streak badge error:', e);
       }
 
-      // â”€â”€ Leaderboard Titles on Bracket â”€â”€
+      // ── Leaderboard Titles on Bracket ──
       try {
         const { data: ct } = await supabaseClient.from('tournaments')
           .select('id').eq('status', 'completed').order('created_at', { ascending: false }).limit(1);
@@ -529,7 +529,7 @@
             if (el.textContent.trim() === champName) {
               const badge = document.createElement('span');
               badge.className = 'title-badge champion-badge';
-              badge.textContent = 'ðŸ‘‘';
+              badge.textContent = '👑';
               badge.title = 'Current Champion';
               el.after(badge);
             }
@@ -537,7 +537,7 @@
         }
       } catch (_) {}
 
-      // â”€â”€ Rivalry System â”€â”€
+      // ── Rivalry System ──
       try {
         const matchCards = document.querySelectorAll('.match-card');
         for (const card of matchCards) {
@@ -568,7 +568,7 @@
             if (p1Wins + p2Wins > 0) {
               const rivalDiv = document.createElement('div');
               rivalDiv.className = 'rivalry-badge';
-              rivalDiv.innerHTML = `âš”ï¸ <span class="rivalry-record">${p1Wins} - ${p2Wins}</span>`;
+              rivalDiv.innerHTML = `⚔️ <span class="rivalry-record">${p1Wins} - ${p2Wins}</span>`;
               rivalDiv.title = `${p1Name} ${p1Wins} vs ${p2Wins} ${p2Name} (all time)`;
               const firstPlayer = card.querySelector('.match-player');
               if (firstPlayer && firstPlayer.nextSibling) {
@@ -658,7 +658,7 @@
       const icon = document.getElementById('chat-toggle-icon');
       const open = body.style.display === 'none';
       body.style.display = open ? 'block' : 'none';
-      icon.textContent = open ? 'â–²' : 'â–¼';
+      icon.textContent = open ? '▲' : '▼';
       if (open) playSound?.('click');
     }
 
@@ -869,9 +869,9 @@
       }
     }
 
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════
     // TRASH TALK SHOUTBOX
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════
     let shoutboxOpen = false;
     let shoutboxChannel = null;
     let shoutboxUnread = 0;
@@ -996,9 +996,9 @@
         }).subscribe();
     }
 
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════
     // MATCH HYPE METER
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════
     let hypeData = {};       // matchId -> total count
     let hypeDebounceTimers = {};
     let hypePendingCounts = {};
@@ -1083,7 +1083,7 @@
         if (!card.querySelector('.most-hyped-label')) {
           const lbl = document.createElement('div');
           lbl.className = 'most-hyped-label';
-          lbl.textContent = 'ðŸ”¥ MOST HYPED';
+          lbl.textContent = '🔥 MOST HYPED';
           card.appendChild(lbl);
         }
       }
@@ -1115,7 +1115,7 @@
               bar.className = 'hype-bar';
               const btn = document.createElement('button');
               btn.className = 'hype-btn';
-              btn.textContent = 'ðŸ”¥';
+              btn.textContent = '🔥';
               btn.title = 'Hype this match!';
               btn.addEventListener('click', (e) => {
                 e.stopPropagation();

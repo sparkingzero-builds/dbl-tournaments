@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Betting House â€“ DBL Tournaments</title>
+  <title>Betting House – DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/bracket.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/themes.css" />
   <style>
-    /* â”€â”€ Hero â”€â”€ */
+    /* ── Hero ── */
     .betting-hero { text-align: center; padding: 30px 0 10px; }
     .betting-hero h1 {
       font-size: clamp(32px, 6vw, 56px);
@@ -29,7 +29,7 @@
       letter-spacing: 0.2em; font-style: italic;
     }
 
-    /* â”€â”€ Wallet Bar â”€â”€ */
+    /* ── Wallet Bar ── */
     .wallet-bar {
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
       margin: 20px 0 24px; padding: 14px 20px;
@@ -58,7 +58,7 @@
       background: var(--bg); border-radius: var(--radius-sm); border: 1px solid var(--line);
     }
 
-    /* â”€â”€ Tabs â”€â”€ */
+    /* ── Tabs ── */
     .betting-tabs {
       display: flex; gap: 6px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px;
     }
@@ -76,7 +76,7 @@
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
-    /* â”€â”€ Match Cards â”€â”€ */
+    /* ── Match Cards ── */
     .match-bet-card {
       background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
       padding: 20px; margin-bottom: 16px; transition: all 0.2s;
@@ -166,7 +166,7 @@
       text-transform: uppercase; letter-spacing: 0.1em;
     }
 
-    /* â”€â”€ My Bets â”€â”€ */
+    /* ── My Bets ── */
     .my-bet-row {
       display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px; align-items: center;
       padding: 12px 16px; background: var(--panel); border: 1px solid var(--line);
@@ -189,7 +189,7 @@
       text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700;
     }
 
-    /* â”€â”€ Leaderboard â”€â”€ */
+    /* ── Leaderboard ── */
     .lb-table {
       width: 100%; border-collapse: collapse;
     }
@@ -208,14 +208,14 @@
     .lb-winrate { color: var(--cyan); }
     .lb-biggest { color: var(--gold); font-weight: 700; }
 
-    /* â”€â”€ Empty states â”€â”€ */
+    /* ── Empty states ── */
     .empty-state {
       text-align: center; padding: 60px 20px; color: var(--muted);
     }
     .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
     .empty-state h3 { color: var(--text); margin-bottom: 8px; }
 
-    /* â”€â”€ Chip animation â”€â”€ */
+    /* ── Chip animation ── */
     @keyframes chip-float {
       0%, 100% { transform: translateY(0) rotate(0deg); }
       25% { transform: translateY(-6px) rotate(5deg); }
@@ -223,7 +223,7 @@
     }
     .chip-icon { display: inline-block; animation: chip-float 2s ease-in-out infinite; }
 
-    /* â”€â”€ Responsive â”€â”€ */
+    /* ── Responsive ── */
     @media (max-width: 768px) {
       .versus-row { grid-template-columns: 1fr; gap: 8px; }
       .vs-divider { display: none; }
@@ -250,7 +250,7 @@
         <li><a href="history.html">History</a></li>
         <li><a href="bounty.html">Bounty</a></li>
         <li class="nav-dropdown">
-          <a href="#" class="active">More â–¾</a>
+          <a href="#" class="active">More ▾</a>
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Data</div>
             <a href="characters.html">Characters</a>
@@ -281,14 +281,14 @@
 
     <!-- Hero -->
     <div class="betting-hero">
-      <h1><span class="chip-icon">ðŸŽ°</span> Betting House <span class="chip-icon">ðŸŽ°</span></h1>
+      <h1><span class="chip-icon">🎰</span> Betting House <span class="chip-icon">🎰</span></h1>
       <div class="subtitle">Put your Zeni where your mouth is</div>
     </div>
 
     <!-- Wallet -->
     <div class="wallet-bar" id="wallet-bar" style="display:none;">
       <div class="wallet-left">
-        <div class="wallet-icon">ðŸª™</div>
+        <div class="wallet-icon">🪙</div>
         <div>
           <div class="wallet-label">Balance</div>
           <div class="wallet-amount" id="balance-value">0</div>
@@ -301,7 +301,7 @@
 
     <!-- Login prompt -->
     <div class="empty-state" id="login-prompt" style="display:none;">
-      <div class="empty-icon">ðŸ”’</div>
+      <div class="empty-icon">🔒</div>
       <h3>Login Required</h3>
       <p>Sign in with Discord to place bets and track your winnings.</p>
     </div>
@@ -311,9 +311,9 @@
 
       <!-- Tabs -->
       <div class="betting-tabs">
-        <button class="betting-tab active" data-tab="active-bets">ðŸŽ² Active Matches</button>
-        <button class="betting-tab" data-tab="my-bets">ðŸ“‹ My Bets</button>
-        <button class="betting-tab" data-tab="leaderboard">ðŸ† Leaderboard</button>
+        <button class="betting-tab active" data-tab="active-bets">🎲 Active Matches</button>
+        <button class="betting-tab" data-tab="my-bets">📋 My Bets</button>
+        <button class="betting-tab" data-tab="leaderboard">🏆 Leaderboard</button>
       </div>
 
       <!-- Active Matches -->
@@ -355,7 +355,7 @@
     let allBets = [];
     let eloMap = {};
 
-    // â”€â”€ Odds Calculation â”€â”€
+    // ── Odds Calculation ──
     function calculateOdds(elo1, elo2) {
       const expected1 = 1 / (1 + Math.pow(10, (elo2 - elo1) / 400));
       const expected2 = 1 - expected1;
@@ -364,7 +364,7 @@
       return { odds1, odds2 };
     }
 
-    // â”€â”€ Tabs â”€â”€
+    // ── Tabs ──
     document.querySelectorAll('.betting-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.betting-tab').forEach(t => t.classList.remove('active'));
@@ -374,7 +374,7 @@
       });
     });
 
-    // â”€â”€ Load Balance â”€â”€
+    // ── Load Balance ──
     async function refreshBalance() {
       try {
         const pts = await db.getPoints(currentUser);
@@ -383,7 +383,7 @@
       } catch (e) { console.error('Failed to load balance', e); }
     }
 
-    // â”€â”€ Load ELO for all players â”€â”€
+    // ── Load ELO for all players ──
     async function loadEloMap() {
       try {
         const lb = await db.getLeaderboard();
@@ -391,7 +391,7 @@
       } catch (e) { console.error('Failed to load ELO data', e); }
     }
 
-    // â”€â”€ Get bets for a match â”€â”€
+    // ── Get bets for a match ──
     async function getBetsForMatch(matchId) {
       const { data, error } = await supabaseClient
         .from('bets')
@@ -401,7 +401,7 @@
       return data || [];
     }
 
-    // â”€â”€ Get all bets for current user â”€â”€
+    // ── Get all bets for current user ──
     async function getMyBets() {
       const { data, error } = await supabaseClient
         .from('bets')
@@ -412,7 +412,7 @@
       return data || [];
     }
 
-    // â”€â”€ Place a bet â”€â”€
+    // ── Place a bet ──
     async function placeBet(matchId, tournamentId, betOn, amount, odds) {
       if (!AUTH.isLoggedIn()) {
         NotificationSystem.show('You must be logged in to bet.', 'error');
@@ -470,7 +470,7 @@
       }
     }
 
-    // â”€â”€ Resolve Bets â”€â”€
+    // ── Resolve Bets ──
     async function resolveBets() {
       if (!activeTournament) return;
 
@@ -509,14 +509,14 @@
       }
     }
 
-    // â”€â”€ Render Match Cards â”€â”€
+    // ── Render Match Cards ──
     async function renderMatches() {
       const container = document.getElementById('matches-list');
 
       if (!activeTournament) {
         container.innerHTML = `
           <div class="empty-state">
-            <div class="empty-icon">ðŸŽ²</div>
+            <div class="empty-icon">🎲</div>
             <h3>No Active Tournament</h3>
             <p>Check back when a tournament is running to place your bets.</p>
           </div>`;
@@ -526,7 +526,7 @@
       if (allMatches.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
-            <div class="empty-icon">â³</div>
+            <div class="empty-icon">⏳</div>
             <h3>No Matches Yet</h3>
             <p>Matches haven't been created yet. Check back soon!</p>
           </div>`;
@@ -600,8 +600,8 @@
               <div class="bet-controls">
                 <div style="color:var(--gold);font-weight:700;font-size:13px;">
                   You bet ${userBet.amount.toLocaleString()} Zeni on ${userBet.bet_on} at ${userBet.odds}x
-                  ${userBet.status === 'won' ? '<span style="color:var(--green);"> â€” WON ' + userBet.payout.toLocaleString() + ' Zeni!</span>' : ''}
-                  ${userBet.status === 'lost' ? '<span style="color:var(--red);"> â€” LOST</span>' : ''}
+                  ${userBet.status === 'won' ? '<span style="color:var(--green);"> — WON ' + userBet.payout.toLocaleString() + ' Zeni!</span>' : ''}
+                  ${userBet.status === 'lost' ? '<span style="color:var(--red);"> — LOST</span>' : ''}
                 </div>
               </div>
             ` : ''}
@@ -620,7 +620,7 @@
       placeBet(matchId, tournamentId, betOn, amount, odds);
     }
 
-    // â”€â”€ Render My Bets â”€â”€
+    // ── Render My Bets ──
     async function renderMyBets() {
       const container = document.getElementById('my-bets-list');
       try {
@@ -628,7 +628,7 @@
         if (bets.length === 0) {
           container.innerHTML = `
             <div class="empty-state">
-              <div class="empty-icon">ðŸ“‹</div>
+              <div class="empty-icon">📋</div>
               <h3>No Bets Yet</h3>
               <p>Place your first bet on an active match!</p>
             </div>`;
@@ -656,7 +656,7 @@
       }
     }
 
-    // â”€â”€ Render Leaderboard â”€â”€
+    // ── Render Leaderboard ──
     async function renderLeaderboard() {
       const container = document.getElementById('leaderboard-content');
       try {
@@ -669,7 +669,7 @@
         if (!allBetsData || allBetsData.length === 0) {
           container.innerHTML = `
             <div class="empty-state">
-              <div class="empty-icon">ðŸ†</div>
+              <div class="empty-icon">🏆</div>
               <h3>No Betting History</h3>
               <p>Be the first to place a bet and make the leaderboard!</p>
             </div>`;
@@ -724,7 +724,7 @@
                 </td>
                 <td class="lb-winrate">${winRate}%</td>
                 <td style="color:var(--muted)">${s.wins}/${s.total}</td>
-                <td class="lb-biggest">${s.biggestWin > 0 ? '+' + s.biggestWin.toLocaleString() : 'â€”'}</td>
+                <td class="lb-biggest">${s.biggestWin > 0 ? '+' + s.biggestWin.toLocaleString() : '—'}</td>
               </tr>`;
         });
 
@@ -736,7 +736,7 @@
       }
     }
 
-    // â”€â”€ Init â”€â”€
+    // ── Init ──
     document.addEventListener('DOMContentLoaded', async () => {
       setTimeout(async () => {
         await AUTH.init();

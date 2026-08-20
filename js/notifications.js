@@ -1,4 +1,4 @@
-const NotificationSystem = (() => {
+﻿const NotificationSystem = (() => {
   let container;
 
   function init() {
@@ -23,12 +23,12 @@ const NotificationSystem = (() => {
 
     const colors = {
       info: { border: '#5f7cff', icon: 'i' },
-      success: { border: '#2ed573', icon: '✓' },
+      success: { border: '#2ed573', icon: '?' },
       warning: { border: '#ffd740', icon: '!' },
-      error: { border: '#ff4757', icon: '✕' },
-      match: { border: '#00e5ff', icon: '⚔' },
+      error: { border: '#ff4757', icon: '?' },
+      match: { border: '#00e5ff', icon: '?' },
       signup: { border: '#2ed573', icon: '+' },
-      ko: { border: '#ff2d78', icon: '★' },
+      ko: { border: '#ff2d78', icon: '?' },
     };
 
     const c = colors[type] || colors.info;

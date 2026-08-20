@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shop â€” DBL Tournaments</title>
+  <title>Shop — DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/bracket.css" />
@@ -335,7 +335,7 @@
         <li><a href="bounty.html">Bounty</a></li>
         <li><a href="matches.html">Matches</a></li>
         <li class="nav-dropdown">
-          <a href="#" class="active">More â–¾</a>
+          <a href="#" class="active">More ▾</a>
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Data</div>
             <a href="characters.html">Characters</a>
@@ -368,7 +368,7 @@
   <!-- Detail Modal -->
   <div class="modal-overlay" id="item-modal" onclick="if(event.target===this)closeModal()">
     <div class="modal-card">
-      <button class="modal-close" onclick="closeModal()">âœ•</button>
+      <button class="modal-close" onclick="closeModal()">✕</button>
       <div class="modal-visual" id="modal-visual"></div>
       <div class="modal-body">
         <div class="modal-rarity-tag" id="modal-rarity"></div>
@@ -406,7 +406,7 @@
 
         <div class="wallet-bar">
           <div class="wallet-left">
-            <div class="wallet-icon">âš¡</div>
+            <div class="wallet-icon">⚡</div>
             <div>
               <div class="wallet-label">Balance</div>
               <div class="wallet-amount" id="balance-value">0</div>
@@ -418,19 +418,19 @@
           </div>
         </div>
 
-        <div class=�shop-tabs� id=�main-tabs�>
-          <button class=�shop-tab active� onclick=�switchMainTab('shop')�>Shop</button>
-          <button class=�shop-tab� onclick=�switchMainTab('titles')�>Titles</button>
-          <button class=�shop-tab� onclick=�switchMainTab('inventory')�>Inventory</button>
-          <button class=�shop-tab� onclick=�switchMainTab('history')�>History</button>
+        <div class=?shop-tabs? id=?main-tabs?>
+          <button class=?shop-tab active? onclick=?switchMainTab('shop')?>Shop</button>
+          <button class=?shop-tab? onclick=?switchMainTab('titles')?>Titles</button>
+          <button class=?shop-tab? onclick=?switchMainTab('inventory')?>Inventory</button>
+          <button class=?shop-tab? onclick=?switchMainTab('history')?>History</button>
         </div>
 
-        <div id=�tab-titles� class=�tab-section�>
-          <div class=�shop-section-header�><h2>Purchasable Titles</h2></div>
-          <div id=�titles-shop-grid� class=�item-grid� style=�grid-template-columns:repeat(auto-fill,minmax(220px,1fr));�></div>
+        <div id=?tab-titles? class=?tab-section?>
+          <div class=?shop-section-header?><h2>Purchasable Titles</h2></div>
+          <div id=?titles-shop-grid? class=?item-grid? style=?grid-template-columns:repeat(auto-fill,minmax(220px,1fr));?></div>
         </div>
 
-        <div id=�tab-shop� class=�tab-section active�>
+        <div id=?tab-shop? class=?tab-section active?>
           <div class="shop-tabs" id="category-tabs"></div>
           <div id="shop-items-container">
             <div class="loader"><div class="loader-spinner"></div></div>
@@ -439,7 +439,7 @@
 
         <div id="tab-inventory" class="tab-section">
           <div id="inventory-container">
-            <div class="empty-state">No items yet â€” go grab something from the shop!</div>
+            <div class="empty-state">No items yet — go grab something from the shop!</div>
           </div>
         </div>
 
@@ -487,7 +487,7 @@
     };
 
     const CATEGORY_LABELS = {
-      all: 'ðŸ”¥ All Items', cosmetics: 'ðŸŽ¨ Cosmetics', effects: 'âš¡ Effects', social: 'ðŸ’¬ Social'
+      all: '🔥 All Items', cosmetics: '🎨 Cosmetics', effects: '⚡ Effects', social: '💬 Social'
     };
 
     const ITEM_DESCRIPTIONS = {
@@ -496,10 +496,10 @@
       aura: 'An animated glow effect that surrounds your name in the rankings table and profile card. Different colours for different vibes.',
       victory_quote: 'A custom quote that appears on your profile and shows up in the Live Feed when you win a match. Talk your trash.',
       kings_commentary: "Post a pinned commentary message in the Live Feed that appears with a gold crown icon. Your words, broadcast to the whole tournament.",
-      golden_name: 'Your username gets rendered in gold with a glowing effect across the entire site â€” rankings, brackets, profiles, feed. Everyone will know.',
+      golden_name: 'Your username gets rendered in gold with a glowing effect across the entire site — rankings, brackets, profiles, feed. Everyone will know.',
       hype_bomb: 'Drop an animated hype explosion in the Live Feed that everyone sees. A burst of energy particles and screen shake when you trigger it.',
       profile_bg: 'Changes the background theme of your profile page. Each background has unique colours and atmospheric effects.',
-      badge: "A collectible badge displayed on your profile's badge wall. Some are earned, some are bought â€” all are bragging rights.",
+      badge: "A collectible badge displayed on your profile's badge wall. Some are earned, some are bought — all are bragging rights.",
       double_down: 'Doubles the points you earn from your next tournament. Win points become 200, loss points become 50, champion bonus becomes 1000. One-time use.',
       vegetas_pride: "When you lose a match, you earn warrior's bonus points (75 instead of 25). Lasts for one full tournament. Pride in defeat.",
       ban_immunity: 'Protect one character on your team from being banned in the next tournament. Your opponent cannot ban your shielded pick. One-time use.',
@@ -606,19 +606,19 @@
         case 'golden_name':
           return `<div style="font-weight:900;font-size:18px;background:linear-gradient(90deg,#ffd700,#fff4b0,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none;font-family:'Exo 2',sans-serif;">YourName</div>`;
         case 'hype_bomb':
-          return `<div style="font-size:11px;color:var(--text);text-align:center;line-height:1.6;"><span style="font-size:24px;">ðŸ’¥</span><br>Everyone sees an animated<br>explosion in the feed!</div>`;
+          return `<div style="font-size:11px;color:var(--text);text-align:center;line-height:1.6;"><span style="font-size:24px;">💥</span><br>Everyone sees an animated<br>explosion in the feed!</div>`;
         case 'profile_bg':
           return `<div style="width:120px;height:60px;border-radius:8px;background:${item.name.includes('Void') ? 'radial-gradient(ellipse,rgba(30,0,50,0.95),#000)' : item.name.includes('Chamber') ? 'linear-gradient(180deg,rgba(255,255,255,0.15),rgba(20,20,40,0.95))' : 'linear-gradient(135deg,rgba(20,20,40,0.95),rgba(40,20,60,0.95))'};border:1px solid var(--line);"></div>`;
         case 'kings_commentary':
-          return `<div style="padding:8px 12px;background:rgba(255,215,0,0.08);border-left:3px solid var(--gold);border-radius:4px;font-size:11px;color:var(--text);max-width:200px;"><span style="color:var(--gold);font-weight:700;">ðŸ‘‘ You:</span> Your message here</div>`;
+          return `<div style="padding:8px 12px;background:rgba(255,215,0,0.08);border-left:3px solid var(--gold);border-radius:4px;font-size:11px;color:var(--text);max-width:200px;"><span style="color:var(--gold);font-weight:700;">👑 You:</span> Your message here</div>`;
         case 'double_down':
-          return `<div style="text-align:center;font-size:12px;color:var(--text);line-height:1.6;"><span style="font-size:18px;color:var(--cyan);font-weight:900;font-family:'Exo 2',sans-serif;">100â†’200</span> pts<br><span style="font-size:10px;color:var(--muted);">Win points doubled next tournament</span></div>`;
+          return `<div style="text-align:center;font-size:12px;color:var(--text);line-height:1.6;"><span style="font-size:18px;color:var(--cyan);font-weight:900;font-family:'Exo 2',sans-serif;">100→200</span> pts<br><span style="font-size:10px;color:var(--muted);">Win points doubled next tournament</span></div>`;
         case 'ban_immunity':
           return `<div style="text-align:center;font-size:12px;color:var(--text);line-height:1.6;"><div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:6px;"><span style="color:#22c55e;font-weight:700;">PROTECTED</span></div><br><span style="font-size:10px;color:var(--muted);">One character can't be banned</span></div>`;
         case 'scouter':
           return `<div style="text-align:center;font-size:12px;color:var(--text);line-height:1.6;font-family:monospace;"><div style="padding:4px 10px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:4px;font-size:10px;color:#22c55e;">SCANNING OPPONENT...<br>Team: ??? | W/L: ???</div></div>`;
         case 'vegetas_pride':
-          return `<div style="text-align:center;font-size:12px;color:var(--text);line-height:1.6;"><span style="font-size:18px;color:var(--pink);font-weight:900;font-family:'Exo 2',sans-serif;">25â†’75</span> pts<br><span style="font-size:10px;color:var(--muted);">Loss points tripled for one tournament</span></div>`;
+          return `<div style="text-align:center;font-size:12px;color:var(--text);line-height:1.6;"><span style="font-size:18px;color:var(--pink);font-weight:900;font-family:'Exo 2',sans-serif;">25→75</span> pts<br><span style="font-size:10px;color:var(--muted);">Loss points tripled for one tournament</span></div>`;
         case 'badge':
           return `<div style="text-align:center;"><div style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:8px;">${makeCardVisual(item, 32)}<span style="color:var(--gold);font-weight:700;font-family:'Exo 2',sans-serif;font-size:12px;">${escapeHtml(item.name)}</span></div><div style="font-size:10px;color:var(--muted);margin-top:6px;">Displayed on your profile badge wall</div></div>`;
         default:
@@ -661,7 +661,7 @@
           <div class="card-price-bar">
             <div class="card-price">
               ${item.cost > 0
-                ? `<div class="price-coin">âš¡</div><span class="price-value">${item.cost.toLocaleString()}</span>`
+                ? `<div class="price-coin">⚡</div><span class="price-value">${item.cost.toLocaleString()}</span>`
                 : '<span class="price-value free">FREE</span>'}
             </div>
             <button class="${btnClass}" ${btnDisabled ? 'disabled' : ''} onclick="event.stopPropagation();buyItem('${item.id}', ${item.cost}, '${escapeHtml(item.name).replace(/'/g, "\\'")}')">
@@ -698,7 +698,7 @@
 
       const priceEl = document.getElementById('modal-price');
       priceEl.innerHTML = item.cost > 0
-        ? `<div class="price-coin">âš¡</div><span class="price-value">${item.cost.toLocaleString()}</span>`
+        ? `<div class="price-coin">⚡</div><span class="price-value">${item.cost.toLocaleString()}</span>`
         : '<span class="price-value free">FREE</span>';
 
       const owned = ownedItemIds.has(item.id);
@@ -826,13 +826,13 @@
 
       let html = '';
       if (featured.length) {
-        html += '<div class="shop-section-header"><h2>â­ Featured</h2></div>';
+        html += '<div class="shop-section-header"><h2>⭐ Featured</h2></div>';
         html += '<div class="item-grid featured">';
         featured.forEach(item => { html += renderItemCard(item, true); });
         html += '</div>';
       }
       if (regular.length) {
-        if (featured.length) html += '<div class="shop-section-header"><h2>ðŸ›’ Daily Items</h2></div>';
+        if (featured.length) html += '<div class="shop-section-header"><h2>🛒 Daily Items</h2></div>';
         html += '<div class="item-grid">';
         regular.sort((a, b) => b.cost - a.cost);
         regular.forEach(item => { html += renderItemCard(item, false); });
@@ -870,7 +870,7 @@
       const container = document.getElementById('inventory-container');
       try {
         const items = await db.getInventory(shopUsername);
-        if (!items.length) { container.innerHTML = '<div class="empty-state">No items yet â€” go grab something from the shop!</div>'; return; }
+        if (!items.length) { container.innerHTML = '<div class="empty-state">No items yet — go grab something from the shop!</div>'; return; }
         let html = '<div class="inv-grid">';
         items.forEach(inv => {
           const item = inv.item || {};
@@ -883,7 +883,7 @@
                 <div class="inv-card-type">${escapeHtml(typeLabel)}</div>
                 <button class="inv-equip-btn ${inv.equipped ? 'equipped' : ''}"
                   onclick="toggleEquip('${inv.id}', ${inv.equipped})">
-                  ${inv.equipped ? 'âœ“ Equipped' : 'Equip'}
+                  ${inv.equipped ? '✓ Equipped' : 'Equip'}
                 </button>
               </div>
             </div>`;

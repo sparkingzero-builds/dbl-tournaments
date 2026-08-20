@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>World Tournament â€” DBL Tournaments</title>
+  <title>World Tournament — DBL Tournaments</title>
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;800;900&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/themes.css" />
   <style>
-    /* â”€â”€ World Tournament Styles â”€â”€ */
+    /* ── World Tournament Styles ── */
 
     .wt-hero {
       text-align: center;
@@ -80,7 +80,7 @@
       font-weight: 700;
     }
 
-    /* â”€â”€ Section base â”€â”€ */
+    /* ── Section base ── */
 
     .wt-section {
       max-width: 1100px;
@@ -109,7 +109,7 @@
       margin: 10px auto 30px;
     }
 
-    /* â”€â”€ Qualifier Cards â”€â”€ */
+    /* ── Qualifier Cards ── */
 
     .qualifiers-grid {
       display: grid;
@@ -218,7 +218,7 @@
       color: var(--gold);
     }
 
-    /* â”€â”€ Prize Cards â”€â”€ */
+    /* ── Prize Cards ── */
 
     .prizes-grid {
       display: grid;
@@ -282,7 +282,7 @@
       font-weight: 600;
     }
 
-    /* â”€â”€ Rules â”€â”€ */
+    /* ── Rules ── */
 
     .rules-list {
       list-style: none;
@@ -318,7 +318,7 @@
       min-width: 28px;
     }
 
-    /* â”€â”€ History â”€â”€ */
+    /* ── History ── */
 
     .history-table-wrap {
       overflow-x: auto;
@@ -354,7 +354,7 @@
       font-size: 1rem;
     }
 
-    /* â”€â”€ Countdown â”€â”€ */
+    /* ── Countdown ── */
 
     .countdown-wrap {
       text-align: center;
@@ -409,7 +409,7 @@
       letter-spacing: 2px;
     }
 
-    /* â”€â”€ Flame particle accents â”€â”€ */
+    /* ── Flame particle accents ── */
 
     .flame-particle {
       position: fixed;
@@ -429,7 +429,7 @@
       100% { opacity: 0; transform: translateY(-120px) scale(0.3); }
     }
 
-    /* â”€â”€ Responsive â”€â”€ */
+    /* ── Responsive ── */
 
     @media (max-width: 600px) {
       .wt-title { letter-spacing: 3px; }
@@ -444,7 +444,7 @@
   <nav class="navbar">
     <div class="container">
       <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
-      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">â˜°</button>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
       <ul class="navbar-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="tournament.html">Tournament</a></li>
@@ -455,7 +455,7 @@
         <li><a href="bounty.html">Bounty</a></li>
         <li><a href="matches.html">Matches</a></li>
         <li class="nav-dropdown">
-          <a href="#">More â–¾</a>
+          <a href="#">More ▾</a>
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Data</div>
             <a href="characters.html">Characters</a>
@@ -510,26 +510,26 @@
     <h2 class="wt-section-title">Prize Pool</h2>
     <div class="prizes-grid">
       <div class="prize-card gold">
-        <div class="prize-emoji">ðŸ†</div>
+        <div class="prize-emoji">🏆</div>
         <div class="prize-place">1st Place</div>
         <div class="prize-amount">5,000</div>
         <div class="prize-title-badge">"World Champion" Title + Special Border</div>
       </div>
       <div class="prize-card silver">
-        <div class="prize-emoji">ðŸ¥ˆ</div>
+        <div class="prize-emoji">🥈</div>
         <div class="prize-place">2nd Place</div>
         <div class="prize-amount">3,000</div>
         <div class="prize-title-badge">"Grand Finalist" Title</div>
       </div>
       <div class="prize-card bronze">
-        <div class="prize-emoji">ðŸ¥‰</div>
-        <div class="prize-place">3rd â€” 4th</div>
+        <div class="prize-emoji">🥉</div>
+        <div class="prize-place">3rd — 4th</div>
         <div class="prize-amount">1,500</div>
         <div class="prize-title-badge">"Elite Four" Badge</div>
       </div>
       <div class="prize-card">
-        <div class="prize-emoji">ðŸŽ–ï¸</div>
-        <div class="prize-place">5th â€” 8th</div>
+        <div class="prize-emoji">🎖️</div>
+        <div class="prize-place">5th — 8th</div>
         <div class="prize-amount">500</div>
         <div class="prize-title-badge">"World Contender" Badge</div>
       </div>
@@ -567,7 +567,7 @@
   <script src="js/sounds.js"></script>
 
   <script>
-    /* â”€â”€ World Tournament Page Logic â”€â”€ */
+    /* ── World Tournament Page Logic ── */
 
     function waitForSupabase() {
       return new Promise(resolve => {
@@ -589,7 +589,7 @@
           .maybeSingle();
 
         if (data) {
-          el.innerHTML = `<span class="active-name">${data.name}</span> â€” Status: ${data.status}`;
+          el.innerHTML = `<span class="active-name">${data.name}</span> — Status: ${data.status}`;
         } else {
           el.textContent = 'Next World Tournament: End of Season';
         }
@@ -626,7 +626,7 @@
             .in('target_name', playerNames);
 
           if (bounties) {
-            /* Count how many bounties each player completed (was the target that got claimed) â€”
+            /* Count how many bounties each player completed (was the target that got claimed) —
                actually count how many times a player appears as claimer. Adjust field name as needed. */
             for (const b of bounties) {
               const n = b.target_name;
@@ -688,7 +688,7 @@
         grid.innerHTML = top8.map((p, i) => {
           const rank = i + 1;
           const rankClass = rank <= 3 ? ` rank-${rank}` : '';
-          const medal = rank === 1 ? 'ðŸ‘‘' : rank === 2 ? 'ðŸ¥ˆ' : rank === 3 ? 'ðŸ¥‰' : `#${rank}`;
+          const medal = rank === 1 ? '👑' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
           return `
             <div class="qualifier-card${rankClass}">
               <div class="qualifier-rank">${medal}</div>
@@ -697,8 +697,8 @@
               </div>
               <div class="qualifier-stats">
                 <span>ELO ${p.elo}</span>
-                <span>ðŸŽ¯ ${p.bounties}</span>
-                <span>ðŸ† ${p.wins}</span>
+                <span>🎯 ${p.bounties}</span>
+                <span>🏆 ${p.wins}</span>
               </div>
               <div class="qualifier-composite">${(p.composite * 100).toFixed(1)} PTS</div>
             </div>`;
@@ -787,11 +787,11 @@
               <tbody>
                 ${history.map(t => `
                   <tr>
-                    <td>${t.name || 'â€”'}</td>
-                    <td>${t.date || 'â€”'}</td>
-                    <td style="color:var(--gold);font-weight:700">${t.champion || 'â€”'}</td>
-                    <td>${t.runnerUp || 'â€”'}</td>
-                    <td>${t.participantCount || 'â€”'}</td>
+                    <td>${t.name || '—'}</td>
+                    <td>${t.date || '—'}</td>
+                    <td style="color:var(--gold);font-weight:700">${t.champion || '—'}</td>
+                    <td>${t.runnerUp || '—'}</td>
+                    <td>${t.participantCount || '—'}</td>
                   </tr>`).join('')}
               </tbody>
             </table>
@@ -801,7 +801,7 @@
       }
     }
 
-    /* â”€â”€ Flame particles â”€â”€ */
+    /* ── Flame particles ── */
     function spawnParticles() {
       const colors = ['#ffd740', '#ff6d00', '#ff2d78', '#ffab00'];
       for (let i = 0; i < 12; i++) {
@@ -816,7 +816,7 @@
       }
     }
 
-    /* â”€â”€ Init â”€â”€ */
+    /* ── Init ── */
     (async function init() {
       spawnParticles();
       loadHistory();

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin — DBL Tournaments</title>
+  <title>Admin � DBL Tournaments</title>
   <link rel="stylesheet" href="../css/main.css" />
   <link rel="stylesheet" href="../css/components.css" />
   <link rel="stylesheet" href="../css/roster.css" />
@@ -423,7 +423,7 @@
       color: var(--cyan);
     }
 
-    /* ── Admin Layout: Sidebar + Main ─────────────── */
+    /* -- Admin Layout: Sidebar + Main --------------- */
     .admin-layout {
       display: grid;
       grid-template-columns: 220px 1fr;
@@ -614,7 +614,7 @@
   <nav class="navbar">
     <div class="container">
       <a href="../index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
-      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">?</button>
       <ul class="navbar-links">
         <li><a href="../index.html">Home</a></li>
         <li><a href="../tournament.html">Tournament</a></li>
@@ -624,7 +624,7 @@
         <li><a href="../history.html">History</a></li>
         <li><a href="../bounty.html">Bounty</a></li>
         <li class="nav-dropdown">
-          <a href="#">More ▾</a>
+          <a href="#">More ?</a>
           <div class="nav-dropdown-menu">
             <a href="../compare.html">Compare</a>
             <a href="../shop.html">Shop</a>
@@ -652,26 +652,26 @@
 
         <div class="sidebar-section">
           <div class="sidebar-label">Tournament</div>
-          <div class="sidebar-item active" data-tab="tournament"><span class="icon">🏆</span> Tournament</div>
-          <div class="sidebar-item" data-tab="players"><span class="icon">👥</span> Players</div>
-          <div class="sidebar-item" data-tab="bracket"><span class="icon">📊</span> Bracket</div>
+          <div class="sidebar-item active" data-tab="tournament"><span class="icon">??</span> Tournament</div>
+          <div class="sidebar-item" data-tab="players"><span class="icon">??</span> Players</div>
+          <div class="sidebar-item" data-tab="bracket"><span class="icon">??</span> Bracket</div>
         </div>
 
         <div class="sidebar-section">
           <div class="sidebar-label">Data</div>
-          <div class="sidebar-item" data-tab="stats"><span class="icon">📈</span> Stats</div>
-          <div class="sidebar-item" data-tab="audit"><span class="icon">📋</span> Audit Log</div>
+          <div class="sidebar-item" data-tab="stats"><span class="icon">??</span> Stats</div>
+          <div class="sidebar-item" data-tab="audit"><span class="icon">??</span> Audit Log</div>
         </div>
 
         <div class="sidebar-section">
           <div class="sidebar-label">Economy</div>
-          <div class="sidebar-item" data-tab="economy"><span class="icon">💰</span> Economy</div>
-          <div class="sidebar-item" data-tab="bounty"><span class="icon">🎯</span> Bounty</div>
+          <div class="sidebar-item" data-tab="economy"><span class="icon">??</span> Economy</div>
+          <div class="sidebar-item" data-tab="bounty"><span class="icon">??</span> Bounty</div>
         </div>
 
         <div class="sidebar-section">
           <div class="sidebar-label">System</div>
-          <div class="sidebar-item" data-tab="settings"><span class="icon">⚙️</span> Settings</div>
+          <div class="sidebar-item" data-tab="settings"><span class="icon">??</span> Settings</div>
         </div>
       </aside>
 
@@ -1223,7 +1223,7 @@
         <div class="form-group mt-3">
           <label>Characters Banned (by vote)</label>
           <input type="number" id="ban-count" min="1" max="10" value="1" style="max-width:120px;" onchange="updateBanCount()" />
-          <p class="text-muted mt-1" style="font-size:12px;">How many top-voted characters get banned. Each player votes for 1 character — the most-voted get removed.</p>
+          <p class="text-muted mt-1" style="font-size:12px;">How many top-voted characters get banned. Each player votes for 1 character � the most-voted get removed.</p>
         </div>
         <div class="form-group mt-3">
           <label>Signup Deadline</label>
@@ -1295,7 +1295,7 @@
             <button class="btn btn-sm btn-secondary" id="awards-btn-open" onclick="setAwardsVotingState('open')" style="border-color:var(--green);color:var(--green);">Open Voting</button>
             <button class="btn btn-sm btn-secondary" id="awards-btn-results" onclick="setAwardsVotingState('results')" style="border-color:var(--gold);color:var(--gold);">Reveal Results</button>
           </div>
-          <p class="text-muted mt-1" style="font-size:12px;">Current state: <strong id="awards-current-state">—</strong></p>
+          <p class="text-muted mt-1" style="font-size:12px;">Current state: <strong id="awards-current-state">�</strong></p>
         </div>
         <div class="form-group mt-2">
           <div class="toggle-switch" onclick="toggleAwardsLiveResults()">
@@ -1518,7 +1518,7 @@
     </div><!-- /.admin-layout -->
   </main>
 
-  <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+  <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">?</button>
   <div id="winner-modal-root"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -1643,7 +1643,7 @@
         card.className = 'char-select-card' + (selectedCharIds.has(c.id) ? ' selected' : '');
         card.innerHTML = `
           <img src="${c.image}" alt="${c.name}" title="${c.name}" loading="lazy" onerror="this.style.display='none'" />
-          <div class="check">✓</div>
+          <div class="check">?</div>
         `;
         card.addEventListener('click', () => {
           if (selectedCharIds.has(c.id)) {
@@ -1863,7 +1863,7 @@
         tbody.innerHTML = signups.map((s, i) => {
           const teamHtml = s.team ? s.team.map(c =>
             `<img src="${c.image}" alt="${c.name}" title="${c.name}" style="width:30px;height:30px;border-radius:4px;border:1px solid var(--border-color);" onerror="this.style.display='none'" />`
-          ).join('') : '<span class="text-muted">—</span>';
+          ).join('') : '<span class="text-muted">�</span>';
 
           const date = new Date(s.created_at).toLocaleDateString();
 
@@ -2735,11 +2735,11 @@
       const permBans = currentTournament.tournament_bans || [];
 
       if (hasVotes) {
-        desc.textContent = `Re-ban round in progress — ${votedCount}/${signups.length} voted.`;
+        desc.textContent = `Re-ban round in progress � ${votedCount}/${signups.length} voted.`;
         container.innerHTML = `
           <div class="flex gap-1 mt-1" style="flex-wrap:wrap;">
-            <button class="btn btn-sm btn-danger" onclick="endReban('round')">End Ban — This Round Only</button>
-            <button class="btn btn-sm btn-pink" onclick="endReban('tournament')" style="background:var(--pink);color:#fff;">End Ban — Whole Tournament</button>
+            <button class="btn btn-sm btn-danger" onclick="endReban('round')">End Ban � This Round Only</button>
+            <button class="btn btn-sm btn-pink" onclick="endReban('tournament')" style="background:var(--pink);color:#fff;">End Ban � Whole Tournament</button>
             <button class="btn btn-sm btn-secondary" onclick="startReban()">Reset Votes</button>
           </div>`;
       } else {
@@ -2881,7 +2881,7 @@
              onclick="addManualBan('${c.id}')">
           <img src="${c.image}" style="width:28px;height:28px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />
           <span style="font-size:13px;font-weight:600;">${c.name}</span>
-          <span style="font-size:10px;color:var(--muted);margin-left:auto;">${c.element} · ${c.rarity}</span>
+          <span style="font-size:10px;color:var(--muted);margin-left:auto;">${c.element} � ${c.rarity}</span>
         </div>
       `).join('');
     }
@@ -2940,7 +2940,7 @@
       }).join('');
     }
 
-    // ── Economy Tab ──────────────────────────────────────────────
+    // -- Economy Tab ----------------------------------------------
     let editingShopItemId = null;
 
     async function loadEconomy() {
@@ -3118,47 +3118,47 @@
     // Seed default shop items
     async function seedDefaultShopItems() {
       const defaults = [
-        // ── Flair Borders ──
+        // -- Flair Borders --
         { type: 'flair_border', name: 'Fire Border', description: 'A blazing fire effect around your profile', cost: 500, metadata: { effect: 'flair-fire' }, active: true },
         { type: 'flair_border', name: 'Ice Border', description: 'A frozen ice effect around your profile', cost: 500, metadata: { effect: 'flair-ice' }, active: true },
         { type: 'flair_border', name: 'Royal Border', description: 'A regal golden border effect', cost: 750, metadata: { effect: 'flair-royal' }, active: true },
         { type: 'flair_border', name: 'Shadow Border', description: 'A dark shadowy border effect', cost: 600, metadata: { effect: 'flair-shadow' }, active: true },
-        // ── DB Titles ──
-        { type: 'flair_title', name: 'Earthling', description: '"Earthling" — everyone starts somewhere', cost: 100, metadata: { title: 'Earthling' }, active: true },
-        { type: 'flair_title', name: 'Saiyan Warrior', description: '"Saiyan Warrior" — born to fight', cost: 300, metadata: { title: 'Saiyan Warrior' }, active: true },
-        { type: 'flair_title', name: 'Super Saiyan', description: '"Super Saiyan" — the legend awakens', cost: 500, metadata: { title: 'Super Saiyan' }, active: true },
-        { type: 'flair_title', name: 'Z Fighter', description: '"Z Fighter" — protector of Earth', cost: 400, metadata: { title: 'Z Fighter' }, active: true },
-        { type: 'flair_title', name: 'Namekian Elder', description: '"Namekian Elder" — wisdom of the ages', cost: 350, metadata: { title: 'Namekian Elder' }, active: true },
-        { type: 'flair_title', name: 'Elite Saiyan', description: '"Elite Saiyan" — Vegeta would approve', cost: 700, metadata: { title: 'Elite Saiyan' }, active: true },
-        { type: 'flair_title', name: 'Frieza Force Commander', description: '"Frieza Force Commander" — fear and respect', cost: 800, metadata: { title: 'Frieza Force Commander' }, active: true },
-        { type: 'flair_title', name: 'God of Destruction', description: '"God of Destruction" — hakai!', cost: 2000, metadata: { title: 'God of Destruction' }, active: true },
-        { type: 'flair_title', name: 'Ultra Instinct', description: '"Ultra Instinct" — beyond the gods', cost: 3000, metadata: { title: 'Ultra Instinct' }, active: true },
-        { type: 'flair_title', name: 'Grand Zeno', description: '"Grand Zeno" — ruler of all', cost: 5000, metadata: { title: 'Grand Zeno' }, active: true },
-        // ── Aura Effects ──
+        // -- DB Titles --
+        { type: 'flair_title', name: 'Earthling', description: '"Earthling" � everyone starts somewhere', cost: 100, metadata: { title: 'Earthling' }, active: true },
+        { type: 'flair_title', name: 'Saiyan Warrior', description: '"Saiyan Warrior" � born to fight', cost: 300, metadata: { title: 'Saiyan Warrior' }, active: true },
+        { type: 'flair_title', name: 'Super Saiyan', description: '"Super Saiyan" � the legend awakens', cost: 500, metadata: { title: 'Super Saiyan' }, active: true },
+        { type: 'flair_title', name: 'Z Fighter', description: '"Z Fighter" � protector of Earth', cost: 400, metadata: { title: 'Z Fighter' }, active: true },
+        { type: 'flair_title', name: 'Namekian Elder', description: '"Namekian Elder" � wisdom of the ages', cost: 350, metadata: { title: 'Namekian Elder' }, active: true },
+        { type: 'flair_title', name: 'Elite Saiyan', description: '"Elite Saiyan" � Vegeta would approve', cost: 700, metadata: { title: 'Elite Saiyan' }, active: true },
+        { type: 'flair_title', name: 'Frieza Force Commander', description: '"Frieza Force Commander" � fear and respect', cost: 800, metadata: { title: 'Frieza Force Commander' }, active: true },
+        { type: 'flair_title', name: 'God of Destruction', description: '"God of Destruction" � hakai!', cost: 2000, metadata: { title: 'God of Destruction' }, active: true },
+        { type: 'flair_title', name: 'Ultra Instinct', description: '"Ultra Instinct" � beyond the gods', cost: 3000, metadata: { title: 'Ultra Instinct' }, active: true },
+        { type: 'flair_title', name: 'Grand Zeno', description: '"Grand Zeno" � ruler of all', cost: 5000, metadata: { title: 'Grand Zeno' }, active: true },
+        // -- Aura Effects --
         { type: 'aura', name: 'Blue Ki Aura', description: 'A pulsing blue ki glow around your name on the bracket', cost: 600, metadata: { effect: 'aura-blue' }, active: true },
-        { type: 'aura', name: 'Red Ki Aura', description: 'A fiery red ki glow — Kaio-Ken style', cost: 600, metadata: { effect: 'aura-red' }, active: true },
+        { type: 'aura', name: 'Red Ki Aura', description: 'A fiery red ki glow � Kaio-Ken style', cost: 600, metadata: { effect: 'aura-red' }, active: true },
         { type: 'aura', name: 'Golden SSJ Aura', description: 'Super Saiyan golden glow on the bracket', cost: 1000, metadata: { effect: 'aura-gold' }, active: true },
-        { type: 'aura', name: 'Ultra Instinct Aura', description: 'Silver shimmer — mastered UI energy', cost: 2500, metadata: { effect: 'aura-ui' }, active: true },
-        // ── Victory Quotes ──
+        { type: 'aura', name: 'Ultra Instinct Aura', description: 'Silver shimmer � mastered UI energy', cost: 2500, metadata: { effect: 'aura-ui' }, active: true },
+        // -- Victory Quotes --
         { type: 'victory_quote', name: 'Fusion Above All', description: 'Show "Fusion Above All" after winning on the bracket', cost: 400, metadata: { quote: 'Fusion Above All' }, active: true },
         { type: 'victory_quote', name: 'Final Flash!', description: 'Show "Final Flash!" after winning on the bracket', cost: 400, metadata: { quote: 'Final Flash!' }, active: true },
-        { type: 'victory_quote', name: 'You\'re Nothing', description: 'Show "You\'re nothing but a weakling" — Vegeta energy', cost: 500, metadata: { quote: "You're nothing but a weakling." }, active: true },
+        { type: 'victory_quote', name: 'You\'re Nothing', description: 'Show "You\'re nothing but a weakling" � Vegeta energy', cost: 500, metadata: { quote: "You're nothing but a weakling." }, active: true },
         { type: 'victory_quote', name: 'It\'s Over 9000', description: 'Show "It\'s over 9000!!!" after a win', cost: 500, metadata: { quote: "It's over 9000!!!" }, active: true },
         { type: 'victory_quote', name: 'This Isn\'t Even My Final Form', description: 'The classic Frieza taunt', cost: 750, metadata: { quote: "This isn't even my final form." }, active: true },
-        { type: 'victory_quote', name: 'Owari Da', description: 'Show "Owari Da." — Beerus finisher', cost: 800, metadata: { quote: 'Owari Da.' }, active: true },
-        // ── Social Rewards ──
+        { type: 'victory_quote', name: 'Owari Da', description: 'Show "Owari Da." � Beerus finisher', cost: 800, metadata: { quote: 'Owari Da.' }, active: true },
+        // -- Social Rewards --
         { type: 'kings_commentary', name: 'King Kai\'s Commentary', description: 'Your trash talk messages get a golden crown highlight', cost: 1200, metadata: {}, active: true },
         { type: 'golden_name', name: 'Golden Name', description: 'Your name appears in gold on the shoutbox', cost: 800, metadata: {}, active: true },
-        { type: 'hype_bomb', name: 'Hype Bomb', description: 'Your hype clicks count as 10x — Spirit Bomb energy!', cost: 1500, metadata: { multiplier: 10 }, active: true },
-        // ── Profile Backgrounds ──
+        { type: 'hype_bomb', name: 'Hype Bomb', description: 'Your hype clicks count as 10x � Spirit Bomb energy!', cost: 1500, metadata: { multiplier: 10 }, active: true },
+        // -- Profile Backgrounds --
         { type: 'profile_bg', name: 'Tournament Arena', description: 'World Tournament stage background on your profile', cost: 900, metadata: { bg: 'tournament-arena' }, active: true },
         { type: 'profile_bg', name: 'World of Void', description: 'The empty void from Tournament of Power', cost: 1200, metadata: { bg: 'world-of-void' }, active: true },
         { type: 'profile_bg', name: 'Hyperbolic Time Chamber', description: 'Train in the endless white void', cost: 1500, metadata: { bg: 'time-chamber' }, active: true },
-        // ── Cosmetic Extras ──
-        // ── Badges ──
-        { type: 'badge', name: 'First Blood Badge', description: 'Badge for winning your first match ever', cost: 200, metadata: { badge: 'first-blood', icon: '🩸' }, active: true },
-        { type: 'badge', name: 'Dragon Ball Collector', description: 'Collect all 7 Dragon Balls badge', cost: 3500, metadata: { badge: 'dragonball-collector', icon: '🟠' }, active: true },
-        { type: 'badge', name: 'Tournament of Power Survivor', description: 'Season 1 exclusive — you were there', cost: 0, metadata: { badge: 'top-survivor', icon: '⭐', exclusive: true }, active: true },
+        // -- Cosmetic Extras --
+        // -- Badges --
+        { type: 'badge', name: 'First Blood Badge', description: 'Badge for winning your first match ever', cost: 200, metadata: { badge: 'first-blood', icon: '??' }, active: true },
+        { type: 'badge', name: 'Dragon Ball Collector', description: 'Collect all 7 Dragon Balls badge', cost: 3500, metadata: { badge: 'dragonball-collector', icon: '??' }, active: true },
+        { type: 'badge', name: 'Tournament of Power Survivor', description: 'Season 1 exclusive � you were there', cost: 0, metadata: { badge: 'top-survivor', icon: '?', exclusive: true }, active: true },
       ];
 
       try {
@@ -3183,7 +3183,7 @@
       }
     }
 
-    // ── Season Management ──────────────────────────────────────
+    // -- Season Management --------------------------------------
 
     let adminActiveSeason = null;
 
@@ -3334,11 +3334,11 @@
         { tier: 13, name: '200 Zeni',               type: 'points',           track: 'free',    premium_cost: 0,                                                        metadata: { amount: 200 } },
         { tier: 14, name: 'Golden SSJ Aura',        type: 'aura',             track: 'premium', premium_cost: 500,  description: 'Super Saiyan golden glow',            metadata: { effect: 'aura-gold' } },
         { tier: 15, name: 'Tournament Arena BG',    type: 'profile_bg',       track: 'premium', premium_cost: 300,  description: 'World Tournament stage background',   metadata: { bg: 'tournament-arena' } },
-        { tier: 16, name: 'First Blood Badge',      type: 'badge',            track: 'free',    premium_cost: 0,    description: 'First blood!',                        metadata: { badge: 'first-blood', icon: '🩸' } },
+        { tier: 16, name: 'First Blood Badge',      type: 'badge',            track: 'free',    premium_cost: 0,    description: 'First blood!',                        metadata: { badge: 'first-blood', icon: '??' } },
         { tier: 17, name: 'Shadow Border',          type: 'flair_border',     track: 'premium', premium_cost: 500,  description: 'Dark shadow profile border',          metadata: { effect: 'flair-shadow' } },
         { tier: 18, name: 'God of Destruction',     type: 'flair_title',      track: 'premium', premium_cost: 700,  description: 'Hakai!',                              metadata: { title: 'God of Destruction' } },
-        { tier: 19, name: 'Ultra Instinct Aura',    type: 'aura',             track: 'premium', premium_cost: 800,  description: 'Silver shimmer — mastered UI',        metadata: { effect: 'aura-ui' } },
-        { tier: 20, name: 'ToP Survivor Badge',     type: 'badge',            track: 'free',    premium_cost: 0,    description: 'Season 1 exclusive — you survived',   metadata: { badge: 'top-survivor', icon: '⭐', exclusive: true } },
+        { tier: 19, name: 'Ultra Instinct Aura',    type: 'aura',             track: 'premium', premium_cost: 800,  description: 'Silver shimmer � mastered UI',        metadata: { effect: 'aura-ui' } },
+        { tier: 20, name: 'ToP Survivor Badge',     type: 'badge',            track: 'free',    premium_cost: 0,    description: 'Season 1 exclusive � you survived',   metadata: { badge: 'top-survivor', icon: '?', exclusive: true } },
       ];
 
       try {
@@ -3382,12 +3382,12 @@
         tbody.innerHTML = '';
       }
     }
-    // ── AdminLog Utility ──────────────────────────────────────
+    // -- AdminLog Utility --------------------------------------
     const AdminLog = {
       _key: 'dbl_admin_audit_log',
       _icons: {
         tournament: '\u{1F3C6}', player: '\u{1F464}', points: '\u{1FA99}',
-        elo: '\u{1F4CA}', bounty: '\u{1F4B0}', settings: '⚙️',
+        elo: '\u{1F4CA}', bounty: '\u{1F4B0}', settings: '??',
         economy: '\u{1F6D2}', general: '\u{1F4DD}'
       },
       log(type, message, details = null) {
@@ -3450,7 +3450,7 @@
       NotificationSystem.show('Audit log cleared', 'info');
     }
 
-    // ── Wrap existing functions to add audit logging ──────────
+    // -- Wrap existing functions to add audit logging ----------
     const _origSaveTournament = saveTournament;
     saveTournament = async function() {
       await _origSaveTournament();
@@ -3497,7 +3497,7 @@
       AdminLog.log('elo', 'Recalculated all ELO ratings');
     };
 
-    // ── Enhanced Players Tab ──────────────────────────────────
+    // -- Enhanced Players Tab ----------------------------------
     let bulkSelectedPlayers = new Set();
 
     function filterPlayersTable() {
@@ -3701,7 +3701,7 @@
         tbody.innerHTML = signups.map((s, i) => {
           const teamHtml = s.team ? s.team.map(c =>
             `<img src="${c.image}" alt="${c.name}" title="${c.name}" style="width:30px;height:30px;border-radius:4px;border:1px solid var(--border-color);" onerror="this.style.display='none'" />`
-          ).join('') : '<span class="text-muted">—</span>';
+          ).join('') : '<span class="text-muted">�</span>';
           const date = new Date(s.created_at).toLocaleDateString();
           const safeUser = s.discord_username.replace(/'/g,"\\'");
           return `
@@ -3725,7 +3725,7 @@
       }
     };
 
-    // ── Bounty Tab ──────────────────────────────────────────
+    // -- Bounty Tab ------------------------------------------
     async function loadBountyTab() {
       // Load bounties
       try {
@@ -3819,9 +3819,9 @@
                 <td><strong>${c.challenger}</strong></td>
                 <td><strong>${c.target}</strong></td>
                 <td><span style="color:${statusColor[c.status] || 'var(--muted)'};font-weight:700;text-transform:uppercase;font-size:11px;">${c.status}</span></td>
-                <td>${c.winner || '—'}</td>
+                <td>${c.winner || '�'}</td>
                 <td style="color:var(--gold);font-family:'Exo 2',sans-serif;font-weight:700;">${c.currency_reward || 0}</td>
-                <td style="font-family:'Exo 2',sans-serif;font-weight:700;">${c.elo_change ? (c.elo_change > 0 ? '+' : '') + c.elo_change : '—'}</td>
+                <td style="font-family:'Exo 2',sans-serif;font-weight:700;">${c.elo_change ? (c.elo_change > 0 ? '+' : '') + c.elo_change : '�'}</td>
                 <td>${c.status === 'pending' || c.status === 'accepted' ? `<button class="action-btn" style="border-color:var(--red);color:var(--red);" onclick="cancelChallenge('${c.id}')">Cancel</button>` : ''}</td>
               </tr>`;
           }).join('');
@@ -3868,7 +3868,7 @@
           .update({ status: 'completed', winner: winner })
           .eq('id', id);
         if (error) throw error;
-        AdminLog.log('bounty', `Resolved dispute #${id.slice(0,8)} — winner: ${winner}`);
+        AdminLog.log('bounty', `Resolved dispute #${id.slice(0,8)} � winner: ${winner}`);
         NotificationSystem.show(`Dispute resolved. Winner: ${winner}`, 'success');
         loadBountyTab();
       } catch (e) {
@@ -3935,7 +3935,7 @@
       }
     }
 
-    // ── Enhanced Stats ──────────────────────────────────────
+    // -- Enhanced Stats --------------------------------------
     const _origLoadStats = loadStats;
     loadStats = async function() {
       await _origLoadStats();
@@ -4024,7 +4024,7 @@
       // Build bar chart from playerCounts (already computed in loadStats)
       const container = document.getElementById('stat-activity-chart');
       // Re-derive from signups count in stats overview
-      // Use the same data from loadStats — recollect
+      // Use the same data from loadStats � recollect
       // We'll grab from the "Most Active" section data
       const rows = document.querySelectorAll('#stat-most-active .player-row');
       if (!rows.length) {
@@ -4059,7 +4059,7 @@
       }).join('')}</div>`;
     }
 
-    // ── Maintenance Mode ──────────────────────────────────────
+    // -- Maintenance Mode --------------------------------------
     function loadMaintenanceState() {
       const enabled = localStorage.getItem('dbl_maintenance_mode') === 'true';
       const toggle = document.getElementById('maintenance-toggle');
@@ -4116,7 +4116,7 @@
       }
     }
 
-    // ── Announcements ──────────────────────────────────────
+    // -- Announcements --------------------------------------
     async function createAnnouncement() {
       const title = document.getElementById('ann-title').value.trim();
       const body = document.getElementById('ann-body').value.trim();
@@ -4216,7 +4216,7 @@
       loadAnnouncements();
     }
 
-    // ── Update tab switching to handle new tabs ──────────────
+    // -- Update tab switching to handle new tabs --------------
     // Extend the existing tab handler by updating the DOMContentLoaded + tab click
     const _origTabHandler = true; // marker
     document.querySelectorAll('.sidebar-item').forEach(tab => {
@@ -4298,7 +4298,7 @@ async function loadWorldTournamentStatus() {
     const { data: wt } = await supabaseClient.from('tournaments')
       .select('*').eq('type', 'world_tournament').neq('status', 'completed').maybeSingle();
     if (wt) {
-      statusEl.innerHTML = 'Active: <strong style="color:var(--gold)">' + wt.name + '</strong> — Status: ' + wt.status;
+      statusEl.innerHTML = 'Active: <strong style="color:var(--gold)">' + wt.name + '</strong> � Status: ' + wt.status;
       startBtn.style.display = 'none';
       endBtn.style.display = '';
     } else {
@@ -4315,7 +4315,7 @@ loadSettings = function() {
   _origLoadSettings3();
   loadWorldTournamentStatus();
 };
-// ── Season Awards Admin Controls ──
+// -- Season Awards Admin Controls --
 async function getActiveSeasonId() {
   try {
     const { data } = await supabaseClient.from('seasons').select('id').order('created_at', { ascending: false }).limit(1);

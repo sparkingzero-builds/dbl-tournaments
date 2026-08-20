@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bounty Hunters â€” DBL Tournaments</title>
+  <title>Bounty Hunters — DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/bracket.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/themes.css" />
   <style>
-    /* â”€â”€ Hazard stripes â”€â”€ */
+    /* ── Hazard stripes ── */
     .hazard-top, .hazard-bottom {
       height: 12px;
       background: repeating-linear-gradient(
@@ -28,7 +28,7 @@
     body { padding-top: 12px; padding-bottom: 12px; }
     .navbar { top: 12px; }
 
-    /* â”€â”€ Hero / Landing â”€â”€ */
+    /* ── Hero / Landing ── */
     .bounty-hero {
       display: grid;
       grid-template-columns: 1fr 1.4fr;
@@ -115,7 +115,7 @@
       line-height: 1.6;
     }
 
-    /* â”€â”€ How it works â”€â”€ */
+    /* ── How it works ── */
     .how-section { margin-bottom: 40px; }
     .how-title {
       font-family: 'Exo 2', sans-serif;
@@ -219,7 +219,7 @@
       font-size: 13px;
     }
 
-    /* â”€â”€ Section divider â”€â”€ */
+    /* ── Section divider ── */
     .section-divider {
       height: 6px;
       background: repeating-linear-gradient(
@@ -231,7 +231,7 @@
       border-radius: 3px;
     }
 
-    /* â”€â”€ Bounty Board â”€â”€ */
+    /* ── Bounty Board ── */
     .board-header {
       display: flex;
       align-items: center;
@@ -291,7 +291,7 @@
     .bounty-row.rank-2 { border-color: #c0c0c0; background: rgba(192,192,192,0.05); }
     .bounty-row.rank-3 { border-color: #cd7f32; background: rgba(205,127,50,0.05); }
 
-    /* â”€â”€ Villain Arc â”€â”€ */
+    /* ── Villain Arc ── */
     @keyframes villain-pulse {
       0%, 100% { box-shadow: 0 0 12px rgba(180,0,30,0.4), inset 0 0 8px rgba(180,0,30,0.1); }
       50% { box-shadow: 0 0 28px rgba(180,0,30,0.7), inset 0 0 14px rgba(180,0,30,0.2); }
@@ -367,7 +367,7 @@
     }
     .bounty-amount .z { font-size: 14px; margin-right: 2px; }
 
-    /* â”€â”€ Wanted Poster Modal â”€â”€ */
+    /* ── Wanted Poster Modal ── */
     .wanted-overlay {
       display: none;
       position: fixed;
@@ -598,7 +598,7 @@
     .challenge-btn:hover { transform: translateY(-2px); }
     .challenge-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-    /* â”€â”€ Challenge Panel â”€â”€ */
+    /* ── Challenge Panel ── */
     .challenge-section {
       background: var(--panel);
       border: 1px solid var(--line);
@@ -632,7 +632,7 @@
     }
     .challenge-form input::placeholder { color: var(--muted); }
 
-    /* â”€â”€ My Bounty â”€â”€ */
+    /* ── My Bounty ── */
     .my-bounty {
       background: linear-gradient(135deg, rgba(255,215,64,0.08), rgba(255,140,0,0.04));
       border: 1px solid rgba(255,215,64,0.2);
@@ -669,7 +669,7 @@
       color: var(--muted);
     }
 
-    /* â”€â”€ Pending Challenges â”€â”€ */
+    /* ── Pending Challenges ── */
     .pending-list { margin-top: 20px; }
     .pending-card {
       display: flex;
@@ -709,7 +709,7 @@
       cursor: pointer;
     }
 
-    /* â”€â”€ Responsive â”€â”€ */
+    /* ── Responsive ── */
     @media (max-width: 768px) {
       .bounty-hero {
         grid-template-columns: 1fr;
@@ -796,7 +796,7 @@
       }
     }
 
-    /* â”€â”€ Loading â”€â”€ */
+    /* ── Loading ── */
     .loading-text {
       text-align: center;
       color: var(--muted);
@@ -804,7 +804,7 @@
       padding: 40px;
     }
 
-    /* â”€â”€ Character art mapping â”€â”€ */
+    /* ── Character art mapping ── */
     .wanted-art-placeholder {
       width: 200px;
       height: 200px;
@@ -816,7 +816,7 @@
       font-size: 72px;
     }
 
-    /* â”€â”€ Zenkai Boost â”€â”€ */
+    /* ── Zenkai Boost ── */
     @keyframes zenkai-glow {
       0%, 100% { box-shadow: 0 0 8px rgba(0,229,255,0.3), inset 0 0 8px rgba(0,229,255,0.05); }
       50% { box-shadow: 0 0 20px rgba(0,229,255,0.6), inset 0 0 16px rgba(0,229,255,0.1); }
@@ -898,7 +898,7 @@
         <li><a href="history.html">History</a></li>
         <li><a href="bounty.html" class="active">Bounty</a></li>
         <li class="nav-dropdown">
-          <a href="#" class="active">More â–¾</a>
+          <a href="#" class="active">More ▾</a>
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Data</div>
             <a href="characters.html">Characters</a>
@@ -932,7 +932,7 @@
   <!-- Wanted Poster Modal -->
   <div class="wanted-overlay" id="wanted-modal" onclick="if(event.target===this)closeWanted()">
     <div class="wanted-card" id="wanted-card">
-      <button class="wanted-close" onclick="closeWanted()">âœ•</button>
+      <button class="wanted-close" onclick="closeWanted()">✕</button>
       <div class="wanted-hazard"></div>
       <div class="wanted-header">
         <div class="wanted-logo">Bounty<br>Hunters<small>WANTED</small></div>
@@ -941,7 +941,7 @@
       <div class="wanted-art" id="wanted-art"></div>
       <div class="wanted-info">
         <div class="wanted-player-name" id="wanted-name">ASPEXT</div>
-        <div class="wanted-subtitle">WANTED Â· DEAD OR ALIVE</div>
+        <div class="wanted-subtitle">WANTED · DEAD OR ALIVE</div>
         <div class="wanted-threat" id="wanted-threat"></div>
       </div>
       <div class="wanted-stats-bar">
@@ -966,7 +966,7 @@
 
   <div class="container">
 
-    <!-- â•â•â• HERO / LANDING â•â•â• -->
+    <!-- ═══ HERO / LANDING ═══ -->
     <section class="bounty-hero">
       <div class="bounty-hero-left">
         <div class="event-tag">New Permanent Event</div>
@@ -986,14 +986,14 @@
         <p class="hero-intro">
           The bigger your streak, the bigger the bag on your head.
           <u>Anyone in the server can challenge you at any time</u>
-          â€” and if they take you down, they take everything.
+          — and if they take you down, they take everything.
         </p>
 
         <div class="how-section">
           <div class="how-title">How It Works</div>
           <div class="rule-card win">
             <div class="rule-label">Win</div>
-            <div class="rule-text">Your bounty grows â€” up to <span class="zeni">Z 100,000</span></div>
+            <div class="rule-text">Your bounty grows — up to <span class="zeni">Z 100,000</span></div>
           </div>
           <div class="rule-card lose">
             <div class="rule-label">Lose</div>
@@ -1001,12 +1001,12 @@
           </div>
           <div class="rule-card dodge">
             <div class="rule-label">Dodge</div>
-            <div class="rule-text">Go inactive or dodge too many challenges â€” bounty stripped</div>
+            <div class="rule-text">Go inactive or dodge too many challenges — bounty stripped</div>
           </div>
         </div>
 
         <div class="cta-row">
-          <a href="#bounty-board" class="cta-btn">Leaderboard + Rules â†’ #Bounty-Hunters</a>
+          <a href="#bounty-board" class="cta-btn">Leaderboard + Rules → #Bounty-Hunters</a>
           <span class="cta-side">Check your wanted poster. Start hunting.</span>
         </div>
 
@@ -1016,7 +1016,7 @@
 
     <div class="section-divider"></div>
 
-    <!-- â•â•â• MY BOUNTY BAR â•â•â• -->
+    <!-- ═══ MY BOUNTY BAR ═══ -->
     <div class="my-bounty" id="my-bounty" style="display:none;">
       <div class="my-bounty-info">
         <div>
@@ -1033,20 +1033,20 @@
       </div>
     </div>
 
-    <!-- â•â•â• PENDING CHALLENGES â•â•â• -->
+    <!-- ═══ PENDING CHALLENGES ═══ -->
     <div id="pending-section" style="display:none;">
       <h3 style="font-family:'Exo 2',sans-serif;font-size:16px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;">Incoming Challenges</h3>
       <div class="pending-list" id="pending-list"></div>
     </div>
 
-    <!-- â•â•â• REPORT MATCH RESULTS â•â•â• -->
+    <!-- ═══ REPORT MATCH RESULTS ═══ -->
     <div id="report-section" style="display:none;">
       <h3 style="font-family:'Exo 2',sans-serif;font-size:16px;text-transform:uppercase;color:var(--cyan);margin-bottom:12px;">Report Match Results</h3>
       <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Report the outcome of your accepted challenges. When both players agree on the winner, the result is auto-resolved. If reports conflict, the match is flagged for admin review.</p>
       <div class="pending-list" id="report-list"></div>
     </div>
 
-    <!-- â•â•â• BOUNTY BOARD â•â•â• -->
+    <!-- ═══ BOUNTY BOARD ═══ -->
     <section id="bounty-board">
       <div class="board-header">
         <div class="board-header-left">
@@ -1070,7 +1070,7 @@
 
     <div class="section-divider"></div>
 
-    <!-- â•â•â• CHALLENGE FORM â•â•â• -->
+    <!-- ═══ CHALLENGE FORM ═══ -->
     <div class="challenge-section">
       <div class="challenge-title">Send a Challenge</div>
       <div class="challenge-form">
@@ -1171,7 +1171,7 @@
     let allBounties = [];
     let zenkaiCache = {}; // username -> { active, level } for board rendering
 
-    // â”€â”€ Zenkai Boost System â”€â”€
+    // ── Zenkai Boost System ──
     function getZenkaiKey(username) {
       return `dbl_zenkai_${username.toLowerCase()}`;
     }
@@ -1333,8 +1333,8 @@
       rarityEl.className = 'wanted-rarity ' + rarity.cls;
 
       document.getElementById('wanted-threat').innerHTML = `
-        <span class="threat-label">Scouter Â· Threat</span>
-        <span class="threat-stars">${'â˜…'.repeat(threat)}${'â˜†'.repeat(5 - threat)}</span>
+        <span class="threat-label">Scouter · Threat</span>
+        <span class="threat-stars">${'★'.repeat(threat)}${'☆'.repeat(5 - threat)}</span>
       `;
 
       const ballsHtml = Array.from({ length: dbCount }, (_, i) => {
@@ -1344,7 +1344,7 @@
       document.getElementById('wanted-balls').innerHTML = ballsHtml;
 
       const art = getPlayerArt(b.discord_username);
-      document.getElementById('wanted-art').innerHTML = `<img src="${art}" alt="${escapeHtml(b.discord_username)}" onerror="this.parentElement.innerHTML='<div class=\\'wanted-art-placeholder\\'>âš”</div>'" />`;
+      document.getElementById('wanted-art').innerHTML = `<img src="${art}" alt="${escapeHtml(b.discord_username)}" onerror="this.parentElement.innerHTML='<div class=\\'wanted-art-placeholder\\'>⚔</div>'" />`;
 
       const challengeBtn = document.getElementById('wanted-challenge-btn');
       if (currentUser && currentUser.toLowerCase() !== b.discord_username.toLowerCase()) {
@@ -1514,8 +1514,8 @@
                 <div class="pending-card" style="border-color:var(--cyan);">
                   <div class="pending-info">
                     <strong>${escapeHtml(c.challenger)}</strong> vs <strong>${escapeHtml(c.target)}</strong>
-                    â€” <span style="color:var(--cyan);font-weight:700;">ACCEPTED</span>
-                    â€” Stake: <span style="color:var(--gold);font-weight:700;">Z ${formatBounty(c.bounty_at_stake)}</span>
+                    — <span style="color:var(--cyan);font-weight:700;">ACCEPTED</span>
+                    — Stake: <span style="color:var(--gold);font-weight:700;">Z ${formatBounty(c.bounty_at_stake)}</span>
                   </div>
                   <div class="pending-actions">
                     <button class="btn-accept" onclick="document.getElementById('report-section').scrollIntoView({behavior:'smooth'})">Report Results</button>
@@ -1553,7 +1553,7 @@
       }
     }
 
-    // â”€â”€ Admin: resolve a challenge â”€â”€
+    // ── Admin: resolve a challenge ──
     async function resolveChallenge(challengeId, winnerUsername) {
       if (!isAdmin()) return alert('Admin only');
 
@@ -1643,7 +1643,7 @@
       loadMyBounty();
     }
 
-    // â”€â”€ Self-Reporting System â”€â”€
+    // ── Self-Reporting System ──
     function getReportKey(challengeId, username) {
       return `bounty_report_${challengeId}_${username.toLowerCase()}`;
     }
@@ -1676,16 +1676,16 @@
         return;
       }
 
-      // Both players have reported â€” check agreement
+      // Both players have reported — check agreement
       if (otherReport.toLowerCase() === claimedWinner.toLowerCase()) {
-        // They agree â€” auto-resolve using the same logic as resolveChallenge
+        // They agree — auto-resolve using the same logic as resolveChallenge
         await autoResolveChallenge(challengeId, claimedWinner);
         // Clean up localStorage
         localStorage.removeItem(getReportKey(challengeId, reporter));
         localStorage.removeItem(getReportKey(challengeId, otherPlayer));
         alert(`Both players agreed: ${claimedWinner} wins! Match resolved.`);
       } else {
-        // Disagreement â€” flag as disputed (using 'expired' status)
+        // Disagreement — flag as disputed (using 'expired' status)
         await supabaseClient.from('bounty_challenges').update({
           status: 'expired'
         }).eq('id', challengeId);
@@ -1844,7 +1844,7 @@
               <div class="pending-card">
                 <div class="pending-info">
                   <strong>${escapeHtml(c.challenger)}</strong> vs <strong>${escapeHtml(c.target)}</strong>
-                  â€” Stake: <span style="color:var(--gold);font-weight:700;">Z ${formatBounty(c.bounty_at_stake)}</span>
+                  — Stake: <span style="color:var(--gold);font-weight:700;">Z ${formatBounty(c.bounty_at_stake)}</span>
                   ${reportedText}
                 </div>
                 <div class="pending-actions" ${myReport ? 'style="display:none;"' : ''}>
@@ -1860,7 +1860,7 @@
             <div class="pending-card" style="border-color:var(--gold);background:rgba(255,215,64,0.05);">
               <div class="pending-info">
                 <strong>${escapeHtml(c.challenger)}</strong> vs <strong>${escapeHtml(c.target)}</strong>
-                â€” <span style="color:var(--gold);font-weight:700;">DISPUTED</span> â€” Awaiting admin review
+                — <span style="color:var(--gold);font-weight:700;">DISPUTED</span> — Awaiting admin review
               </div>
             </div>
           `).join('');
@@ -1874,7 +1874,7 @@
       }
     }
 
-    // â”€â”€ Init â”€â”€
+    // ── Init ──
     document.addEventListener('DOMContentLoaded', async () => {
       // Wait a tick for AUTH to init
       setTimeout(async () => {

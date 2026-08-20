@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fight Night â€” DBL Tournaments</title>
+  <title>Fight Night — DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/themes.css" />
   <style>
-    /* â”€â”€ Fight Night Core â”€â”€ */
+    /* ── Fight Night Core ── */
     .fn-hero {
       text-align: center;
       padding: 50px 20px 30px;
@@ -94,7 +94,7 @@
       margin-left: 12px;
     }
 
-    /* â”€â”€ Countdown â”€â”€ */
+    /* ── Countdown ── */
     .fn-countdown {
       display: flex;
       justify-content: center;
@@ -128,7 +128,7 @@
       line-height: 1;
     }
 
-    /* â”€â”€ Fight Card â”€â”€ */
+    /* ── Fight Card ── */
     .fn-card-section {
       max-width: 800px;
       margin: 0 auto;
@@ -156,7 +156,7 @@
     .fn-section-title::before { right: calc(50% + 80px); }
     .fn-section-title::after { left: calc(50% + 80px); }
 
-    /* â”€â”€ Match Card (Fight Card Style) â”€â”€ */
+    /* ── Match Card (Fight Card Style) ── */
     .fn-match {
       background: var(--panel);
       border: 1px solid var(--line);
@@ -250,7 +250,7 @@
       border-top: 1px solid var(--line);
     }
 
-    /* â”€â”€ Prediction Vote â”€â”€ */
+    /* ── Prediction Vote ── */
     .fn-predict {
       display: flex;
       justify-content: center;
@@ -291,7 +291,7 @@
       opacity: .5;
     }
 
-    /* â”€â”€ Result Flash â”€â”€ */
+    /* ── Result Flash ── */
     .fn-result-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -340,7 +340,7 @@
       color: var(--muted);
     }
 
-    /* â”€â”€ Commentary / Shoutbox â”€â”€ */
+    /* ── Commentary / Shoutbox ── */
     .fn-commentary {
       max-width: 800px;
       margin: 30px auto;
@@ -425,7 +425,7 @@
       font-size: .85rem;
     }
 
-    /* â”€â”€ Recap Section â”€â”€ */
+    /* ── Recap Section ── */
     .fn-recap {
       max-width: 800px;
       margin: 0 auto 40px;
@@ -479,7 +479,7 @@
       margin-top: 4px;
     }
 
-    /* â”€â”€ Predictions Leaderboard â”€â”€ */
+    /* ── Predictions Leaderboard ── */
     .fn-predictions-lb {
       max-width: 800px;
       margin: 0 auto 40px;
@@ -518,7 +518,7 @@
       color: var(--cyan);
     }
 
-    /* â”€â”€ Stats Row â”€â”€ */
+    /* ── Stats Row ── */
     .fn-stats-row {
       display: flex;
       justify-content: center;
@@ -547,7 +547,7 @@
       color: var(--muted);
     }
 
-    /* â”€â”€ Responsive â”€â”€ */
+    /* ── Responsive ── */
     @media (max-width: 600px) {
       .fn-match-body { padding: 12px 10px; gap: 8px; }
       .fn-fighter-name { font-size: 15px; }
@@ -560,7 +560,7 @@
   <nav class="navbar">
     <div class="container">
       <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
-      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">â˜°</button>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
       <ul class="navbar-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="tournament.html">Tournament</a></li>
@@ -571,7 +571,7 @@
         <li><a href="bounty.html">Bounty</a></li>
         <li><a href="matches.html">Matches</a></li>
         <li class="nav-dropdown">
-          <a href="#">More â–¾</a>
+          <a href="#">More ▾</a>
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Data</div>
             <a href="characters.html">Characters</a>
@@ -654,7 +654,7 @@
   <script src="js/sounds.js"></script>
   <script src="js/themes.js"></script>
   <script>
-    // â”€â”€ Fight Night Page Logic â”€â”€
+    // ── Fight Night Page Logic ──
     let tournament = null;
     let matches = [];
     let signups = [];
@@ -844,8 +844,8 @@
 
         const p1Name = p1?.discord_username || 'TBD';
         const p2Name = p2?.discord_username || 'TBD';
-        const p1Elo = p1?.elo || 'â€”';
-        const p2Elo = p2?.elo || 'â€”';
+        const p1Elo = p1?.elo || '—';
+        const p2Elo = p2?.elo || '—';
 
         const winnerClass1 = isCompleted ? (m.winner_id === m.player1_id ? 'fn-winner' : 'fn-loser') : '';
         const winnerClass2 = isCompleted ? (m.winner_id === m.player2_id ? 'fn-winner' : 'fn-loser') : '';
@@ -860,8 +860,8 @@
             const cls1 = pred === m.player1_id ? (correct1 ? 'correct' : 'wrong') : '';
             const cls2 = pred === m.player2_id ? (correct2 ? 'correct' : 'wrong') : '';
             predictHtml = `<div class="fn-predict">
-              <button class="fn-predict-btn ${cls1}" disabled>${p1Name} ${correct1 ? 'âœ“' : ''}</button>
-              <button class="fn-predict-btn ${cls2}" disabled>${p2Name} ${correct2 ? 'âœ“' : ''}</button>
+              <button class="fn-predict-btn ${cls1}" disabled>${p1Name} ${correct1 ? '✓' : ''}</button>
+              <button class="fn-predict-btn ${cls2}" disabled>${p2Name} ${correct2 ? '✓' : ''}</button>
             </div>`;
           } else if (!isCompleted) {
             const v1 = pred === m.player1_id ? 'voted' : '';
@@ -913,7 +913,7 @@
       NotificationSystem.show('Prediction locked in!', 'success');
     }
 
-    // â”€â”€ Polling for live updates â”€â”€
+    // ── Polling for live updates ──
     function startPolling() {
       pollingInterval = setInterval(async () => {
         try {
@@ -977,7 +977,7 @@
       addChatMessage(`${winnerName} wins the ${label}!`, 'SYSTEM', true);
     }
 
-    // â”€â”€ Chat / Commentary â”€â”€
+    // ── Chat / Commentary ──
     let chatMessages = [];
     const CHAT_KEY = () => 'fn_chat_' + tournament?.id;
 
@@ -1023,7 +1023,7 @@
       }
     });
 
-    // â”€â”€ Spectator tracking â”€â”€
+    // ── Spectator tracking ──
     function trackSpectator() {
       // Simple localStorage-based spectator count
       const key = 'fn_spectators_' + tournament.id;
@@ -1052,7 +1052,7 @@
       }, 10000);
     }
 
-    // â”€â”€ Recap â”€â”€
+    // ── Recap ──
     function renderRecap() {
       const section = document.getElementById('fn-recap-section');
       section.style.display = 'block';
@@ -1111,7 +1111,7 @@
         html += `<div class="fn-award fight-of-night">
           <div class="fn-award-label">Fight of the Night</div>
           <div class="fn-award-name">${p1} vs ${p2}</div>
-          <div class="fn-award-sub">Closest match â€” ${smallestDiff} ELO difference</div>
+          <div class="fn-award-sub">Closest match — ${smallestDiff} ELO difference</div>
         </div>`;
       }
 
@@ -1121,7 +1121,7 @@
         html += `<div class="fn-award ko-of-night">
           <div class="fn-award-label" style="color:var(--red);">KO of the Night</div>
           <div class="fn-award-name">${winner?.discord_username || '?'}</div>
-          <div class="fn-award-sub">Biggest upset â€” ${biggestUpset} ELO gap overcome</div>
+          <div class="fn-award-sub">Biggest upset — ${biggestUpset} ELO gap overcome</div>
         </div>`;
       }
 
@@ -1168,7 +1168,7 @@
       return count;
     }
 
-    // â”€â”€ Predictions Leaderboard â”€â”€
+    // ── Predictions Leaderboard ──
     function renderPredictionsLeaderboard() {
       const section = document.getElementById('fn-predictions-section');
       section.style.display = 'block';

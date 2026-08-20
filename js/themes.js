@@ -1,12 +1,12 @@
-const ThemeManager = (() => {
+﻿const ThemeManager = (() => {
   const themes = {
-    cyberpunk: { name: 'Cyberpunk', icon: '🌆' },
-    saiyan: { name: 'Saiyan Saga', icon: '🔥' },
-    namek: { name: 'Namek Saga', icon: '🌿' },
-    cell: { name: 'Cell Saga', icon: '👾' },
-    buu: { name: 'Buu Saga', icon: '💗' },
-    gt: { name: 'GT', icon: '🔵' },
-    super: { name: 'Super', icon: '⚡' }
+    cyberpunk: { name: 'Cyberpunk', icon: '??' },
+    saiyan: { name: 'Saiyan Saga', icon: '??' },
+    namek: { name: 'Namek Saga', icon: '??' },
+    cell: { name: 'Cell Saga', icon: '??' },
+    buu: { name: 'Buu Saga', icon: '??' },
+    gt: { name: 'GT', icon: '??' },
+    super: { name: 'Super', icon: '?' }
   };
 
   function apply(themeName) {

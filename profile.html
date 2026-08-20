@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Player Profile â€” DBL Tournaments</title>
+  <title>Player Profile — DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/themes.css" />
   <style>
-    /* â”€â”€ Villain Arc â”€â”€ */
+    /* ── Villain Arc ── */
     @keyframes villain-pulse {
       0%, 100% { box-shadow: 0 0 12px rgba(180,0,30,0.4), inset 0 0 8px rgba(180,0,30,0.1); }
       50% { box-shadow: 0 0 28px rgba(180,0,30,0.7), inset 0 0 14px rgba(180,0,30,0.2); }
@@ -381,7 +381,7 @@
     }
 
     .badge-card.locked .badge-icon::after {
-      content: 'ðŸ”’';
+      content: '🔒';
       font-size: 12px;
       position: absolute;
       top: 6px;
@@ -492,7 +492,7 @@
       color: var(--muted);
     }
 
-    /* â”€â”€ Player Card â”€â”€ */
+    /* ── Player Card ── */
     @keyframes cardBorderRotate {
       0% { --card-angle: 0deg; }
       100% { --card-angle: 360deg; }
@@ -929,7 +929,7 @@
       margin-top: 4px;
     }
 
-    /* ── Player Titles ── */
+    /* -- Player Titles -- */
     .profile-equipped-title {
       font-family: 'Exo 2', sans-serif;
       font-size: 13px;
@@ -1012,7 +1012,7 @@
       font-style: italic;
     }
 
-    /* â”€â”€ Zenkai Indicator â”€â”€ */
+    /* ── Zenkai Indicator ── */
     .zenkai-indicator {
       display: inline-flex;
       align-items: center;
@@ -1066,7 +1066,7 @@
         <li><a href="bounty.html">Bounty</a></li>
         <li><a href="matches.html">Matches</a></li>
         <li class="nav-dropdown">
-          <a href="#">More â–¾</a>
+          <a href="#">More ▾</a>
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Data</div>
             <a href="characters.html">Characters</a>
@@ -1161,7 +1161,7 @@
         return;
       }
 
-      document.title = `${playerName} â€” DBL Tournaments`;
+      document.title = `${playerName} — DBL Tournaments`;
 
       try {
         // Get all signups for this player
@@ -1345,7 +1345,7 @@
           </div>
         `;
 
-        // â”€â”€ Bounty Hunter Section â”€â”€
+        // ── Bounty Hunter Section ──
         try {
           const { data: bountyData } = await supabaseClient
             .from('bounties')
@@ -1405,7 +1405,7 @@
                       if (!raw) return '';
                       const z = JSON.parse(raw);
                       if (!z.active || Date.now() - z.activatedAt > 86400000) return '';
-                      return '<div class="zenkai-indicator"><span class="zenkai-flame">ðŸ”¥</span><span class="zenkai-text">Zenkai Active</span><span class="zenkai-level">Lv' + z.level + '</span></div>';
+                      return '<div class="zenkai-indicator"><span class="zenkai-flame">🔥</span><span class="zenkai-text">Zenkai Active</span><span class="zenkai-level">Lv' + z.level + '</span></div>';
                     } catch { return ''; }
                   })()}
                 ` : ''}
@@ -1426,7 +1426,7 @@
                   </div>
                 ` : '<div style="font-size:13px;color:var(--muted);font-style:italic;">No bounty matches yet.</div>'}
                 <div style="margin-top:12px;">
-                  <a href="bounty.html" style="color:var(--gold);font-size:13px;font-weight:700;text-decoration:none;">View Bounty Board â†’</a>
+                  <a href="bounty.html" style="color:var(--gold);font-size:13px;font-weight:700;text-decoration:none;">View Bounty Board →</a>
                 </div>
               </div>
             `;
@@ -1739,16 +1739,16 @@
           console.error('Badges error:', e);
         }
 
-        // â”€â”€ Player Card â”€â”€
+        // ── Player Card ──
         try {
           const eloData = await db.getPlayerElo(playerName);
           const elo = eloData ? eloData.elo : null;
           const tier = elo
-            ? (elo >= 1400 ? { name: 'Diamond', icon: 'ðŸ’Ž', cls: 'tier-diamond' }
-              : elo >= 1200 ? { name: 'Platinum', icon: 'âš¡', cls: 'tier-platinum' }
-              : elo >= 1100 ? { name: 'Gold', icon: 'ðŸ¥‡', cls: 'tier-gold' }
-              : elo >= 1000 ? { name: 'Silver', icon: 'ðŸ¥ˆ', cls: 'tier-silver' }
-              : { name: 'Bronze', icon: 'ðŸ¥‰', cls: 'tier-bronze' })
+            ? (elo >= 1400 ? { name: 'Diamond', icon: '💎', cls: 'tier-diamond' }
+              : elo >= 1200 ? { name: 'Platinum', icon: '⚡', cls: 'tier-platinum' }
+              : elo >= 1100 ? { name: 'Gold', icon: '🥇', cls: 'tier-gold' }
+              : elo >= 1000 ? { name: 'Silver', icon: '🥈', cls: 'tier-silver' }
+              : { name: 'Bronze', icon: '🥉', cls: 'tier-bronze' })
             : null;
 
           // Equipped flair items
@@ -1794,24 +1794,24 @@
 
           // Earned badges (reuse the earned Set from above)
           const badgeDefs = [
-            { id: 'first_blood',    icon: 'ðŸŒŸ' },
-            { id: 'champion',       icon: 'ðŸ†' },
-            { id: 'dynasty',        icon: 'ðŸ‘‘' },
-            { id: 'on_fire',        icon: 'ðŸ”¥' },
-            { id: 'streak_master',  icon: 'âš¡' },
-            { id: 'veteran',        icon: 'âš”ï¸' },
-            { id: 'socialite',      icon: 'ðŸ¤' },
-            { id: 'sharpshooter',   icon: 'ðŸŽ¯' },
-            { id: 'iron_wall',      icon: 'ðŸ›¡ï¸' },
-            { id: 'underdog',       icon: 'ðŸ’€' },
-            { id: 'rising_star',    icon: 'â­' },
-            { id: 'elite',          icon: 'ðŸ’Ž' },
-            { id: 'bounty_hunter',  icon: 'ðŸ’°' },
-            { id: 'bounty_king',    icon: 'ðŸ¤‘' },
-            { id: 'big_spender',    icon: 'ðŸ›’' },
-            { id: 'collector',      icon: 'ðŸ“¦' },
-            { id: 'perfect_season', icon: 'âœ¨' },
-            { id: 'tenacious',      icon: 'ðŸ”„' },
+            { id: 'first_blood',    icon: '🌟' },
+            { id: 'champion',       icon: '🏆' },
+            { id: 'dynasty',        icon: '👑' },
+            { id: 'on_fire',        icon: '🔥' },
+            { id: 'streak_master',  icon: '⚡' },
+            { id: 'veteran',        icon: '⚔️' },
+            { id: 'socialite',      icon: '🤝' },
+            { id: 'sharpshooter',   icon: '🎯' },
+            { id: 'iron_wall',      icon: '🛡️' },
+            { id: 'underdog',       icon: '💀' },
+            { id: 'rising_star',    icon: '⭐' },
+            { id: 'elite',          icon: '💎' },
+            { id: 'bounty_hunter',  icon: '💰' },
+            { id: 'bounty_king',    icon: '🤑' },
+            { id: 'big_spender',    icon: '🛒' },
+            { id: 'collector',      icon: '📦' },
+            { id: 'perfect_season', icon: '✨' },
+            { id: 'tenacious',      icon: '🔄' },
           ];
           const earnedBadgeIcons = badgeDefs.filter(b => earned.has(b.id)).map(b => b.icon);
 
@@ -1828,7 +1828,7 @@
                       <div class="card-elo-value">${elo}</div>
                       <span class="card-tier-badge ${tier.cls}">${tier.icon} ${tier.name}</span>
                     ` : ''}
-                    ${pointsVal !== null ? `<div class="card-points-badge">ðŸ’Ž ${pointsVal.toLocaleString()} Points</div>` : ''}
+                    ${pointsVal !== null ? `<div class="card-points-badge">💎 ${pointsVal.toLocaleString()} Points</div>` : ''}
                   </div>
 
                   ${cardChars.length ? `
@@ -1870,7 +1870,7 @@
                   ` : ''}
                 </div>
               </div>
-              <button class="card-share-btn" onclick="copyProfileLink()">ðŸ“‹ Copy Profile Link</button>
+              <button class="card-share-btn" onclick="copyProfileLink()">📋 Copy Profile Link</button>
             </div>
           `;
 
@@ -1892,14 +1892,14 @@
               if (fm?.length) {
                 const w = fm[0];
                 const champName = w.winner_id === w.player1_id ? w.player1?.discord_username : w.player2?.discord_username;
-                if (champName === playerName) accolades.push({ icon: 'ðŸ†', label: 'Current Champion' });
+                if (champName === playerName) accolades.push({ icon: '🏆', label: 'Current Champion' });
               }
             }
             // Best streak
             const { data: pts } = await supabaseClient.from('player_points')
               .select('best_streak, current_streak').eq('discord_username', playerName).single();
-            if (pts?.best_streak >= 3) accolades.push({ icon: 'ðŸ”¥', label: `Best Streak: ${pts.best_streak}` });
-            if (pts?.current_streak >= 2) accolades.push({ icon: 'âš¡', label: `On ${pts.current_streak} Win Streak` });
+            if (pts?.best_streak >= 3) accolades.push({ icon: '🔥', label: `Best Streak: ${pts.best_streak}` });
+            if (pts?.current_streak >= 2) accolades.push({ icon: '⚡', label: `On ${pts.current_streak} Win Streak` });
 
             if (accolades.length > 0) {
               const wrap = document.querySelector('.player-card-inner .card-top');

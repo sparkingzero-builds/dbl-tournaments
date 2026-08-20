@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Auction House Ã¢â‚¬â€ DBL Tournaments</title>
+  <title>Auction House â€” DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/bracket.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/themes.css" />
   <style>
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Hero Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Hero â”€â”€ */
     .auction-hero { text-align: center; padding: 30px 0 10px; }
     .auction-hero h1 {
       font-size: clamp(28px, 5vw, 48px);
@@ -23,7 +23,7 @@
       color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.15em;
     }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Wallet bar Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Wallet bar â”€â”€ */
     .wallet-bar {
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
       margin: 20px 0 24px; padding: 14px 20px;
@@ -42,7 +42,7 @@
       color: var(--gold); text-shadow: 0 0 12px rgba(255,215,0,0.2);
     }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Tabs Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Tabs â”€â”€ */
     .auction-tabs {
       display: flex; gap: 6px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px;
     }
@@ -58,7 +58,7 @@
       border-color: var(--gold); color: var(--gold); box-shadow: 0 0 12px rgba(255,215,64,0.15);
     }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Filters Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Filters â”€â”€ */
     .auction-filters {
       display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;
     }
@@ -72,7 +72,7 @@
     .auction-filters select:focus { border-color: var(--gold); outline: none; }
     .auction-filters input { flex: 1; min-width: 160px; }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Listings grid Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Listings grid â”€â”€ */
     .listings-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px;
       margin-bottom: 30px;
@@ -154,7 +154,7 @@
     }
     .btn-cancel:hover { border-color: var(--red) !important; color: var(--red); }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Create listing panel Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Create listing panel â”€â”€ */
     .create-listing-panel {
       background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
       padding: 24px; margin-bottom: 30px;
@@ -178,7 +178,7 @@
     .form-group select:focus,
     .form-group input:focus { border-color: var(--gold); outline: none; }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ My listings / bids Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ My listings / bids â”€â”€ */
     .my-items-table {
       width: 100%; border-collapse: collapse; margin-bottom: 20px;
     }
@@ -201,26 +201,26 @@
     .status-outbid { background: rgba(255,45,120,0.15); color: var(--pink); }
     .status-winning { background: rgba(46,213,115,0.15); color: var(--green); }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Empty state Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Empty state â”€â”€ */
     .empty-state {
       text-align: center; padding: 60px 20px; color: var(--muted);
     }
     .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
     .empty-state p { font-size: 14px; }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Login prompt Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Login prompt â”€â”€ */
     .login-prompt {
       text-align: center; padding: 40px; background: var(--panel);
       border: 1px solid var(--line); border-radius: 12px;
     }
     .login-prompt p { color: var(--muted); margin-bottom: 16px; }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Section header Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Section header â”€â”€ */
     .section-header { display: flex; align-items: center; gap: 12px; margin: 28px 0 16px; }
     .section-header h2 { font-size: 16px; color: var(--text); letter-spacing: 0.1em; white-space: nowrap; font-family: 'Exo 2', sans-serif; font-weight: 800; text-transform: uppercase; }
     .section-header::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--line), transparent); }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Responsive Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Responsive â”€â”€ */
     @media (max-width: 600px) {
       .listings-grid { grid-template-columns: 1fr; }
       .create-form { grid-template-columns: 1fr; }
@@ -308,7 +308,7 @@
       <button class="auction-tab" data-tab="my-bids" onclick="switchTab('my-bids')">My Bids</button>
     </div>
 
-    <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â Browse Tab Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
+    <!-- â•â•â• Browse Tab â•â•â• -->
     <div class="tab-content" id="tab-browse">
       <div class="auction-filters">
         <input type="text" id="search-input" placeholder="Search items..." oninput="filterListings()" />
@@ -338,7 +338,7 @@
       </div>
     </div>
 
-    <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â Create Tab Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
+    <!-- â•â•â• Create Tab â•â•â• -->
     <div class="tab-content" id="tab-create" style="display:none">
       <div id="create-login-check"></div>
       <div class="create-listing-panel" id="create-panel" style="display:none">
@@ -374,7 +374,7 @@
       </div>
     </div>
 
-    <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â My Listings Tab Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
+    <!-- â•â•â• My Listings Tab â•â•â• -->
     <div class="tab-content" id="tab-my-listings" style="display:none">
       <div id="my-listings-login-check"></div>
       <div class="table-scroll" id="my-listings-content" style="display:none">
@@ -387,7 +387,7 @@
       </div>
     </div>
 
-    <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â My Bids Tab Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
+    <!-- â•â•â• My Bids Tab â•â•â• -->
     <div class="tab-content" id="tab-my-bids" style="display:none">
       <div id="my-bids-login-check"></div>
       <div class="table-scroll" id="my-bids-content" style="display:none">
@@ -418,7 +418,7 @@
     let currentUser = null;
     let userBalance = 0;
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Init Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Init â”€â”€
     document.addEventListener('DOMContentLoaded', async () => {
       if (AUTH.isLoggedIn()) {
         currentUser = AUTH.getDiscordUsername();
@@ -429,7 +429,7 @@
       await loadListings();
     });
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Balance Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Balance â”€â”€
     async function loadBalance() {
       const { data } = await supabaseClient
         .from('player_points')
@@ -440,7 +440,7 @@
       document.getElementById('wallet-amount').textContent = userBalance.toLocaleString();
     }
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Tab switching Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Tab switching â”€â”€
     function switchTab(tab) {
       document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
       document.querySelectorAll('.auction-tab').forEach(el => el.classList.remove('active'));
@@ -452,7 +452,7 @@
       if (tab === 'my-bids') loadMyBids();
     }
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Load active listings Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Load active listings â”€â”€
     async function loadListings() {
       const { data, error } = await supabaseClient
         .from('auction_listings')
@@ -464,7 +464,7 @@
       filterListings();
     }
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Filter & render Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Filter & render â”€â”€
     function filterListings() {
       const search = document.getElementById('search-input').value.toLowerCase();
       const typeFilter = document.getElementById('filter-type').value;
@@ -538,7 +538,7 @@
       }).join('');
     }
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Place bid Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Place bid â”€â”€
     async function placeBid(listingId) {
       if (!currentUser) return;
 
@@ -620,7 +620,7 @@
       await loadListings();
     }
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Buy now Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Buy now â”€â”€
     async function buyNow(listingId) {
       if (!currentUser) return;
 
@@ -697,7 +697,7 @@
       await loadListings();
     }
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Create listing tab setup Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Create listing tab setup â”€â”€
     async function setupCreateTab() {
       if (!currentUser) {
         document.getElementById('create-login-check').innerHTML =
@@ -738,7 +738,7 @@
       }
     }
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Create listing Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Create listing â”€â”€
     async function createListing() {
       if (!currentUser) return;
 
@@ -790,7 +790,7 @@
       await loadListings();
     }
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ My listings Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ My listings â”€â”€
     async function loadMyListings() {
       if (!currentUser) {
         document.getElementById('my-listings-login-check').innerHTML =
@@ -829,7 +829,7 @@
       }).join('');
     }
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Cancel listing Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Cancel listing â”€â”€
     async function cancelListing(listingId) {
       const { data: listing } = await supabaseClient
         .from('auction_listings')
@@ -864,7 +864,7 @@
       await loadListings();
     }
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ My bids Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ My bids â”€â”€
     async function loadMyBids() {
       if (!currentUser) {
         document.getElementById('my-bids-login-check').innerHTML =
@@ -919,7 +919,7 @@
       }).join('');
     }
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Process expired listings Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Process expired listings â”€â”€
     async function processExpiredListings() {
       const { data: expired } = await supabaseClient
         .from('auction_listings')
@@ -965,7 +965,7 @@
       }
     }
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Helpers Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Helpers â”€â”€
     function formatTimeRemaining(ms) {
       if (ms <= 0) return 'Expired';
       const h = Math.floor(ms / 3600000);
