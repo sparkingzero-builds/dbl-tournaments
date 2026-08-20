@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Power Rankings — DBL Tournaments</title>
+  <title>Power Rankings â€” DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
@@ -63,7 +63,7 @@
       50% { opacity: 0.4; box-shadow: none; }
     }
 
-    /* ── Section Headings ── */
+    /* â”€â”€ Section Headings â”€â”€ */
     .pr-section {
       max-width: 900px;
       margin: 0 auto 36px;
@@ -84,7 +84,7 @@
     }
     .pr-section-title .icon { font-size: 20px; }
 
-    /* ── Player of the Week ── */
+    /* â”€â”€ Player of the Week â”€â”€ */
     .potw-card {
       background: var(--panel);
       border: 2px solid var(--gold);
@@ -143,7 +143,7 @@
       letter-spacing: 0.08em;
     }
 
-    /* ── Movers ── */
+    /* â”€â”€ Movers â”€â”€ */
     .movers-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -204,7 +204,7 @@
     .mover-change.up { color: var(--green); }
     .mover-change.down { color: var(--red); }
 
-    /* ── Upsets ── */
+    /* â”€â”€ Upsets â”€â”€ */
     .upset-card {
       background: var(--panel);
       border: 1px solid var(--line);
@@ -241,7 +241,7 @@
       text-align: right;
     }
 
-    /* ── Char bars ── */
+    /* â”€â”€ Char bars â”€â”€ */
     .char-bar {
       display: flex;
       align-items: center;
@@ -297,7 +297,7 @@
       text-align: right;
     }
 
-    /* ── Activity Stats ── */
+    /* â”€â”€ Activity Stats â”€â”€ */
     .activity-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -324,7 +324,7 @@
       margin-top: 4px;
     }
 
-    /* ── Streaks ── */
+    /* â”€â”€ Streaks â”€â”€ */
     .streak-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -499,6 +499,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-client.js"></script>
+  <script src="js/maintenance.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/activity-alerts.js"></script>
     <script src="js/daily-rewards.js"></script>
@@ -523,9 +524,9 @@
         const weekAgoISO = weekAgo.toISOString();
 
         document.getElementById('pr-date-range').textContent =
-          formatDate(weekAgo) + ' — ' + formatDate(now);
+          formatDate(weekAgo) + ' â€” ' + formatDate(now);
 
-        // ── Fetch all data in parallel ──
+        // â”€â”€ Fetch all data in parallel â”€â”€
         const [
           eloRes,
           bountyRes,
@@ -579,7 +580,7 @@
         const signupIdToUser = {};
         recentSignups.forEach(s => { signupIdToUser[s.id] = s.discord_username; });
 
-        // ── ELO Snapshots (localStorage) ──
+        // â”€â”€ ELO Snapshots (localStorage) â”€â”€
         const SNAPSHOT_KEY = 'pr_elo_snapshots';
         const snapshots = JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || '{}');
         const todayKey = now.toISOString().slice(0, 10);
@@ -648,9 +649,9 @@
           });
         }
 
-        // ═══════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // 1. Player of the Week
-        // ═══════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         const potwContainer = document.getElementById('potw-container');
         if (eloChanges.length > 0) {
           const sorted = [...eloChanges].sort((a, b) => b.change - a.change);
@@ -673,7 +674,7 @@
                   <div class="lbl">Current ELO</div>
                 </div>
                 <div class="potw-stat">
-                  <div class="val" style="color:var(--text)">${w}W — ${l}L</div>
+                  <div class="val" style="color:var(--text)">${w}W â€” ${l}L</div>
                   <div class="lbl">This Week</div>
                 </div>
                 ${bw > 0 ? `<div class="potw-stat">
@@ -686,9 +687,9 @@
           potwContainer.innerHTML = '<div class="pr-empty">No data yet this week. Check back after some matches!</div>';
         }
 
-        // ═══════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // 2. Biggest Movers
-        // ═══════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         const moversContainer = document.getElementById('movers-container');
         if (eloChanges.length > 0) {
           const risers = [...eloChanges].filter(e => e.change > 0).sort((a, b) => b.change - a.change).slice(0, 5);
@@ -719,9 +720,9 @@
           moversContainer.innerHTML = '<div class="pr-empty">No movement data available this week.</div>';
         }
 
-        // ═══════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // 3. Upsets of the Week
-        // ═══════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         const upsetsContainer = document.getElementById('upsets-container');
         const upsets = [];
         recentMatches.forEach(m => {
@@ -770,9 +771,9 @@
           upsetsContainer.innerHTML = '<div class="pr-empty">No upsets this week. The favourites held firm.</div>';
         }
 
-        // ═══════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // 4. Most Used Characters
-        // ═══════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         const charsUsedContainer = document.getElementById('chars-used-container');
         const charPicks = {};
         recentSignups.forEach(s => {
@@ -804,9 +805,9 @@
           charsUsedContainer.innerHTML = '<div class="pr-empty">No team data from this week.</div>';
         }
 
-        // ═══════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // 5. Most Banned Characters
-        // ═══════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         const charsBannedContainer = document.getElementById('chars-banned-container');
         const banCounts = {};
         recentSignups.forEach(s => {
@@ -839,9 +840,9 @@
           charsBannedContainer.innerHTML = '<div class="pr-empty">No ban data from this week.</div>';
         }
 
-        // ═══════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // 6. Activity Stats
-        // ═══════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         const activityContainer = document.getElementById('activity-stats-container');
         const totalMatchesWeek = recentMatches.filter(m => m.winner_id).length;
         const totalBountyChallenges = recentChallenges.length;
@@ -880,9 +881,9 @@
             </div>
           </div>`;
 
-        // ═══════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // 7. Hot & Cold Streaks
-        // ═══════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         const streaksContainer = document.getElementById('streaks-container');
 
         // From bounties table (has streak column)
@@ -931,3 +932,6 @@
   <script src="js/toolbar.js"></script>
 </body>
 </html>
+
+
+

@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Season Awards — DBL Tournaments</title>
+  <title>Season Awards â€” DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
@@ -408,6 +408,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-client.js"></script>
+  <script src="js/maintenance.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/activity-alerts.js"></script>
   <script src="js/daily-rewards.js"></script>
@@ -429,7 +430,7 @@
     let myVotes = {};
     let allVotes = {};
 
-    // ── Voting state management (localStorage per-season) ──
+    // â”€â”€ Voting state management (localStorage per-season) â”€â”€
     function getVotingState(seasonId) {
       try {
         const data = JSON.parse(localStorage.getItem('mvp_voting_state') || '{}');
@@ -445,7 +446,7 @@
       } catch (e) { console.error('Error saving voting state:', e); }
     }
 
-    // ── Load current season ──
+    // â”€â”€ Load current season â”€â”€
     async function loadSeason() {
       try {
         const { data: seasons } = await supabaseClient
@@ -467,7 +468,7 @@
       }
     }
 
-    // ── Load players for dropdowns ──
+    // â”€â”€ Load players for dropdowns â”€â”€
     async function loadPlayers() {
       try {
         const { data } = await supabaseClient
@@ -480,7 +481,7 @@
       }
     }
 
-    // ── Load existing votes ──
+    // â”€â”€ Load existing votes â”€â”€
     async function loadMyVotes() {
       if (!currentSeason || !AUTH.isLoggedIn()) return;
       const voter = AUTH.getDiscordUsername();
@@ -519,7 +520,7 @@
       }
     }
 
-    // ── Render voting cards ──
+    // â”€â”€ Render voting cards â”€â”€
     function renderVoting() {
       const grid = document.getElementById('awards-grid');
       const showLive = localStorage.getItem('mvp_show_live_results') !== 'false';
@@ -565,7 +566,7 @@
       // Visual feedback only; actual save on submit
     }
 
-    // ── Submit votes ──
+    // â”€â”€ Submit votes â”€â”€
     async function submitVotes() {
       if (!AUTH.isLoggedIn()) return;
       const voter = AUTH.getDiscordUsername();
@@ -599,12 +600,12 @@
         }, 2000);
       } catch (e) {
         console.error('Error submitting votes:', e);
-        btn.textContent = 'Error — Try Again';
+        btn.textContent = 'Error â€” Try Again';
         btn.disabled = false;
       }
     }
 
-    // ── Render results ──
+    // â”€â”€ Render results â”€â”€
     function renderResults() {
       const grid = document.getElementById('results-grid');
       grid.innerHTML = CATEGORIES.map(cat => {
@@ -638,7 +639,7 @@
       }).join('');
     }
 
-    // ── Load past winners ──
+    // â”€â”€ Load past winners â”€â”€
     async function loadPastWinners() {
       try {
         const { data: seasons } = await supabaseClient
@@ -695,7 +696,7 @@
       }
     }
 
-    // ── Init ──
+    // â”€â”€ Init â”€â”€
     async function init() {
       await loadSeason();
       await loadPlayers();
@@ -751,3 +752,6 @@
   <script src="js/toolbar.js"></script>
 </body>
 </html>
+
+
+

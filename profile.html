@@ -1,15 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Player Profile â€” DBL Tournaments</title>
+  <title>Player Profile Ã¢â‚¬â€ DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/themes.css" />
   <style>
-    /* â”€â”€ Villain Arc â”€â”€ */
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ Villain Arc Ã¢â€â‚¬Ã¢â€â‚¬ */
     @keyframes villain-pulse {
       0%, 100% { box-shadow: 0 0 12px rgba(180,0,30,0.4), inset 0 0 8px rgba(180,0,30,0.1); }
       50% { box-shadow: 0 0 28px rgba(180,0,30,0.7), inset 0 0 14px rgba(180,0,30,0.2); }
@@ -381,7 +381,7 @@
     }
 
     .badge-card.locked .badge-icon::after {
-      content: 'ðŸ”’';
+      content: 'Ã°Å¸â€â€™';
       font-size: 12px;
       position: absolute;
       top: 6px;
@@ -492,7 +492,7 @@
       color: var(--muted);
     }
 
-    /* â”€â”€ Player Card â”€â”€ */
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ Player Card Ã¢â€â‚¬Ã¢â€â‚¬ */
     @keyframes cardBorderRotate {
       0% { --card-angle: 0deg; }
       100% { --card-angle: 360deg; }
@@ -929,7 +929,90 @@
       margin-top: 4px;
     }
 
-    /* â”€â”€ Zenkai Indicator â”€â”€ */
+    /* â”€â”€ Player Titles â”€â”€ */
+    .profile-equipped-title {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-top: 4px;
+      text-shadow: 0 0 10px currentColor;
+    }
+    .titles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .title-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      text-align: center;
+      position: relative;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    }
+    .title-card:hover { transform: translateY(-2px); }
+    .title-card.owned { border-color: var(--cyan); }
+    .title-card.owned:hover { box-shadow: 0 0 16px rgba(0, 229, 255, 0.2); }
+    .title-card.equipped-card {
+      border-color: var(--gold);
+      box-shadow: 0 0 16px rgba(255, 215, 0, 0.2);
+    }
+    .title-card.locked {
+      opacity: 0.35;
+      filter: grayscale(0.8);
+    }
+    .title-card-name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .title-card-desc {
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .title-card-source {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 2px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .title-card-source.earned { background: rgba(0, 229, 255, 0.12); color: var(--cyan); }
+    .title-card-source.shop { background: rgba(255, 215, 0, 0.12); color: var(--gold); }
+    .title-equip-btn {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      padding: 6px;
+      border-radius: 6px;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 10px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .title-equip-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .title-equip-btn.is-equipped { border-color: var(--gold); color: var(--gold); background: rgba(255, 215, 0, 0.08); }
+    .title-lock-hint {
+      font-size: 9px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ Zenkai Indicator Ã¢â€â‚¬Ã¢â€â‚¬ */
     .zenkai-indicator {
       display: inline-flex;
       align-items: center;
@@ -983,7 +1066,7 @@
         <li><a href="bounty.html">Bounty</a></li>
         <li><a href="matches.html">Matches</a></li>
         <li class="nav-dropdown">
-          <a href="#">More â–¾</a>
+          <a href="#">More Ã¢â€“Â¾</a>
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Data</div>
             <a href="characters.html">Characters</a>
@@ -1020,7 +1103,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-client.js"></script>
+  <script src="js/maintenance.js"></script>
   <script src="js/auth.js"></script>
+    <script src="js/titles.js"></script>
     <script src="js/activity-alerts.js"></script>
     <script src="js/daily-rewards.js"></script>
   <script src="js/notifications.js"></script>
@@ -1028,6 +1113,23 @@
   <script src="js/particles.js"></script>
   <script>
     initParticles(document.getElementById('particles'));
+
+    async function equipPlayerTitle(titleId) {
+      try {
+        const username = AUTH.getDiscordUsername();
+        if (!username) return;
+        await TitleManager.equipTitle(username, titleId);
+        if (typeof NotificationSystem !== 'undefined') {
+          const t = TitleManager.TITLES[titleId];
+          NotificationSystem.show('Equipped title: ' + (t ? t.name : titleId), 'success');
+        }
+        setTimeout(() => window.location.reload(), 500);
+      } catch (e) {
+        if (typeof NotificationSystem !== 'undefined') {
+          NotificationSystem.show('Failed to equip title', 'error');
+        }
+      }
+    }
 
     function copyProfileLink() {
       navigator.clipboard.writeText(window.location.href).then(() => {
@@ -1058,7 +1160,7 @@
         return;
       }
 
-      document.title = `${playerName} â€” DBL Tournaments`;
+      document.title = `${playerName} Ã¢â‚¬â€ DBL Tournaments`;
 
       try {
         // Get all signups for this player
@@ -1154,6 +1256,7 @@
         content.innerHTML = `
           <div class="profile-header">
             <h1 class="profile-name">${playerName}</h1>
+            <div id="player-title-display"></div>
             <div class="profile-subtitle">Player Profile</div>
           </div>
           <div id="villain-overlay-slot"></div>
@@ -1161,6 +1264,8 @@
           <div id="elo-section"></div>
 
           <div id="achievements-section"></div>
+
+          <div id="titles-section" class="achievements-section" style="display:none;"></div>
 
           <div class="profile-stats stagger">
             <div class="p-stat">
@@ -1239,7 +1344,7 @@
           </div>
         `;
 
-        // â”€â”€ Bounty Hunter Section â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬ Bounty Hunter Section Ã¢â€â‚¬Ã¢â€â‚¬
         try {
           const { data: bountyData } = await supabaseClient
             .from('bounties')
@@ -1299,7 +1404,7 @@
                       if (!raw) return '';
                       const z = JSON.parse(raw);
                       if (!z.active || Date.now() - z.activatedAt > 86400000) return '';
-                      return '<div class="zenkai-indicator"><span class="zenkai-flame">ðŸ”¥</span><span class="zenkai-text">Zenkai Active</span><span class="zenkai-level">Lv' + z.level + '</span></div>';
+                      return '<div class="zenkai-indicator"><span class="zenkai-flame">Ã°Å¸â€Â¥</span><span class="zenkai-text">Zenkai Active</span><span class="zenkai-level">Lv' + z.level + '</span></div>';
                     } catch { return ''; }
                   })()}
                 ` : ''}
@@ -1320,7 +1425,7 @@
                   </div>
                 ` : '<div style="font-size:13px;color:var(--muted);font-style:italic;">No bounty matches yet.</div>'}
                 <div style="margin-top:12px;">
-                  <a href="bounty.html" style="color:var(--gold);font-size:13px;font-weight:700;text-decoration:none;">View Bounty Board â†’</a>
+                  <a href="bounty.html" style="color:var(--gold);font-size:13px;font-weight:700;text-decoration:none;">View Bounty Board Ã¢â€ â€™</a>
                 </div>
               </div>
             `;
@@ -1404,24 +1509,24 @@
 
           // -- Badge definitions with tiers --
           const badgeDefs = [
-            { id: 'first_blood',    icon: 'ðŸŒŸ', name: 'First Blood',    desc: 'Won their first ever match' },
-            { id: 'champion',       icon: 'ðŸ†', name: 'Champion',       desc: 'Won a tournament',                  tiers: [1, 3, 5], tierLabel: 'tournament wins' },
-            { id: 'dynasty',        icon: 'ðŸ‘‘', name: 'Dynasty',        desc: 'Won 2+ tournaments',                gold: true },
-            { id: 'on_fire',        icon: 'ðŸ”¥', name: 'On Fire',        desc: 'Won 3+ matches in a row',           tiers: [3, 5, 10], tierLabel: 'win streak' },
-            { id: 'streak_master',  icon: 'âš¡', name: 'Streak Master',  desc: 'Won 5+ matches in a row' },
-            { id: 'veteran',        icon: 'âš”ï¸', name: 'Veteran',        desc: 'Played in 3+ tournaments',          tiers: [3, 7, 15], tierLabel: 'tournaments' },
-            { id: 'socialite',      icon: 'ðŸ¤', name: 'Socialite',      desc: 'Played in 5+ tournaments' },
-            { id: 'sharpshooter',   icon: 'ðŸŽ¯', name: 'Sharpshooter',   desc: '75%+ win rate (min 4 matches)' },
-            { id: 'iron_wall',      icon: 'ðŸ›¡ï¸', name: 'Iron Wall',      desc: 'Never lost in a tournament (min 2)' },
-            { id: 'underdog',       icon: 'ðŸ’€', name: 'Underdog',       desc: 'Beat a player with higher ELO' },
-            { id: 'rising_star',    icon: 'â­', name: 'Rising Star',    desc: 'Reached 1100+ ELO' },
-            { id: 'elite',          icon: 'ðŸ’Ž', name: 'Elite',          desc: 'Reached 1300+ ELO' },
-            { id: 'bounty_hunter',  icon: 'ðŸ’°', name: 'Bounty Hunter',  desc: 'Won 5+ bounty matches',             tiers: [5, 15, 30], tierLabel: 'bounty wins' },
-            { id: 'bounty_king',    icon: 'ðŸ¤‘', name: 'Bounty King',    desc: 'Won 15+ bounty matches' },
-            { id: 'big_spender',    icon: 'ðŸ›’', name: 'Big Spender',    desc: 'Spent 1000+ points total' },
-            { id: 'collector',      icon: 'ðŸ“¦', name: 'Collector',      desc: 'Own 5+ shop items' },
-            { id: 'perfect_season', icon: 'âœ¨', name: 'Perfect Season', desc: 'Won a tournament without losing' },
-            { id: 'tenacious',      icon: 'ðŸ”„', name: 'Tenacious',      desc: 'Lost 3+ but still won the tournament' },
+            { id: 'first_blood',    icon: 'Ã°Å¸Å’Å¸', name: 'First Blood',    desc: 'Won their first ever match' },
+            { id: 'champion',       icon: 'Ã°Å¸Ââ€ ', name: 'Champion',       desc: 'Won a tournament',                  tiers: [1, 3, 5], tierLabel: 'tournament wins' },
+            { id: 'dynasty',        icon: 'Ã°Å¸â€˜â€˜', name: 'Dynasty',        desc: 'Won 2+ tournaments',                gold: true },
+            { id: 'on_fire',        icon: 'Ã°Å¸â€Â¥', name: 'On Fire',        desc: 'Won 3+ matches in a row',           tiers: [3, 5, 10], tierLabel: 'win streak' },
+            { id: 'streak_master',  icon: 'Ã¢Å¡Â¡', name: 'Streak Master',  desc: 'Won 5+ matches in a row' },
+            { id: 'veteran',        icon: 'Ã¢Å¡â€Ã¯Â¸Â', name: 'Veteran',        desc: 'Played in 3+ tournaments',          tiers: [3, 7, 15], tierLabel: 'tournaments' },
+            { id: 'socialite',      icon: 'Ã°Å¸Â¤Â', name: 'Socialite',      desc: 'Played in 5+ tournaments' },
+            { id: 'sharpshooter',   icon: 'Ã°Å¸Å½Â¯', name: 'Sharpshooter',   desc: '75%+ win rate (min 4 matches)' },
+            { id: 'iron_wall',      icon: 'Ã°Å¸â€ºÂ¡Ã¯Â¸Â', name: 'Iron Wall',      desc: 'Never lost in a tournament (min 2)' },
+            { id: 'underdog',       icon: 'Ã°Å¸â€™â‚¬', name: 'Underdog',       desc: 'Beat a player with higher ELO' },
+            { id: 'rising_star',    icon: 'Ã¢Â­Â', name: 'Rising Star',    desc: 'Reached 1100+ ELO' },
+            { id: 'elite',          icon: 'Ã°Å¸â€™Å½', name: 'Elite',          desc: 'Reached 1300+ ELO' },
+            { id: 'bounty_hunter',  icon: 'Ã°Å¸â€™Â°', name: 'Bounty Hunter',  desc: 'Won 5+ bounty matches',             tiers: [5, 15, 30], tierLabel: 'bounty wins' },
+            { id: 'bounty_king',    icon: 'Ã°Å¸Â¤â€˜', name: 'Bounty King',    desc: 'Won 15+ bounty matches' },
+            { id: 'big_spender',    icon: 'Ã°Å¸â€ºâ€™', name: 'Big Spender',    desc: 'Spent 1000+ points total' },
+            { id: 'collector',      icon: 'Ã°Å¸â€œÂ¦', name: 'Collector',      desc: 'Own 5+ shop items' },
+            { id: 'perfect_season', icon: 'Ã¢Å“Â¨', name: 'Perfect Season', desc: 'Won a tournament without losing' },
+            { id: 'tenacious',      icon: 'Ã°Å¸â€â€ž', name: 'Tenacious',      desc: 'Lost 3+ but still won the tournament' },
           ];
 
           const earned = new Set();
@@ -1633,16 +1738,16 @@
           console.error('Badges error:', e);
         }
 
-        // â”€â”€ Player Card â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬ Player Card Ã¢â€â‚¬Ã¢â€â‚¬
         try {
           const eloData = await db.getPlayerElo(playerName);
           const elo = eloData ? eloData.elo : null;
           const tier = elo
-            ? (elo >= 1400 ? { name: 'Diamond', icon: 'ðŸ’Ž', cls: 'tier-diamond' }
-              : elo >= 1200 ? { name: 'Platinum', icon: 'âš¡', cls: 'tier-platinum' }
-              : elo >= 1100 ? { name: 'Gold', icon: 'ðŸ¥‡', cls: 'tier-gold' }
-              : elo >= 1000 ? { name: 'Silver', icon: 'ðŸ¥ˆ', cls: 'tier-silver' }
-              : { name: 'Bronze', icon: 'ðŸ¥‰', cls: 'tier-bronze' })
+            ? (elo >= 1400 ? { name: 'Diamond', icon: 'Ã°Å¸â€™Å½', cls: 'tier-diamond' }
+              : elo >= 1200 ? { name: 'Platinum', icon: 'Ã¢Å¡Â¡', cls: 'tier-platinum' }
+              : elo >= 1100 ? { name: 'Gold', icon: 'Ã°Å¸Â¥â€¡', cls: 'tier-gold' }
+              : elo >= 1000 ? { name: 'Silver', icon: 'Ã°Å¸Â¥Ë†', cls: 'tier-silver' }
+              : { name: 'Bronze', icon: 'Ã°Å¸Â¥â€°', cls: 'tier-bronze' })
             : null;
 
           // Equipped flair items
@@ -1688,24 +1793,24 @@
 
           // Earned badges (reuse the earned Set from above)
           const badgeDefs = [
-            { id: 'first_blood',    icon: 'ðŸŒŸ' },
-            { id: 'champion',       icon: 'ðŸ†' },
-            { id: 'dynasty',        icon: 'ðŸ‘‘' },
-            { id: 'on_fire',        icon: 'ðŸ”¥' },
-            { id: 'streak_master',  icon: 'âš¡' },
-            { id: 'veteran',        icon: 'âš”ï¸' },
-            { id: 'socialite',      icon: 'ðŸ¤' },
-            { id: 'sharpshooter',   icon: 'ðŸŽ¯' },
-            { id: 'iron_wall',      icon: 'ðŸ›¡ï¸' },
-            { id: 'underdog',       icon: 'ðŸ’€' },
-            { id: 'rising_star',    icon: 'â­' },
-            { id: 'elite',          icon: 'ðŸ’Ž' },
-            { id: 'bounty_hunter',  icon: 'ðŸ’°' },
-            { id: 'bounty_king',    icon: 'ðŸ¤‘' },
-            { id: 'big_spender',    icon: 'ðŸ›’' },
-            { id: 'collector',      icon: 'ðŸ“¦' },
-            { id: 'perfect_season', icon: 'âœ¨' },
-            { id: 'tenacious',      icon: 'ðŸ”„' },
+            { id: 'first_blood',    icon: 'Ã°Å¸Å’Å¸' },
+            { id: 'champion',       icon: 'Ã°Å¸Ââ€ ' },
+            { id: 'dynasty',        icon: 'Ã°Å¸â€˜â€˜' },
+            { id: 'on_fire',        icon: 'Ã°Å¸â€Â¥' },
+            { id: 'streak_master',  icon: 'Ã¢Å¡Â¡' },
+            { id: 'veteran',        icon: 'Ã¢Å¡â€Ã¯Â¸Â' },
+            { id: 'socialite',      icon: 'Ã°Å¸Â¤Â' },
+            { id: 'sharpshooter',   icon: 'Ã°Å¸Å½Â¯' },
+            { id: 'iron_wall',      icon: 'Ã°Å¸â€ºÂ¡Ã¯Â¸Â' },
+            { id: 'underdog',       icon: 'Ã°Å¸â€™â‚¬' },
+            { id: 'rising_star',    icon: 'Ã¢Â­Â' },
+            { id: 'elite',          icon: 'Ã°Å¸â€™Å½' },
+            { id: 'bounty_hunter',  icon: 'Ã°Å¸â€™Â°' },
+            { id: 'bounty_king',    icon: 'Ã°Å¸Â¤â€˜' },
+            { id: 'big_spender',    icon: 'Ã°Å¸â€ºâ€™' },
+            { id: 'collector',      icon: 'Ã°Å¸â€œÂ¦' },
+            { id: 'perfect_season', icon: 'Ã¢Å“Â¨' },
+            { id: 'tenacious',      icon: 'Ã°Å¸â€â€ž' },
           ];
           const earnedBadgeIcons = badgeDefs.filter(b => earned.has(b.id)).map(b => b.icon);
 
@@ -1722,7 +1827,7 @@
                       <div class="card-elo-value">${elo}</div>
                       <span class="card-tier-badge ${tier.cls}">${tier.icon} ${tier.name}</span>
                     ` : ''}
-                    ${pointsVal !== null ? `<div class="card-points-badge">ðŸ’Ž ${pointsVal.toLocaleString()} Points</div>` : ''}
+                    ${pointsVal !== null ? `<div class="card-points-badge">Ã°Å¸â€™Å½ ${pointsVal.toLocaleString()} Points</div>` : ''}
                   </div>
 
                   ${cardChars.length ? `
@@ -1764,7 +1869,7 @@
                   ` : ''}
                 </div>
               </div>
-              <button class="card-share-btn" onclick="copyProfileLink()">ðŸ“‹ Copy Profile Link</button>
+              <button class="card-share-btn" onclick="copyProfileLink()">Ã°Å¸â€œâ€¹ Copy Profile Link</button>
             </div>
           `;
 
@@ -1786,14 +1891,14 @@
               if (fm?.length) {
                 const w = fm[0];
                 const champName = w.winner_id === w.player1_id ? w.player1?.discord_username : w.player2?.discord_username;
-                if (champName === playerName) accolades.push({ icon: 'ðŸ†', label: 'Current Champion' });
+                if (champName === playerName) accolades.push({ icon: 'Ã°Å¸Ââ€ ', label: 'Current Champion' });
               }
             }
             // Best streak
             const { data: pts } = await supabaseClient.from('player_points')
               .select('best_streak, current_streak').eq('discord_username', playerName).single();
-            if (pts?.best_streak >= 3) accolades.push({ icon: 'ðŸ”¥', label: `Best Streak: ${pts.best_streak}` });
-            if (pts?.current_streak >= 2) accolades.push({ icon: 'âš¡', label: `On ${pts.current_streak} Win Streak` });
+            if (pts?.best_streak >= 3) accolades.push({ icon: 'Ã°Å¸â€Â¥', label: `Best Streak: ${pts.best_streak}` });
+            if (pts?.current_streak >= 2) accolades.push({ icon: 'Ã¢Å¡Â¡', label: `On ${pts.current_streak} Win Streak` });
 
             if (accolades.length > 0) {
               const wrap = document.querySelector('.player-card-inner .card-top');
@@ -1805,6 +1910,70 @@
               }
             }
           } catch (_) {}
+
+          // ── Player Titles ──
+          try {
+            if (typeof TitleManager !== 'undefined') {
+              const equippedTitle = await TitleManager.getEquippedTitle(playerName);
+              const titleDisplay = document.getElementById('player-title-display');
+              if (titleDisplay && equippedTitle) {
+                titleDisplay.innerHTML = `<div class="profile-equipped-title" style="color:${equippedTitle.color}">${equippedTitle.name}</div>`;
+              }
+
+              // Also show on the player card
+              const cardFlairEl = document.querySelector('.card-flair-title');
+              if (!cardFlairEl) {
+                const cardTop = document.querySelector('.card-top .card-player-name');
+                if (cardTop && equippedTitle.id !== 'rookie') {
+                  cardTop.insertAdjacentHTML('afterend', `<div class="card-flair-title" style="color:${equippedTitle.color};text-shadow:0 0 8px ${equippedTitle.color};">${equippedTitle.name}</div>`);
+                }
+              }
+
+              // Titles section
+              const allTitleDefs = Object.values(TitleManager.TITLES);
+              const ownedTitles = await TitleManager.getPlayerTitles(playerName);
+              const ownedIds = new Set(ownedTitles.map(t => t.title_id));
+              const equippedId = ownedTitles.find(t => t.equipped)?.title_id || (ownedIds.has('rookie') ? 'rookie' : null);
+
+              const isOwnProfile = typeof AUTH !== 'undefined' && AUTH.isLoggedIn() && AUTH.getDiscordUsername() === playerName;
+
+              let titlesHtml = `<div class="achievements-title">Titles <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:8px;">${ownedIds.size}/${allTitleDefs.length}</span></div>`;
+              titlesHtml += '<div class="titles-grid">';
+              for (const t of allTitleDefs) {
+                const owned = ownedIds.has(t.id);
+                const isEquipped = equippedId === t.id;
+                let cls = 'title-card';
+                if (owned) cls += ' owned';
+                if (isEquipped) cls += ' equipped-card';
+                if (!owned) cls += ' locked';
+
+                titlesHtml += `<div class="${cls}">`;
+                titlesHtml += `<div class="title-card-name" style="color:${owned ? t.color : 'var(--muted)'}">${t.name}</div>`;
+                titlesHtml += `<div class="title-card-desc">${t.description}</div>`;
+                titlesHtml += `<div class="title-card-source ${t.source}">${t.source === 'shop' ? 'Shop - ' + t.price + ' pts' : 'Earned'}</div>`;
+
+                if (owned && isOwnProfile) {
+                  if (isEquipped) {
+                    titlesHtml += `<button class="title-equip-btn is-equipped" disabled>Equipped</button>`;
+                  } else {
+                    titlesHtml += `<button class="title-equip-btn" onclick="equipPlayerTitle('${t.id}')">Equip</button>`;
+                  }
+                } else if (!owned) {
+                  titlesHtml += `<div class="title-lock-hint">${t.source === 'shop' ? 'Available in Shop' : t.description}</div>`;
+                }
+                titlesHtml += '</div>';
+              }
+              titlesHtml += '</div>';
+
+              const titlesSection = document.getElementById('titles-section');
+              if (titlesSection) {
+                titlesSection.innerHTML = titlesHtml;
+                titlesSection.style.display = '';
+              }
+            }
+          } catch (e) {
+            console.error('Titles error:', e);
+          }
 
           // Cosmetic Collection
           try {
@@ -1862,4 +2031,7 @@
   <script src="js/toolbar.js"></script>
 </body>
 </html>
+
+
+
 

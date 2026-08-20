@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rankings â€” DBL Tournaments</title>
+  <title>Rankings Ã¢â‚¬â€ DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
@@ -177,7 +177,7 @@
         <li><a href="bounty.html">Bounty</a></li>
         <li><a href="matches.html">Matches</a></li>
         <li class="nav-dropdown">
-          <a href="#">More â–¾</a>
+          <a href="#">More Ã¢â€“Â¾</a>
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Data</div>
             <a href="characters.html">Characters</a>
@@ -233,7 +233,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-client.js"></script>
+  <script src="js/maintenance.js"></script>
   <script src="js/auth.js"></script>
+    <script src="js/titles.js"></script>
     <script src="js/activity-alerts.js"></script>
     <script src="js/daily-rewards.js"></script>
   <script src="js/notifications.js"></script>
@@ -243,11 +245,11 @@
   <script>
     initParticles(document.getElementById('particles'));
 
-    /* â”€â”€ State â”€â”€ */
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ State Ã¢â€â‚¬Ã¢â€â‚¬ */
     let currentTab = 'overall';
     let data = { elo: [], bounty: [], currency: [], matches: [] };
 
-    /* â”€â”€ Helpers â”€â”€ */
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ Helpers Ã¢â€â‚¬Ã¢â€â‚¬ */
     function getTier(elo) {
       if (elo >= 1400) return { name: 'Diamond', cls: 'tier-diamond' };
       if (elo >= 1200) return { name: 'Platinum', cls: 'tier-platinum' };
@@ -270,7 +272,7 @@
       return `<a class="lb-name" href="profile.html?player=${encodeURIComponent(name)}">${name}</a>${skull}`;
     }
 
-    /* â”€â”€ Data Loading â”€â”€ */
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ Data Loading Ã¢â€â‚¬Ã¢â€â‚¬ */
     async function loadAllData() {
       const [eloRes, bountyRes, currencyRes, matchRes] = await Promise.all([
         supabaseClient.from('player_elo').select('discord_username, elo, peak_elo'),
@@ -312,7 +314,7 @@
       document.getElementById('player-count').innerHTML = `<strong>${allNames.size}</strong> Players Tracked`;
     }
 
-    /* â”€â”€ Build datasets per tab â”€â”€ */
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ Build datasets per tab Ã¢â€â‚¬Ã¢â€â‚¬ */
     function getOverallData() {
       // Merge all players, compute composite score
       const map = {};
@@ -335,7 +337,7 @@
         const w = d.wins || 0, l = d.losses || 0;
         const wr = (w + l) >= 4 ? w / (w + l) : 0;
         // Composite: weighted ELO (40%) + win rate (25%) + bounty (20%) + currency (15%)
-        const eloNorm = ((d.elo || 1000) - 800) / 600; // 800-1400 â†’ 0-1
+        const eloNorm = ((d.elo || 1000) - 800) / 600; // 800-1400 Ã¢â€ â€™ 0-1
         const bountyNorm = Math.min((d.bounty || 0) / 5000, 1);
         const currNorm = Math.min((d.balance || 0) / 10000, 1);
         const score = eloNorm * 0.4 + wr * 0.25 + bountyNorm * 0.2 + currNorm * 0.15;
@@ -353,7 +355,7 @@
       return players.sort((a, b) => b.rate - a.rate);
     }
 
-    /* â”€â”€ Render â”€â”€ */
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ Render Ã¢â€â‚¬Ã¢â€â‚¬ */
     function render(searchQuery) {
       const container = document.getElementById('leaderboard');
       const q = (searchQuery || '').toLowerCase().trim();
@@ -447,7 +449,7 @@
       container.innerHTML = html;
     }
 
-    /* â”€â”€ Tab switching â”€â”€ */
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ Tab switching Ã¢â€â‚¬Ã¢â€â‚¬ */
     document.querySelectorAll('.view-tab').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
@@ -457,12 +459,12 @@
       });
     });
 
-    /* â”€â”€ Search â”€â”€ */
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ Search Ã¢â€â‚¬Ã¢â€â‚¬ */
     document.getElementById('player-search').addEventListener('input', (e) => {
       render(e.target.value);
     });
 
-    /* â”€â”€ Init â”€â”€ */
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ Init Ã¢â€â‚¬Ã¢â€â‚¬ */
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         await loadAllData();
@@ -476,4 +478,7 @@
   <script src="js/toolbar.js"></script>
 </body>
 </html>
+
+
+
 
