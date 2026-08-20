@@ -652,26 +652,33 @@
 
         <div class="sidebar-section">
           <div class="sidebar-label">Tournament</div>
-          <div class="sidebar-item active" data-tab="tournament"><span class="icon">??</span> Tournament</div>
-          <div class="sidebar-item" data-tab="players"><span class="icon">??</span> Players</div>
-          <div class="sidebar-item" data-tab="bracket"><span class="icon">??</span> Bracket</div>
+          <div class="sidebar-item active" data-tab="tournament"><span class="icon">🏆</span> Tournament</div>
+          <div class="sidebar-item" data-tab="players"><span class="icon">👥</span> Players</div>
+          <div class="sidebar-item" data-tab="bracket"><span class="icon">📊</span> Bracket</div>
         </div>
 
         <div class="sidebar-section">
           <div class="sidebar-label">Data</div>
-          <div class="sidebar-item" data-tab="stats"><span class="icon">??</span> Stats</div>
-          <div class="sidebar-item" data-tab="audit"><span class="icon">??</span> Audit Log</div>
+          <div class="sidebar-item" data-tab="stats"><span class="icon">📈</span> Stats</div>
+          <div class="sidebar-item" data-tab="audit"><span class="icon">📝</span> Audit Log</div>
         </div>
 
         <div class="sidebar-section">
           <div class="sidebar-label">Economy</div>
-          <div class="sidebar-item" data-tab="economy"><span class="icon">??</span> Economy</div>
-          <div class="sidebar-item" data-tab="bounty"><span class="icon">??</span> Bounty</div>
+          <div class="sidebar-item" data-tab="economy"><span class="icon">💰</span> Economy</div>
+          <div class="sidebar-item" data-tab="bounty"><span class="icon">🎯</span> Bounty</div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-label">Management</div>
+          <div class="sidebar-item" data-tab="rewards"><span class="icon">🎁</span> Rewards</div>
+          <div class="sidebar-item" data-tab="seasons"><span class="icon">🌍</span> Seasons</div>
+          <div class="sidebar-item" data-tab="manage"><span class="icon">🛠️</span> Manage</div>
         </div>
 
         <div class="sidebar-section">
           <div class="sidebar-label">System</div>
-          <div class="sidebar-item" data-tab="settings"><span class="icon">??</span> Settings</div>
+          <div class="sidebar-item" data-tab="settings"><span class="icon">⚙️</span> Settings</div>
         </div>
       </aside>
 
@@ -1514,11 +1521,76 @@
         <div id="audit-log-entries"><p class="text-muted">No actions logged yet.</p></div>
       </div>
     </div>
+
+    <!-- Rewards Tab -->
+    <div class="tab-content" id="tab-rewards">
+      <div class="card">
+        <h3 class="mb-2">Tournament Rewards Automation</h3>
+        <p class="text-muted mb-3">Distribute bonus points and ELO for a completed tournament: match winners/losers, and bracket placements (champion, runner-up, semi-finalists).</p>
+        <div class="flex gap-2 items-center mb-3">
+          <select id="rewards-tournament-select" style="max-width:320px;"></select>
+          <button class="btn btn-secondary" onclick="previewTournamentRewards()">Preview Rewards</button>
+          <button class="btn btn-primary" id="btn-distribute-rewards" style="display:none;" onclick="distributeTournamentRewards()">Distribute Tournament Rewards</button>
+        </div>
+        <div id="rewards-preview"></div>
+      </div>
+    </div>
+
+    <!-- Seasons Tab -->
+    <div class="tab-content" id="tab-seasons">
+      <div class="card mb-3">
+        <h3 class="mb-2">Current Season</h3>
+        <div id="season-tab-active-info">
+          <p class="text-muted">Loading...</p>
+        </div>
+        <div class="flex gap-2 mt-3">
+          <button class="btn btn-danger" id="btn-season-end" onclick="endCurrentSeason()" style="display:none;">End Season</button>
+        </div>
+      </div>
+      <div class="card mb-3" id="season-tab-start-card" style="display:none;">
+        <h3 class="mb-2">Start New Season</h3>
+        <div class="flex gap-2">
+          <input type="text" id="season-tab-name" placeholder="Season name (e.g. Season 3)" style="max-width:320px;" />
+          <button class="btn btn-primary" onclick="startNewSeasonTab()">Start New Season</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3 class="mb-2">Season History</h3>
+        <div id="season-tab-history"><p class="text-muted">No archived seasons yet.</p></div>
+      </div>
+    </div>
+
+    <!-- Manage Tab -->
+    <div class="tab-content" id="tab-manage">
+      <div class="card mb-3">
+        <div class="flex justify-between items-center mb-2">
+          <h3>Clans</h3>
+          <button class="btn btn-sm btn-secondary" onclick="loadManageClans()">Refresh</button>
+        </div>
+        <div id="manage-clans-list"><p class="text-muted">Loading clans...</p></div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="flex justify-between items-center mb-2">
+          <h3>Bets</h3>
+          <button class="btn btn-sm btn-secondary" onclick="loadManageBets()">Refresh</button>
+        </div>
+        <div id="manage-bets-list"><p class="text-muted">Loading bets...</p></div>
+      </div>
+
+      <div class="card">
+        <div class="flex justify-between items-center mb-2">
+          <h3>Auction Listings</h3>
+          <button class="btn btn-sm btn-secondary" onclick="loadManageAuction()">Refresh</button>
+        </div>
+        <div id="manage-auction-list"><p class="text-muted">Loading listings...</p></div>
+      </div>
+    </div>
       </div><!-- /.admin-main -->
     </div><!-- /.admin-layout -->
   </main>
 
-  <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">?</button>
+  <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">☰</button>
   <div id="winner-modal-root"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -1580,12 +1652,14 @@
     const sidebarTabTitles = {
       tournament: 'Tournament', players: 'Players', bracket: 'Bracket',
       stats: 'Stats', audit: 'Audit Log', economy: 'Economy',
-      bounty: 'Bounty', settings: 'Settings'
+      bounty: 'Bounty', rewards: 'Rewards', seasons: 'Seasons',
+      manage: 'Manage', settings: 'Settings'
     };
     const sidebarTabSections = {
       tournament: 'Tournament', players: 'Tournament', bracket: 'Tournament',
       stats: 'Data', audit: 'Data', economy: 'Economy',
-      bounty: 'Economy', settings: 'System'
+      bounty: 'Economy', rewards: 'Management', seasons: 'Management',
+      manage: 'Management', settings: 'System'
     };
 
     function switchAdminTab(tabName) {
@@ -1616,6 +1690,9 @@
         if (tab.dataset.tab === 'stats') loadStats();
         if (tab.dataset.tab === 'settings') loadSettings();
         if (tab.dataset.tab === 'economy') loadEconomy();
+        if (tab.dataset.tab === 'rewards') loadRewardsTab();
+        if (tab.dataset.tab === 'seasons') loadSeasonsTab();
+        if (tab.dataset.tab === 'manage') loadManageTab();
       });
     });
 
@@ -3156,8 +3233,8 @@
         { type: 'profile_bg', name: 'Hyperbolic Time Chamber', description: 'Train in the endless white void', cost: 1500, metadata: { bg: 'time-chamber' }, active: true },
         // -- Cosmetic Extras --
         // -- Badges --
-        { type: 'badge', name: 'First Blood Badge', description: 'Badge for winning your first match ever', cost: 200, metadata: { badge: 'first-blood', icon: '??' }, active: true },
-        { type: 'badge', name: 'Dragon Ball Collector', description: 'Collect all 7 Dragon Balls badge', cost: 3500, metadata: { badge: 'dragonball-collector', icon: '??' }, active: true },
+        { type: 'badge', name: 'First Blood Badge', description: 'Badge for winning your first match ever', cost: 200, metadata: { badge: 'first-blood', icon: '\u{1F31F}' }, active: true },
+        { type: 'badge', name: 'Dragon Ball Collector', description: 'Collect all 7 Dragon Balls badge', cost: 3500, metadata: { badge: 'dragonball-collector', icon: '\u{1F31F}' }, active: true },
         { type: 'badge', name: 'Tournament of Power Survivor', description: 'Season 1 exclusive � you were there', cost: 0, metadata: { badge: 'top-survivor', icon: '?', exclusive: true }, active: true },
       ];
 
@@ -3334,7 +3411,7 @@
         { tier: 13, name: '200 Zeni',               type: 'points',           track: 'free',    premium_cost: 0,                                                        metadata: { amount: 200 } },
         { tier: 14, name: 'Golden SSJ Aura',        type: 'aura',             track: 'premium', premium_cost: 500,  description: 'Super Saiyan golden glow',            metadata: { effect: 'aura-gold' } },
         { tier: 15, name: 'Tournament Arena BG',    type: 'profile_bg',       track: 'premium', premium_cost: 300,  description: 'World Tournament stage background',   metadata: { bg: 'tournament-arena' } },
-        { tier: 16, name: 'First Blood Badge',      type: 'badge',            track: 'free',    premium_cost: 0,    description: 'First blood!',                        metadata: { badge: 'first-blood', icon: '??' } },
+        { tier: 16, name: 'First Blood Badge',      type: 'badge',            track: 'free',    premium_cost: 0,    description: 'First blood!',                        metadata: { badge: 'first-blood', icon: '\u{1F31F}' } },
         { tier: 17, name: 'Shadow Border',          type: 'flair_border',     track: 'premium', premium_cost: 500,  description: 'Dark shadow profile border',          metadata: { effect: 'flair-shadow' } },
         { tier: 18, name: 'God of Destruction',     type: 'flair_title',      track: 'premium', premium_cost: 700,  description: 'Hakai!',                              metadata: { title: 'God of Destruction' } },
         { tier: 19, name: 'Ultra Instinct Aura',    type: 'aura',             track: 'premium', premium_cost: 800,  description: 'Silver shimmer � mastered UI',        metadata: { effect: 'aura-ui' } },
@@ -3387,7 +3464,7 @@
       _key: 'dbl_admin_audit_log',
       _icons: {
         tournament: '\u{1F3C6}', player: '\u{1F464}', points: '\u{1FA99}',
-        elo: '\u{1F4CA}', bounty: '\u{1F4B0}', settings: '??',
+        elo: '\u{1F4CA}', bounty: '\u{1F4B0}', settings: '\u{2699}\u{FE0F}',
         economy: '\u{1F6D2}', general: '\u{1F4DD}'
       },
       log(type, message, details = null) {
@@ -4233,6 +4310,451 @@
       loadMaintenanceState();
       loadAnnouncements();
     };
+
+    // ============================================================
+    // -- Rewards Tab: Tournament rewards automation --------------
+    // ============================================================
+
+    const K_FACTOR = 32;
+
+    function expectedScore(ratingA, ratingB) {
+      return 1 / (1 + Math.pow(10, (ratingB - ratingA) / 400));
+    }
+
+    function eloDelta(ratingWinner, ratingLoser) {
+      const expected = expectedScore(ratingWinner, ratingLoser);
+      return Math.round(K_FACTOR * (1 - expected));
+    }
+
+    async function loadRewardsTab() {
+      const select = document.getElementById('rewards-tournament-select');
+      document.getElementById('rewards-preview').innerHTML = '';
+      document.getElementById('btn-distribute-rewards').style.display = 'none';
+      try {
+        const { data: tournaments, error } = await supabaseClient
+          .from('tournaments').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+        select.innerHTML = (tournaments || []).map(t =>
+          `<option value="${t.id}">${t.name} (${t.status})</option>`).join('');
+      } catch (e) {
+        select.innerHTML = '<option value="">Could not load tournaments</option>';
+      }
+    }
+
+    let _rewardsPreviewData = null;
+
+    async function previewTournamentRewards() {
+      const tournamentId = document.getElementById('rewards-tournament-select').value;
+      const previewEl = document.getElementById('rewards-preview');
+      const distributeBtn = document.getElementById('btn-distribute-rewards');
+      distributeBtn.style.display = 'none';
+      if (!tournamentId) { NotificationSystem.show('Select a tournament', 'error'); return; }
+
+      try {
+        const tMatches = await db.getMatches(tournamentId);
+        const completed = tMatches.filter(m => m.winner_id && m.player1 && m.player2);
+        if (!completed.length) {
+          previewEl.innerHTML = '<p class="text-muted">No completed matches found for this tournament.</p>';
+          return;
+        }
+
+        const maxRound = Math.max(...tMatches.map(m => m.round || 0));
+        const finalMatch = completed.find(m => m.round === maxRound);
+        const semiMatches = completed.filter(m => m.round === maxRound - 1);
+
+        const rows = [];
+        for (const m of completed) {
+          const winner = m.winner_id === m.player1_id ? m.player1 : m.player2;
+          const loser = m.winner_id === m.player1_id ? m.player2 : m.player1;
+          rows.push({ username: winner.discord_username, points: 500, type: 'Match Win', matchId: m.id, isWinner: true, opponentUsername: loser.discord_username });
+          rows.push({ username: loser.discord_username, points: 100, type: 'Match Participation', matchId: m.id, isWinner: false, opponentUsername: winner.discord_username });
+        }
+
+        let champion = null, runnerUp = null;
+        if (finalMatch) {
+          champion = finalMatch.winner_id === finalMatch.player1_id ? finalMatch.player1 : finalMatch.player2;
+          runnerUp = finalMatch.winner_id === finalMatch.player1_id ? finalMatch.player2 : finalMatch.player1;
+          rows.push({ username: champion.discord_username, points: 2000, type: 'Champion Bonus' });
+          rows.push({ username: runnerUp.discord_username, points: 1000, type: 'Runner-Up Bonus' });
+        }
+        const semiFinalists = [];
+        for (const m of semiMatches) {
+          const loser = m.winner_id === m.player1_id ? m.player2 : m.player1;
+          if (loser && (!champion || loser.discord_username !== champion.discord_username) && (!runnerUp || loser.discord_username !== runnerUp.discord_username)) {
+            semiFinalists.push(loser);
+            rows.push({ username: loser.discord_username, points: 500, type: 'Semi-Finalist Bonus' });
+          }
+        }
+
+        _rewardsPreviewData = { tournamentId, completed, champion, runnerUp, semiFinalists };
+
+        previewEl.innerHTML = `
+          <p class="text-muted mb-2">${completed.length} completed match(es). ELO also updates using K-factor ${K_FACTOR}.</p>
+          <table class="signup-table">
+            <thead><tr><th>Player</th><th>Reward</th><th>Points</th></tr></thead>
+            <tbody>
+              ${rows.map(r => `<tr><td>${r.username}</td><td>${r.type}</td><td style="color:var(--gold);">+${r.points}</td></tr>`).join('')}
+            </tbody>
+          </table>`;
+        distributeBtn.style.display = '';
+      } catch (e) {
+        previewEl.innerHTML = '';
+        NotificationSystem.show('Error building preview: ' + e.message, 'error');
+      }
+    }
+
+    async function distributeTournamentRewards() {
+      if (!_rewardsPreviewData) { NotificationSystem.show('Preview rewards first', 'error'); return; }
+      if (!confirm('Distribute rewards for this tournament? This awards points and updates ELO for all completed matches and placements.')) return;
+
+      const { completed, champion, runnerUp, semiFinalists } = _rewardsPreviewData;
+      try {
+        for (const m of completed) {
+          const winner = m.winner_id === m.player1_id ? m.player1 : m.player2;
+          const loser = m.winner_id === m.player1_id ? m.player2 : m.player1;
+
+          await db.awardPoints(winner.discord_username, 500, 'tournament_reward_win', m.id);
+          await db.awardPoints(loser.discord_username, 100, 'tournament_reward_participation', m.id);
+
+          const winnerElo = (await db.getPlayerElo(winner.discord_username))?.elo || 1000;
+          const loserElo = (await db.getPlayerElo(loser.discord_username))?.elo || 1000;
+          const delta = eloDelta(winnerElo, loserElo);
+          await db.updateElo(winner.discord_username, delta, true);
+          await db.updateElo(loser.discord_username, -delta, false);
+        }
+
+        if (champion) await db.awardPoints(champion.discord_username, 2000, 'tournament_champion_bonus', _rewardsPreviewData.tournamentId);
+        if (runnerUp) await db.awardPoints(runnerUp.discord_username, 1000, 'tournament_runnerup_bonus', _rewardsPreviewData.tournamentId);
+        for (const sf of semiFinalists) {
+          await db.awardPoints(sf.discord_username, 500, 'tournament_semifinalist_bonus', _rewardsPreviewData.tournamentId);
+        }
+
+        AdminLog.log('points', `Distributed tournament rewards for ${completed.length} match(es)`);
+        NotificationSystem.show('Tournament rewards distributed!', 'success');
+        document.getElementById('btn-distribute-rewards').style.display = 'none';
+      } catch (e) {
+        NotificationSystem.show('Error distributing rewards: ' + e.message, 'error');
+      }
+    }
+
+    // ============================================================
+    // -- Seasons Tab: Seasonal leaderboard reset -----------------
+    // ============================================================
+
+    async function loadSeasonsTab() {
+      const infoEl = document.getElementById('season-tab-active-info');
+      const endBtn = document.getElementById('btn-season-end');
+      const startCard = document.getElementById('season-tab-start-card');
+      try {
+        const season = await db.getActiveSeason();
+        if (season) {
+          infoEl.innerHTML = `
+            <p><strong style="color:var(--cyan);">${season.name}</strong></p>
+            <p class="text-muted">Started: ${new Date(season.started_at || season.created_at).toLocaleDateString()} &middot; Status: ${season.status}</p>`;
+          endBtn.style.display = '';
+          startCard.style.display = 'none';
+        } else {
+          infoEl.innerHTML = '<p class="text-muted">No active season.</p>';
+          endBtn.style.display = 'none';
+          startCard.style.display = '';
+        }
+      } catch (e) {
+        infoEl.innerHTML = '<p class="text-muted">Could not load season info.</p>';
+      }
+      await loadSeasonHistory();
+    }
+
+    async function loadSeasonHistory() {
+      const historyEl = document.getElementById('season-tab-history');
+      try {
+        const seasons = await db.getAllSeasons();
+        const archived = (seasons || []).filter(s => s.status === 'completed');
+        if (!archived.length) {
+          historyEl.innerHTML = '<p class="text-muted">No archived seasons yet.</p>';
+          return;
+        }
+        historyEl.innerHTML = `
+          <table class="signup-table">
+            <thead><tr><th>Season</th><th>Ended</th><th>Final Standings</th></tr></thead>
+            <tbody>
+              ${archived.map(s => {
+                let standings = '-';
+                try {
+                  const archive = JSON.parse(localStorage.getItem('dbl_season_archive') || '{}');
+                  if (archive[s.id]) standings = archive[s.id].slice(0, 3).map(p => p.discord_username).join(', ');
+                } catch {}
+                return `<tr><td>${s.name}</td><td>${s.ended_at ? new Date(s.ended_at).toLocaleDateString() : '-'}</td><td>${standings}</td></tr>`;
+              }).join('')}
+            </tbody>
+          </table>`;
+      } catch (e) {
+        historyEl.innerHTML = '<p class="text-muted">Could not load season history.</p>';
+      }
+    }
+
+    async function endCurrentSeason() {
+      if (!confirm('End the current season? This archives the leaderboard, resets all ELO to 1000, and keeps points. This cannot be undone.')) return;
+      try {
+        const season = await db.getActiveSeason();
+        if (!season) { NotificationSystem.show('No active season', 'error'); return; }
+
+        // Archive final standings (by ELO) to localStorage
+        const leaderboard = await db.getLeaderboard();
+        const archive = JSON.parse(localStorage.getItem('dbl_season_archive') || '{}');
+        archive[season.id] = leaderboard.map(p => ({ discord_username: p.discord_username, elo: p.elo, wins: p.wins, losses: p.losses }));
+        localStorage.setItem('dbl_season_archive', JSON.stringify(archive));
+
+        // Reset ELO for all players (elo=1000, wins=0, losses=0), keep points untouched
+        const { error: resetError } = await supabaseClient
+          .from('elo_ratings')
+          .update({ elo: 1000, wins: 0, losses: 0 })
+          .not('id', 'is', null);
+        if (resetError) throw resetError;
+
+        await db.updateSeason(season.id, { status: 'completed', ended_at: new Date().toISOString() });
+        _activeSeason = null;
+
+        AdminLog.log('elo', `Ended season "${season.name}" and reset ELO ratings`);
+        NotificationSystem.show('Season ended, leaderboard archived, and ELO reset.', 'success');
+        loadSeasonsTab();
+      } catch (e) {
+        NotificationSystem.show('Error ending season: ' + e.message, 'error');
+      }
+    }
+
+    async function startNewSeasonTab() {
+      const name = document.getElementById('season-tab-name').value.trim();
+      if (!name) { NotificationSystem.show('Enter a season name', 'error'); return; }
+      try {
+        await db.createSeason({ name, status: 'active', started_at: new Date().toISOString() });
+        _activeSeason = null;
+        document.getElementById('season-tab-name').value = '';
+        AdminLog.log('tournament', `Started new season "${name}"`);
+        NotificationSystem.show('New season started!', 'success');
+        loadSeasonsTab();
+      } catch (e) {
+        NotificationSystem.show('Error starting season: ' + e.message, 'error');
+      }
+    }
+
+    // ============================================================
+    // -- Manage Tab: Clans / Bets / Auction admin controls -------
+    // ============================================================
+
+    async function loadManageTab() {
+      loadManageClans();
+      loadManageBets();
+      loadManageAuction();
+    }
+
+    async function loadManageClans() {
+      const el = document.getElementById('manage-clans-list');
+      try {
+        const { data: clans, error } = await supabaseClient.from('clans').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+        if (!clans || !clans.length) { el.innerHTML = '<p class="text-muted">No clans found.</p>'; return; }
+
+        el.innerHTML = `
+          <table class="signup-table">
+            <thead><tr><th>Name</th><th>Leader</th><th>Actions</th></tr></thead>
+            <tbody>
+              ${clans.map(c => `<tr>
+                <td>${c.name || c.tag || c.id}</td>
+                <td>${c.leader_username || c.leader || '-'}</td>
+                <td>
+                  <button class="btn btn-sm btn-secondary" onclick="transferClanLeadership('${c.id}')">Transfer Leader</button>
+                  <button class="btn btn-sm btn-secondary" onclick="viewClanMembers('${c.id}')">Members</button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteClan('${c.id}', '${(c.name || '').replace(/'/g, "\\'")}')">Delete</button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+          <div id="clan-members-panel"></div>`;
+      } catch (e) {
+        el.innerHTML = `<p class="text-muted">Could not load clans: ${e.message}</p>`;
+      }
+    }
+
+    async function deleteClan(clanId, name) {
+      if (!confirm(`Delete clan "${name}"? This removes the clan and its members.`)) return;
+      try {
+        await supabaseClient.from('clan_members').delete().eq('clan_id', clanId);
+        const { error } = await supabaseClient.from('clans').delete().eq('id', clanId);
+        if (error) throw error;
+        AdminLog.log('general', `Deleted clan "${name}"`);
+        NotificationSystem.show('Clan deleted', 'success');
+        loadManageClans();
+      } catch (e) {
+        NotificationSystem.show('Error deleting clan: ' + e.message, 'error');
+      }
+    }
+
+    async function viewClanMembers(clanId) {
+      const panel = document.getElementById('clan-members-panel');
+      try {
+        const { data: members, error } = await supabaseClient.from('clan_members').select('*').eq('clan_id', clanId);
+        if (error) throw error;
+        panel.innerHTML = `
+          <h4 class="mt-3 mb-2">Members</h4>
+          <table class="signup-table">
+            <thead><tr><th>Username</th><th>Role</th><th>Actions</th></tr></thead>
+            <tbody>
+              ${(members || []).map(m => `<tr>
+                <td>${m.discord_username || m.username}</td>
+                <td>${m.role || 'member'}</td>
+                <td><button class="btn btn-sm btn-danger" onclick="removeClanMember('${m.id}', '${clanId}')">Remove</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>`;
+      } catch (e) {
+        panel.innerHTML = `<p class="text-muted">Could not load members: ${e.message}</p>`;
+      }
+    }
+
+    async function removeClanMember(memberId, clanId) {
+      if (!confirm('Remove this member from the clan?')) return;
+      try {
+        const { error } = await supabaseClient.from('clan_members').delete().eq('id', memberId);
+        if (error) throw error;
+        AdminLog.log('general', 'Removed a clan member');
+        NotificationSystem.show('Member removed', 'success');
+        viewClanMembers(clanId);
+      } catch (e) {
+        NotificationSystem.show('Error removing member: ' + e.message, 'error');
+      }
+    }
+
+    async function transferClanLeadership(clanId) {
+      const newLeader = prompt('Enter the discord username of the new leader:');
+      if (!newLeader) return;
+      try {
+        const { error } = await supabaseClient.from('clans').update({ leader_username: newLeader }).eq('id', clanId);
+        if (error) throw error;
+        AdminLog.log('general', `Transferred clan leadership to ${newLeader}`);
+        NotificationSystem.show('Leadership transferred', 'success');
+        loadManageClans();
+      } catch (e) {
+        NotificationSystem.show('Error transferring leadership: ' + e.message, 'error');
+      }
+    }
+
+    async function loadManageBets() {
+      const el = document.getElementById('manage-bets-list');
+      try {
+        const { data: bets, error } = await supabaseClient.from('bets').select('*').eq('status', 'pending').order('created_at', { ascending: false });
+        if (error) throw error;
+        if (!bets || !bets.length) { el.innerHTML = '<p class="text-muted">No pending bets.</p>'; return; }
+
+        el.innerHTML = `
+          <table class="signup-table">
+            <thead><tr><th>User</th><th>Amount</th><th>On</th><th>Actions</th></tr></thead>
+            <tbody>
+              ${bets.map(b => `<tr>
+                <td>${b.discord_username || b.username}</td>
+                <td>${b.amount}</td>
+                <td>${b.pick || b.target || '-'}</td>
+                <td>
+                  <button class="btn btn-sm btn-primary" onclick="resolveBet('${b.id}', true)">Won</button>
+                  <button class="btn btn-sm btn-secondary" onclick="resolveBet('${b.id}', false)">Lost</button>
+                  <button class="btn btn-sm btn-danger" onclick="cancelBet('${b.id}')">Cancel</button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>`;
+      } catch (e) {
+        el.innerHTML = `<p class="text-muted">Could not load bets: ${e.message}</p>`;
+      }
+    }
+
+    async function resolveBet(betId, won) {
+      if (!confirm(`Mark this bet as ${won ? 'won' : 'lost'}?`)) return;
+      try {
+        const { data: bet, error: fetchErr } = await supabaseClient.from('bets').select('*').eq('id', betId).single();
+        if (fetchErr) throw fetchErr;
+
+        if (won) {
+          const payout = (bet.potential_payout || bet.amount * 2 || bet.amount);
+          await db.awardPoints(bet.discord_username || bet.username, payout, 'bet_payout', betId);
+        }
+
+        const { error } = await supabaseClient.from('bets').update({ status: won ? 'won' : 'lost' }).eq('id', betId);
+        if (error) throw error;
+        AdminLog.log('economy', `Resolved bet as ${won ? 'won' : 'lost'}`);
+        NotificationSystem.show('Bet resolved', 'success');
+        loadManageBets();
+      } catch (e) {
+        NotificationSystem.show('Error resolving bet: ' + e.message, 'error');
+      }
+    }
+
+    async function cancelBet(betId) {
+      if (!confirm('Cancel this bet and refund the stake?')) return;
+      try {
+        const { data: bet, error: fetchErr } = await supabaseClient.from('bets').select('*').eq('id', betId).single();
+        if (fetchErr) throw fetchErr;
+        await db.awardPoints(bet.discord_username || bet.username, bet.amount, 'bet_cancelled_refund', betId);
+        const { error } = await supabaseClient.from('bets').update({ status: 'cancelled' }).eq('id', betId);
+        if (error) throw error;
+        AdminLog.log('economy', 'Cancelled a bet and refunded stake');
+        NotificationSystem.show('Bet cancelled and refunded', 'success');
+        loadManageBets();
+      } catch (e) {
+        NotificationSystem.show('Error cancelling bet: ' + e.message, 'error');
+      }
+    }
+
+    async function loadManageAuction() {
+      const el = document.getElementById('manage-auction-list');
+      try {
+        const { data: listings, error } = await supabaseClient.from('auction_listings').select('*').eq('status', 'active').order('created_at', { ascending: false });
+        if (error) throw error;
+        if (!listings || !listings.length) { el.innerHTML = '<p class="text-muted">No active listings.</p>'; return; }
+
+        el.innerHTML = `
+          <table class="signup-table">
+            <thead><tr><th>Seller</th><th>Item</th><th>Price</th><th>Actions</th></tr></thead>
+            <tbody>
+              ${listings.map(l => `<tr>
+                <td>${l.seller_username || l.discord_username || '-'}</td>
+                <td>${l.item_name || l.title || '-'}</td>
+                <td>${l.price || l.current_bid || '-'}</td>
+                <td>
+                  <button class="btn btn-sm btn-secondary" onclick="expireAuctionListing('${l.id}')">Expire</button>
+                  <button class="btn btn-sm btn-danger" onclick="cancelAuctionListing('${l.id}')">Cancel</button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>`;
+      } catch (e) {
+        el.innerHTML = `<p class="text-muted">Could not load auction listings: ${e.message}</p>`;
+      }
+    }
+
+    async function expireAuctionListing(listingId) {
+      if (!confirm('Expire this listing?')) return;
+      try {
+        const { error } = await supabaseClient.from('auction_listings').update({ status: 'expired' }).eq('id', listingId);
+        if (error) throw error;
+        AdminLog.log('economy', 'Expired an auction listing');
+        NotificationSystem.show('Listing expired', 'success');
+        loadManageAuction();
+      } catch (e) {
+        NotificationSystem.show('Error expiring listing: ' + e.message, 'error');
+      }
+    }
+
+    async function cancelAuctionListing(listingId) {
+      if (!confirm('Cancel and remove this listing?')) return;
+      try {
+        const { error } = await supabaseClient.from('auction_listings').update({ status: 'cancelled' }).eq('id', listingId);
+        if (error) throw error;
+        AdminLog.log('economy', 'Cancelled an auction listing');
+        NotificationSystem.show('Listing cancelled', 'success');
+        loadManageAuction();
+      } catch (e) {
+        NotificationSystem.show('Error cancelling listing: ' + e.message, 'error');
+      }
+    }
   </script>
   <script src="../js/toolbar.js"></script>
 <script>
