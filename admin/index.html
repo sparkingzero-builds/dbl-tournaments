@@ -423,7 +423,184 @@
       color: var(--cyan);
     }
 
+    /* ── Admin Layout: Sidebar + Main ─────────────── */
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 0;
+      min-height: calc(100vh - 60px);
+    }
+
+    .admin-sidebar {
+      background: var(--panel);
+      border-right: 1px solid var(--line);
+      padding: 20px 0 20px;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+    }
+
+    .sidebar-brand {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar-brand h2 {
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .sidebar-section {
+      margin-bottom: 8px;
+    }
+
+    .sidebar-label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 12px 20px 6px;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: 'Chakra Petch', sans-serif;
+      user-select: none;
+    }
+
+    .sidebar-item:hover {
+      background: rgba(0, 229, 255, 0.05);
+      color: var(--text);
+    }
+
+    .sidebar-item.active {
+      color: var(--cyan);
+      border-left-color: var(--cyan);
+      background: rgba(0, 229, 255, 0.08);
+    }
+
+    .sidebar-item .icon {
+      font-size: 16px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .admin-main {
+      padding: 24px 32px;
+      max-width: 1100px;
+    }
+
+    .admin-main .content-header {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    .admin-main .content-title {
+      font-size: 22px;
+      font-weight: 900;
+      margin-bottom: 20px;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    /* Mobile hamburger for sidebar */
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1100;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--cyan);
+      color: #000;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 229, 255, 0.3);
+      font-weight: 900;
+    }
+
+    /* Card improvements */
+    .admin-main .card {
+      padding: 24px;
+    }
+
+    .admin-main .card h3 {
+      margin-bottom: 16px;
+    }
+
+    .admin-main .form-group {
+      margin-bottom: 20px;
+    }
+
+    .admin-main .card:hover {
+      border-color: rgba(0, 229, 255, 0.15);
+    }
+
     @media (max-width: 768px) {
+      .admin-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-sidebar {
+        position: fixed;
+        top: 0;
+        left: -260px;
+        width: 260px;
+        height: 100vh;
+        z-index: 1050;
+        transition: left 0.25s ease;
+        padding-top: 20px;
+      }
+
+      .admin-sidebar.open {
+        left: 0;
+      }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(6, 4, 14, 0.6);
+        z-index: 1040;
+      }
+
+      .sidebar-overlay.open {
+        display: block;
+      }
+
+      .sidebar-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .admin-main {
+        padding: 16px;
+      }
+
       .form-row { grid-template-columns: 1fr; }
       #stats-overview { grid-template-columns: repeat(2, 1fr) !important; }
       #tab-stats > div:last-child { grid-template-columns: 1fr !important; }
@@ -463,22 +640,45 @@
     </div>
   </nav>
 
-  <main class="page container page-enter">
-    <div class="admin-header">
-      <h2>Admin Panel</h2>
-      <span class="admin-badge">ADMIN</span>
-    </div>
+  <main class="page page-enter" style="max-width:none; padding:0;">
+    <div class="admin-layout">
+      <!-- Sidebar Navigation -->
+      <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+      <aside class="admin-sidebar" id="admin-sidebar">
+        <div class="sidebar-brand">
+          <h2>Admin Panel</h2>
+          <span class="admin-badge">ADMIN</span>
+        </div>
 
-    <div class="tabs">
-      <button class="tab active" data-tab="tournament">Tournament</button>
-      <button class="tab" data-tab="players">Players</button>
-      <button class="tab" data-tab="bracket">Bracket</button>
-      <button class="tab" data-tab="stats">Stats</button>
-      <button class="tab" data-tab="settings">Settings</button>
-      <button class="tab" data-tab="economy">Economy</button>
-      <button class="tab" data-tab="bounty">Bounty</button>
-      <button class="tab" data-tab="audit">Audit Log</button>
-    </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Tournament</div>
+          <div class="sidebar-item active" data-tab="tournament"><span class="icon">🏆</span> Tournament</div>
+          <div class="sidebar-item" data-tab="players"><span class="icon">👥</span> Players</div>
+          <div class="sidebar-item" data-tab="bracket"><span class="icon">📊</span> Bracket</div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-label">Data</div>
+          <div class="sidebar-item" data-tab="stats"><span class="icon">📈</span> Stats</div>
+          <div class="sidebar-item" data-tab="audit"><span class="icon">📋</span> Audit Log</div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-label">Economy</div>
+          <div class="sidebar-item" data-tab="economy"><span class="icon">💰</span> Economy</div>
+          <div class="sidebar-item" data-tab="bounty"><span class="icon">🎯</span> Bounty</div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-label">System</div>
+          <div class="sidebar-item" data-tab="settings"><span class="icon">⚙️</span> Settings</div>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <div class="admin-main">
+        <div class="content-header" id="content-section-label">Tournament</div>
+        <div class="content-title" id="content-title">Tournament</div>
 
     <!-- Tournament Tab -->
     <div class="tab-content active" id="tab-tournament">
@@ -1314,8 +1514,11 @@
         <div id="audit-log-entries"><p class="text-muted">No actions logged yet.</p></div>
       </div>
     </div>
+      </div><!-- /.admin-main -->
+    </div><!-- /.admin-layout -->
   </main>
 
+  <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">☰</button>
   <div id="winner-modal-root"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -1373,13 +1576,40 @@
       return _activeSeason;
     }
 
+    // Sidebar tab labels
+    const sidebarTabTitles = {
+      tournament: 'Tournament', players: 'Players', bracket: 'Bracket',
+      stats: 'Stats', audit: 'Audit Log', economy: 'Economy',
+      bounty: 'Bounty', settings: 'Settings'
+    };
+    const sidebarTabSections = {
+      tournament: 'Tournament', players: 'Tournament', bracket: 'Tournament',
+      stats: 'Data', audit: 'Data', economy: 'Economy',
+      bounty: 'Economy', settings: 'System'
+    };
+
+    function switchAdminTab(tabName) {
+      document.querySelectorAll('.sidebar-item').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      const item = document.querySelector('.sidebar-item[data-tab="' + tabName + '"]');
+      if (item) item.classList.add('active');
+      document.getElementById('tab-' + tabName).classList.add('active');
+      document.getElementById('content-section-label').textContent = sidebarTabSections[tabName] || '';
+      document.getElementById('content-title').textContent = sidebarTabTitles[tabName] || tabName;
+      // Close sidebar on mobile
+      document.getElementById('admin-sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('open');
+    }
+
+    function toggleSidebar() {
+      document.getElementById('admin-sidebar').classList.toggle('open');
+      document.getElementById('sidebar-overlay').classList.toggle('open');
+    }
+
     // Tabs
-    document.querySelectorAll('.tab').forEach(tab => {
+    document.querySelectorAll('.sidebar-item').forEach(tab => {
       tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        switchAdminTab(tab.dataset.tab);
 
         if (tab.dataset.tab === 'players') loadPlayers();
         if (tab.dataset.tab === 'bracket') loadAdminBracket();
@@ -3989,7 +4219,7 @@
     // ── Update tab switching to handle new tabs ──────────────
     // Extend the existing tab handler by updating the DOMContentLoaded + tab click
     const _origTabHandler = true; // marker
-    document.querySelectorAll('.tab').forEach(tab => {
+    document.querySelectorAll('.sidebar-item').forEach(tab => {
       tab.addEventListener('click', () => {
         if (tab.dataset.tab === 'bounty') loadBountyTab();
         if (tab.dataset.tab === 'audit') renderAuditLog();
