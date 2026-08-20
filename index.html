@@ -56,7 +56,7 @@
       justify-content: center;
     }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Live Stats Bar Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Live Stats Bar â”€â”€ */
     .stats-bar {
       width: 100%;
       max-width: 900px;
@@ -104,7 +104,7 @@
       margin-top: 6px;
     }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Section shared Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Section shared â”€â”€ */
     .home-section {
       max-width: 900px;
       margin: 0 auto;
@@ -131,7 +131,7 @@
       background: var(--line);
     }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Tournament Card Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Tournament Card â”€â”€ */
     .tournament-card {
       background: var(--panel);
       border: 1px solid var(--line);
@@ -219,7 +219,7 @@
       font-size: 13px;
     }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Top Players Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Top Players â”€â”€ */
     .top-players-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -299,7 +299,7 @@
     .player-record .win { color: var(--green); }
     .player-record .loss { color: var(--red); }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Villain Alert Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Villain Alert â”€â”€ */
     @keyframes villain-pulse {
       0%, 100% { box-shadow: 0 0 12px rgba(180,0,30,0.3); }
       50% { box-shadow: 0 0 24px rgba(180,0,30,0.6); }
@@ -326,7 +326,7 @@
     }
     .villain-alert-text a { color: #ff6b7a; text-decoration: underline; }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Activity Feed Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Activity Feed â”€â”€ */
     .activity-feed {
       display: flex;
       flex-direction: column;
@@ -395,7 +395,7 @@
       border-radius: var(--radius, 8px);
     }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Quick Links Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Quick Links â”€â”€ */
     .quick-links-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -452,7 +452,7 @@
       line-height: 1.4;
     }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Responsive Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Responsive â”€â”€ */
     @media (max-width: 600px) {
       .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 10px; }
       .top-players-grid { grid-template-columns: 1fr; max-width: 320px; margin: 0 auto; }
@@ -469,7 +469,7 @@
   <nav class="navbar">
     <div class="container">
       <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
-      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">Ã¢ËœÂ°</button>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">â˜°</button>
       <ul class="navbar-links">
         <li><a href="index.html" class="active">Home</a></li>
         <li><a href="tournament.html">Tournament</a></li>
@@ -480,7 +480,7 @@
         <li><a href="bounty.html">Bounty</a></li>
         <li><a href="matches.html">Matches</a></li>
         <li class="nav-dropdown">
-          <a href="#">More Ã¢â€“Â¾</a>
+          <a href="#">More â–¾</a>
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Data</div>
             <a href="characters.html">Characters</a>
@@ -510,7 +510,7 @@
 
   <div class="particles-bg" id="particles"></div>
 
-  <!-- Ã¢â€â‚¬Ã¢â€â‚¬ Hero Ã¢â€â‚¬Ã¢â€â‚¬ -->
+  <!-- â”€â”€ Hero â”€â”€ -->
   <section class="hero page page-enter">
     <h1 class="hero-title">DBL <span class="text-cyan">Tournaments</span></h1>
     <p class="hero-sub">Dragon Ball Legends Competitive</p>
@@ -527,7 +527,7 @@
     </div>
   </section>
 
-  <!-- Ã¢â€â‚¬Ã¢â€â‚¬ Live Stats Bar Ã¢â€â‚¬Ã¢â€â‚¬ -->
+  <!-- â”€â”€ Live Stats Bar â”€â”€ -->
   <div class="stats-bar" id="stats-bar">
     <div class="stat-item">
       <div class="stat-number" data-target="0" id="stat-players">0</div>
@@ -547,7 +547,7 @@
     </div>
   </div>
 
-  <!-- Ã¢â€â‚¬Ã¢â€â‚¬ Active Tournament Card Ã¢â€â‚¬Ã¢â€â‚¬ -->
+  <!-- â”€â”€ Active Tournament Card â”€â”€ -->
   <div class="home-section" id="tournament-section">
     <div class="section-heading">Active Tournament</div>
     <div class="tournament-card" id="tournament-card">
@@ -555,7 +555,7 @@
     </div>
   </div>
 
-  <!-- Ã¢â€â‚¬Ã¢â€â‚¬ Top Players Spotlight Ã¢â€â‚¬Ã¢â€â‚¬ -->
+  <!-- â”€â”€ Top Players Spotlight â”€â”€ -->
   <div class="home-section" id="top-players-section">
     <div class="section-heading">Top Players</div>
     <div class="top-players-grid" id="top-players-grid">
@@ -563,7 +563,7 @@
     </div>
   </div>
 
-  <!-- Ã¢â€â‚¬Ã¢â€â‚¬ Recent Activity Ã¢â€â‚¬Ã¢â€â‚¬ -->
+  <!-- â”€â”€ Recent Activity â”€â”€ -->
   <div class="home-section" id="activity-section">
     <div class="section-heading">Recent Activity</div>
     <div class="activity-feed" id="activity-feed">
@@ -571,37 +571,37 @@
     </div>
   </div>
 
-  <!-- Ã¢â€â‚¬Ã¢â€â‚¬ Quick Links Ã¢â€â‚¬Ã¢â€â‚¬ -->
+  <!-- â”€â”€ Quick Links â”€â”€ -->
   <div class="home-section">
     <div class="section-heading">Explore</div>
     <div class="quick-links-grid">
       <a href="rankings.html" class="quick-link">
-        <div class="quick-link-icon">Ã°Å¸Ââ€¦</div>
+        <div class="quick-link-icon">ðŸ…</div>
         <h4>Rankings</h4>
         <p>ELO leaderboard and player tiers</p>
       </a>
       <a href="bounty.html" class="quick-link">
-        <div class="quick-link-icon">Ã°Å¸â€™Â°</div>
+        <div class="quick-link-icon">ðŸ’°</div>
         <h4>Bounty Board</h4>
         <p>Challenge top players for glory</p>
       </a>
       <a href="shop.html" class="quick-link">
-        <div class="quick-link-icon">Ã°Å¸â€ºâ€™</div>
+        <div class="quick-link-icon">ðŸ›’</div>
         <h4>Shop</h4>
         <p>Spend points on titles and badges</p>
       </a>
       <a href="season.html" class="quick-link">
-        <div class="quick-link-icon">Ã°Å¸Å½â€“</div>
+        <div class="quick-link-icon">ðŸŽ–</div>
         <h4>Season Pass</h4>
         <p>Track progress and unlock rewards</p>
       </a>
       <a href="matches.html" class="quick-link">
-        <div class="quick-link-icon">Ã°Å¸â€œâ€¹</div>
+        <div class="quick-link-icon">ðŸ“‹</div>
         <h4>Match History</h4>
         <p>Browse all recorded match results</p>
       </a>
       <a href="characters.html" class="quick-link">
-        <div class="quick-link-icon">Ã¢Å¡Â¡</div>
+        <div class="quick-link-icon">âš¡</div>
         <h4>Characters</h4>
         <p>Full roster with stats and tags</p>
       </a>
@@ -633,7 +633,7 @@
       ]);
     });
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Tournament Card Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Tournament Card â”€â”€
     async function loadTournament() {
       try {
         const tournament = await db.getActiveTournament();
@@ -698,7 +698,7 @@
           `;
         } else if (tournament.status === 'banning') {
           cardHTML += `
-            <div class="tc-round-info">Ban Phase Active Ã¢â‚¬â€ Pick your bans before matches begin</div>
+            <div class="tc-round-info">Ban Phase Active â€” Pick your bans before matches begin</div>
             <div class="tc-actions">
               <a href="banpick.html" class="btn btn-primary">Go to Ban Phase</a>
               <a href="bracket.html" class="btn btn-secondary">View Bracket</a>
@@ -707,7 +707,7 @@
         } else {
           const round = tournament.current_round || 1;
           cardHTML += `
-            <div class="tc-round-info">Round ${round} in progress Ã¢â‚¬â€ ${playerCount} players competing</div>
+            <div class="tc-round-info">Round ${round} in progress â€” ${playerCount} players competing</div>
             <div class="tc-actions">
               <a href="bracket.html" class="btn btn-primary">View Bracket</a>
               <a href="matches.html" class="btn btn-secondary">Match Results</a>
@@ -721,7 +721,7 @@
       }
     }
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Live Stats Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Live Stats â”€â”€
     async function loadStats() {
       try {
         const [playersRes, tournamentsRes, matchesRes, bountiesRes] = await Promise.allSettled([
@@ -757,7 +757,7 @@
       requestAnimationFrame(tick);
     }
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Top Players Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Top Players â”€â”€
     async function loadTopPlayers() {
       const grid = document.getElementById('top-players-grid');
       try {
@@ -799,7 +799,7 @@
       return { name: 'Silver', color: '#9088b8', bg: 'rgba(144,136,184,0.1)' };
     }
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Activity Feed Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Activity Feed â”€â”€
     async function loadActivity() {
       const feed = document.getElementById('activity-feed');
       try {
@@ -817,7 +817,7 @@
               const loser = m.winner === m.player1 ? m.player2 : m.player1;
               const tName = m.tournaments?.name || 'a tournament';
               items.push({
-                icon: 'Ã¢Å¡â€',
+                icon: 'âš”',
                 text: `<strong>${escapeHtml(m.winner)}</strong> defeated <strong>${escapeHtml(loser)}</strong> in ${escapeHtml(tName)}`,
                 time: m.created_at
               });
@@ -835,7 +835,7 @@
           if (bounties) {
             bounties.forEach(b => {
               items.push({
-                icon: 'Ã°Å¸â€™Â°',
+                icon: 'ðŸ’°',
                 text: `<strong>${escapeHtml(b.challenger_name)}</strong> challenged <strong>${escapeHtml(b.target_name)}</strong> to a bounty match`,
                 time: b.created_at
               });
@@ -853,7 +853,7 @@
           if (txns) {
             txns.forEach(t => {
               items.push({
-                icon: 'Ã°Å¸â€ºâ€™',
+                icon: 'ðŸ›’',
                 text: `<strong>${escapeHtml(t.player_name)}</strong> ${escapeHtml(t.description || 'made a purchase')}`,
                 time: t.created_at
               });
@@ -924,7 +924,7 @@
       return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Countdown (kept from original) Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€ Countdown (kept from original) â”€â”€
     function initCountdown(container, deadline, label) {
       if (!container || !deadline) return;
 

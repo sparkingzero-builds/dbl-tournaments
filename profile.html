@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Player Profile Ã¢â‚¬â€ DBL Tournaments</title>
+  <title>Player Profile â€” DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/themes.css" />
   <style>
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Villain Arc Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Villain Arc â”€â”€ */
     @keyframes villain-pulse {
       0%, 100% { box-shadow: 0 0 12px rgba(180,0,30,0.4), inset 0 0 8px rgba(180,0,30,0.1); }
       50% { box-shadow: 0 0 28px rgba(180,0,30,0.7), inset 0 0 14px rgba(180,0,30,0.2); }
@@ -381,7 +381,7 @@
     }
 
     .badge-card.locked .badge-icon::after {
-      content: 'Ã°Å¸â€â€™';
+      content: 'ðŸ”’';
       font-size: 12px;
       position: absolute;
       top: 6px;
@@ -492,7 +492,7 @@
       color: var(--muted);
     }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Player Card Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Player Card â”€â”€ */
     @keyframes cardBorderRotate {
       0% { --card-angle: 0deg; }
       100% { --card-angle: 360deg; }
@@ -929,7 +929,7 @@
       margin-top: 4px;
     }
 
-    /* â”€â”€ Player Titles â”€â”€ */
+    /* ── Player Titles ── */
     .profile-equipped-title {
       font-family: 'Exo 2', sans-serif;
       font-size: 13px;
@@ -1012,7 +1012,7 @@
       font-style: italic;
     }
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬ Zenkai Indicator Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* â”€â”€ Zenkai Indicator â”€â”€ */
     .zenkai-indicator {
       display: inline-flex;
       align-items: center;
@@ -1066,7 +1066,7 @@
         <li><a href="bounty.html">Bounty</a></li>
         <li><a href="matches.html">Matches</a></li>
         <li class="nav-dropdown">
-          <a href="#">More Ã¢â€“Â¾</a>
+          <a href="#">More â–¾</a>
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Data</div>
             <a href="characters.html">Characters</a>
@@ -1161,7 +1161,7 @@
         return;
       }
 
-      document.title = `${playerName} Ã¢â‚¬â€ DBL Tournaments`;
+      document.title = `${playerName} â€” DBL Tournaments`;
 
       try {
         // Get all signups for this player
@@ -1345,7 +1345,7 @@
           </div>
         `;
 
-        // Ã¢â€â‚¬Ã¢â€â‚¬ Bounty Hunter Section Ã¢â€â‚¬Ã¢â€â‚¬
+        // â”€â”€ Bounty Hunter Section â”€â”€
         try {
           const { data: bountyData } = await supabaseClient
             .from('bounties')
@@ -1405,7 +1405,7 @@
                       if (!raw) return '';
                       const z = JSON.parse(raw);
                       if (!z.active || Date.now() - z.activatedAt > 86400000) return '';
-                      return '<div class="zenkai-indicator"><span class="zenkai-flame">Ã°Å¸â€Â¥</span><span class="zenkai-text">Zenkai Active</span><span class="zenkai-level">Lv' + z.level + '</span></div>';
+                      return '<div class="zenkai-indicator"><span class="zenkai-flame">ðŸ”¥</span><span class="zenkai-text">Zenkai Active</span><span class="zenkai-level">Lv' + z.level + '</span></div>';
                     } catch { return ''; }
                   })()}
                 ` : ''}
@@ -1426,7 +1426,7 @@
                   </div>
                 ` : '<div style="font-size:13px;color:var(--muted);font-style:italic;">No bounty matches yet.</div>'}
                 <div style="margin-top:12px;">
-                  <a href="bounty.html" style="color:var(--gold);font-size:13px;font-weight:700;text-decoration:none;">View Bounty Board Ã¢â€ â€™</a>
+                  <a href="bounty.html" style="color:var(--gold);font-size:13px;font-weight:700;text-decoration:none;">View Bounty Board â†’</a>
                 </div>
               </div>
             `;
@@ -1510,24 +1510,24 @@
 
           // -- Badge definitions with tiers --
           const badgeDefs = [
-            { id: 'first_blood',    icon: 'Ã°Å¸Å’Å¸', name: 'First Blood',    desc: 'Won their first ever match' },
-            { id: 'champion',       icon: 'Ã°Å¸Ââ€ ', name: 'Champion',       desc: 'Won a tournament',                  tiers: [1, 3, 5], tierLabel: 'tournament wins' },
-            { id: 'dynasty',        icon: 'Ã°Å¸â€˜â€˜', name: 'Dynasty',        desc: 'Won 2+ tournaments',                gold: true },
-            { id: 'on_fire',        icon: 'Ã°Å¸â€Â¥', name: 'On Fire',        desc: 'Won 3+ matches in a row',           tiers: [3, 5, 10], tierLabel: 'win streak' },
-            { id: 'streak_master',  icon: 'Ã¢Å¡Â¡', name: 'Streak Master',  desc: 'Won 5+ matches in a row' },
-            { id: 'veteran',        icon: 'Ã¢Å¡â€Ã¯Â¸Â', name: 'Veteran',        desc: 'Played in 3+ tournaments',          tiers: [3, 7, 15], tierLabel: 'tournaments' },
-            { id: 'socialite',      icon: 'Ã°Å¸Â¤Â', name: 'Socialite',      desc: 'Played in 5+ tournaments' },
-            { id: 'sharpshooter',   icon: 'Ã°Å¸Å½Â¯', name: 'Sharpshooter',   desc: '75%+ win rate (min 4 matches)' },
-            { id: 'iron_wall',      icon: 'Ã°Å¸â€ºÂ¡Ã¯Â¸Â', name: 'Iron Wall',      desc: 'Never lost in a tournament (min 2)' },
-            { id: 'underdog',       icon: 'Ã°Å¸â€™â‚¬', name: 'Underdog',       desc: 'Beat a player with higher ELO' },
-            { id: 'rising_star',    icon: 'Ã¢Â­Â', name: 'Rising Star',    desc: 'Reached 1100+ ELO' },
-            { id: 'elite',          icon: 'Ã°Å¸â€™Å½', name: 'Elite',          desc: 'Reached 1300+ ELO' },
-            { id: 'bounty_hunter',  icon: 'Ã°Å¸â€™Â°', name: 'Bounty Hunter',  desc: 'Won 5+ bounty matches',             tiers: [5, 15, 30], tierLabel: 'bounty wins' },
-            { id: 'bounty_king',    icon: 'Ã°Å¸Â¤â€˜', name: 'Bounty King',    desc: 'Won 15+ bounty matches' },
-            { id: 'big_spender',    icon: 'Ã°Å¸â€ºâ€™', name: 'Big Spender',    desc: 'Spent 1000+ points total' },
-            { id: 'collector',      icon: 'Ã°Å¸â€œÂ¦', name: 'Collector',      desc: 'Own 5+ shop items' },
-            { id: 'perfect_season', icon: 'Ã¢Å“Â¨', name: 'Perfect Season', desc: 'Won a tournament without losing' },
-            { id: 'tenacious',      icon: 'Ã°Å¸â€â€ž', name: 'Tenacious',      desc: 'Lost 3+ but still won the tournament' },
+            { id: 'first_blood',    icon: '\u{1F31F}', name: 'First Blood',    desc: 'Won their first ever match' },
+            { id: 'champion',       icon: '\u{1F3C6}', name: 'Champion',       desc: 'Won a tournament',                  tiers: [1, 3, 5], tierLabel: 'tournament wins' },
+            { id: 'dynasty',        icon: '\u{1F451}', name: 'Dynasty',        desc: 'Won 2+ tournaments',                gold: true },
+            { id: 'on_fire',        icon: '\u{1F525}', name: 'On Fire',        desc: 'Won 3+ matches in a row',           tiers: [3, 5, 10], tierLabel: 'win streak' },
+            { id: 'streak_master',  icon: '\u{26A1}', name: 'Streak Master',  desc: 'Won 5+ matches in a row' },
+            { id: 'veteran',        icon: '\u{2694}\uFE0F', name: 'Veteran',        desc: 'Played in 3+ tournaments',          tiers: [3, 7, 15], tierLabel: 'tournaments' },
+            { id: 'socialite',      icon: '\u{1F91D}', name: 'Socialite',      desc: 'Played in 5+ tournaments' },
+            { id: 'sharpshooter',   icon: '\u{1F3AF}', name: 'Sharpshooter',   desc: '75%+ win rate (min 4 matches)' },
+            { id: 'iron_wall',      icon: '\u{1F6E1}\uFE0F', name: 'Iron Wall',      desc: 'Never lost in a tournament (min 2)' },
+            { id: 'underdog',       icon: '\u{1F4AA}', name: 'Underdog',       desc: 'Beat a player with higher ELO' },
+            { id: 'rising_star',    icon: '\u{2B50}', name: 'Rising Star',    desc: 'Reached 1100+ ELO' },
+            { id: 'elite',          icon: '\u{1F48E}', name: 'Elite',          desc: 'Reached 1300+ ELO' },
+            { id: 'bounty_hunter',  icon: '\u{1F4B0}', name: 'Bounty Hunter',  desc: 'Won 5+ bounty matches',             tiers: [5, 15, 30], tierLabel: 'bounty wins' },
+            { id: 'bounty_king',    icon: '\u{1F934}', name: 'Bounty King',    desc: 'Won 15+ bounty matches' },
+            { id: 'big_spender',    icon: '\u{1F4B8}', name: 'Big Spender',    desc: 'Spent 1000+ points total' },
+            { id: 'collector',      icon: '\u{1F4E6}', name: 'Collector',      desc: 'Own 5+ shop items' },
+            { id: 'perfect_season', icon: '\u{2728}', name: 'Perfect Season', desc: 'Won a tournament without losing' },
+            { id: 'tenacious',      icon: '\u{1F9E0}', name: 'Tenacious',      desc: 'Lost 3+ but still won the tournament' },
           ];
 
           const earned = new Set();
@@ -1739,16 +1739,16 @@
           console.error('Badges error:', e);
         }
 
-        // Ã¢â€â‚¬Ã¢â€â‚¬ Player Card Ã¢â€â‚¬Ã¢â€â‚¬
+        // â”€â”€ Player Card â”€â”€
         try {
           const eloData = await db.getPlayerElo(playerName);
           const elo = eloData ? eloData.elo : null;
           const tier = elo
-            ? (elo >= 1400 ? { name: 'Diamond', icon: 'Ã°Å¸â€™Å½', cls: 'tier-diamond' }
-              : elo >= 1200 ? { name: 'Platinum', icon: 'Ã¢Å¡Â¡', cls: 'tier-platinum' }
-              : elo >= 1100 ? { name: 'Gold', icon: 'Ã°Å¸Â¥â€¡', cls: 'tier-gold' }
-              : elo >= 1000 ? { name: 'Silver', icon: 'Ã°Å¸Â¥Ë†', cls: 'tier-silver' }
-              : { name: 'Bronze', icon: 'Ã°Å¸Â¥â€°', cls: 'tier-bronze' })
+            ? (elo >= 1400 ? { name: 'Diamond', icon: 'ðŸ’Ž', cls: 'tier-diamond' }
+              : elo >= 1200 ? { name: 'Platinum', icon: 'âš¡', cls: 'tier-platinum' }
+              : elo >= 1100 ? { name: 'Gold', icon: 'ðŸ¥‡', cls: 'tier-gold' }
+              : elo >= 1000 ? { name: 'Silver', icon: 'ðŸ¥ˆ', cls: 'tier-silver' }
+              : { name: 'Bronze', icon: 'ðŸ¥‰', cls: 'tier-bronze' })
             : null;
 
           // Equipped flair items
@@ -1794,24 +1794,24 @@
 
           // Earned badges (reuse the earned Set from above)
           const badgeDefs = [
-            { id: 'first_blood',    icon: 'Ã°Å¸Å’Å¸' },
-            { id: 'champion',       icon: 'Ã°Å¸Ââ€ ' },
-            { id: 'dynasty',        icon: 'Ã°Å¸â€˜â€˜' },
-            { id: 'on_fire',        icon: 'Ã°Å¸â€Â¥' },
-            { id: 'streak_master',  icon: 'Ã¢Å¡Â¡' },
-            { id: 'veteran',        icon: 'Ã¢Å¡â€Ã¯Â¸Â' },
-            { id: 'socialite',      icon: 'Ã°Å¸Â¤Â' },
-            { id: 'sharpshooter',   icon: 'Ã°Å¸Å½Â¯' },
-            { id: 'iron_wall',      icon: 'Ã°Å¸â€ºÂ¡Ã¯Â¸Â' },
-            { id: 'underdog',       icon: 'Ã°Å¸â€™â‚¬' },
-            { id: 'rising_star',    icon: 'Ã¢Â­Â' },
-            { id: 'elite',          icon: 'Ã°Å¸â€™Å½' },
-            { id: 'bounty_hunter',  icon: 'Ã°Å¸â€™Â°' },
-            { id: 'bounty_king',    icon: 'Ã°Å¸Â¤â€˜' },
-            { id: 'big_spender',    icon: 'Ã°Å¸â€ºâ€™' },
-            { id: 'collector',      icon: 'Ã°Å¸â€œÂ¦' },
-            { id: 'perfect_season', icon: 'Ã¢Å“Â¨' },
-            { id: 'tenacious',      icon: 'Ã°Å¸â€â€ž' },
+            { id: 'first_blood',    icon: 'ðŸŒŸ' },
+            { id: 'champion',       icon: 'ðŸ†' },
+            { id: 'dynasty',        icon: 'ðŸ‘‘' },
+            { id: 'on_fire',        icon: 'ðŸ”¥' },
+            { id: 'streak_master',  icon: 'âš¡' },
+            { id: 'veteran',        icon: 'âš”ï¸' },
+            { id: 'socialite',      icon: 'ðŸ¤' },
+            { id: 'sharpshooter',   icon: 'ðŸŽ¯' },
+            { id: 'iron_wall',      icon: 'ðŸ›¡ï¸' },
+            { id: 'underdog',       icon: 'ðŸ’€' },
+            { id: 'rising_star',    icon: 'â­' },
+            { id: 'elite',          icon: 'ðŸ’Ž' },
+            { id: 'bounty_hunter',  icon: 'ðŸ’°' },
+            { id: 'bounty_king',    icon: 'ðŸ¤‘' },
+            { id: 'big_spender',    icon: 'ðŸ›’' },
+            { id: 'collector',      icon: 'ðŸ“¦' },
+            { id: 'perfect_season', icon: 'âœ¨' },
+            { id: 'tenacious',      icon: 'ðŸ”„' },
           ];
           const earnedBadgeIcons = badgeDefs.filter(b => earned.has(b.id)).map(b => b.icon);
 
@@ -1828,7 +1828,7 @@
                       <div class="card-elo-value">${elo}</div>
                       <span class="card-tier-badge ${tier.cls}">${tier.icon} ${tier.name}</span>
                     ` : ''}
-                    ${pointsVal !== null ? `<div class="card-points-badge">Ã°Å¸â€™Å½ ${pointsVal.toLocaleString()} Points</div>` : ''}
+                    ${pointsVal !== null ? `<div class="card-points-badge">ðŸ’Ž ${pointsVal.toLocaleString()} Points</div>` : ''}
                   </div>
 
                   ${cardChars.length ? `
@@ -1870,7 +1870,7 @@
                   ` : ''}
                 </div>
               </div>
-              <button class="card-share-btn" onclick="copyProfileLink()">Ã°Å¸â€œâ€¹ Copy Profile Link</button>
+              <button class="card-share-btn" onclick="copyProfileLink()">ðŸ“‹ Copy Profile Link</button>
             </div>
           `;
 
@@ -1892,14 +1892,14 @@
               if (fm?.length) {
                 const w = fm[0];
                 const champName = w.winner_id === w.player1_id ? w.player1?.discord_username : w.player2?.discord_username;
-                if (champName === playerName) accolades.push({ icon: 'Ã°Å¸Ââ€ ', label: 'Current Champion' });
+                if (champName === playerName) accolades.push({ icon: 'ðŸ†', label: 'Current Champion' });
               }
             }
             // Best streak
             const { data: pts } = await supabaseClient.from('player_points')
               .select('best_streak, current_streak').eq('discord_username', playerName).single();
-            if (pts?.best_streak >= 3) accolades.push({ icon: 'Ã°Å¸â€Â¥', label: `Best Streak: ${pts.best_streak}` });
-            if (pts?.current_streak >= 2) accolades.push({ icon: 'Ã¢Å¡Â¡', label: `On ${pts.current_streak} Win Streak` });
+            if (pts?.best_streak >= 3) accolades.push({ icon: 'ðŸ”¥', label: `Best Streak: ${pts.best_streak}` });
+            if (pts?.current_streak >= 2) accolades.push({ icon: 'âš¡', label: `On ${pts.current_streak} Win Streak` });
 
             if (accolades.length > 0) {
               const wrap = document.querySelector('.player-card-inner .card-top');
@@ -1912,7 +1912,7 @@
             }
           } catch (_) {}
 
-          // ── Player Titles ──
+          // -- Player Titles --
           try {
             if (typeof TitleManager !== 'undefined') {
               const equippedTitle = await TitleManager.getEquippedTitle(playerName);
