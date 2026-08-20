@@ -60,10 +60,11 @@
       display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;
     }
     .emoji-opt {
-      width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-      font-size: 20px; background: var(--bg); border: 2px solid var(--line);
+      width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+      padding: 4px; background: var(--bg); border: 2px solid var(--line);
       border-radius: 8px; cursor: pointer; transition: all 0.15s;
     }
+    .emoji-opt svg { width: 100%; height: 100%; }
     .emoji-opt:hover { border-color: var(--muted); }
     .emoji-opt.selected { border-color: var(--cyan); box-shadow: 0 0 8px rgba(0,229,255,0.3); }
 
@@ -98,7 +99,7 @@
     .clan-row:nth-child(3) .clan-rank { color: #cd7f32; }
 
     .clan-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
-    .clan-emoji { font-size: 24px; flex-shrink: 0; }
+    .clan-emoji { font-size: 24px; flex-shrink: 0; display: inline-flex; align-items: center; }
     .clan-name-block { min-width: 0; }
     .clan-name {
       font-family: 'Exo 2', sans-serif; font-weight: 700; font-size: 15px;
@@ -381,7 +382,25 @@
   <script src="js/clan-tag.js"></script>
   <script src="js/toolbar.js"></script>
   <script>
-    const EMOJIS = ['⚔️','🐉','🔥','💀','👑','🦁','🐍','🦅','⚡','🌙','💎','🎯','🛡️','🏴','☠️','🐺'];
+    const DBZ_ICONS = {
+      'dragonball': { name: 'Dragon Ball', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="46" fill="#FF8C00" stroke="#CC6600" stroke-width="3"/><circle cx="50" cy="50" r="38" fill="none" stroke="#FFD700" stroke-width="1.5" opacity="0.4"/><circle cx="38" cy="36" r="7" fill="#FF4500"/><circle cx="62" cy="36" r="7" fill="#FF4500"/><circle cx="50" cy="52" r="7" fill="#FF4500"/><circle cx="38" cy="64" r="7" fill="#FF4500"/><circle cx="16" cy="28" r="12" fill="rgba(255,255,255,0.25)"/></svg>` },
+      'saiyan': { name: 'Saiyan Crest', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M50 5 L65 35 L95 40 L72 62 L78 95 L50 78 L22 95 L28 62 L5 40 L35 35 Z" fill="#E63946" stroke="#8B0000" stroke-width="2"/><circle cx="50" cy="52" r="14" fill="#8B0000"/><path d="M50 42 L54 50 L50 58 L46 50 Z" fill="#FFD700"/></svg>` },
+      'capsule': { name: 'Capsule Corp', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="44" fill="#4A90D9" stroke="#2C5F8A" stroke-width="3"/><text x="50" y="62" text-anchor="middle" font-size="42" font-weight="900" font-family="Arial" fill="#FFF">C</text><text x="68" y="62" text-anchor="middle" font-size="42" font-weight="900" font-family="Arial" fill="#FFF">C</text></svg>` },
+      'redribbon': { name: 'Red Ribbon', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="44" fill="#DC143C" stroke="#8B0000" stroke-width="3"/><rect x="30" y="25" width="40" height="50" rx="4" fill="#FFF"/><text x="50" y="58" text-anchor="middle" font-size="30" font-weight="900" font-family="Arial" fill="#DC143C">RR</text></svg>` },
+      'majin': { name: 'Majin', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="44" fill="#2D1B4E" stroke="#6B21A8" stroke-width="3"/><text x="50" y="68" text-anchor="middle" font-size="55" font-weight="900" font-family="serif" fill="#D946EF" style="font-style:italic">M</text></svg>` },
+      'turtle': { name: 'Turtle School', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="44" fill="#FF6B00" stroke="#CC5500" stroke-width="3"/><text x="50" y="66" text-anchor="middle" font-size="48" font-weight="900" font-family="serif" fill="#FFF">亀</text></svg>` },
+      'crane': { name: 'Crane School', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="44" fill="#FFD700" stroke="#B8860B" stroke-width="3"/><text x="50" y="66" text-anchor="middle" font-size="48" font-weight="900" font-family="serif" fill="#333">鶴</text></svg>` },
+      'ginyu': { name: 'Ginyu Force', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M50 8 L60 38 L92 38 L66 56 L76 88 L50 70 L24 88 L34 56 L8 38 L40 38 Z" fill="#9333EA" stroke="#6B21A8" stroke-width="2"/><circle cx="50" cy="50" r="12" fill="#FFF"/><text x="50" y="56" text-anchor="middle" font-size="18" font-weight="900" font-family="Arial" fill="#9333EA">G</text></svg>` },
+      'frieza': { name: 'Frieza Force', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="44" fill="#1A1A2E" stroke="#7B2D8E" stroke-width="3"/><path d="M50 20 C65 20 78 30 78 45 C78 65 50 85 50 85 C50 85 22 65 22 45 C22 30 35 20 50 20Z" fill="#7B2D8E" opacity="0.6"/><circle cx="50" cy="44" r="10" fill="#E040FB"/><circle cx="50" cy="44" r="5" fill="#FFF"/></svg>` },
+      'zfighter': { name: 'Z-Fighter', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="44" fill="#1565C0" stroke="#0D47A1" stroke-width="3"/><text x="50" y="70" text-anchor="middle" font-size="65" font-weight="900" font-family="Arial" fill="#FFD740" stroke="#FF8F00" stroke-width="2">Z</text></svg>` },
+      'potara': { name: 'Potara', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="55" rx="22" ry="28" fill="#FFD740" stroke="#FF8F00" stroke-width="2"/><ellipse cx="50" cy="55" rx="16" ry="22" fill="#FFF176"/><circle cx="50" cy="25" r="8" fill="#888" stroke="#666" stroke-width="2"/><rect x="48" y="30" width="4" height="8" fill="#888"/><circle cx="42" cy="42" r="6" fill="rgba(255,255,255,0.4)"/></svg>` },
+      'senzu': { name: 'Senzu Bean', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="50" rx="20" ry="32" fill="#2ED573" stroke="#1B8A4A" stroke-width="2.5" transform="rotate(-15 50 50)"/><ellipse cx="44" cy="38" rx="8" ry="14" fill="rgba(255,255,255,0.2)" transform="rotate(-15 50 50)"/><path d="M50 18 Q55 10 52 5" stroke="#1B8A4A" stroke-width="2.5" fill="none"/></svg>` },
+      'kai': { name: 'Supreme Kai', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="44" fill="#311B92" stroke="#4A148C" stroke-width="3"/><path d="M50 15 L56 40 L80 40 L60 55 L68 80 L50 65 L32 80 L40 55 L20 40 L44 40 Z" fill="#CE93D8"/><circle cx="50" cy="48" r="8" fill="#E1BEE7"/></svg>` },
+      'destroyer': { name: 'God of Destruction', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="44" fill="#1A0A2E" stroke="#6A0DAD" stroke-width="3"/><path d="M50 12 L58 38 L86 38 L63 55 L71 82 L50 67 L29 82 L37 55 L14 38 L42 38 Z" fill="#6A0DAD"/><circle cx="50" cy="46" r="12" fill="#E040FB"/><circle cx="50" cy="46" r="6" fill="#F3E5F5"/></svg>` },
+      'angel': { name: 'Angel', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="44" fill="#E3F2FD" stroke="#90CAF9" stroke-width="3"/><ellipse cx="50" cy="28" rx="18" ry="6" fill="none" stroke="#FFD740" stroke-width="4"/><path d="M35 45 L50 80 L65 45" stroke="#90CAF9" stroke-width="3" fill="rgba(144,202,249,0.2)"/><circle cx="50" cy="55" r="3" fill="#64B5F6"/></svg>` },
+      'timepartol': { name: 'Time Patrol', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="44" fill="#004D40" stroke="#00695C" stroke-width="3"/><circle cx="50" cy="50" r="28" fill="none" stroke="#26A69A" stroke-width="3"/><line x1="50" y1="50" x2="50" y2="30" stroke="#4DB6AC" stroke-width="3" stroke-linecap="round"/><line x1="50" y1="50" x2="65" y2="55" stroke="#4DB6AC" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="50" r="3" fill="#80CBC4"/></svg>` },
+    };
+    const ICON_KEYS = Object.keys(DBZ_ICONS);
     const COLORS = ['#00e5ff','#ff2d78','#ffd740','#2ed573','#ff4757','#a55eea','#ff6b81','#1e90ff'];
 
     let allClans = [];
@@ -397,12 +416,20 @@
       await loadData();
     });
 
+    function getIconSvg(key, size) {
+      const icon = DBZ_ICONS[key];
+      if (!icon) return `<span style="font-size:${size}px">⚔️</span>`;
+      return `<div style="width:${size}px;height:${size}px;display:inline-flex;align-items:center;justify-content:center;">${icon.svg}</div>`;
+    }
+
     function initPickers() {
       const ep = document.getElementById('emoji-picker');
-      EMOJIS.forEach((e, i) => {
+      ICON_KEYS.forEach((key, i) => {
         const d = document.createElement('div');
         d.className = 'emoji-opt' + (i === 0 ? ' selected' : '');
-        d.textContent = e;
+        d.dataset.icon = key;
+        d.innerHTML = DBZ_ICONS[key].svg;
+        d.title = DBZ_ICONS[key].name;
         d.onclick = () => {
           ep.querySelectorAll('.emoji-opt').forEach(x => x.classList.remove('selected'));
           d.classList.add('selected');
@@ -452,7 +479,7 @@
       } else if (AUTH.isLoggedIn() && userMembership) {
         const clan = allClans.find(c => c.id === userMembership.clan_id);
         statusEl.innerHTML = clan
-          ? `<span class="free-agent-badge" style="background:rgba(46,213,115,0.15);border-color:var(--green);color:var(--green);">${clan.logo_emoji} ${clan.name} [${clan.tag}]</span>`
+          ? `<span class="free-agent-badge" style="background:rgba(46,213,115,0.15);border-color:var(--green);color:var(--green);">${getIconSvg(clan.logo_emoji, 18)} ${clan.name} [${clan.tag}]</span>`
           : '';
         createEl.style.display = 'none';
       } else {
@@ -489,7 +516,7 @@
         <div class="clan-row" onclick="openClanDetail('${c.id}')">
           <div class="clan-rank">${i + 1}</div>
           <div class="clan-info">
-            <span class="clan-emoji">${c.logo_emoji}</span>
+            <span class="clan-emoji">${getIconSvg(c.logo_emoji, 28)}</span>
             <div class="clan-name-block">
               <div class="clan-name">${esc(c.name)}</div>
               <span class="clan-tag-label" style="color:${c.color}">[${esc(c.tag)}]</span>
@@ -531,7 +558,7 @@
 
       let html = `
         <div class="clan-banner">
-          <span class="clan-banner-emoji">${clan.logo_emoji}</span>
+          <span class="clan-banner-emoji">${getIconSvg(clan.logo_emoji, 52)}</span>
           <div>
             <div>
               <span class="clan-banner-name" style="color:${clan.color}">${esc(clan.name)}</span>
@@ -577,7 +604,7 @@
           const myWins = w.clan1_id === clanId ? w.clan1_wins : w.clan2_wins;
           const theirWins = w.clan1_id === clanId ? w.clan2_wins : w.clan1_wins;
           html += `<div class="war-row">
-            <span class="war-opponent">${opponent ? opponent.logo_emoji + ' ' + esc(opponent.name) : 'Unknown'}</span>
+            <span class="war-opponent">${opponent ? getIconSvg(opponent.logo_emoji, 20) + ' ' + esc(opponent.name) : 'Unknown'}</span>
             <span class="war-score"><span class="win">${myWins}W</span> - <span class="loss">${theirWins}L</span></span>
           </div>`;
         });
@@ -621,7 +648,7 @@
       const name = document.getElementById('clan-name').value.trim();
       const tag = document.getElementById('clan-tag').value.trim().toUpperCase();
       const desc = document.getElementById('clan-desc').value.trim();
-      const emoji = document.querySelector('#emoji-picker .emoji-opt.selected')?.textContent || '⚔️';
+      const emoji = document.querySelector('#emoji-picker .emoji-opt.selected')?.dataset.icon || 'dragonball';
       const color = getComputedStyle(document.querySelector('#color-picker .color-opt.selected')).backgroundColor;
       const colorHex = document.querySelector('#color-picker .color-opt.selected')?.style.background || '#00e5ff';
 
