@@ -1,0 +1,967 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hall of Fame - DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    /* Gold shimmer animation */
+    @keyframes gold-shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    @keyframes sparkle {
+      0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+      50% { opacity: 1; transform: scale(1) rotate(180deg); }
+    }
+
+    @keyframes trophy-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    @keyframes marble-shine {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 100% 100%; }
+    }
+
+    .hof-page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    /* Hero */
+    .hof-hero {
+      text-align: center;
+      padding: 50px 20px 30px;
+      position: relative;
+    }
+
+    .hof-hero-decorations {
+      font-size: 28px;
+      margin-bottom: 10px;
+      animation: trophy-float 3s ease-in-out infinite;
+    }
+
+    .hof-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: clamp(36px, 7vw, 60px);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 6px;
+      background: linear-gradient(135deg, #ffd740 0%, #ffab00 25%, #fff8e1 50%, #ffd740 75%, #ff8f00 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gold-shimmer 4s linear infinite;
+      margin: 0;
+      line-height: 1.1;
+      text-shadow: none;
+    }
+
+    .hof-subtitle {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    .hof-divider {
+      width: 120px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 20px auto 0;
+    }
+
+    /* Section headings */
+    .hof-section-heading {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      margin: 40px 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hof-section-heading::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+
+    .hof-section-heading .icon {
+      font-size: 18px;
+    }
+
+    /* Legends Tier */
+    .legends-tier {
+      background: linear-gradient(135deg, rgba(255,215,64,0.08), rgba(255,143,0,0.05));
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .legends-tier::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #ff8f00, #ffd740, #fff8e1, #ffd740, #ff8f00);
+      background-size: 200% auto;
+      animation: gold-shimmer 3s linear infinite;
+    }
+
+    .legends-tier-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .legends-tier-sub {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .legends-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .legend-card {
+      background: linear-gradient(135deg, rgba(255,215,64,0.12), rgba(255,143,0,0.06));
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .legend-crown { font-size: 28px; margin-bottom: 6px; }
+
+    .legend-name {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ffd740, #fff8e1, #ffd740);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gold-shimmer 3s linear infinite;
+    }
+
+    .legend-name a {
+      color: inherit;
+      text-decoration: none;
+      -webkit-text-fill-color: inherit;
+    }
+
+    .legend-records {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .legend-record-count {
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .legends-empty {
+      text-align: center;
+      padding: 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* Champions Wall */
+    .champions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+    }
+
+    .champion-card {
+      background: linear-gradient(145deg, #1a1535 0%, #12102a 100%);
+      border: 2px solid var(--gold);
+      border-radius: 10px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .champion-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(255,215,64,0.15);
+    }
+
+    .champion-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #ff8f00, #ffd740, #ff8f00);
+    }
+
+    .champion-trophy {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      font-size: 26px;
+      opacity: 0.3;
+    }
+
+    .champion-tournament {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 4px;
+      padding-right: 30px;
+    }
+
+    .champion-date {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .champion-name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .champion-name a {
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .champion-name a:hover {
+      color: var(--gold);
+    }
+
+    .champion-team {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .champion-team img {
+      width: 36px;
+      height: 36px;
+      border-radius: 4px;
+      border: 1px solid var(--line);
+      object-fit: cover;
+    }
+
+    .champion-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* Records Section */
+    .records-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 16px;
+    }
+
+    .record-card {
+      background: linear-gradient(145deg, #1a1535, #12102a);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .record-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-3px);
+    }
+
+    .record-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+      opacity: 0.5;
+    }
+
+    .record-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .record-title {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .record-holder {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .record-holder a {
+      text-decoration: none;
+      background: linear-gradient(135deg, #ffd740, #fff8e1, #ffd740);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gold-shimmer 4s linear infinite;
+    }
+
+    .record-value {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+
+    .record-empty {
+      color: var(--muted);
+      font-size: 13px;
+      font-style: italic;
+    }
+
+    /* Season Champions */
+    .season-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .season-card {
+      background: linear-gradient(145deg, #1a1535, #12102a);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: border-color 0.2s;
+    }
+
+    .season-card:hover {
+      border-color: var(--gold);
+    }
+
+    .season-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), #ff8f00);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #0d0a1a;
+      flex-shrink: 0;
+    }
+
+    .season-info { flex: 1; }
+
+    .season-name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .season-winner {
+      font-size: 13px;
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    .season-winner a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .season-winner a:hover { text-decoration: underline; }
+
+    .season-xp {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .season-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 30px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* Loading */
+    .hof-loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* Sparkle particles */
+    .sparkle {
+      position: fixed;
+      pointer-events: none;
+      width: 4px;
+      height: 4px;
+      background: var(--gold);
+      border-radius: 50%;
+      animation: sparkle 3s ease-in-out infinite;
+    }
+
+    @media (max-width: 600px) {
+      .champions-grid { grid-template-columns: 1fr; }
+      .records-grid { grid-template-columns: 1fr; }
+      .season-list { grid-template-columns: 1fr; }
+      .legends-grid { grid-template-columns: 1fr; }
+      .hof-hero { padding: 30px 16px 20px; }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">&#9776;</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+        <li><a href="bounty.html">Bounty</a></li>
+        <li><a href="matches.html">Matches</a></li>
+        <li class="nav-dropdown">
+          <a href="#">More &#9662;</a>
+          <div class="nav-dropdown-menu">
+            <div class="dropdown-label">Data</div>
+            <a href="characters.html">Characters</a>
+            <a href="tierlist.html">Tier List</a>
+            <a href="analytics.html">Ban Analytics</a>
+            <a href="power-rankings.html">Power Rankings</a>
+            <a href="hall-of-fame.html" class="active">Hall of Fame</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Community</div>
+            <a href="compare.html">Compare</a>
+            <a href="shop.html">Shop</a>
+            <a href="auction.html">Auction</a>
+            <a href="season.html">Season</a>
+            <a href="world-tournament.html">World Tournament</a>
+            <a href="feed.html">Live Feed</a>
+            <a href="rivalries.html">Rivalries</a>
+            <a href="clans.html">Clans</a>
+            <a href="mvp-vote.html">Season Awards</a>
+            <a href="betting.html">Betting</a>
+          </div>
+        </li>
+
+        <div id="auth-nav"></div>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="hof-page page page-enter">
+    <!-- Sparkle decorations -->
+    <div id="sparkles"></div>
+
+    <!-- Hero -->
+    <div class="hof-hero">
+      <div class="hof-hero-decorations">&#9733; &#127942; &#9733;</div>
+      <h1 class="hof-title">Hall of Fame</h1>
+      <p class="hof-subtitle">Legends never die</p>
+      <div class="hof-divider"></div>
+    </div>
+
+    <!-- Legends Tier (3+ records) -->
+    <div id="legends-tier" style="display:none;">
+      <div class="hof-section-heading"><span class="icon">&#128081;</span> Legends Tier</div>
+      <div class="legends-tier">
+        <div class="legends-tier-title">&#9733; True Legends &#9733;</div>
+        <div class="legends-tier-sub">Players who hold 3 or more all-time records</div>
+        <div class="legends-grid" id="legends-grid"></div>
+      </div>
+    </div>
+
+    <!-- Tournament Champions Wall -->
+    <div class="hof-section-heading"><span class="icon">&#127942;</span> Tournament Champions</div>
+    <div class="champions-grid" id="champions-grid">
+      <div class="hof-loading">Loading champions...</div>
+    </div>
+
+    <!-- All-Time Records -->
+    <div class="hof-section-heading"><span class="icon">&#127941;</span> All-Time Records</div>
+    <div class="records-grid" id="records-grid">
+      <div class="hof-loading">Loading records...</div>
+    </div>
+
+    <!-- Season Champions -->
+    <div class="hof-section-heading"><span class="icon">&#127760;</span> Season Champions</div>
+    <div class="season-list" id="season-list">
+      <div class="hof-loading">Loading seasons...</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/activity-alerts.js"></script>
+  <script src="js/daily-rewards.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/themes.js"></script>
+  <script>
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function profileLink(name) {
+      return `<a href="profile.html?player=${encodeURIComponent(name)}">${escapeHtml(name)}</a>`;
+    }
+
+    // Track record holders for Legends Tier
+    const recordHolders = {};
+    function addRecord(playerName, recordTitle) {
+      if (!playerName) return;
+      if (!recordHolders[playerName]) recordHolders[playerName] = [];
+      recordHolders[playerName].push(recordTitle);
+    }
+
+    // ---- Tournament Champions ----
+    async function loadChampions() {
+      const grid = document.getElementById('champions-grid');
+      try {
+        const { data: tournaments, error } = await supabaseClient
+          .from('tournaments')
+          .select('id, name, created_at, start_date')
+          .eq('status', 'completed')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        if (!tournaments || tournaments.length === 0) {
+          grid.innerHTML = '<div class="champion-empty">No completed tournaments yet. Be the first champion!</div>';
+          return;
+        }
+
+        let html = '';
+        for (const t of tournaments) {
+          // Find the final match winner
+          const { data: finalMatch } = await supabaseClient
+            .from('matches')
+            .select('winner_name, round')
+            .eq('tournament_id', t.id)
+            .not('winner_name', 'is', null)
+            .order('round', { ascending: false })
+            .limit(1);
+
+          const champion = finalMatch && finalMatch.length > 0 ? finalMatch[0].winner_name : null;
+
+          // Try to get champion's team
+          let teamHtml = '';
+          if (champion) {
+            const { data: teamData } = await supabaseClient
+              .from('tournament_registrations')
+              .select('team')
+              .eq('tournament_id', t.id)
+              .eq('player_name', champion)
+              .limit(1);
+
+            if (teamData && teamData.length > 0 && teamData[0].team) {
+              const team = typeof teamData[0].team === 'string' ? JSON.parse(teamData[0].team) : teamData[0].team;
+              if (Array.isArray(team)) {
+                teamHtml = '<div class="champion-team">' +
+                  team.slice(0, 6).map(c => {
+                    const img = typeof c === 'object' ? (c.image_url || c.icon || '') : '';
+                    const name = typeof c === 'object' ? (c.name || c.character_name || '') : c;
+                    return img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" title="${escapeHtml(name)}">` : '';
+                  }).filter(Boolean).join('') +
+                  '</div>';
+              }
+            }
+          }
+
+          const date = t.start_date || t.created_at;
+          const dateStr = date ? new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
+          html += `
+            <div class="champion-card">
+              <div class="champion-trophy">&#127942;</div>
+              <div class="champion-tournament">${escapeHtml(t.name)}</div>
+              <div class="champion-date">${dateStr}</div>
+              <div class="champion-name">${champion ? profileLink(champion) : '<span class="record-empty">Unknown</span>'}</div>
+              ${teamHtml}
+            </div>
+          `;
+        }
+
+        grid.innerHTML = html || '<div class="champion-empty">No champions found.</div>';
+      } catch (e) {
+        console.error('Champions error:', e);
+        grid.innerHTML = '<div class="champion-empty">Could not load champions.</div>';
+      }
+    }
+
+    // ---- All-Time Records ----
+    async function loadRecords() {
+      const grid = document.getElementById('records-grid');
+      const records = [];
+
+      // 1. Highest ELO Ever
+      try {
+        const { data } = await supabaseClient
+          .from('elo_ratings')
+          .select('player_name, peak_elo')
+          .order('peak_elo', { ascending: false })
+          .limit(1);
+        if (data && data.length > 0 && data[0].peak_elo) {
+          records.push({ icon: '&#9889;', title: 'Highest ELO Ever', holder: data[0].player_name, value: data[0].peak_elo });
+          addRecord(data[0].player_name, 'Highest ELO');
+        } else {
+          records.push({ icon: '&#9889;', title: 'Highest ELO Ever', holder: null, value: null });
+        }
+      } catch(e) { records.push({ icon: '&#9889;', title: 'Highest ELO Ever', holder: null, value: null }); }
+
+      // 2. Most Tournament Wins
+      try {
+        const { data: tournaments } = await supabaseClient
+          .from('tournaments')
+          .select('id')
+          .eq('status', 'completed');
+
+        if (tournaments && tournaments.length > 0) {
+          const winCounts = {};
+          for (const t of tournaments) {
+            const { data: fm } = await supabaseClient
+              .from('matches')
+              .select('winner_name, round')
+              .eq('tournament_id', t.id)
+              .not('winner_name', 'is', null)
+              .order('round', { ascending: false })
+              .limit(1);
+            if (fm && fm.length > 0 && fm[0].winner_name) {
+              winCounts[fm[0].winner_name] = (winCounts[fm[0].winner_name] || 0) + 1;
+            }
+          }
+          const top = Object.entries(winCounts).sort((a,b) => b[1]-a[1])[0];
+          if (top) {
+            records.push({ icon: '&#127942;', title: 'Most Tournament Wins', holder: top[0], value: top[1] });
+            addRecord(top[0], 'Most Tournament Wins');
+          } else {
+            records.push({ icon: '&#127942;', title: 'Most Tournament Wins', holder: null, value: null });
+          }
+        } else {
+          records.push({ icon: '&#127942;', title: 'Most Tournament Wins', holder: null, value: null });
+        }
+      } catch(e) { records.push({ icon: '&#127942;', title: 'Most Tournament Wins', holder: null, value: null }); }
+
+      // 3. Longest Win Streak
+      try {
+        const { data } = await supabaseClient
+          .from('bounties')
+          .select('player_name, streak')
+          .order('streak', { ascending: false })
+          .limit(1);
+        if (data && data.length > 0 && data[0].streak) {
+          records.push({ icon: '&#128293;', title: 'Longest Win Streak', holder: data[0].player_name, value: data[0].streak });
+          addRecord(data[0].player_name, 'Longest Win Streak');
+        } else {
+          records.push({ icon: '&#128293;', title: 'Longest Win Streak', holder: null, value: null });
+        }
+      } catch(e) { records.push({ icon: '&#128293;', title: 'Longest Win Streak', holder: null, value: null }); }
+
+      // 4. Highest Bounty Ever
+      try {
+        const { data } = await supabaseClient
+          .from('bounties')
+          .select('player_name, peak_bounty')
+          .order('peak_bounty', { ascending: false })
+          .limit(1);
+        if (data && data.length > 0 && data[0].peak_bounty) {
+          records.push({ icon: '&#128176;', title: 'Highest Bounty Ever', holder: data[0].player_name, value: data[0].peak_bounty.toLocaleString() });
+          addRecord(data[0].player_name, 'Highest Bounty');
+        } else {
+          records.push({ icon: '&#128176;', title: 'Highest Bounty Ever', holder: null, value: null });
+        }
+      } catch(e) { records.push({ icon: '&#128176;', title: 'Highest Bounty Ever', holder: null, value: null }); }
+
+      // 5. Most Matches Played
+      try {
+        const { data } = await supabaseClient.rpc('get_most_matches_player');
+        if (data && data.length > 0) {
+          records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: data[0].player_name, value: data[0].match_count });
+          addRecord(data[0].player_name, 'Most Matches');
+        } else {
+          // Fallback: manual count
+          const { data: matches } = await supabaseClient
+            .from('matches')
+            .select('player1_name, player2_name');
+          if (matches && matches.length > 0) {
+            const counts = {};
+            matches.forEach(m => {
+              if (m.player1_name) counts[m.player1_name] = (counts[m.player1_name] || 0) + 1;
+              if (m.player2_name) counts[m.player2_name] = (counts[m.player2_name] || 0) + 1;
+            });
+            const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+            if (top) {
+              records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: top[0], value: top[1] });
+              addRecord(top[0], 'Most Matches');
+            } else {
+              records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: null, value: null });
+            }
+          } else {
+            records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: null, value: null });
+          }
+        }
+      } catch(e) {
+        // Fallback: manual count
+        try {
+          const { data: matches } = await supabaseClient
+            .from('matches')
+            .select('player1_name, player2_name');
+          if (matches && matches.length > 0) {
+            const counts = {};
+            matches.forEach(m => {
+              if (m.player1_name) counts[m.player1_name] = (counts[m.player1_name] || 0) + 1;
+              if (m.player2_name) counts[m.player2_name] = (counts[m.player2_name] || 0) + 1;
+            });
+            const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+            if (top) {
+              records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: top[0], value: top[1] });
+              addRecord(top[0], 'Most Matches');
+            } else {
+              records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: null, value: null });
+            }
+          } else {
+            records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: null, value: null });
+          }
+        } catch(e2) {
+          records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: null, value: null });
+        }
+      }
+
+      // 6. Richest Player (most lifetime points)
+      try {
+        const { data } = await supabaseClient
+          .from('player_points')
+          .select('player_name, lifetime_earned')
+          .order('lifetime_earned', { ascending: false })
+          .limit(1);
+        if (data && data.length > 0 && data[0].lifetime_earned) {
+          records.push({ icon: '&#128176;', title: 'Richest Player', holder: data[0].player_name, value: data[0].lifetime_earned.toLocaleString() + ' pts' });
+          addRecord(data[0].player_name, 'Richest Player');
+        } else {
+          records.push({ icon: '&#128176;', title: 'Richest Player', holder: null, value: null });
+        }
+      } catch(e) { records.push({ icon: '&#128176;', title: 'Richest Player', holder: null, value: null }); }
+
+      // 7. Most Bounties Claimed
+      try {
+        const { data } = await supabaseClient
+          .from('bounties')
+          .select('player_name, wins')
+          .order('wins', { ascending: false })
+          .limit(1);
+        if (data && data.length > 0 && data[0].wins) {
+          records.push({ icon: '&#127919;', title: 'Most Bounties Claimed', holder: data[0].player_name, value: data[0].wins });
+          addRecord(data[0].player_name, 'Most Bounties Claimed');
+        } else {
+          records.push({ icon: '&#127919;', title: 'Most Bounties Claimed', holder: null, value: null });
+        }
+      } catch(e) { records.push({ icon: '&#127919;', title: 'Most Bounties Claimed', holder: null, value: null }); }
+
+      // 8. Most Active Player (matches + bounty challenges)
+      try {
+        const { data: matches } = await supabaseClient
+          .from('matches')
+          .select('player1_name, player2_name');
+        const { data: challenges } = await supabaseClient
+          .from('bounty_challenges')
+          .select('challenger_name, target_name');
+
+        const activity = {};
+        if (matches) {
+          matches.forEach(m => {
+            if (m.player1_name) activity[m.player1_name] = (activity[m.player1_name] || 0) + 1;
+            if (m.player2_name) activity[m.player2_name] = (activity[m.player2_name] || 0) + 1;
+          });
+        }
+        if (challenges) {
+          challenges.forEach(c => {
+            if (c.challenger_name) activity[c.challenger_name] = (activity[c.challenger_name] || 0) + 1;
+            if (c.target_name) activity[c.target_name] = (activity[c.target_name] || 0) + 1;
+          });
+        }
+
+        const top = Object.entries(activity).sort((a,b) => b[1]-a[1])[0];
+        if (top) {
+          records.push({ icon: '&#9733;', title: 'Most Active Player', holder: top[0], value: top[1] + ' activities' });
+          addRecord(top[0], 'Most Active');
+        } else {
+          records.push({ icon: '&#9733;', title: 'Most Active Player', holder: null, value: null });
+        }
+      } catch(e) { records.push({ icon: '&#9733;', title: 'Most Active Player', holder: null, value: null }); }
+
+      // Render records
+      grid.innerHTML = records.map(r => `
+        <div class="record-card">
+          <div class="record-icon">${r.icon}</div>
+          <div class="record-title">${r.title}</div>
+          ${r.holder
+            ? `<div class="record-holder">${profileLink(r.holder)}</div>
+               <div class="record-value">${r.value}</div>`
+            : '<div class="record-empty">No record yet</div>'
+          }
+        </div>
+      `).join('');
+    }
+
+    // ---- Season Champions ----
+    async function loadSeasonChampions() {
+      const list = document.getElementById('season-list');
+      try {
+        const { data: seasons, error } = await supabaseClient
+          .from('seasons')
+          .select('*')
+          .eq('status', 'completed')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        if (!seasons || seasons.length === 0) {
+          list.innerHTML = '<div class="season-empty">No completed seasons yet.</div>';
+          return;
+        }
+
+        let html = '';
+        for (const s of seasons) {
+          // Find winner by most XP
+          const { data: xpData } = await supabaseClient
+            .from('season_xp')
+            .select('player_name, xp')
+            .eq('season_id', s.id)
+            .order('xp', { ascending: false })
+            .limit(1);
+
+          const winner = xpData && xpData.length > 0 ? xpData[0] : null;
+          const seasonNum = s.season_number || s.name || '?';
+
+          html += `
+            <div class="season-card">
+              <div class="season-badge">S${seasonNum}</div>
+              <div class="season-info">
+                <div class="season-name">${escapeHtml(s.name || 'Season ' + seasonNum)}</div>
+                <div class="season-winner">${winner ? profileLink(winner.player_name) : 'No winner'}</div>
+                ${winner ? `<div class="season-xp">${winner.xp.toLocaleString()} XP</div>` : ''}
+              </div>
+            </div>
+          `;
+        }
+
+        list.innerHTML = html || '<div class="season-empty">No season data available.</div>';
+      } catch(e) {
+        console.error('Seasons error:', e);
+        list.innerHTML = '<div class="season-empty">No season data available.</div>';
+      }
+    }
+
+    // ---- Legends Tier ----
+    function renderLegendsTier() {
+      const legends = Object.entries(recordHolders).filter(([_, records]) => records.length >= 3);
+      if (legends.length === 0) return;
+
+      document.getElementById('legends-tier').style.display = 'block';
+      const grid = document.getElementById('legends-grid');
+
+      grid.innerHTML = legends
+        .sort((a, b) => b[1].length - a[1].length)
+        .map(([name, records]) => `
+          <div class="legend-card">
+            <div class="legend-crown">&#128081;</div>
+            <div class="legend-name">${profileLink(name)}</div>
+            <div class="legend-records">
+              <span class="legend-record-count">${records.length} Records:</span>
+              ${records.join(' &bull; ')}
+            </div>
+          </div>
+        `).join('');
+    }
+
+    // ---- Sparkle effects ----
+    function createSparkles() {
+      const container = document.getElementById('sparkles');
+      if (!container) return;
+      for (let i = 0; i < 12; i++) {
+        const s = document.createElement('div');
+        s.className = 'sparkle';
+        s.style.left = Math.random() * 100 + '%';
+        s.style.top = Math.random() * 100 + '%';
+        s.style.animationDelay = (Math.random() * 3) + 's';
+        s.style.animationDuration = (2 + Math.random() * 2) + 's';
+        container.appendChild(s);
+      }
+    }
+
+    // ---- Init ----
+    document.addEventListener('DOMContentLoaded', async () => {
+      createSparkles();
+      await loadChampions();
+      await loadRecords();
+      await loadSeasonChampions();
+      renderLegendsTier();
+    });
+  </script>
+  <script src="js/toolbar.js"></script>
+</body>
+</html>
+

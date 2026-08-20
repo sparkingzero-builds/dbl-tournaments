@@ -342,6 +342,7 @@
             <a href="tierlist.html">Tier List</a>
             <a href="analytics.html">Ban Analytics</a>
             <a href="power-rankings.html">Power Rankings</a>
+            <a href="hall-of-fame.html">Hall of Fame</a>
             <div class="dropdown-divider"></div>
             <div class="dropdown-label">Community</div>
             <a href="compare.html">Compare</a>
@@ -855,7 +856,7 @@
 
     function switchMainTab(tab) {
       document.querySelectorAll('#main-tabs .shop-tab').forEach((btn, i) => {
-        btn.classList.toggle('active', ['shop', 'inventory', 'history'][i] === tab);
+        btn.classList.toggle('active', ['shop', 'titles', 'inventory', 'history'][i] === tab);
       });
       document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
       document.getElementById('tab-' + tab).classList.add('active');
@@ -914,6 +915,75 @@
         html += '</div>';
         container.innerHTML = html;
       } catch (e) { container.innerHTML = '<div class="empty-state">Failed to load transactions.</div>'; console.error(e); }
+    }
+
+    async function loadTitlesShop() {
+      const grid = document.getElementById('titles-shop-grid');
+      if (!grid || typeof TitleManager === 'undefined') {
+        if (grid) grid.innerHTML = '<div class="empty-state">Titles system loading...</div>';
+        return;
+      }
+      try {
+        const shopTitles = Object.values(TitleManager.TITLES).filter(t => t.source === 'shop');
+        const ownedTitles = await TitleManager.getPlayerTitles(shopUsername);
+        const ownedIds = new Set(ownedTitles.map(t => t.title_id));
+
+        if (!shopTitles.length) {
+          grid.innerHTML = '<div class="empty-state">No titles available.</div>';
+          return;
+        }
+
+        let html = '';
+        for (const t of shopTitles) {
+          const owned = ownedIds.has(t.id);
+          const canBuy = !owned && currentBalance >= t.price;
+          const rarity = t.price >= 1500 ? 'mythic' : t.price >= 1000 ? 'legendary' : t.price >= 750 ? 'epic' : 'rare';
+
+          html += `
+            <div class="item-card ${owned ? 'owned-card' : ''}" data-rarity="${rarity}" style="aspect-ratio:4/3;">
+              ${owned ? '<div class="card-badge" style="background:var(--green);box-shadow:0 0 10px rgba(46,213,115,0.4);">OWNED</div>' : ''}
+              <div class="card-visual">
+                <div class="card-bg-effect aura-effect"></div>
+                <div style="z-index:1;text-align:center;padding:16px;">
+                  <div style="font-family:'Exo 2',sans-serif;font-size:18px;font-weight:900;color:${t.color};text-shadow:0 0 12px ${t.color};text-transform:uppercase;letter-spacing:0.08em;">${escapeHtml(t.name)}</div>
+                  <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4;">${escapeHtml(t.description)}</div>
+                </div>
+              </div>
+              <div class="card-info">
+                <div class="card-name">${escapeHtml(t.name)}</div>
+                <div class="card-type" style="color:${t.color};">Player Title</div>
+              </div>
+              <div class="card-price-bar">
+                <div class="card-price">
+                  <div class="price-coin">&#9889;</div>
+                  <span class="price-value">${t.price.toLocaleString()}</span>
+                </div>
+                <button class="btn-get ${owned ? 'owned' : ''}" ${owned || !canBuy ? 'disabled' : ''}
+                  onclick="event.stopPropagation();buyTitle('${t.id}')">
+                  ${owned ? 'OWNED' : canBuy ? 'GET' : 'LOCKED'}
+                </button>
+              </div>
+            </div>`;
+        }
+        grid.innerHTML = html;
+      } catch (e) {
+        grid.innerHTML = '<div class="empty-state">Failed to load titles.</div>';
+        console.error(e);
+      }
+    }
+
+    async function buyTitle(titleId) {
+      if (typeof TitleManager === 'undefined') return;
+      try {
+        const title = await TitleManager.purchaseTitle(shopUsername, titleId);
+        playSound('purchase');
+        NotificationSystem.show('Purchased title: ' + title.name + '!', 'success');
+        await refreshBalance();
+        await loadTitlesShop();
+      } catch (e) {
+        playSound('error');
+        NotificationSystem.show(e.message || 'Purchase failed', 'error');
+      }
     }
 
     function escapeHtml(str) { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
