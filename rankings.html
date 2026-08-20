@@ -276,7 +276,7 @@
     /* â”€â”€ Data Loading â”€â”€ */
     async function loadAllData() {
       const [eloRes, bountyRes, currencyRes, matchRes] = await Promise.all([
-        supabaseClient.from('player_elo').select('discord_username, elo, peak_elo'),
+        supabaseClient.from('elo_ratings').select('discord_username, elo, peak_elo'),
         supabaseClient.from('bounties').select('discord_username, bounty, wins, losses, streak'),
         supabaseClient.from('player_points').select('discord_username, balance, lifetime_earned'),
         supabaseClient.from('matches').select('player1_id, player2_id, winner_id'),
