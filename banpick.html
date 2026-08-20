@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ban Phase — DBL Tournaments</title>
+  <title>Ban Phase â€” DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/roster.css" />
@@ -118,7 +118,7 @@
     }
 
     .banned-overlay::after {
-      content: '🚫';
+      content: 'ðŸš«';
       position: absolute;
       top: 50%;
       left: 50%;
@@ -217,7 +217,7 @@
   <nav class="navbar">
     <div class="container">
       <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
-      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">â˜°</button>
       <ul class="navbar-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="tournament.html">Tournament</a></li>
@@ -228,12 +228,13 @@
         <li><a href="bounty.html">Bounty</a></li>
         <li><a href="matches.html">Matches</a></li>
         <li class="nav-dropdown">
-          <a href="#">More ▾</a>
+          <a href="#">More â–¾</a>
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Data</div>
             <a href="characters.html">Characters</a>
             <a href="tierlist.html">Tier List</a>
             <a href="analytics.html">Ban Analytics</a>
+            <a href="power-rankings.html">Power Rankings</a>
             <div class="dropdown-divider"></div>
             <div class="dropdown-label">Community</div>
             <a href="compare.html">Compare</a>
@@ -383,8 +384,8 @@
 
       content.innerHTML = `
         <div class="ban-header">
-          <h1 class="ban-title">⚔ Ban Vote</h1>
-          <p class="ban-subtitle">${tournament.name} — Vote for the character you want banned. The top ${banCount} most-voted character${banCount !== 1 ? 's get' : ' gets'} banned from the tournament.</p>
+          <h1 class="ban-title">âš” Ban Vote</h1>
+          <p class="ban-subtitle">${tournament.name} â€” Vote for the character you want banned. The top ${banCount} most-voted character${banCount !== 1 ? 's get' : ' gets'} banned from the tournament.</p>
         </div>
         <div class="ban-login">
           <div class="card card-glow">
@@ -399,7 +400,7 @@
               <div class="ban-player-row">
                 <span class="player-name">${s.discord_username}</span>
                 ${s.bans && s.bans.length > 0
-                  ? '<span class="ban-done">✓ Voted</span>'
+                  ? '<span class="ban-done">âœ“ Voted</span>'
                   : '<span class="ban-pending">Pending</span>'}
               </div>
             `).join('')}
@@ -441,7 +442,7 @@
 
       content.innerHTML = `
         <div class="ban-header">
-          <h1 class="ban-title">⚔ Ban Vote</h1>
+          <h1 class="ban-title">âš” Ban Vote</h1>
           <p class="ban-subtitle">Pick 1 character you want banned from the tournament. The character with the most votes gets removed.</p>
         </div>
         <div class="ban-phase-content">
@@ -552,7 +553,7 @@
           </div>
           <div class="char-card__body">
             <div class="char-card__name">${c.name}</div>
-            <a href="character.html?id=${c.id}" class="char-card__info" onclick="event.stopPropagation()" title="View kit">ℹ</a>
+            <a href="character.html?id=${c.id}" class="char-card__info" onclick="event.stopPropagation()" title="View kit">â„¹</a>
           </div>
         `;
 
@@ -635,7 +636,7 @@
                 <div class="ban-player-row">
                   <span class="player-name">${s.discord_username}</span>
                   ${s.bans && s.bans.length > 0
-                    ? '<span class="ban-done">✓ Voted</span>'
+                    ? '<span class="ban-done">âœ“ Voted</span>'
                     : '<span class="ban-pending">Pending</span>'}
                 </div>
               `).join('')}
@@ -652,7 +653,7 @@
                 <div class="ban-slot ${isBanned ? 'filled' : ''}" style="${isBanned ? '' : 'opacity:0.5;'}">
                   <img class="ban-slot__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
                   <span class="ban-slot__name" style="${isBanned ? 'color:var(--pink);' : ''}">${c.name}</span>
-                  <span style="font-family:'Exo 2',sans-serif;font-weight:800;font-size:13px;color:${isBanned ? 'var(--pink)' : 'var(--muted)'};">${r.count} vote${r.count !== 1 ? 's' : ''}${isBanned ? ' — BANNED' : ''}</span>
+                  <span style="font-family:'Exo 2',sans-serif;font-weight:800;font-size:13px;color:${isBanned ? 'var(--pink)' : 'var(--muted)'};">${r.count} vote${r.count !== 1 ? 's' : ''}${isBanned ? ' â€” BANNED' : ''}</span>
                 </div>` : '';
             }).join('')}
           </div>`;
@@ -662,7 +663,7 @@
         if (conflicting.length > 0) {
           html += `
             <div class="card mt-3" style="max-width:500px;margin:0 auto;border-color:var(--pink);">
-              <h4 class="text-pink mb-2">⚠ Team Conflict!</h4>
+              <h4 class="text-pink mb-2">âš  Team Conflict!</h4>
               <p class="text-muted mb-2" style="font-size:13px;">A character on your team was banned! You need to replace them.</p>
               ${conflicting.map(c => `
                 <div class="ban-slot filled">
@@ -675,7 +676,7 @@
         } else {
           html += `
             <div class="card mt-3" style="max-width:500px;margin:0 auto;border-color:var(--green);">
-              <h4 style="color:var(--green);">✓ Team is Clear</h4>
+              <h4 style="color:var(--green);">âœ“ Team is Clear</h4>
               <p class="text-muted mt-1">Your team isn't affected by the ban. You're good to go!</p>
             </div>`;
         }
@@ -737,7 +738,7 @@
           : `Your team only has ${myTeam.length} character${myTeam.length !== 1 ? 's' : ''}. You need to fill your team to 3.`;
         content.innerHTML = `
           <div class="ban-header">
-            <h1 class="ban-title" style="color:var(--pink);">⚠ Team Incomplete</h1>
+            <h1 class="ban-title" style="color:var(--pink);">âš  Team Incomplete</h1>
             <p class="ban-subtitle">${message}</p>
           </div>
           <div style="max-width:500px;margin:0 auto;">
@@ -758,12 +759,12 @@
       } else {
         content.innerHTML = `
           <div class="ban-header">
-            <h1 class="ban-title" style="color:var(--cyan);">✓ Team Clear</h1>
+            <h1 class="ban-title" style="color:var(--cyan);">âœ“ Team Clear</h1>
             <p class="ban-subtitle">Your team isn't affected by any bans. You're good to go!</p>
           </div>
           <div style="max-width:500px;margin:0 auto;">
             <div class="card" style="border-color:var(--green);">
-              <h4 style="color:var(--green);">✓ All Good</h4>
+              <h4 style="color:var(--green);">âœ“ All Good</h4>
               <p class="text-muted mt-1">None of your characters were banned.</p>
             </div>
             <a href="bracket.html" class="btn btn-primary mt-3" style="display:block;text-align:center;">Go to Bracket</a>
@@ -899,7 +900,7 @@
           </div>
           <div class="char-card__body">
             <div class="char-card__name">${c.name}</div>
-            <a href="character.html?id=${c.id}" class="char-card__info" onclick="event.stopPropagation()" title="View kit">ℹ</a>
+            <a href="character.html?id=${c.id}" class="char-card__info" onclick="event.stopPropagation()" title="View kit">â„¹</a>
           </div>
         `;
 
@@ -966,3 +967,4 @@
   <script src="js/toolbar.js"></script>
 </body>
 </html>
+

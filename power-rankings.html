@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Power Rankings — DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    .pr-header {
+      text-align: center;
+      padding: 48px 0 12px;
+    }
+    .pr-title {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      background: linear-gradient(135deg, var(--cyan), var(--pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .pr-subtitle {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+    .pr-date {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      font-family: 'Exo 2', sans-serif;
+    }
+    .pr-broadcast-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 12px;
+      font-size: 11px;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-weight: 700;
+    }
+    .pr-broadcast-bar .live-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--red);
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--red); }
+      50% { opacity: 0.4; box-shadow: none; }
+    }
+
+    /* ── Section Headings ── */
+    .pr-section {
+      max-width: 900px;
+      margin: 0 auto 36px;
+    }
+    .pr-section-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--cyan);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 2px solid var(--line);
+      padding-bottom: 8px;
+    }
+    .pr-section-title .icon { font-size: 20px; }
+
+    /* ── Player of the Week ── */
+    .potw-card {
+      background: var(--panel);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(255, 215, 64, 0.15);
+    }
+    .potw-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,215,64,0.06), transparent);
+      pointer-events: none;
+    }
+    .potw-trophy { font-size: 40px; margin-bottom: 8px; }
+    .potw-label {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .potw-name {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .potw-name a { color: inherit; text-decoration: none; }
+    .potw-name a:hover { color: var(--gold); }
+    .potw-stats {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .potw-stat {
+      text-align: center;
+    }
+    .potw-stat .val {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+    }
+    .potw-stat .val.green { color: var(--green); }
+    .potw-stat .val.gold { color: var(--gold); }
+    .potw-stat .lbl {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── Movers ── */
+    .movers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 600px) {
+      .movers-grid { grid-template-columns: 1fr; }
+    }
+    .movers-col-title {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .movers-col-title.risers { color: var(--green); }
+    .movers-col-title.fallers { color: var(--red); }
+    .mover-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 6px;
+    }
+    .mover-rank {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--muted);
+      min-width: 20px;
+    }
+    .mover-name {
+      flex: 1;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .mover-name a { color: var(--text); text-decoration: none; }
+    .mover-name a:hover { color: var(--cyan); }
+    .mover-elo {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .mover-change {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      min-width: 55px;
+      text-align: right;
+    }
+    .mover-change.up { color: var(--green); }
+    .mover-change.down { color: var(--red); }
+
+    /* ── Upsets ── */
+    .upset-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .upset-badge {
+      background: var(--red);
+      color: #fff;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+    .upset-vs {
+      flex: 1;
+      font-size: 14px;
+    }
+    .upset-vs a { color: var(--text); text-decoration: none; }
+    .upset-vs a:hover { color: var(--cyan); }
+    .upset-vs .defeated { color: var(--muted); font-size: 12px; }
+    .upset-meta {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    /* ── Char bars ── */
+    .char-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 14px;
+      margin-bottom: 6px;
+    }
+    .char-bar__rank {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--muted);
+      min-width: 24px;
+    }
+    .char-bar__img {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid var(--line);
+    }
+    .char-bar__info { flex: 1; min-width: 0; }
+    .char-bar__name {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .char-bar__meter {
+      height: 6px;
+      background: var(--line);
+      border-radius: 3px;
+      margin-top: 4px;
+      overflow: hidden;
+    }
+    .char-bar__fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.6s ease;
+    }
+    .char-bar__fill.cyan { background: var(--cyan); }
+    .char-bar__fill.pink { background: var(--pink); }
+    .char-bar__count {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--cyan);
+      min-width: 40px;
+      text-align: right;
+    }
+
+    /* ── Activity Stats ── */
+    .activity-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .activity-stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+    }
+    .activity-stat .val {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--cyan);
+    }
+    .activity-stat .lbl {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+
+    /* ── Streaks ── */
+    .streak-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 600px) {
+      .streak-grid { grid-template-columns: 1fr; }
+    }
+    .streak-col-title {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .streak-col-title.hot { color: var(--gold); }
+    .streak-col-title.cold { color: #4fc3f7; }
+    .streak-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 6px;
+    }
+    .streak-name { flex: 1; font-weight: 600; font-size: 14px; }
+    .streak-name a { color: var(--text); text-decoration: none; }
+    .streak-name a:hover { color: var(--cyan); }
+    .streak-val {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+    }
+    .streak-val.hot { color: var(--gold); }
+    .streak-val.cold { color: #4fc3f7; }
+
+    .pr-empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 24px;
+      font-size: 14px;
+    }
+    .loader { text-align: center; padding: 24px; }
+    .loader-spinner {
+      width: 28px; height: 28px;
+      border: 3px solid var(--line);
+      border-top-color: var(--cyan);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">&#9776;</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+        <li><a href="bounty.html">Bounty</a></li>
+        <li><a href="matches.html">Matches</a></li>
+        <li class="nav-dropdown">
+          <a href="#" class="active">More &#9662;</a>
+          <div class="nav-dropdown-menu">
+            <div class="dropdown-label">Data</div>
+            <a href="characters.html">Characters</a>
+            <a href="tierlist.html">Tier List</a>
+            <a href="analytics.html">Ban Analytics</a>
+            <a href="power-rankings.html">Power Rankings</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Community</div>
+            <a href="compare.html">Compare</a>
+            <a href="shop.html">Shop</a>
+            <a href="season.html">Season</a>
+            <a href="world-tournament.html">World Tournament</a>
+            <a href="feed.html">Live Feed</a>
+          </div>
+        </li>
+
+        <div id="auth-nav"></div>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="particles-bg" id="particles"></div>
+
+  <main class="page container page-enter">
+    <!-- Header -->
+    <div class="pr-header">
+      <h1 class="pr-title">Power Rankings</h1>
+      <div class="pr-subtitle">Weekly Meta Report</div>
+      <div class="pr-date" id="pr-date-range"></div>
+      <div class="pr-broadcast-bar">
+        <div class="live-dot"></div>
+        <span>DBL Tournaments Broadcast</span>
+      </div>
+    </div>
+
+    <!-- Player of the Week -->
+    <div class="pr-section">
+      <div class="pr-section-title"><span class="icon">&#127942;</span> Player of the Week</div>
+      <div id="potw-container">
+        <div class="loader"><div class="loader-spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Biggest Movers -->
+    <div class="pr-section">
+      <div class="pr-section-title"><span class="icon">&#128200;</span> Biggest Movers</div>
+      <div id="movers-container">
+        <div class="loader"><div class="loader-spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Upsets of the Week -->
+    <div class="pr-section">
+      <div class="pr-section-title"><span class="icon">&#9889;</span> Upsets of the Week</div>
+      <div id="upsets-container">
+        <div class="loader"><div class="loader-spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Most Used Characters -->
+    <div class="pr-section">
+      <div class="pr-section-title"><span class="icon">&#9876;&#65039;</span> Most Used Characters</div>
+      <div id="chars-used-container">
+        <div class="loader"><div class="loader-spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Most Banned Characters -->
+    <div class="pr-section">
+      <div class="pr-section-title"><span class="icon">&#128683;</span> Most Banned Characters</div>
+      <div id="chars-banned-container">
+        <div class="loader"><div class="loader-spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Activity Stats -->
+    <div class="pr-section">
+      <div class="pr-section-title"><span class="icon">&#128202;</span> Activity Stats</div>
+      <div id="activity-stats-container">
+        <div class="loader"><div class="loader-spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Hot & Cold Streaks -->
+    <div class="pr-section">
+      <div class="pr-section-title"><span class="icon">&#128293;</span> Streaks</div>
+      <div id="streaks-container">
+        <div class="loader"><div class="loader-spinner"></div></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/activity-alerts.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/particles.js"></script>
+  <script>
+    initParticles(document.getElementById('particles'));
+
+    function playerLink(name) {
+      return `<a href="profile.html?player=${encodeURIComponent(name)}">${name}</a>`;
+    }
+
+    function formatDate(d) {
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    async function loadPowerRankings() {
+      try {
+        const now = new Date();
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const weekAgoISO = weekAgo.toISOString();
+
+        document.getElementById('pr-date-range').textContent =
+          formatDate(weekAgo) + ' — ' + formatDate(now);
+
+        // ── Fetch all data in parallel ──
+        const [
+          eloRes,
+          bountyRes,
+          tournamentsRes,
+          challengesRes,
+          charResp
+        ] = await Promise.all([
+          supabaseClient.from('player_elo').select('discord_username, elo, peak_elo'),
+          supabaseClient.from('bounties').select('discord_username, bounty, wins, losses, streak'),
+          supabaseClient.from('tournaments').select('id, name, status, created_at').order('created_at', { ascending: false }),
+          supabaseClient.from('bounty_challenges').select('*').gte('created_at', weekAgoISO),
+          fetch('data/characters.json')
+        ]);
+
+        const allPlayers = eloRes.data || [];
+        const allBounties = bountyRes.data || [];
+        const allTournaments = tournamentsRes.data || [];
+        const recentChallenges = challengesRes.data || [];
+        const allChars = await charResp.json();
+
+        const charMap = {};
+        allChars.forEach(c => { charMap[String(c.id)] = c; });
+
+        const eloMap = {};
+        allPlayers.forEach(p => { eloMap[p.discord_username] = p.elo; });
+
+        const bountyMap = {};
+        allBounties.forEach(b => { bountyMap[b.discord_username] = b; });
+
+        // Get recent tournaments (last 7 days)
+        const recentTournaments = allTournaments.filter(t =>
+          new Date(t.created_at) >= weekAgo
+        );
+
+        // Fetch signups and matches for recent tournaments
+        const recentSignups = [];
+        const recentMatches = [];
+        const recentTournamentNames = {};
+
+        for (const t of recentTournaments) {
+          recentTournamentNames[t.id] = t.name;
+          const [signRes, matchRes] = await Promise.all([
+            supabaseClient.from('signups').select('id, discord_username, team, bans, tournament_id').eq('tournament_id', t.id),
+            supabaseClient.from('matches').select('id, player1_id, player2_id, winner_id, round, tournament_id, created_at').eq('tournament_id', t.id)
+          ]);
+          if (signRes.data) recentSignups.push(...signRes.data);
+          if (matchRes.data) recentMatches.push(...matchRes.data);
+        }
+
+        // Build signup ID -> username map
+        const signupIdToUser = {};
+        recentSignups.forEach(s => { signupIdToUser[s.id] = s.discord_username; });
+
+        // ── ELO Snapshots (localStorage) ──
+        const SNAPSHOT_KEY = 'pr_elo_snapshots';
+        const snapshots = JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || '{}');
+        const todayKey = now.toISOString().slice(0, 10);
+
+        // Store today's snapshot
+        const currentSnapshot = {};
+        allPlayers.forEach(p => { currentSnapshot[p.discord_username] = p.elo; });
+        snapshots[todayKey] = currentSnapshot;
+
+        // Clean old snapshots (keep last 14 days)
+        const cutoff = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        Object.keys(snapshots).forEach(k => { if (k < cutoff) delete snapshots[k]; });
+        localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshots));
+
+        // Find the oldest snapshot within the last 7 days
+        const snapshotDates = Object.keys(snapshots).filter(k => k >= weekAgo.toISOString().slice(0, 10) && k < todayKey).sort();
+        const baselineKey = snapshotDates.length > 0 ? snapshotDates[0] : null;
+        const baseline = baselineKey ? snapshots[baselineKey] : {};
+
+        // Calculate ELO changes
+        const eloChanges = [];
+        allPlayers.forEach(p => {
+          const oldElo = baseline[p.discord_username];
+          if (oldElo !== undefined) {
+            eloChanges.push({
+              name: p.discord_username,
+              elo: p.elo,
+              change: p.elo - oldElo
+            });
+          }
+        });
+
+        // Also calculate from recent match win/loss if no baseline
+        const weekWins = {};
+        const weekLosses = {};
+        recentMatches.forEach(m => {
+          if (!m.winner_id) return;
+          const winner = signupIdToUser[m.winner_id];
+          const p1 = signupIdToUser[m.player1_id];
+          const p2 = signupIdToUser[m.player2_id];
+          if (winner) weekWins[winner] = (weekWins[winner] || 0) + 1;
+          const loser = winner === p1 ? p2 : p1;
+          if (loser) weekLosses[loser] = (weekLosses[loser] || 0) + 1;
+        });
+
+        // Count bounty wins/losses this week
+        const weekBountyWins = {};
+        recentChallenges.forEach(c => {
+          if (c.status === 'completed' && c.winner) {
+            weekBountyWins[c.winner] = (weekBountyWins[c.winner] || 0) + 1;
+          }
+        });
+
+        // If no ELO snapshots, estimate changes from match results
+        if (eloChanges.length === 0) {
+          const playerSet = new Set([...Object.keys(weekWins), ...Object.keys(weekLosses)]);
+          playerSet.forEach(name => {
+            const w = weekWins[name] || 0;
+            const l = weekLosses[name] || 0;
+            const estimatedChange = (w - l) * 25;
+            eloChanges.push({
+              name,
+              elo: eloMap[name] || 1000,
+              change: estimatedChange
+            });
+          });
+        }
+
+        // ═══════════════════════════════════════════
+        // 1. Player of the Week
+        // ═══════════════════════════════════════════
+        const potwContainer = document.getElementById('potw-container');
+        if (eloChanges.length > 0) {
+          const sorted = [...eloChanges].sort((a, b) => b.change - a.change);
+          const potw = sorted[0];
+          const w = weekWins[potw.name] || 0;
+          const l = weekLosses[potw.name] || 0;
+          const bw = weekBountyWins[potw.name] || 0;
+          potwContainer.innerHTML = `
+            <div class="potw-card">
+              <div class="potw-trophy">&#127942;</div>
+              <div class="potw-label">Player of the Week</div>
+              <div class="potw-name">${playerLink(potw.name)}</div>
+              <div class="potw-stats">
+                <div class="potw-stat">
+                  <div class="val green">${potw.change >= 0 ? '+' : ''}${potw.change}</div>
+                  <div class="lbl">ELO Change</div>
+                </div>
+                <div class="potw-stat">
+                  <div class="val gold">${potw.elo}</div>
+                  <div class="lbl">Current ELO</div>
+                </div>
+                <div class="potw-stat">
+                  <div class="val" style="color:var(--text)">${w}W — ${l}L</div>
+                  <div class="lbl">This Week</div>
+                </div>
+                ${bw > 0 ? `<div class="potw-stat">
+                  <div class="val" style="color:var(--pink)">${bw}</div>
+                  <div class="lbl">Bounty Wins</div>
+                </div>` : ''}
+              </div>
+            </div>`;
+        } else {
+          potwContainer.innerHTML = '<div class="pr-empty">No data yet this week. Check back after some matches!</div>';
+        }
+
+        // ═══════════════════════════════════════════
+        // 2. Biggest Movers
+        // ═══════════════════════════════════════════
+        const moversContainer = document.getElementById('movers-container');
+        if (eloChanges.length > 0) {
+          const risers = [...eloChanges].filter(e => e.change > 0).sort((a, b) => b.change - a.change).slice(0, 5);
+          const fallers = [...eloChanges].filter(e => e.change < 0).sort((a, b) => a.change - b.change).slice(0, 5);
+
+          const renderMovers = (list, dir) => list.length > 0
+            ? list.map((p, i) => `
+              <div class="mover-row">
+                <div class="mover-rank">${i + 1}</div>
+                <div class="mover-name">${playerLink(p.name)}</div>
+                <div class="mover-elo">${p.elo}</div>
+                <div class="mover-change ${dir}">${dir === 'up' ? '&#9650;' : '&#9660;'} ${dir === 'up' ? '+' : ''}${p.change}</div>
+              </div>`).join('')
+            : '<div class="pr-empty">None</div>';
+
+          moversContainer.innerHTML = `
+            <div class="movers-grid">
+              <div>
+                <div class="movers-col-title risers">&#9650; Top Risers</div>
+                ${renderMovers(risers, 'up')}
+              </div>
+              <div>
+                <div class="movers-col-title fallers">&#9660; Biggest Fallers</div>
+                ${renderMovers(fallers, 'down')}
+              </div>
+            </div>`;
+        } else {
+          moversContainer.innerHTML = '<div class="pr-empty">No movement data available this week.</div>';
+        }
+
+        // ═══════════════════════════════════════════
+        // 3. Upsets of the Week
+        // ═══════════════════════════════════════════
+        const upsetsContainer = document.getElementById('upsets-container');
+        const upsets = [];
+        recentMatches.forEach(m => {
+          if (!m.winner_id) return;
+          const winner = signupIdToUser[m.winner_id];
+          const p1 = signupIdToUser[m.player1_id];
+          const p2 = signupIdToUser[m.player2_id];
+          const loser = winner === p1 ? p2 : p1;
+          if (!winner || !loser) return;
+          const winnerElo = eloMap[winner] || 1000;
+          const loserElo = eloMap[loser] || 1000;
+          if (winnerElo < loserElo) {
+            const gap = loserElo - winnerElo;
+            upsets.push({ winner, loser, gap, winnerElo, loserElo, tournamentId: m.tournament_id });
+          }
+        });
+
+        // Also check bounty upsets
+        recentChallenges.forEach(c => {
+          if (c.status !== 'completed' || !c.winner) return;
+          const loser = c.winner === c.challenger ? c.target : c.challenger;
+          const winnerElo = eloMap[c.winner] || 1000;
+          const loserElo = eloMap[loser] || 1000;
+          if (winnerElo < loserElo) {
+            upsets.push({ winner: c.winner, loser, gap: loserElo - winnerElo, winnerElo, loserElo, isBounty: true });
+          }
+        });
+
+        upsets.sort((a, b) => b.gap - a.gap);
+        const topUpsets = upsets.slice(0, 8);
+
+        if (topUpsets.length > 0) {
+          upsetsContainer.innerHTML = topUpsets.map(u => `
+            <div class="upset-card">
+              <div class="upset-badge">${u.gap} ELO Gap</div>
+              <div class="upset-vs">
+                ${playerLink(u.winner)} <span style="color:var(--green);font-weight:700">W</span>
+                <span class="defeated"> def. </span>
+                ${playerLink(u.loser)} <span style="color:var(--red);font-weight:700">L</span>
+              </div>
+              <div class="upset-meta">
+                ${u.isBounty ? 'Bounty Match' : (recentTournamentNames[u.tournamentId] || 'Tournament')}
+              </div>
+            </div>`).join('');
+        } else {
+          upsetsContainer.innerHTML = '<div class="pr-empty">No upsets this week. The favourites held firm.</div>';
+        }
+
+        // ═══════════════════════════════════════════
+        // 4. Most Used Characters
+        // ═══════════════════════════════════════════
+        const charsUsedContainer = document.getElementById('chars-used-container');
+        const charPicks = {};
+        recentSignups.forEach(s => {
+          if (!s.team || !Array.isArray(s.team)) return;
+          s.team.forEach(c => {
+            const key = String(c.id);
+            if (!charPicks[key]) charPicks[key] = { id: c.id, name: c.name, image: c.image, count: 0 };
+            charPicks[key].count++;
+          });
+        });
+
+        const sortedPicks = Object.values(charPicks).sort((a, b) => b.count - a.count).slice(0, 10);
+        const maxPicks = sortedPicks.length > 0 ? sortedPicks[0].count : 1;
+
+        if (sortedPicks.length > 0) {
+          charsUsedContainer.innerHTML = sortedPicks.map((c, i) => `
+            <div class="char-bar">
+              <div class="char-bar__rank">${i + 1}</div>
+              <img class="char-bar__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
+              <div class="char-bar__info">
+                <div class="char-bar__name">${c.name}</div>
+                <div class="char-bar__meter">
+                  <div class="char-bar__fill cyan" style="width:${(c.count / maxPicks * 100).toFixed(1)}%"></div>
+                </div>
+              </div>
+              <div class="char-bar__count">${c.count}</div>
+            </div>`).join('');
+        } else {
+          charsUsedContainer.innerHTML = '<div class="pr-empty">No team data from this week.</div>';
+        }
+
+        // ═══════════════════════════════════════════
+        // 5. Most Banned Characters
+        // ═══════════════════════════════════════════
+        const charsBannedContainer = document.getElementById('chars-banned-container');
+        const banCounts = {};
+        recentSignups.forEach(s => {
+          if (!s.bans || !Array.isArray(s.bans)) return;
+          s.bans.forEach(b => {
+            if (!b || !b.id) return;
+            const key = String(b.id);
+            if (!banCounts[key]) banCounts[key] = { id: b.id, name: b.name, image: b.image, count: 0 };
+            banCounts[key].count++;
+          });
+        });
+
+        const sortedBans = Object.values(banCounts).sort((a, b) => b.count - a.count).slice(0, 10);
+        const maxBans = sortedBans.length > 0 ? sortedBans[0].count : 1;
+
+        if (sortedBans.length > 0) {
+          charsBannedContainer.innerHTML = sortedBans.map((c, i) => `
+            <div class="char-bar">
+              <div class="char-bar__rank">${i + 1}</div>
+              <img class="char-bar__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
+              <div class="char-bar__info">
+                <div class="char-bar__name">${c.name}</div>
+                <div class="char-bar__meter">
+                  <div class="char-bar__fill pink" style="width:${(c.count / maxBans * 100).toFixed(1)}%"></div>
+                </div>
+              </div>
+              <div class="char-bar__count">${c.count}</div>
+            </div>`).join('');
+        } else {
+          charsBannedContainer.innerHTML = '<div class="pr-empty">No ban data from this week.</div>';
+        }
+
+        // ═══════════════════════════════════════════
+        // 6. Activity Stats
+        // ═══════════════════════════════════════════
+        const activityContainer = document.getElementById('activity-stats-container');
+        const totalMatchesWeek = recentMatches.filter(m => m.winner_id).length;
+        const totalBountyChallenges = recentChallenges.length;
+        const uniquePlayers = new Set();
+        recentSignups.forEach(s => uniquePlayers.add(s.discord_username));
+        recentChallenges.forEach(c => { uniquePlayers.add(c.challenger); uniquePlayers.add(c.target); });
+        const avgMatchesPerPlayer = uniquePlayers.size > 0
+          ? (totalMatchesWeek / uniquePlayers.size).toFixed(1)
+          : '0';
+
+        // New players: those with ELO but no baseline
+        let newPlayersCount = 0;
+        if (baselineKey) {
+          allPlayers.forEach(p => {
+            if (!baseline[p.discord_username]) newPlayersCount++;
+          });
+        }
+
+        activityContainer.innerHTML = `
+          <div class="activity-grid">
+            <div class="activity-stat">
+              <div class="val">${totalMatchesWeek}</div>
+              <div class="lbl">Tournament Matches</div>
+            </div>
+            <div class="activity-stat">
+              <div class="val">${totalBountyChallenges}</div>
+              <div class="lbl">Bounty Challenges</div>
+            </div>
+            <div class="activity-stat">
+              <div class="val">${newPlayersCount}</div>
+              <div class="lbl">New Players</div>
+            </div>
+            <div class="activity-stat">
+              <div class="val">${avgMatchesPerPlayer}</div>
+              <div class="lbl">Avg Matches / Player</div>
+            </div>
+          </div>`;
+
+        // ═══════════════════════════════════════════
+        // 7. Hot & Cold Streaks
+        // ═══════════════════════════════════════════
+        const streaksContainer = document.getElementById('streaks-container');
+
+        // From bounties table (has streak column)
+        const hotStreaks = allBounties
+          .filter(b => b.streak > 0)
+          .sort((a, b) => b.streak - a.streak)
+          .slice(0, 5);
+
+        const coldStreaks = allBounties
+          .filter(b => b.streak < 0)
+          .sort((a, b) => a.streak - b.streak)
+          .slice(0, 5);
+
+        const renderStreaks = (list, type) => list.length > 0
+          ? list.map(p => `
+            <div class="streak-row">
+              <div class="streak-name">${playerLink(p.discord_username)}</div>
+              <div class="streak-val ${type}">${type === 'hot' ? '&#128293;' : '&#10052;&#65039;'} ${Math.abs(p.streak)}${type === 'hot' ? 'W' : 'L'}</div>
+            </div>`).join('')
+          : '<div class="pr-empty">No streaks</div>';
+
+        streaksContainer.innerHTML = `
+          <div class="streak-grid">
+            <div>
+              <div class="streak-col-title hot">&#128293; Hot Streaks</div>
+              ${renderStreaks(hotStreaks, 'hot')}
+            </div>
+            <div>
+              <div class="streak-col-title cold">&#10052;&#65039; Cold Streaks</div>
+              ${renderStreaks(coldStreaks, 'cold')}
+            </div>
+          </div>`;
+
+        if (typeof playSound === 'function') playSound('reveal');
+
+      } catch (e) {
+        console.error('Power Rankings error:', e);
+        document.getElementById('potw-container').innerHTML =
+          '<div class="pr-empty">Error loading power rankings. Please try again later.</div>';
+      }
+    }
+
+    loadPowerRankings();
+  </script>
+  <script src="js/themes.js"></script>
+  <script src="js/toolbar.js"></script>
+</body>
+</html>

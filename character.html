@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Character — DBL Tournaments</title>
+  <title>Character â€” DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
@@ -318,12 +318,13 @@
         <li><a href="bounty.html">Bounty</a></li>
         <li><a href="matches.html">Matches</a></li>
         <li class="nav-dropdown">
-          <a href="#">More ▾</a>
+          <a href="#">More â–¾</a>
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Data</div>
             <a href="characters.html">Characters</a>
             <a href="tierlist.html">Tier List</a>
             <a href="analytics.html">Ban Analytics</a>
+            <a href="power-rankings.html">Power Rankings</a>
             <div class="dropdown-divider"></div>
             <div class="dropdown-label">Community</div>
             <a href="compare.html">Compare</a>
@@ -392,7 +393,7 @@
           return;
         }
 
-        document.title = `${charInfo.name} — DBL Tournaments`;
+        document.title = `${charInfo.name} â€” DBL Tournaments`;
         render();
         playSound('reveal');
       } catch (e) {
@@ -427,12 +428,12 @@
           </div>
           <div class="char-info">
             <div class="char-name">${charInfo.name}</div>
-            <div class="char-card-id">${cardId || ''} ${charInfo.zenkai ? '• ZENKAI' : ''} ${charInfo.lf ? '• LEGENDS LIMITED' : ''}</div>
+            <div class="char-card-id">${cardId || ''} ${charInfo.zenkai ? 'â€¢ ZENKAI' : ''} ${charInfo.lf ? 'â€¢ LEGENDS LIMITED' : ''}</div>
             <div class="char-tags">
               ${tags.map(t => `<span class="char-tag">${t}</span>`).join('')}
             </div>
             <a class="dblegends-link" href="https://dblegends.net/character/${charId}" target="_blank" rel="noopener">
-              View full details on dblegends.net →
+              View full details on dblegends.net â†’
             </a>
           </div>
         </div>
@@ -574,3 +575,4 @@
   <script src="js/toolbar.js"></script>
 </body>
 </html>
+

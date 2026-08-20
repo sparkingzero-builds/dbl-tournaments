@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Draft Lobby — DBL Tournaments</title>
+  <title>Draft Lobby â€” DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/roster.css" />
@@ -371,6 +371,7 @@
             <a href="characters.html">Characters</a>
             <a href="tierlist.html">Tier List</a>
             <a href="analytics.html">Ban Analytics</a>
+            <a href="power-rankings.html">Power Rankings</a>
             <div class="dropdown-divider"></div>
             <div class="dropdown-label">Community</div>
             <a href="compare.html">Compare</a>
@@ -497,7 +498,7 @@
     let timerInterval = null;
     let pickDeadline = null;
 
-    // ── Init ──────────────────────────────────────────────
+    // â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     document.addEventListener('DOMContentLoaded', async () => {
       await AUTH.init();
       AUTH.renderNav();
@@ -553,7 +554,7 @@
       document.getElementById('draft-loading').innerHTML = `<h2 style="color:var(--red);">Error</h2><p class="text-muted">${msg}</p>`;
     }
 
-    // ── Snake Order Generation ────────────────────────────
+    // â”€â”€ Snake Order Generation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     function generateSnakeOrder(playerNames, picksPerPlayer) {
       const order = [];
       let pickNum = 0;
@@ -567,7 +568,7 @@
       return order;
     }
 
-    // ── Start Draft UI ────────────────────────────────────
+    // â”€â”€ Start Draft UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     async function startDraftUI() {
       document.getElementById('draft-loading').style.display = 'none';
       document.getElementById('draft-not-started').style.display = 'none';
@@ -625,7 +626,7 @@
       draftPicks = data || [];
     }
 
-    // ── Rendering ─────────────────────────────────────────
+    // â”€â”€ Rendering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     function renderAll() {
       renderStatus();
       renderDraftOrder();
@@ -757,7 +758,7 @@
       container.scrollTop = container.scrollHeight;
     }
 
-    // ── Character Selection & Confirm ─────────────────────
+    // â”€â”€ Character Selection & Confirm â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     function selectChar(charId, charName) {
       if (!isMyTurn()) return;
       selectedCharId = charId;
@@ -813,7 +814,7 @@
       }
     }
 
-    // ── Polling ───────────────────────────────────────────
+    // â”€â”€ Polling â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     function startPolling() {
       if (pollInterval) clearInterval(pollInterval);
       pollInterval = setInterval(async () => {
@@ -825,7 +826,7 @@
       }, 3000);
     }
 
-    // ── Timer ─────────────────────────────────────────────
+    // â”€â”€ Timer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     function startTimer() {
       // Timer is informational - no auto-skip
       const timerEl = document.getElementById('ds-timer');
@@ -856,3 +857,4 @@
   <script src="js/toolbar.js"></script>
 </body>
 </html>
+

@@ -1,0 +1,1213 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fight Night â€” DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    /* â”€â”€ Fight Night Core â”€â”€ */
+    .fn-hero {
+      text-align: center;
+      padding: 50px 20px 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    .fn-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255,71,87,.15) 0%, transparent 70%),
+                  radial-gradient(ellipse at 50% 100%, rgba(0,229,255,.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .fn-title {
+      font-family: 'Exo 2', sans-serif;
+      font-size: clamp(36px, 8vw, 72px);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 6px;
+      background: linear-gradient(180deg, #ff4757, #ffd740, #ff4757);
+      background-size: 100% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: fn-fire 2s ease-in-out infinite;
+      margin-bottom: 4px;
+      text-shadow: none;
+    }
+    @keyframes fn-fire {
+      0%, 100% { background-position: 0% 0%; }
+      50% { background-position: 0% 100%; }
+    }
+    .fn-event-name {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: clamp(16px, 3vw, 24px);
+      color: var(--cyan);
+      margin-bottom: 6px;
+      text-shadow: 0 0 20px rgba(0,229,255,.3);
+    }
+    .fn-venue {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    .fn-live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--red);
+      color: #fff;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      padding: 6px 18px;
+      border-radius: 999px;
+      animation: live-pulse 1.5s ease-in-out infinite;
+    }
+    .fn-live-badge .dot {
+      width: 8px; height: 8px;
+      background: #fff;
+      border-radius: 50%;
+      animation: dot-blink 1s step-end infinite;
+    }
+    @keyframes live-pulse {
+      0%, 100% { box-shadow: 0 0 8px rgba(255,71,87,.4); }
+      50% { box-shadow: 0 0 24px rgba(255,71,87,.8); }
+    }
+    @keyframes dot-blink {
+      0%, 100% { opacity: 1; } 50% { opacity: 0; }
+    }
+    .fn-spectators {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--muted);
+      margin-left: 12px;
+    }
+
+    /* â”€â”€ Countdown â”€â”€ */
+    .fn-countdown {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .fn-cd-unit {
+      text-align: center;
+    }
+    .fn-cd-digit {
+      font-family: 'Exo 2', sans-serif;
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 900;
+      color: var(--red);
+      text-shadow: 0 0 20px rgba(255,71,87,.4);
+      line-height: 1;
+    }
+    .fn-cd-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+    .fn-cd-sep {
+      font-family: 'Exo 2', sans-serif;
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 900;
+      color: var(--muted);
+      opacity: .4;
+      line-height: 1;
+    }
+
+    /* â”€â”€ Fight Card â”€â”€ */
+    .fn-card-section {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    .fn-section-title {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-align: center;
+      margin: 30px 0 16px;
+      position: relative;
+    }
+    .fn-section-title::before, .fn-section-title::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 60px;
+      height: 1px;
+      background: var(--line);
+    }
+    .fn-section-title::before { right: calc(50% + 80px); }
+    .fn-section-title::after { left: calc(50% + 80px); }
+
+    /* â”€â”€ Match Card (Fight Card Style) â”€â”€ */
+    .fn-match {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: all .3s;
+    }
+    .fn-match.main-event {
+      border-color: var(--red);
+      box-shadow: 0 0 20px rgba(255,71,87,.15);
+    }
+    .fn-match.co-main {
+      border-color: var(--gold);
+      box-shadow: 0 0 12px rgba(255,215,64,.1);
+    }
+    .fn-match.active-match {
+      border-color: var(--cyan);
+      animation: match-active-pulse 2s ease-in-out infinite;
+    }
+    @keyframes match-active-pulse {
+      0%, 100% { box-shadow: 0 0 12px rgba(0,229,255,.3); }
+      50% { box-shadow: 0 0 30px rgba(0,229,255,.6); }
+    }
+    .fn-match.completed .fn-winner { color: var(--green); }
+    .fn-match.completed .fn-loser { opacity: .45; }
+
+    .fn-match-label {
+      text-align: center;
+      padding: 6px;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-bottom: 1px solid var(--line);
+    }
+    .fn-match.main-event .fn-match-label {
+      background: linear-gradient(90deg, rgba(255,71,87,.15), rgba(255,215,64,.15));
+      color: var(--red);
+    }
+    .fn-match.co-main .fn-match-label {
+      color: var(--gold);
+    }
+    .fn-match:not(.main-event):not(.co-main) .fn-match-label {
+      color: var(--muted);
+    }
+
+    .fn-match-body {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 16px 20px;
+      gap: 16px;
+    }
+    .fn-fighter {
+      text-align: center;
+    }
+    .fn-fighter-name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: clamp(16px, 3vw, 22px);
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .fn-fighter-stats {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .fn-fighter-elo {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      color: var(--cyan);
+      font-size: 13px;
+    }
+
+    .fn-vs {
+      font-family: 'Exo 2', sans-serif;
+      font-size: clamp(20px, 4vw, 32px);
+      font-weight: 900;
+      color: var(--red);
+      text-shadow: 0 0 16px rgba(255,71,87,.4);
+      line-height: 1;
+    }
+
+    .fn-time-slot {
+      text-align: center;
+      padding: 4px 0 8px;
+      font-size: 12px;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+    }
+
+    /* â”€â”€ Prediction Vote â”€â”€ */
+    .fn-predict {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-top: 1px solid var(--line);
+    }
+    .fn-predict-btn {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      padding: 5px 14px;
+      border-radius: 4px;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .fn-predict-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+    .fn-predict-btn.voted {
+      background: rgba(0,229,255,.1);
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+    .fn-predict-btn.correct {
+      background: rgba(46,213,115,.15);
+      border-color: var(--green);
+      color: var(--green);
+    }
+    .fn-predict-btn.wrong {
+      background: rgba(255,71,87,.1);
+      border-color: var(--red);
+      color: var(--red);
+      opacity: .5;
+    }
+
+    /* â”€â”€ Result Flash â”€â”€ */
+    .fn-result-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,.85);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: overlay-in .3s ease-out;
+    }
+    @keyframes overlay-in {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+    .fn-result-card {
+      text-align: center;
+      padding: 40px 60px;
+      background: var(--panel);
+      border: 2px solid var(--green);
+      border-radius: 12px;
+      box-shadow: 0 0 60px rgba(46,213,115,.3);
+      animation: result-scale .4s cubic-bezier(.17,.67,.35,1.2);
+    }
+    @keyframes result-scale {
+      from { transform: scale(.5); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .fn-result-label {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .fn-result-winner {
+      font-family: 'Exo 2', sans-serif;
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 900;
+      color: var(--green);
+      text-shadow: 0 0 30px rgba(46,213,115,.4);
+      margin-bottom: 4px;
+    }
+    .fn-result-sub {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* â”€â”€ Commentary / Shoutbox â”€â”€ */
+    .fn-commentary {
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 0 16px;
+    }
+    .fn-chat-box {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .fn-chat-header {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: .9rem;
+      color: var(--cyan);
+    }
+    .fn-chat-messages {
+      max-height: 300px;
+      min-height: 120px;
+      overflow-y: auto;
+      padding: 10px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cyan) var(--bg);
+    }
+    .fn-chat-msg {
+      margin-bottom: 6px;
+      padding: 5px 10px;
+      border-radius: 4px;
+      background: var(--bg);
+      border-left: 3px solid var(--pink);
+      animation: msg-glow .5s ease-out;
+    }
+    .fn-chat-msg.system {
+      border-left-color: var(--gold);
+      background: rgba(255,215,64,.05);
+    }
+    @keyframes msg-glow {
+      0% { box-shadow: 0 0 8px rgba(255,0,128,.4); }
+      100% { box-shadow: none; }
+    }
+    .fn-chat-msg .msg-user {
+      font-weight: 700;
+      font-size: .78rem;
+      color: var(--cyan);
+    }
+    .fn-chat-msg .msg-time {
+      font-size: .66rem;
+      color: var(--muted);
+      float: right;
+    }
+    .fn-chat-msg .msg-text {
+      font-size: .84rem;
+      color: var(--text);
+      word-break: break-word;
+    }
+    .fn-chat-input {
+      display: flex;
+      gap: 6px;
+      padding: 10px;
+      border-top: 1px solid var(--line);
+    }
+    .fn-chat-input input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: .85rem;
+    }
+    .fn-chat-input button {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 4px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: .85rem;
+    }
+
+    /* â”€â”€ Recap Section â”€â”€ */
+    .fn-recap {
+      max-width: 800px;
+      margin: 0 auto 40px;
+      padding: 0 16px;
+    }
+    .fn-recap-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .fn-recap-header h2 {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--gold);
+      text-shadow: 0 0 20px rgba(255,215,64,.3);
+    }
+    .fn-award {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .fn-award.fight-of-night {
+      border-color: var(--gold);
+      box-shadow: 0 0 20px rgba(255,215,64,.1);
+    }
+    .fn-award.ko-of-night {
+      border-color: var(--red);
+      box-shadow: 0 0 20px rgba(255,71,87,.1);
+    }
+    .fn-award-label {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+    .fn-award-name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--text);
+    }
+    .fn-award-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* â”€â”€ Predictions Leaderboard â”€â”€ */
+    .fn-predictions-lb {
+      max-width: 800px;
+      margin: 0 auto 40px;
+      padding: 0 16px;
+    }
+    .fn-lb-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+    .fn-lb-row.top-3 {
+      border-color: var(--gold);
+    }
+    .fn-lb-rank {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--gold);
+      width: 30px;
+      text-align: center;
+    }
+    .fn-lb-name {
+      flex: 1;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .fn-lb-score {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--cyan);
+    }
+
+    /* â”€â”€ Stats Row â”€â”€ */
+    .fn-stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+    .fn-stat {
+      text-align: center;
+      padding: 12px 20px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-width: 100px;
+    }
+    .fn-stat-val {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--cyan);
+    }
+    .fn-stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+
+    /* â”€â”€ Responsive â”€â”€ */
+    @media (max-width: 600px) {
+      .fn-match-body { padding: 12px 10px; gap: 8px; }
+      .fn-fighter-name { font-size: 15px; }
+      .fn-result-card { padding: 24px 20px; }
+      .fn-spectators { margin-left: 0; margin-top: 8px; }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">â˜°</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+        <li><a href="bounty.html">Bounty</a></li>
+        <li><a href="matches.html">Matches</a></li>
+        <li class="nav-dropdown">
+          <a href="#">More â–¾</a>
+          <div class="nav-dropdown-menu">
+            <div class="dropdown-label">Data</div>
+            <a href="characters.html">Characters</a>
+            <a href="tierlist.html">Tier List</a>
+            <a href="analytics.html">Ban Analytics</a>
+            <a href="power-rankings.html">Power Rankings</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Community</div>
+            <a href="compare.html">Compare</a>
+            <a href="shop.html">Shop</a>
+            <a href="season.html">Season</a>
+            <a href="world-tournament.html">World Tournament</a>
+            <a href="fight-night.html" class="active">Fight Night</a>
+            <a href="feed.html">Live Feed</a>
+          </div>
+        </li>
+        <div id="auth-nav"></div>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="page container page-enter">
+    <div id="fn-loading">
+      <div class="loader"><div class="loader-spinner"></div></div>
+    </div>
+    <div id="fn-no-event" style="display:none; text-align:center; padding:80px 20px;">
+      <h2 style="color:var(--muted); margin-bottom:12px;">No Fight Night Scheduled</h2>
+      <p style="color:var(--muted);">Check back soon for the next event.</p>
+    </div>
+    <div id="fn-content" style="display:none;">
+      <!-- Hero -->
+      <div class="fn-hero">
+        <div class="fn-title">FIGHT NIGHT</div>
+        <div class="fn-event-name" id="fn-event-name"></div>
+        <div class="fn-venue" id="fn-venue"></div>
+        <div id="fn-status-area"></div>
+        <div class="fn-countdown" id="fn-countdown"></div>
+      </div>
+
+      <!-- Fight Card -->
+      <div class="fn-card-section">
+        <div class="fn-section-title">Fight Card</div>
+        <div id="fn-fight-card"></div>
+      </div>
+
+      <!-- Commentary -->
+      <div class="fn-commentary" id="fn-commentary-section" style="display:none;">
+        <div class="fn-section-title">Live Commentary</div>
+        <div class="fn-chat-box">
+          <div class="fn-chat-header">Trash Talk</div>
+          <div class="fn-chat-messages" id="fn-chat-messages"></div>
+          <div class="fn-chat-input" id="fn-chat-input-area">
+            <input type="text" id="fn-chat-input" placeholder="Talk your trash..." maxlength="200" />
+            <button onclick="sendFnChat()">Send</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recap (shown when completed) -->
+      <div id="fn-recap-section" style="display:none;"></div>
+
+      <!-- Predictions Leaderboard -->
+      <div id="fn-predictions-section" style="display:none;"></div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/activity-alerts.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/themes.js"></script>
+  <script>
+    // â”€â”€ Fight Night Page Logic â”€â”€
+    let tournament = null;
+    let matches = [];
+    let signups = [];
+    let fightCard = [];
+    let predictions = {};
+    let pollingInterval = null;
+    let previousResults = {};
+    const POLL_MS = 5000;
+
+    // Predictions stored per-tournament in localStorage
+    function getPredictions() {
+      if (!tournament) return {};
+      try {
+        return JSON.parse(localStorage.getItem('fn_predictions_' + tournament.id) || '{}');
+      } catch { return {}; }
+    }
+    function savePredictions(p) {
+      if (!tournament) return;
+      localStorage.setItem('fn_predictions_' + tournament.id, JSON.stringify(p));
+    }
+
+    // Find the latest fight_night tournament
+    async function findFightNight() {
+      const all = await db.getAllTournaments();
+      // Look for tournaments with fight_card metadata or format 'fight_night'
+      // Fallback: use the most recent active/in_progress tournament
+      let fn = all.find(t => t.metadata?.format === 'fight_night' && ['signup','active','in_progress','completed'].includes(t.status));
+      if (!fn) {
+        // Also check for fight_card in metadata
+        fn = all.find(t => t.metadata?.fight_card && ['signup','active','in_progress','completed'].includes(t.status));
+      }
+      if (!fn) {
+        // Fallback: URL param
+        const params = new URLSearchParams(location.search);
+        const tid = params.get('id');
+        if (tid) {
+          fn = all.find(t => t.id === tid);
+        }
+      }
+      return fn;
+    }
+
+    async function init() {
+      tournament = await findFightNight();
+      if (!tournament) {
+        document.getElementById('fn-loading').style.display = 'none';
+        document.getElementById('fn-no-event').style.display = 'block';
+        return;
+      }
+
+      signups = await db.getSignups(tournament.id);
+      matches = await db.getMatches(tournament.id);
+
+      // Build fight card from metadata or generate from matches
+      fightCard = buildFightCard();
+      predictions = getPredictions();
+
+      // Store initial results for change detection
+      matches.forEach(m => { previousResults[m.id] = m.winner_id; });
+
+      renderHero();
+      renderFightCard();
+
+      document.getElementById('fn-loading').style.display = 'none';
+      document.getElementById('fn-content').style.display = 'block';
+
+      const isLive = ['active', 'in_progress'].includes(tournament.status);
+      const isCompleted = tournament.status === 'completed';
+
+      if (isLive) {
+        document.getElementById('fn-commentary-section').style.display = 'block';
+        startPolling();
+        loadChat();
+      }
+
+      if (isCompleted) {
+        renderRecap();
+        renderPredictionsLeaderboard();
+      } else if (matches.some(m => m.winner_id)) {
+        // Partial results exist, show predictions LB
+        renderPredictionsLeaderboard();
+      }
+    }
+
+    function buildFightCard() {
+      const meta = tournament.metadata?.fight_card;
+      if (meta && Array.isArray(meta)) {
+        // Map metadata entries to matches
+        return meta.map(entry => {
+          const match = matches.find(m => m.id === entry.match_id);
+          return { ...entry, match };
+        }).filter(e => e.match);
+      }
+
+      // Auto-generate: reverse order so last match = "Main Event"
+      const sorted = [...matches].sort((a, b) => a.match_number - b.match_number);
+      const labels = ['Main Event', 'Co-Main Event'];
+      return sorted.reverse().map((match, i) => ({
+        match_id: match.id,
+        match,
+        label: labels[i] || 'Undercard',
+        order: i
+      }));
+    }
+
+    function getSignup(id) {
+      return signups.find(s => s.id === id);
+    }
+
+    function renderHero() {
+      document.getElementById('fn-event-name').textContent = tournament.name;
+      const venue = tournament.metadata?.venue || 'The Arena';
+      document.getElementById('fn-venue').textContent = venue;
+
+      const statusArea = document.getElementById('fn-status-area');
+      const isLive = ['active', 'in_progress'].includes(tournament.status);
+      const isCompleted = tournament.status === 'completed';
+
+      if (isLive) {
+        statusArea.innerHTML = `
+          <span class="fn-live-badge"><span class="dot"></span> LIVE NOW</span>
+          <span class="fn-spectators" id="fn-spectator-count">Spectating</span>
+        `;
+        document.getElementById('fn-countdown').style.display = 'none';
+        trackSpectator();
+      } else if (isCompleted) {
+        statusArea.innerHTML = '<span style="color:var(--muted);font-size:14px;">Event Completed</span>';
+        document.getElementById('fn-countdown').style.display = 'none';
+      } else {
+        // Countdown to start
+        const startTime = tournament.metadata?.start_time;
+        if (startTime) {
+          startCountdown(new Date(startTime));
+        } else {
+          document.getElementById('fn-countdown').innerHTML = '<span style="color:var(--muted);">Date TBA</span>';
+        }
+      }
+    }
+
+    function startCountdown(target) {
+      const el = document.getElementById('fn-countdown');
+      function tick() {
+        const diff = target - Date.now();
+        if (diff <= 0) {
+          el.innerHTML = '<span class="fn-live-badge"><span class="dot"></span> STARTING</span>';
+          return;
+        }
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        el.innerHTML = `
+          <div class="fn-cd-unit"><div class="fn-cd-digit">${String(d).padStart(2,'0')}</div><div class="fn-cd-label">Days</div></div>
+          <div class="fn-cd-sep">:</div>
+          <div class="fn-cd-unit"><div class="fn-cd-digit">${String(h).padStart(2,'0')}</div><div class="fn-cd-label">Hours</div></div>
+          <div class="fn-cd-sep">:</div>
+          <div class="fn-cd-unit"><div class="fn-cd-digit">${String(m).padStart(2,'0')}</div><div class="fn-cd-label">Mins</div></div>
+          <div class="fn-cd-sep">:</div>
+          <div class="fn-cd-unit"><div class="fn-cd-digit">${String(s).padStart(2,'0')}</div><div class="fn-cd-label">Secs</div></div>
+        `;
+      }
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    function renderFightCard() {
+      const container = document.getElementById('fn-fight-card');
+      container.innerHTML = '';
+
+      fightCard.forEach(entry => {
+        const m = entry.match;
+        if (!m) return;
+        const p1 = m.player1 || getSignup(m.player1_id);
+        const p2 = m.player2 || getSignup(m.player2_id);
+        const label = entry.label || 'Undercard';
+        const isMainEvent = label.toLowerCase().includes('main event') && !label.toLowerCase().includes('co-');
+        const isCoMain = label.toLowerCase().includes('co-main');
+        const isLive = ['active', 'in_progress'].includes(tournament.status);
+        const isActive = isLive && !m.winner_id && m.player1_id && m.player2_id;
+        const isCompleted = !!m.winner_id;
+
+        let cls = 'fn-match';
+        if (isMainEvent) cls += ' main-event';
+        else if (isCoMain) cls += ' co-main';
+        if (isActive && entry.order === getCurrentMatchIndex()) cls += ' active-match';
+        if (isCompleted) cls += ' completed';
+
+        const p1Name = p1?.discord_username || 'TBD';
+        const p2Name = p2?.discord_username || 'TBD';
+        const p1Elo = p1?.elo || 'â€”';
+        const p2Elo = p2?.elo || 'â€”';
+
+        const winnerClass1 = isCompleted ? (m.winner_id === m.player1_id ? 'fn-winner' : 'fn-loser') : '';
+        const winnerClass2 = isCompleted ? (m.winner_id === m.player2_id ? 'fn-winner' : 'fn-loser') : '';
+
+        // Prediction buttons
+        let predictHtml = '';
+        if (m.player1_id && m.player2_id) {
+          const pred = predictions[m.id];
+          if (isCompleted && pred) {
+            const correct1 = pred === m.player1_id && m.winner_id === m.player1_id;
+            const correct2 = pred === m.player2_id && m.winner_id === m.player2_id;
+            const cls1 = pred === m.player1_id ? (correct1 ? 'correct' : 'wrong') : '';
+            const cls2 = pred === m.player2_id ? (correct2 ? 'correct' : 'wrong') : '';
+            predictHtml = `<div class="fn-predict">
+              <button class="fn-predict-btn ${cls1}" disabled>${p1Name} ${correct1 ? 'âœ“' : ''}</button>
+              <button class="fn-predict-btn ${cls2}" disabled>${p2Name} ${correct2 ? 'âœ“' : ''}</button>
+            </div>`;
+          } else if (!isCompleted) {
+            const v1 = pred === m.player1_id ? 'voted' : '';
+            const v2 = pred === m.player2_id ? 'voted' : '';
+            predictHtml = `<div class="fn-predict">
+              <button class="fn-predict-btn ${v1}" onclick="predict('${m.id}','${m.player1_id}')">${p1Name}</button>
+              <span style="color:var(--muted);font-size:11px;align-self:center;">PREDICT</span>
+              <button class="fn-predict-btn ${v2}" onclick="predict('${m.id}','${m.player2_id}')">${p2Name}</button>
+            </div>`;
+          }
+        }
+
+        const timeSlot = entry.time_slot ? `<div class="fn-time-slot">${entry.time_slot}</div>` : '';
+
+        container.innerHTML += `
+          <div class="${cls}" data-match-id="${m.id}">
+            <div class="fn-match-label">${label}</div>
+            <div class="fn-match-body">
+              <div class="fn-fighter ${winnerClass1}">
+                <div class="fn-fighter-name">${p1Name}</div>
+                <div class="fn-fighter-elo">${p1Elo}</div>
+              </div>
+              <div class="fn-vs">VS</div>
+              <div class="fn-fighter ${winnerClass2}">
+                <div class="fn-fighter-name">${p2Name}</div>
+                <div class="fn-fighter-elo">${p2Elo}</div>
+              </div>
+            </div>
+            ${timeSlot}
+            ${predictHtml}
+          </div>
+        `;
+      });
+    }
+
+    function getCurrentMatchIndex() {
+      // First incomplete match in fight card order
+      for (let i = 0; i < fightCard.length; i++) {
+        const m = fightCard[i].match;
+        if (m && !m.winner_id && m.player1_id && m.player2_id) return i;
+      }
+      return -1;
+    }
+
+    function predict(matchId, playerId) {
+      predictions[matchId] = playerId;
+      savePredictions(predictions);
+      renderFightCard();
+      NotificationSystem.show('Prediction locked in!', 'success');
+    }
+
+    // â”€â”€ Polling for live updates â”€â”€
+    function startPolling() {
+      pollingInterval = setInterval(async () => {
+        try {
+          const newMatches = await db.getMatches(tournament.id);
+          // Check for new results
+          newMatches.forEach(nm => {
+            if (nm.winner_id && !previousResults[nm.id]) {
+              // New result!
+              const oldMatch = matches.find(m => m.id === nm.id);
+              showResultFlash(nm);
+              try { playSound('victory'); } catch(e) {}
+            }
+            previousResults[nm.id] = nm.winner_id;
+          });
+          matches = newMatches;
+          fightCard = buildFightCard();
+          renderFightCard();
+
+          // Check if tournament completed
+          const t = await db.getTournament(tournament.id);
+          if (t.status !== tournament.status) {
+            tournament = t;
+            if (t.status === 'completed') {
+              clearInterval(pollingInterval);
+              renderHero();
+              renderRecap();
+              renderPredictionsLeaderboard();
+            }
+          }
+        } catch(e) {
+          console.error('Poll error:', e);
+        }
+      }, POLL_MS);
+    }
+
+    function showResultFlash(match) {
+      const winner = match.player1 || getSignup(match.winner_id);
+      const loser = match.winner_id === match.player1_id
+        ? (match.player2 || getSignup(match.player2_id))
+        : (match.player1 || getSignup(match.player1_id));
+      const winnerName = winner?.discord_username || 'Unknown';
+      const loserName = loser?.discord_username || 'Unknown';
+
+      const entry = fightCard.find(e => e.match_id === match.id);
+      const label = entry?.label || '';
+
+      const overlay = document.createElement('div');
+      overlay.className = 'fn-result-overlay';
+      overlay.innerHTML = `
+        <div class="fn-result-card">
+          <div class="fn-result-label">${label}</div>
+          <div class="fn-result-winner">${winnerName}</div>
+          <div class="fn-result-sub">defeats ${loserName}</div>
+        </div>
+      `;
+      overlay.addEventListener('click', () => overlay.remove());
+      document.body.appendChild(overlay);
+      setTimeout(() => overlay.remove(), 4000);
+
+      // Add system message to chat
+      addChatMessage(`${winnerName} wins the ${label}!`, 'SYSTEM', true);
+    }
+
+    // â”€â”€ Chat / Commentary â”€â”€
+    let chatMessages = [];
+    const CHAT_KEY = () => 'fn_chat_' + tournament?.id;
+
+    function loadChat() {
+      try {
+        chatMessages = JSON.parse(localStorage.getItem(CHAT_KEY()) || '[]');
+      } catch { chatMessages = []; }
+      renderChat();
+    }
+
+    function renderChat() {
+      const container = document.getElementById('fn-chat-messages');
+      container.innerHTML = chatMessages.slice(-50).map(msg => `
+        <div class="fn-chat-msg ${msg.system ? 'system' : ''}">
+          <span class="msg-time">${new Date(msg.ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>
+          <span class="msg-user">${msg.user}</span>
+          <div class="msg-text">${escapeHtml(msg.text)}</div>
+        </div>
+      `).join('');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function addChatMessage(text, user, system = false) {
+      const msg = { text, user, ts: Date.now(), system };
+      chatMessages.push(msg);
+      if (chatMessages.length > 100) chatMessages = chatMessages.slice(-100);
+      localStorage.setItem(CHAT_KEY(), JSON.stringify(chatMessages));
+      renderChat();
+    }
+
+    function sendFnChat() {
+      const input = document.getElementById('fn-chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+      const user = AUTH.isLoggedIn() ? AUTH.getDiscordUsername() : 'Spectator';
+      addChatMessage(text, user);
+      input.value = '';
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && document.activeElement?.id === 'fn-chat-input') {
+        sendFnChat();
+      }
+    });
+
+    // â”€â”€ Spectator tracking â”€â”€
+    function trackSpectator() {
+      // Simple localStorage-based spectator count
+      const key = 'fn_spectators_' + tournament.id;
+      let viewers;
+      try { viewers = JSON.parse(localStorage.getItem(key) || '{}'); } catch { viewers = {}; }
+      const myId = Math.random().toString(36).slice(2, 8);
+      viewers[myId] = Date.now();
+      // Clean stale (older than 30s)
+      Object.keys(viewers).forEach(k => {
+        if (Date.now() - viewers[k] > 30000) delete viewers[k];
+      });
+      localStorage.setItem(key, JSON.stringify(viewers));
+      const el = document.getElementById('fn-spectator-count');
+      if (el) el.textContent = Object.keys(viewers).length + ' watching';
+
+      setInterval(() => {
+        try {
+          viewers = JSON.parse(localStorage.getItem(key) || '{}');
+          viewers[myId] = Date.now();
+          Object.keys(viewers).forEach(k => {
+            if (Date.now() - viewers[k] > 30000) delete viewers[k];
+          });
+          localStorage.setItem(key, JSON.stringify(viewers));
+          if (el) el.textContent = Object.keys(viewers).length + ' watching';
+        } catch {}
+      }, 10000);
+    }
+
+    // â”€â”€ Recap â”€â”€
+    function renderRecap() {
+      const section = document.getElementById('fn-recap-section');
+      section.style.display = 'block';
+
+      const completedMatches = matches.filter(m => m.winner_id);
+      if (!completedMatches.length) return;
+
+      // Find "Fight of the Night" - match with closest score or most rounds
+      // Simple heuristic: match where winner ELO is closest to loser ELO
+      let fightOfNight = null;
+      let smallestDiff = Infinity;
+      let koOfNight = null;
+      let biggestUpset = 0;
+
+      completedMatches.forEach(m => {
+        const p1 = m.player1 || getSignup(m.player1_id);
+        const p2 = m.player2 || getSignup(m.player2_id);
+        const e1 = p1?.elo || 1000;
+        const e2 = p2?.elo || 1000;
+        const diff = Math.abs(e1 - e2);
+
+        if (diff < smallestDiff) {
+          smallestDiff = diff;
+          fightOfNight = m;
+        }
+
+        // KO of the night = biggest upset (lower ELO beat higher)
+        const winner = m.winner_id === m.player1_id ? p1 : p2;
+        const loser = m.winner_id === m.player1_id ? p2 : p1;
+        const wElo = winner?.elo || 1000;
+        const lElo = loser?.elo || 1000;
+        if (lElo > wElo && (lElo - wElo) > biggestUpset) {
+          biggestUpset = lElo - wElo;
+          koOfNight = m;
+        }
+      });
+
+      // Find champion (last match winner or bracket winner)
+      const lastMatch = fightCard[0]?.match; // Main event
+      const champion = lastMatch?.winner_id ? (lastMatch.player1?.discord_username || lastMatch.player2?.discord_username || getSignup(lastMatch.winner_id)?.discord_username) : null;
+
+      let html = `<div class="fn-recap"><div class="fn-recap-header"><h2>Fight Night Results</h2></div>`;
+
+      // Champion
+      if (champion) {
+        html += `<div class="fn-award fight-of-night" style="border-color:var(--cyan);box-shadow:0 0 30px rgba(0,229,255,.2);">
+          <div class="fn-award-label" style="color:var(--cyan);">Champion</div>
+          <div class="fn-award-name" style="color:var(--cyan);">${champion}</div>
+        </div>`;
+      }
+
+      // Fight of the Night
+      if (fightOfNight) {
+        const p1 = (fightOfNight.player1 || getSignup(fightOfNight.player1_id))?.discord_username || '?';
+        const p2 = (fightOfNight.player2 || getSignup(fightOfNight.player2_id))?.discord_username || '?';
+        html += `<div class="fn-award fight-of-night">
+          <div class="fn-award-label">Fight of the Night</div>
+          <div class="fn-award-name">${p1} vs ${p2}</div>
+          <div class="fn-award-sub">Closest match â€” ${smallestDiff} ELO difference</div>
+        </div>`;
+      }
+
+      // KO of the Night
+      if (koOfNight) {
+        const winner = (koOfNight.winner_id === koOfNight.player1_id ? koOfNight.player1 : koOfNight.player2) || getSignup(koOfNight.winner_id);
+        html += `<div class="fn-award ko-of-night">
+          <div class="fn-award-label" style="color:var(--red);">KO of the Night</div>
+          <div class="fn-award-name">${winner?.discord_username || '?'}</div>
+          <div class="fn-award-sub">Biggest upset â€” ${biggestUpset} ELO gap overcome</div>
+        </div>`;
+      }
+
+      // Stats
+      html += `<div class="fn-stats-row">
+        <div class="fn-stat"><div class="fn-stat-val">${completedMatches.length}</div><div class="fn-stat-label">Matches</div></div>
+        <div class="fn-stat"><div class="fn-stat-val">${signups.length}</div><div class="fn-stat-label">Fighters</div></div>
+        <div class="fn-stat"><div class="fn-stat-val">${countCorrectPredictions()}</div><div class="fn-stat-label">Correct Predictions</div></div>
+      </div>`;
+
+      // All results
+      html += `<div class="fn-section-title">All Results</div>`;
+      fightCard.forEach(entry => {
+        const m = entry.match;
+        if (!m || !m.winner_id) return;
+        const p1 = (m.player1 || getSignup(m.player1_id))?.discord_username || 'TBD';
+        const p2 = (m.player2 || getSignup(m.player2_id))?.discord_username || 'TBD';
+        const winnerName = m.winner_id === m.player1_id ? p1 : p2;
+        const loserName = m.winner_id === m.player1_id ? p2 : p1;
+        html += `<div class="fn-match completed" style="margin-bottom:8px;">
+          <div class="fn-match-label">${entry.label}</div>
+          <div class="fn-match-body">
+            <div class="fn-fighter ${m.winner_id === m.player1_id ? 'fn-winner' : 'fn-loser'}">
+              <div class="fn-fighter-name">${p1}</div>
+            </div>
+            <div class="fn-vs" style="font-size:18px;">VS</div>
+            <div class="fn-fighter ${m.winner_id === m.player2_id ? 'fn-winner' : 'fn-loser'}">
+              <div class="fn-fighter-name">${p2}</div>
+            </div>
+          </div>
+        </div>`;
+      });
+
+      html += '</div>';
+      section.innerHTML = html;
+    }
+
+    function countCorrectPredictions() {
+      let count = 0;
+      Object.entries(predictions).forEach(([matchId, playerId]) => {
+        const m = matches.find(m2 => m2.id === matchId);
+        if (m && m.winner_id === playerId) count++;
+      });
+      return count;
+    }
+
+    // â”€â”€ Predictions Leaderboard â”€â”€
+    function renderPredictionsLeaderboard() {
+      const section = document.getElementById('fn-predictions-section');
+      section.style.display = 'block';
+
+      // For localStorage-only: just show this user's score
+      const correct = countCorrectPredictions();
+      const total = Object.keys(predictions).length;
+      const completedWithPred = matches.filter(m => m.winner_id && predictions[m.id]).length;
+
+      let html = `<div class="fn-predictions-lb">
+        <div class="fn-section-title">Your Predictions</div>
+        <div class="fn-award">
+          <div class="fn-award-label">Prediction Score</div>
+          <div class="fn-award-name" style="color:var(--cyan);">${correct} / ${completedWithPred}</div>
+          <div class="fn-award-sub">${total} predictions made</div>
+        </div>`;
+
+      // Bonus currency for perfect score
+      if (completedWithPred > 0 && correct === completedWithPred) {
+        const bonus = 500;
+        const curKey = 'fn_bonus_' + tournament.id;
+        if (!localStorage.getItem(curKey)) {
+          localStorage.setItem(curKey, bonus);
+          // Add to user currency
+          const existing = parseInt(localStorage.getItem('dbl_currency') || '0');
+          localStorage.setItem('dbl_currency', existing + bonus);
+          html += `<div class="fn-award" style="border-color:var(--gold);">
+            <div class="fn-award-label">Perfect Predictions Bonus!</div>
+            <div class="fn-award-name" style="color:var(--gold);">+${bonus} Zeni</div>
+          </div>`;
+        }
+      }
+
+      html += '</div>';
+      section.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    // Init
+    init();
+  </script>
+  <script src="js/toolbar.js"></script>
+</body>
+</html>
+
