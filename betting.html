@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Betting House – DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/bracket.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    /* ── Hero ── */
+    .betting-hero { text-align: center; padding: 30px 0 10px; }
+    .betting-hero h1 {
+      font-size: clamp(32px, 6vw, 56px);
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      background: linear-gradient(135deg, #ffd740, #ff8c00, #ffd740);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 4px 16px rgba(255,215,0,0.3));
+      margin-bottom: 4px;
+    }
+    .betting-hero .subtitle {
+      color: var(--muted); font-size: 13px; text-transform: uppercase;
+      letter-spacing: 0.2em; font-style: italic;
+    }
+
+    /* ── Wallet Bar ── */
+    .wallet-bar {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+      margin: 20px 0 24px; padding: 14px 20px;
+      background: linear-gradient(135deg, rgba(255,215,64,0.08), rgba(46,213,115,0.05));
+      border: 1px solid rgba(255,215,64,0.2); border-radius: var(--radius);
+    }
+    .wallet-left { display: flex; align-items: center; gap: 12px; }
+    .wallet-icon {
+      width: 36px; height: 36px; background: linear-gradient(135deg, var(--gold), #ff8c00);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 18px; box-shadow: 0 0 16px rgba(255,215,0,0.3);
+      animation: coin-spin 3s ease-in-out infinite;
+    }
+    @keyframes coin-spin {
+      0%, 100% { transform: rotateY(0deg); }
+      50% { transform: rotateY(180deg); }
+    }
+    .wallet-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .wallet-amount {
+      font-family: 'Exo 2', sans-serif; font-size: 28px; font-weight: 900;
+      color: var(--gold); text-shadow: 0 0 12px rgba(255,215,0,0.2);
+    }
+    .wallet-right { display: flex; gap: 8px; align-items: center; }
+    .wallet-username {
+      font-size: 13px; color: var(--muted); padding: 6px 14px;
+      background: var(--bg); border-radius: var(--radius-sm); border: 1px solid var(--line);
+    }
+
+    /* ── Tabs ── */
+    .betting-tabs {
+      display: flex; gap: 6px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px;
+    }
+    .betting-tab {
+      background: var(--panel); border: 1px solid var(--line); color: var(--muted);
+      font-family: 'Exo 2', sans-serif; font-weight: 700; font-size: 12px;
+      padding: 10px 18px; border-radius: var(--radius); cursor: pointer;
+      text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; transition: all 0.2s;
+    }
+    .betting-tab:hover { border-color: var(--gold); color: var(--text); }
+    .betting-tab.active {
+      background: linear-gradient(135deg, rgba(255,215,64,0.15), rgba(255,215,64,0.05));
+      border-color: var(--gold); color: var(--gold); box-shadow: 0 0 12px rgba(255,215,64,0.15);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Match Cards ── */
+    .match-bet-card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 20px; margin-bottom: 16px; transition: all 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .match-bet-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--green), var(--gold));
+    }
+    .match-bet-card.locked { opacity: 0.6; }
+    .match-bet-card.locked::before {
+      background: linear-gradient(90deg, var(--muted), var(--line), var(--muted));
+    }
+
+    .match-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .match-round { font-weight: 700; }
+    .match-status-badge {
+      padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 800;
+    }
+    .badge-open { background: rgba(46,213,115,0.15); color: var(--green); border: 1px solid rgba(46,213,115,0.3); }
+    .badge-locked { background: rgba(144,136,184,0.15); color: var(--muted); border: 1px solid var(--line); }
+
+    .versus-row {
+      display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; margin-bottom: 16px;
+    }
+    .player-side { text-align: center; }
+    .player-side .player-name {
+      font-family: 'Exo 2', sans-serif; font-size: 18px; font-weight: 800;
+      color: var(--text); margin-bottom: 4px;
+    }
+    .player-side .player-stats {
+      font-size: 11px; color: var(--muted); margin-bottom: 6px;
+    }
+    .player-side .player-elo {
+      font-family: 'Exo 2', sans-serif; font-size: 13px; font-weight: 700;
+      color: var(--cyan);
+    }
+    .player-side .odds-display {
+      font-family: 'Exo 2', sans-serif; font-size: 24px; font-weight: 900;
+      color: var(--gold); margin-top: 4px;
+      text-shadow: 0 0 10px rgba(255,215,0,0.3);
+    }
+    .pool-amount {
+      font-size: 11px; color: var(--muted); margin-top: 4px;
+    }
+    .pool-amount span { color: var(--gold); font-weight: 700; }
+
+    .vs-divider {
+      font-family: 'Exo 2', sans-serif; font-size: 20px; font-weight: 900;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em;
+    }
+
+    .bet-controls {
+      display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap;
+    }
+    .bet-input {
+      width: 100px; padding: 8px 12px; font-family: 'Exo 2', sans-serif;
+      font-size: 14px; font-weight: 700; text-align: center;
+      background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-sm);
+      color: var(--gold); outline: none; transition: border-color 0.2s;
+    }
+    .bet-input:focus { border-color: var(--gold); }
+    .bet-input::placeholder { color: var(--muted); font-weight: 400; }
+
+    .btn-bet {
+      padding: 8px 16px; border: none; border-radius: var(--radius-sm);
+      font-family: 'Exo 2', sans-serif; font-size: 12px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-bet-p1 {
+      background: linear-gradient(135deg, rgba(0,229,255,0.2), rgba(0,229,255,0.1));
+      color: var(--cyan); border: 1px solid rgba(0,229,255,0.3);
+    }
+    .btn-bet-p1:hover { background: rgba(0,229,255,0.3); box-shadow: 0 0 12px rgba(0,229,255,0.2); }
+    .btn-bet-p2 {
+      background: linear-gradient(135deg, rgba(255,45,120,0.2), rgba(255,45,120,0.1));
+      color: var(--pink); border: 1px solid rgba(255,45,120,0.3);
+    }
+    .btn-bet-p2:hover { background: rgba(255,45,120,0.3); box-shadow: 0 0 12px rgba(255,45,120,0.2); }
+    .btn-bet:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .bet-limits {
+      text-align: center; font-size: 10px; color: var(--muted); margin-top: 8px;
+      text-transform: uppercase; letter-spacing: 0.1em;
+    }
+
+    /* ── My Bets ── */
+    .my-bet-row {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px; align-items: center;
+      padding: 12px 16px; background: var(--panel); border: 1px solid var(--line);
+      border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 13px;
+    }
+    .my-bet-row.won { border-color: rgba(46,213,115,0.4); box-shadow: 0 0 12px rgba(46,213,115,0.1); }
+    .my-bet-row.lost { border-color: rgba(255,71,87,0.3); opacity: 0.7; }
+    .my-bet-match { color: var(--text); font-weight: 700; }
+    .my-bet-on { color: var(--cyan); font-weight: 600; }
+    .my-bet-amount { color: var(--gold); font-weight: 700; font-family: 'Exo 2', sans-serif; }
+    .my-bet-odds { color: var(--muted); }
+    .my-bet-status { font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 0.1em; }
+    .status-pending { color: var(--gold); }
+    .status-won { color: var(--green); }
+    .status-lost { color: var(--red); }
+
+    .my-bets-header {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px;
+      padding: 8px 16px; font-size: 10px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700;
+    }
+
+    /* ── Leaderboard ── */
+    .lb-table {
+      width: 100%; border-collapse: collapse;
+    }
+    .lb-table th {
+      text-align: left; padding: 10px 16px; font-size: 10px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--line);
+    }
+    .lb-table td {
+      padding: 10px 16px; font-size: 13px; border-bottom: 1px solid rgba(46,39,85,0.5);
+    }
+    .lb-table tr:hover td { background: rgba(255,215,64,0.03); }
+    .lb-rank { font-family: 'Exo 2', sans-serif; font-weight: 900; color: var(--gold); }
+    .lb-name { color: var(--text); font-weight: 700; }
+    .lb-profit-pos { color: var(--green); font-weight: 700; }
+    .lb-profit-neg { color: var(--red); font-weight: 700; }
+    .lb-winrate { color: var(--cyan); }
+    .lb-biggest { color: var(--gold); font-weight: 700; }
+
+    /* ── Empty states ── */
+    .empty-state {
+      text-align: center; padding: 60px 20px; color: var(--muted);
+    }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state h3 { color: var(--text); margin-bottom: 8px; }
+
+    /* ── Chip animation ── */
+    @keyframes chip-float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-6px) rotate(5deg); }
+      75% { transform: translateY(3px) rotate(-3deg); }
+    }
+    .chip-icon { display: inline-block; animation: chip-float 2s ease-in-out infinite; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .versus-row { grid-template-columns: 1fr; gap: 8px; }
+      .vs-divider { display: none; }
+      .bet-controls { flex-direction: column; }
+      .my-bet-row { grid-template-columns: 1fr 1fr; gap: 6px; font-size: 12px; }
+      .my-bets-header { display: none; }
+      .lb-table { font-size: 12px; }
+      .lb-table th, .lb-table td { padding: 8px; }
+    }
+  </style>
+</head>
+<body class="scanlines">
+
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">&#9776;</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+        <li><a href="bounty.html">Bounty</a></li>
+        <li class="nav-dropdown">
+          <a href="#" class="active">More ▾</a>
+          <div class="nav-dropdown-menu">
+            <div class="dropdown-label">Data</div>
+            <a href="characters.html">Characters</a>
+            <a href="tierlist.html">Tier List</a>
+            <a href="analytics.html">Ban Analytics</a>
+            <a href="power-rankings.html">Power Rankings</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Community</div>
+            <a href="compare.html">Compare</a>
+            <a href="shop.html">Shop</a>
+            <a href="auction.html">Auction</a>
+            <a href="season.html">Season</a>
+            <a href="world-tournament.html">World Tournament</a>
+            <a href="feed.html">Live Feed</a>
+            <a href="mvp-vote.html">Season Awards</a>
+            <a href="bounty.html">Bounty</a>
+            <a href="betting.html" class="active">Betting</a>
+          </div>
+        </li>
+
+        <div id="auth-nav"></div>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- Hero -->
+    <div class="betting-hero">
+      <h1><span class="chip-icon">🎰</span> Betting House <span class="chip-icon">🎰</span></h1>
+      <div class="subtitle">Put your Zeni where your mouth is</div>
+    </div>
+
+    <!-- Wallet -->
+    <div class="wallet-bar" id="wallet-bar" style="display:none;">
+      <div class="wallet-left">
+        <div class="wallet-icon">🪙</div>
+        <div>
+          <div class="wallet-label">Balance</div>
+          <div class="wallet-amount" id="balance-value">0</div>
+        </div>
+      </div>
+      <div class="wallet-right">
+        <span class="wallet-username" id="wallet-username"></span>
+      </div>
+    </div>
+
+    <!-- Login prompt -->
+    <div class="empty-state" id="login-prompt" style="display:none;">
+      <div class="empty-icon">🔒</div>
+      <h3>Login Required</h3>
+      <p>Sign in with Discord to place bets and track your winnings.</p>
+    </div>
+
+    <!-- Main content (shown when logged in) -->
+    <div id="betting-content" style="display:none;">
+
+      <!-- Tabs -->
+      <div class="betting-tabs">
+        <button class="betting-tab active" data-tab="active-bets">🎲 Active Matches</button>
+        <button class="betting-tab" data-tab="my-bets">📋 My Bets</button>
+        <button class="betting-tab" data-tab="leaderboard">🏆 Leaderboard</button>
+      </div>
+
+      <!-- Active Matches -->
+      <div class="tab-panel active" id="tab-active-bets">
+        <div id="matches-list"></div>
+      </div>
+
+      <!-- My Bets -->
+      <div class="tab-panel" id="tab-my-bets">
+        <div class="my-bets-header">
+          <span>Match</span><span>Bet On</span><span>Amount</span><span>Odds</span><span>Status</span>
+        </div>
+        <div id="my-bets-list"></div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="tab-panel" id="tab-leaderboard">
+        <div id="leaderboard-content"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/activity-alerts.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/toolbar.js"></script>
+  <script>
+    let currentUser = null;
+    let currentBalance = 0;
+    let activeTournament = null;
+    let allMatches = [];
+    let allBets = [];
+    let eloMap = {};
+
+    // ── Odds Calculation ──
+    function calculateOdds(elo1, elo2) {
+      const expected1 = 1 / (1 + Math.pow(10, (elo2 - elo1) / 400));
+      const expected2 = 1 - expected1;
+      const odds1 = Math.max(1.1, parseFloat((1 / expected1).toFixed(2)));
+      const odds2 = Math.max(1.1, parseFloat((1 / expected2).toFixed(2)));
+      return { odds1, odds2 };
+    }
+
+    // ── Tabs ──
+    document.querySelectorAll('.betting-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.betting-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // ── Load Balance ──
+    async function refreshBalance() {
+      try {
+        const pts = await db.getPoints(currentUser);
+        currentBalance = pts.balance || 0;
+        document.getElementById('balance-value').textContent = currentBalance.toLocaleString();
+      } catch (e) { console.error('Failed to load balance', e); }
+    }
+
+    // ── Load ELO for all players ──
+    async function loadEloMap() {
+      try {
+        const lb = await db.getLeaderboard();
+        lb.forEach(p => { eloMap[p.discord_username] = p; });
+      } catch (e) { console.error('Failed to load ELO data', e); }
+    }
+
+    // ── Get bets for a match ──
+    async function getBetsForMatch(matchId) {
+      const { data, error } = await supabaseClient
+        .from('bets')
+        .select('*')
+        .eq('match_id', matchId);
+      if (error) throw error;
+      return data || [];
+    }
+
+    // ── Get all bets for current user ──
+    async function getMyBets() {
+      const { data, error } = await supabaseClient
+        .from('bets')
+        .select('*')
+        .eq('bettor', currentUser)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    }
+
+    // ── Place a bet ──
+    async function placeBet(matchId, tournamentId, betOn, amount, odds) {
+      if (!AUTH.isLoggedIn()) {
+        NotificationSystem.show('You must be logged in to bet.', 'error');
+        return;
+      }
+      if (amount < 50) {
+        NotificationSystem.show('Minimum bet is 50 Zeni.', 'error');
+        return;
+      }
+      const maxBet = Math.min(500, currentBalance);
+      if (amount > maxBet) {
+        NotificationSystem.show(`Maximum bet is ${maxBet.toLocaleString()} Zeni.`, 'error');
+        return;
+      }
+
+      try {
+        // Deduct balance
+        const pts = await db.getPoints(currentUser);
+        if (pts.balance < amount) {
+          NotificationSystem.show('Insufficient Zeni balance!', 'error');
+          return;
+        }
+
+        // Insert bet
+        const { error } = await supabaseClient
+          .from('bets')
+          .insert({
+            match_id: matchId,
+            tournament_id: tournamentId,
+            bettor: currentUser,
+            bet_on: betOn,
+            amount: amount,
+            odds: odds,
+            status: 'pending',
+            payout: 0
+          });
+        if (error) {
+          if (error.code === '23505') {
+            NotificationSystem.show('You already placed a bet on this match!', 'error');
+            return;
+          }
+          throw error;
+        }
+
+        // Deduct from balance
+        await db.awardPoints(currentUser, -amount, 'bet_placed');
+
+        NotificationSystem.show(`Bet placed! ${amount} Zeni on ${betOn} at ${odds}x`, 'success');
+        await refreshBalance();
+        await renderMatches();
+        await renderMyBets();
+      } catch (e) {
+        console.error('Failed to place bet', e);
+        NotificationSystem.show('Failed to place bet. Try again.', 'error');
+      }
+    }
+
+    // ── Resolve Bets ──
+    async function resolveBets() {
+      if (!activeTournament) return;
+
+      // Get all matches with winners
+      const completedMatches = allMatches.filter(m => m.winner_id);
+
+      for (const match of completedMatches) {
+        // Get pending bets for this match
+        const { data: pendingBets, error } = await supabaseClient
+          .from('bets')
+          .select('*')
+          .eq('match_id', match.id)
+          .eq('status', 'pending');
+        if (error || !pendingBets || pendingBets.length === 0) continue;
+
+        const winnerName = match.winner_id === match.player1_id
+          ? match.player1?.discord_username
+          : match.player2?.discord_username;
+
+        for (const bet of pendingBets) {
+          const isWin = bet.bet_on === winnerName;
+          const payout = isWin ? Math.floor(bet.amount * bet.odds) : 0;
+          const status = isWin ? 'won' : 'lost';
+
+          // Update bet
+          await supabaseClient
+            .from('bets')
+            .update({ status, payout })
+            .eq('id', bet.id);
+
+          // Credit winnings to bettor
+          if (isWin && payout > 0) {
+            await db.awardPoints(bet.bettor, payout, 'bet_won');
+          }
+        }
+      }
+    }
+
+    // ── Render Match Cards ──
+    async function renderMatches() {
+      const container = document.getElementById('matches-list');
+
+      if (!activeTournament) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🎲</div>
+            <h3>No Active Tournament</h3>
+            <p>Check back when a tournament is running to place your bets.</p>
+          </div>`;
+        return;
+      }
+
+      if (allMatches.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">⏳</div>
+            <h3>No Matches Yet</h3>
+            <p>Matches haven't been created yet. Check back soon!</p>
+          </div>`;
+        return;
+      }
+
+      let html = '';
+      for (const match of allMatches) {
+        const p1Name = match.player1?.discord_username || 'TBD';
+        const p2Name = match.player2?.discord_username || 'TBD';
+        const p1Elo = eloMap[p1Name]?.elo || 1000;
+        const p2Elo = eloMap[p2Name]?.elo || 1000;
+        const p1Stats = eloMap[p1Name];
+        const p2Stats = eloMap[p2Name];
+        const p1WL = p1Stats ? `${p1Stats.wins}W - ${p1Stats.losses}L` : '0W - 0L';
+        const p2WL = p2Stats ? `${p2Stats.wins}W - ${p2Stats.losses}L` : '0W - 0L';
+
+        const { odds1, odds2 } = calculateOdds(p1Elo, p2Elo);
+        const isLocked = !!match.winner_id || p1Name === 'TBD' || p2Name === 'TBD';
+
+        // Get pool amounts
+        let pool1 = 0, pool2 = 0, userBet = null;
+        try {
+          const bets = await getBetsForMatch(match.id);
+          bets.forEach(b => {
+            if (b.bet_on === p1Name) pool1 += b.amount;
+            else pool2 += b.amount;
+            if (b.bettor === currentUser) userBet = b;
+          });
+        } catch (e) { /* ignore */ }
+
+        const hasUserBet = !!userBet;
+
+        html += `
+          <div class="match-bet-card ${isLocked ? 'locked' : ''}">
+            <div class="match-header">
+              <span class="match-round">Round ${match.round || '?'} &middot; Match ${match.match_number || '?'}</span>
+              <span class="match-status-badge ${isLocked ? 'badge-locked' : 'badge-open'}">
+                ${isLocked ? (match.winner_id ? 'COMPLETED' : 'LOCKED') : (hasUserBet ? 'BET PLACED' : 'OPEN')}
+              </span>
+            </div>
+            <div class="versus-row">
+              <div class="player-side">
+                <div class="player-name">${p1Name}</div>
+                <div class="player-stats">${p1WL}</div>
+                <div class="player-elo">ELO ${p1Elo}</div>
+                <div class="odds-display">${odds1}x</div>
+                <div class="pool-amount">Pool: <span>${pool1.toLocaleString()}</span> Zeni</div>
+              </div>
+              <div class="vs-divider">VS</div>
+              <div class="player-side">
+                <div class="player-name">${p2Name}</div>
+                <div class="player-stats">${p2WL}</div>
+                <div class="player-elo">ELO ${p2Elo}</div>
+                <div class="odds-display">${odds2}x</div>
+                <div class="pool-amount">Pool: <span>${pool2.toLocaleString()}</span> Zeni</div>
+              </div>
+            </div>
+            ${!isLocked && !hasUserBet ? `
+              <div class="bet-controls">
+                <button class="btn-bet btn-bet-p1" onclick="handleBet('${match.id}', '${activeTournament.id}', '${p1Name}', ${odds1}, this)">
+                  Bet on ${p1Name}
+                </button>
+                <input type="number" class="bet-input" id="bet-amt-${match.id}" min="50" max="${Math.min(500, currentBalance)}" placeholder="Amount" />
+                <button class="btn-bet btn-bet-p2" onclick="handleBet('${match.id}', '${activeTournament.id}', '${p2Name}', ${odds2}, this)">
+                  Bet on ${p2Name}
+                </button>
+              </div>
+              <div class="bet-limits">Min: 50 &middot; Max: ${Math.min(500, currentBalance).toLocaleString()} Zeni</div>
+            ` : hasUserBet ? `
+              <div class="bet-controls">
+                <div style="color:var(--gold);font-weight:700;font-size:13px;">
+                  You bet ${userBet.amount.toLocaleString()} Zeni on ${userBet.bet_on} at ${userBet.odds}x
+                  ${userBet.status === 'won' ? '<span style="color:var(--green);"> — WON ' + userBet.payout.toLocaleString() + ' Zeni!</span>' : ''}
+                  ${userBet.status === 'lost' ? '<span style="color:var(--red);"> — LOST</span>' : ''}
+                </div>
+              </div>
+            ` : ''}
+          </div>`;
+      }
+      container.innerHTML = html;
+    }
+
+    function handleBet(matchId, tournamentId, betOn, odds, btn) {
+      const input = document.getElementById('bet-amt-' + matchId);
+      const amount = parseInt(input?.value);
+      if (!amount || isNaN(amount)) {
+        NotificationSystem.show('Enter a bet amount.', 'error');
+        return;
+      }
+      placeBet(matchId, tournamentId, betOn, amount, odds);
+    }
+
+    // ── Render My Bets ──
+    async function renderMyBets() {
+      const container = document.getElementById('my-bets-list');
+      try {
+        const bets = await getMyBets();
+        if (bets.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📋</div>
+              <h3>No Bets Yet</h3>
+              <p>Place your first bet on an active match!</p>
+            </div>`;
+          return;
+        }
+
+        let html = '';
+        for (const bet of bets) {
+          const statusClass = bet.status === 'won' ? 'won' : bet.status === 'lost' ? 'lost' : '';
+          html += `
+            <div class="my-bet-row ${statusClass}">
+              <span class="my-bet-match">Match ${bet.match_id.slice(0, 8)}...</span>
+              <span class="my-bet-on">${bet.bet_on}</span>
+              <span class="my-bet-amount">${bet.amount.toLocaleString()}</span>
+              <span class="my-bet-odds">${bet.odds}x</span>
+              <span class="my-bet-status status-${bet.status}">
+                ${bet.status}${bet.status === 'won' ? ' +' + bet.payout.toLocaleString() : ''}
+              </span>
+            </div>`;
+        }
+        container.innerHTML = html;
+      } catch (e) {
+        console.error('Failed to load my bets', e);
+        container.innerHTML = '<div class="empty-state"><p>Failed to load bets.</p></div>';
+      }
+    }
+
+    // ── Render Leaderboard ──
+    async function renderLeaderboard() {
+      const container = document.getElementById('leaderboard-content');
+      try {
+        const { data: allBetsData, error } = await supabaseClient
+          .from('bets')
+          .select('*')
+          .in('status', ['won', 'lost']);
+        if (error) throw error;
+
+        if (!allBetsData || allBetsData.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">🏆</div>
+              <h3>No Betting History</h3>
+              <p>Be the first to place a bet and make the leaderboard!</p>
+            </div>`;
+          return;
+        }
+
+        // Aggregate by bettor
+        const stats = {};
+        allBetsData.forEach(bet => {
+          if (!stats[bet.bettor]) {
+            stats[bet.bettor] = { profit: 0, wins: 0, total: 0, biggestWin: 0 };
+          }
+          const s = stats[bet.bettor];
+          s.total++;
+          if (bet.status === 'won') {
+            s.wins++;
+            const net = bet.payout - bet.amount;
+            s.profit += net;
+            if (net > s.biggestWin) s.biggestWin = net;
+          } else {
+            s.profit -= bet.amount;
+          }
+        });
+
+        // Sort by profit
+        const sorted = Object.entries(stats)
+          .sort(([, a], [, b]) => b.profit - a.profit);
+
+        let html = `
+          <div style="overflow-x:auto;">
+          <table class="lb-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Bettor</th>
+                <th>Profit</th>
+                <th>Win Rate</th>
+                <th>Bets</th>
+                <th>Biggest Win</th>
+              </tr>
+            </thead>
+            <tbody>`;
+
+        sorted.forEach(([name, s], i) => {
+          const winRate = s.total > 0 ? Math.round((s.wins / s.total) * 100) : 0;
+          html += `
+              <tr>
+                <td class="lb-rank">${i + 1}</td>
+                <td class="lb-name">${name}</td>
+                <td class="${s.profit >= 0 ? 'lb-profit-pos' : 'lb-profit-neg'}">
+                  ${s.profit >= 0 ? '+' : ''}${s.profit.toLocaleString()}
+                </td>
+                <td class="lb-winrate">${winRate}%</td>
+                <td style="color:var(--muted)">${s.wins}/${s.total}</td>
+                <td class="lb-biggest">${s.biggestWin > 0 ? '+' + s.biggestWin.toLocaleString() : '—'}</td>
+              </tr>`;
+        });
+
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+      } catch (e) {
+        console.error('Failed to load leaderboard', e);
+        container.innerHTML = '<div class="empty-state"><p>Failed to load leaderboard.</p></div>';
+      }
+    }
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', async () => {
+      setTimeout(async () => {
+        await AUTH.init();
+
+        if (AUTH.isLoggedIn()) {
+          currentUser = AUTH.getDiscordUsername();
+          document.getElementById('wallet-bar').style.display = 'flex';
+          document.getElementById('betting-content').style.display = 'block';
+          document.getElementById('login-prompt').style.display = 'none';
+          document.getElementById('wallet-username').textContent = currentUser;
+
+          await refreshBalance();
+          await loadEloMap();
+
+          // Load active tournament and matches
+          try {
+            activeTournament = await db.getActiveTournament();
+            if (activeTournament) {
+              allMatches = await db.getMatches(activeTournament.id);
+              // Resolve any completed bets
+              await resolveBets();
+              await refreshBalance();
+            }
+          } catch (e) { console.error('Failed to load tournament', e); }
+
+          await renderMatches();
+          await renderMyBets();
+          await renderLeaderboard();
+        } else {
+          document.getElementById('login-prompt').style.display = 'block';
+          document.getElementById('wallet-bar').style.display = 'none';
+          document.getElementById('betting-content').style.display = 'none';
+        }
+      }, 200);
+    });
+  </script>
+
+</body>
+</html>

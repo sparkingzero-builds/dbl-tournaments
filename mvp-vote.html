@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Season Awards — DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    .awards-header {
+      text-align: center;
+      padding: 48px 20px 24px;
+    }
+    .awards-title {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      background: linear-gradient(135deg, #ffd740, #ffab00, #ffd740, #fff176);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: goldShimmer 3s ease infinite;
+      margin-bottom: 4px;
+    }
+    @keyframes goldShimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .awards-trophy {
+      font-size: 48px;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .awards-season {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    .awards-countdown {
+      margin-top: 12px;
+      font-family: 'Chakra Petch', monospace;
+      font-size: 18px;
+      color: var(--gold);
+    }
+    .awards-status {
+      margin-top: 10px;
+    }
+
+    /* Category Cards */
+    .awards-grid {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 20px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .award-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius, 8px);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .award-card:hover { border-color: var(--gold); }
+    .award-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), #ffab00);
+    }
+    .award-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .award-icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+    .award-name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+    }
+    .award-desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .award-select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm, 6px);
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'Exo 2', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239088b8' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+    }
+    .award-select:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(255, 215, 64, 0.15);
+    }
+    .award-select option {
+      background: var(--bg);
+      color: var(--text);
+    }
+    .award-voted {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--green);
+    }
+
+    /* Result bars */
+    .award-results {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .result-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .result-name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      min-width: 100px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .result-bar-wrap {
+      flex: 1;
+      height: 22px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .result-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.6s ease;
+      min-width: 2px;
+    }
+    .result-bar.gold { background: linear-gradient(90deg, var(--gold), #ffab00); }
+    .result-bar.silver { background: linear-gradient(90deg, #b0bec5, #78909c); }
+    .result-bar.bronze { background: linear-gradient(90deg, #bf8040, #a0522d); }
+    .result-bar.normal { background: var(--line); }
+    .result-pct {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* Winner reveal cards */
+    .winner-card {
+      background: var(--panel);
+      border: 2px solid var(--gold);
+      border-radius: var(--radius, 8px);
+      padding: 28px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      animation: winnerReveal 0.5s ease;
+    }
+    @keyframes winnerReveal {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .winner-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gold), #fff176, var(--gold));
+    }
+    .winner-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center top, rgba(255, 215, 64, 0.06), transparent 70%);
+      pointer-events: none;
+    }
+    .winner-trophy { font-size: 40px; margin-bottom: 8px; }
+    .winner-category {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .winner-name {
+      font-family: 'Chakra Petch', monospace;
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: var(--text);
+      text-shadow: 0 0 20px rgba(255, 215, 64, 0.3);
+    }
+    .winner-votes {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .runner-up {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .runner-up .silver-icon { color: #b0bec5; }
+
+    /* Submit button */
+    .awards-submit {
+      max-width: 800px;
+      margin: 0 auto 40px;
+      padding: 0 20px;
+      text-align: center;
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold), #ffab00);
+      color: #000;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border: none;
+      border-radius: var(--radius, 8px);
+      padding: 14px 40px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(255, 215, 64, 0.3); }
+    .btn-gold:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* Login prompt */
+    .login-prompt {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+    .login-prompt a { color: var(--cyan); }
+
+    /* Past winners */
+    .past-winners {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+    .past-winners h2 {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--pink);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+    .past-season {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius, 8px);
+      padding: 16px 20px;
+      margin-bottom: 10px;
+    }
+    .past-season-name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .past-winner-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      font-size: 13px;
+    }
+    .past-winner-cat { color: var(--muted); }
+    .past-winner-name { color: var(--text); font-weight: 600; }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .award-card { padding: 18px 16px; }
+      .result-name { min-width: 70px; font-size: 12px; }
+      .winner-card { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">&#9776;</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+        <li><a href="bounty.html">Bounty</a></li>
+        <li><a href="matches.html">Matches</a></li>
+        <li class="nav-dropdown">
+          <a href="#" class="active">More &#9662;</a>
+          <div class="nav-dropdown-menu">
+            <div class="dropdown-label">Data</div>
+            <a href="characters.html">Characters</a>
+            <a href="tierlist.html">Tier List</a>
+            <a href="analytics.html">Ban Analytics</a>
+            <a href="power-rankings.html">Power Rankings</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Community</div>
+            <a href="compare.html">Compare</a>
+            <a href="shop.html">Shop</a>
+            <a href="auction.html">Auction</a>
+            <a href="season.html">Season</a>
+            <a href="world-tournament.html">World Tournament</a>
+            <a href="feed.html">Live Feed</a>
+            <a href="rivalries.html">Rivalries</a>
+            <a href="clans.html">Clans</a>
+            <a href="mvp-vote.html" class="active">Season Awards</a>
+            <a href="betting.html">Betting</a>
+          </div>
+        </li>
+
+        <div id="auth-nav"></div>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="particles-bg" id="particles"></div>
+
+  <main class="page container page-enter">
+    <div class="awards-header">
+      <span class="awards-trophy">&#127942;</span>
+      <h1 class="awards-title">Season Awards</h1>
+      <div class="awards-season" id="season-name">Loading season...</div>
+      <div class="awards-countdown" id="vote-countdown"></div>
+      <div class="awards-status" id="vote-status"></div>
+    </div>
+
+    <!-- Voting Phase -->
+    <div id="voting-section" style="display:none;">
+      <div class="awards-grid" id="awards-grid"></div>
+      <div class="awards-submit">
+        <button class="btn-gold" id="submit-votes" onclick="submitVotes()">Submit Votes</button>
+      </div>
+    </div>
+
+    <!-- Login prompt -->
+    <div id="login-prompt" class="login-prompt" style="display:none;">
+      <p>You must be logged in to vote.</p>
+      <p><a href="#" onclick="AUTH.login(); return false;">Sign in with Discord</a> to cast your votes.</p>
+    </div>
+
+    <!-- Results Phase -->
+    <div id="results-section" style="display:none;">
+      <div class="awards-grid" id="results-grid"></div>
+    </div>
+
+    <!-- Past Winners -->
+    <div class="past-winners" id="past-winners" style="display:none;">
+      <h2>Past Season Winners</h2>
+      <div id="past-winners-list"></div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/activity-alerts.js"></script>
+  <script src="js/daily-rewards.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/particles.js"></script>
+  <script>
+    const CATEGORIES = [
+      { id: 'mvp', name: 'Season MVP', icon: '&#127942;', desc: 'Best overall player this season' },
+      { id: 'most_improved', name: 'Most Improved', icon: '&#128200;', desc: 'Biggest ELO climb during the season' },
+      { id: 'best_newcomer', name: 'Best Newcomer', icon: '&#11088;', desc: 'Best player who joined this season' },
+      { id: 'clutch_king', name: 'Clutch King', icon: '&#9889;', desc: 'Most close/comeback match wins' },
+      { id: 'fan_favourite', name: 'Fan Favourite', icon: '&#10084;&#65039;', desc: 'Most fun and entertaining player' }
+    ];
+
+    let currentSeason = null;
+    let votingState = 'closed'; // 'open', 'closed', 'results'
+    let players = [];
+    let myVotes = {};
+    let allVotes = {};
+
+    // ── Voting state management (localStorage per-season) ──
+    function getVotingState(seasonId) {
+      try {
+        const data = JSON.parse(localStorage.getItem('mvp_voting_state') || '{}');
+        return data[seasonId] || 'closed';
+      } catch { return 'closed'; }
+    }
+
+    function setVotingState(seasonId, state) {
+      try {
+        const data = JSON.parse(localStorage.getItem('mvp_voting_state') || '{}');
+        data[seasonId] = state;
+        localStorage.setItem('mvp_voting_state', JSON.stringify(data));
+      } catch (e) { console.error('Error saving voting state:', e); }
+    }
+
+    // ── Load current season ──
+    async function loadSeason() {
+      try {
+        const { data: seasons } = await supabaseClient
+          .from('seasons')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (seasons && seasons.length > 0) {
+          currentSeason = seasons[0];
+          document.getElementById('season-name').textContent = currentSeason.name || 'Current Season';
+          votingState = getVotingState(currentSeason.id);
+        } else {
+          document.getElementById('season-name').textContent = 'No Active Season';
+        }
+      } catch (e) {
+        console.error('Error loading season:', e);
+        document.getElementById('season-name').textContent = 'Error loading season';
+      }
+    }
+
+    // ── Load players for dropdowns ──
+    async function loadPlayers() {
+      try {
+        const { data } = await supabaseClient
+          .from('players')
+          .select('discord_username')
+          .order('discord_username');
+        players = data ? data.map(p => p.discord_username) : [];
+      } catch (e) {
+        console.error('Error loading players:', e);
+      }
+    }
+
+    // ── Load existing votes ──
+    async function loadMyVotes() {
+      if (!currentSeason || !AUTH.isLoggedIn()) return;
+      const voter = AUTH.getDiscordUsername();
+      try {
+        const { data } = await supabaseClient
+          .from('mvp_votes')
+          .select('category, nominee')
+          .eq('season_id', currentSeason.id)
+          .eq('voter', voter);
+        myVotes = {};
+        if (data) {
+          data.forEach(v => { myVotes[v.category] = v.nominee; });
+        }
+      } catch (e) {
+        console.error('Error loading votes:', e);
+      }
+    }
+
+    async function loadAllVotes() {
+      if (!currentSeason) return;
+      try {
+        const { data } = await supabaseClient
+          .from('mvp_votes')
+          .select('category, nominee')
+          .eq('season_id', currentSeason.id);
+        allVotes = {};
+        CATEGORIES.forEach(c => { allVotes[c.id] = {}; });
+        if (data) {
+          data.forEach(v => {
+            if (!allVotes[v.category]) allVotes[v.category] = {};
+            allVotes[v.category][v.nominee] = (allVotes[v.category][v.nominee] || 0) + 1;
+          });
+        }
+      } catch (e) {
+        console.error('Error loading all votes:', e);
+      }
+    }
+
+    // ── Render voting cards ──
+    function renderVoting() {
+      const grid = document.getElementById('awards-grid');
+      const showLive = localStorage.getItem('mvp_show_live_results') !== 'false';
+
+      grid.innerHTML = CATEGORIES.map(cat => {
+        const currentVote = myVotes[cat.id] || '';
+        const catVotes = allVotes[cat.id] || {};
+        const totalVotes = Object.values(catVotes).reduce((a, b) => a + b, 0);
+
+        let resultsHtml = '';
+        if (showLive && totalVotes > 0) {
+          const sorted = Object.entries(catVotes).sort((a, b) => b[1] - a[1]).slice(0, 5);
+          resultsHtml = `<div class="award-results">${sorted.map(([name, count], i) => {
+            const pct = Math.round((count / totalVotes) * 100);
+            const barClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'normal';
+            return `<div class="result-row">
+              <span class="result-name">${name}</span>
+              <div class="result-bar-wrap"><div class="result-bar ${barClass}" style="width:${pct}%"></div></div>
+              <span class="result-pct">${pct}%</span>
+            </div>`;
+          }).join('')}</div>`;
+        }
+
+        return `<div class="award-card">
+          <div class="award-card-header">
+            <span class="award-icon">${cat.icon}</span>
+            <div>
+              <div class="award-name">${cat.name}</div>
+              <div class="award-desc">${cat.desc}</div>
+            </div>
+          </div>
+          <select class="award-select" id="vote-${cat.id}" onchange="onVoteChange('${cat.id}')">
+            <option value="">-- Select a player --</option>
+            ${players.map(p => `<option value="${p}" ${p === currentVote ? 'selected' : ''}>${p}</option>`).join('')}
+          </select>
+          ${currentVote ? `<div class="award-voted">&#10003; Voted for ${currentVote}</div>` : ''}
+          ${resultsHtml}
+        </div>`;
+      }).join('');
+    }
+
+    function onVoteChange(category) {
+      // Visual feedback only; actual save on submit
+    }
+
+    // ── Submit votes ──
+    async function submitVotes() {
+      if (!AUTH.isLoggedIn()) return;
+      const voter = AUTH.getDiscordUsername();
+      const btn = document.getElementById('submit-votes');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        for (const cat of CATEGORIES) {
+          const sel = document.getElementById(`vote-${cat.id}`);
+          const nominee = sel ? sel.value : '';
+          if (!nominee) continue;
+
+          await supabaseClient
+            .from('mvp_votes')
+            .upsert({
+              season_id: currentSeason.id,
+              voter: voter,
+              category: cat.id,
+              nominee: nominee
+            }, { onConflict: 'season_id,voter,category' });
+        }
+
+        await loadMyVotes();
+        await loadAllVotes();
+        renderVoting();
+        btn.textContent = 'Votes Saved!';
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = 'Submit Votes';
+        }, 2000);
+      } catch (e) {
+        console.error('Error submitting votes:', e);
+        btn.textContent = 'Error — Try Again';
+        btn.disabled = false;
+      }
+    }
+
+    // ── Render results ──
+    function renderResults() {
+      const grid = document.getElementById('results-grid');
+      grid.innerHTML = CATEGORIES.map(cat => {
+        const catVotes = allVotes[cat.id] || {};
+        const totalVotes = Object.values(catVotes).reduce((a, b) => a + b, 0);
+        const sorted = Object.entries(catVotes).sort((a, b) => b[1] - a[1]);
+        const winner = sorted[0];
+        const runnerUp = sorted[1];
+
+        if (!winner) {
+          return `<div class="award-card">
+            <div class="award-card-header">
+              <span class="award-icon">${cat.icon}</span>
+              <div><div class="award-name">${cat.name}</div></div>
+            </div>
+            <p style="color:var(--muted);font-size:13px;">No votes cast</p>
+          </div>`;
+        }
+
+        const winPct = Math.round((winner[1] / totalVotes) * 100);
+        return `<div class="winner-card">
+          <div class="winner-trophy">&#127942;</div>
+          <div class="winner-category">${cat.name}</div>
+          <div class="winner-name">${winner[0]}</div>
+          <div class="winner-votes">${winPct}% of votes (${winner[1]}/${totalVotes})</div>
+          ${runnerUp ? `<div class="runner-up">
+            <span class="silver-icon">&#129352;</span>
+            Runner-up: <strong>${runnerUp[0]}</strong> (${Math.round((runnerUp[1] / totalVotes) * 100)}%)
+          </div>` : ''}
+        </div>`;
+      }).join('');
+    }
+
+    // ── Load past winners ──
+    async function loadPastWinners() {
+      try {
+        const { data: seasons } = await supabaseClient
+          .from('seasons')
+          .select('id, name')
+          .order('created_at', { ascending: false });
+
+        if (!seasons || seasons.length < 2) return;
+
+        // Skip the current season, show past ones
+        const pastSeasons = currentSeason ? seasons.filter(s => s.id !== currentSeason.id) : seasons.slice(1);
+        if (pastSeasons.length === 0) return;
+
+        const container = document.getElementById('past-winners-list');
+        let html = '';
+
+        for (const season of pastSeasons.slice(0, 5)) {
+          const state = getVotingState(season.id);
+          if (state !== 'results') continue;
+
+          const { data: votes } = await supabaseClient
+            .from('mvp_votes')
+            .select('category, nominee')
+            .eq('season_id', season.id);
+
+          if (!votes || votes.length === 0) continue;
+
+          const catWinners = {};
+          const catCounts = {};
+          votes.forEach(v => {
+            if (!catCounts[v.category]) catCounts[v.category] = {};
+            catCounts[v.category][v.nominee] = (catCounts[v.category][v.nominee] || 0) + 1;
+          });
+          Object.entries(catCounts).forEach(([cat, nominees]) => {
+            const sorted = Object.entries(nominees).sort((a, b) => b[1] - a[1]);
+            if (sorted[0]) catWinners[cat] = sorted[0][0];
+          });
+
+          html += `<div class="past-season">
+            <div class="past-season-name">&#127942; ${season.name || 'Season'}</div>
+            ${CATEGORIES.map(c => catWinners[c.id] ? `<div class="past-winner-row">
+              <span class="past-winner-cat">${c.name}</span>
+              <span class="past-winner-name">${catWinners[c.id]}</span>
+            </div>` : '').join('')}
+          </div>`;
+        }
+
+        if (html) {
+          container.innerHTML = html;
+          document.getElementById('past-winners').style.display = '';
+        }
+      } catch (e) {
+        console.error('Error loading past winners:', e);
+      }
+    }
+
+    // ── Init ──
+    async function init() {
+      await loadSeason();
+      await loadPlayers();
+
+      if (!currentSeason) {
+        document.getElementById('vote-status').innerHTML = '<span class="status status-completed">No season available</span>';
+        return;
+      }
+
+      votingState = getVotingState(currentSeason.id);
+
+      if (votingState === 'open') {
+        document.getElementById('vote-status').innerHTML = '<span class="status status-active">Voting Open</span>';
+        if (AUTH.isLoggedIn()) {
+          await loadMyVotes();
+          await loadAllVotes();
+          document.getElementById('voting-section').style.display = '';
+          renderVoting();
+        } else {
+          document.getElementById('login-prompt').style.display = '';
+        }
+      } else if (votingState === 'results') {
+        document.getElementById('vote-status').innerHTML = '<span class="status status-completed">Results Revealed</span>';
+        await loadAllVotes();
+        document.getElementById('results-section').style.display = '';
+        renderResults();
+      } else {
+        document.getElementById('vote-status').innerHTML = '<span class="status status-completed">Voting Closed</span>';
+      }
+
+      loadPastWinners();
+    }
+
+    // Wait for auth to be ready
+    if (typeof AUTH !== 'undefined' && AUTH.init) {
+      const origInit = AUTH.init.bind(AUTH);
+      const checkAndInit = async () => {
+        await origInit();
+        init();
+      };
+      // If AUTH already initialized, just run
+      if (AUTH.user !== undefined) {
+        init();
+      } else {
+        // Poll briefly for auth readiness
+        setTimeout(init, 500);
+      }
+    } else {
+      init();
+    }
+  </script>
+  <script src="js/themes.js"></script>
+  <script src="js/toolbar.js"></script>
+</body>
+</html>

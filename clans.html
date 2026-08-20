@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clans — DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    .clans-header { text-align: center; padding: 40px 0 20px; }
+    .clans-title {
+      font-size: clamp(28px, 5vw, 42px);
+      color: var(--cyan);
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      text-shadow: 0 0 20px rgba(0,229,255,0.3);
+      margin-bottom: 6px;
+    }
+    .clans-subtitle { color: var(--muted); font-size: 14px; font-family: 'Chakra Petch', sans-serif; }
+
+    .free-agent-badge {
+      display: inline-block; margin-top: 12px;
+      background: rgba(255,45,120,0.15); border: 1px solid var(--pink);
+      color: var(--pink); font-family: 'Exo 2', sans-serif; font-weight: 700;
+      font-size: 12px; padding: 5px 16px; border-radius: 999px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+
+    /* Create Clan Form */
+    .create-clan-section {
+      max-width: 520px; margin: 0 auto 30px; padding: 24px;
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    }
+    .create-clan-section h3 {
+      color: var(--cyan); font-family: 'Exo 2', sans-serif;
+      font-size: 16px; margin-bottom: 16px; text-transform: uppercase;
+    }
+    .form-row { display: flex; gap: 12px; margin-bottom: 12px; }
+    .form-row .form-group { flex: 1; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label {
+      display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px;
+      font-family: 'Exo 2', sans-serif; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 10px 12px; background: var(--bg);
+      border: 1px solid var(--line); border-radius: 6px;
+      color: var(--text); font-family: 'Chakra Petch', sans-serif; font-size: 14px;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none; border-color: var(--cyan);
+    }
+    .form-group textarea { resize: vertical; min-height: 60px; }
+    .emoji-picker-grid {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;
+    }
+    .emoji-opt {
+      width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+      font-size: 20px; background: var(--bg); border: 2px solid var(--line);
+      border-radius: 8px; cursor: pointer; transition: all 0.15s;
+    }
+    .emoji-opt:hover { border-color: var(--muted); }
+    .emoji-opt.selected { border-color: var(--cyan); box-shadow: 0 0 8px rgba(0,229,255,0.3); }
+
+    .color-picker-grid { display: flex; gap: 6px; margin-top: 4px; }
+    .color-opt {
+      width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: all 0.15s;
+    }
+    .color-opt:hover { transform: scale(1.15); }
+    .color-opt.selected { border-color: #fff; box-shadow: 0 0 8px rgba(255,255,255,0.4); }
+
+    /* Clan Leaderboard */
+    .clans-board { max-width: 900px; margin: 0 auto 40px; }
+    .clans-board h3 {
+      color: var(--text); font-family: 'Exo 2', sans-serif;
+      font-size: 15px; margin-bottom: 12px; text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .clan-row {
+      display: grid; grid-template-columns: 40px 1fr 80px 80px 80px;
+      align-items: center; padding: 14px 16px; background: var(--panel);
+      border: 1px solid var(--line); border-radius: var(--radius);
+      margin-bottom: 6px; cursor: pointer; transition: all 0.15s;
+    }
+    .clan-row:hover { border-color: var(--cyan); background: rgba(0,229,255,0.04); }
+    .clan-rank {
+      font-family: 'Exo 2', sans-serif; font-weight: 900; font-size: 16px;
+      color: var(--muted); text-align: center;
+    }
+    .clan-row:nth-child(1) .clan-rank { color: var(--gold); }
+    .clan-row:nth-child(2) .clan-rank { color: #c0c0c0; }
+    .clan-row:nth-child(3) .clan-rank { color: #cd7f32; }
+
+    .clan-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .clan-emoji { font-size: 24px; flex-shrink: 0; }
+    .clan-name-block { min-width: 0; }
+    .clan-name {
+      font-family: 'Exo 2', sans-serif; font-weight: 700; font-size: 15px;
+      color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .clan-tag-label {
+      font-family: 'Chakra Petch', sans-serif; font-size: 11px;
+      font-weight: 700; letter-spacing: 0.06em;
+    }
+    .clan-stat {
+      text-align: center; font-family: 'Exo 2', sans-serif;
+      font-weight: 700; font-size: 14px; color: var(--text);
+    }
+    .clan-stat small {
+      display: block; font-size: 9px; color: var(--muted);
+      text-transform: uppercase; font-weight: 800; letter-spacing: 0.08em;
+    }
+
+    .clan-header-row {
+      display: grid; grid-template-columns: 40px 1fr 80px 80px 80px;
+      padding: 4px 16px; margin-bottom: 6px;
+    }
+    .clan-header-row span {
+      font-family: 'Exo 2', sans-serif; font-size: 9px; font-weight: 800;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em;
+      text-align: center;
+    }
+    .clan-header-row span:nth-child(2) { text-align: left; }
+
+    /* Clan Detail Overlay */
+    .clan-detail {
+      display: none; max-width: 900px; margin: 0 auto 40px;
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 30px; position: relative;
+    }
+    .clan-detail.open { display: block; animation: fadeIn 0.2s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .clan-detail-close {
+      position: absolute; top: 14px; right: 14px; background: none;
+      border: none; color: var(--muted); font-size: 22px; cursor: pointer;
+    }
+    .clan-detail-close:hover { color: var(--text); }
+
+    .clan-banner {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
+      padding-bottom: 20px; border-bottom: 1px solid var(--line);
+    }
+    .clan-banner-emoji { font-size: 48px; }
+    .clan-banner-name {
+      font-family: 'Exo 2', sans-serif; font-weight: 900; font-size: 28px;
+    }
+    .clan-banner-tag {
+      font-family: 'Chakra Petch', sans-serif; font-size: 14px; font-weight: 700;
+      margin-left: 8px;
+    }
+    .clan-banner-desc { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+    .clan-stats-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px; margin-bottom: 24px;
+    }
+    .clan-stat-card {
+      background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+      padding: 14px; text-align: center;
+    }
+    .clan-stat-card .val {
+      font-family: 'Exo 2', sans-serif; font-weight: 900; font-size: 22px;
+      color: var(--cyan);
+    }
+    .clan-stat-card .lbl {
+      font-size: 10px; color: var(--muted); text-transform: uppercase;
+      font-weight: 700; letter-spacing: 0.08em; margin-top: 2px;
+    }
+
+    .member-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+    .member-table th {
+      text-align: left; font-family: 'Exo 2', sans-serif; font-size: 10px;
+      font-weight: 800; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.08em; padding: 8px 10px; border-bottom: 1px solid var(--line);
+    }
+    .member-table td {
+      padding: 10px; font-size: 13px; color: var(--text);
+      border-bottom: 1px solid rgba(46,39,85,0.5);
+    }
+    .member-table tr:hover td { background: rgba(0,229,255,0.03); }
+    .role-badge {
+      font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .role-leader { background: rgba(255,215,64,0.15); color: var(--gold); }
+    .role-officer { background: rgba(0,229,255,0.15); color: var(--cyan); }
+    .role-member { background: rgba(144,136,184,0.15); color: var(--muted); }
+
+    .member-name-link { color: var(--text); text-decoration: none; font-weight: 600; }
+    .member-name-link:hover { color: var(--cyan); }
+
+    /* Leader Tools */
+    .leader-tools {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px;
+      padding-top: 16px; border-top: 1px solid var(--line);
+    }
+    .leader-tools .btn { font-size: 12px; padding: 7px 16px; }
+
+    /* Clan Wars Section */
+    .clan-wars-section { margin-top: 20px; }
+    .clan-wars-section h4 {
+      font-family: 'Exo 2', sans-serif; font-size: 13px; color: var(--muted);
+      text-transform: uppercase; margin-bottom: 10px;
+    }
+    .war-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; background: var(--bg); border: 1px solid var(--line);
+      border-radius: 8px; margin-bottom: 6px; font-size: 13px;
+    }
+    .war-opponent { font-weight: 700; color: var(--text); }
+    .war-score { font-family: 'Exo 2', sans-serif; font-weight: 800; }
+    .war-score .win { color: var(--green); }
+    .war-score .loss { color: var(--red); }
+
+    /* Invite section */
+    .invite-section {
+      display: flex; align-items: center; gap: 8px; margin-top: 12px;
+    }
+    .invite-section input {
+      flex: 1; padding: 8px 10px; background: var(--bg); border: 1px solid var(--line);
+      border-radius: 6px; color: var(--text); font-family: 'Chakra Petch', sans-serif;
+      font-size: 12px;
+    }
+
+    /* Join button */
+    .btn-join {
+      background: var(--green); color: #000; border: none; padding: 6px 14px;
+      border-radius: 6px; font-family: 'Exo 2', sans-serif; font-weight: 700;
+      font-size: 12px; cursor: pointer; text-transform: uppercase;
+    }
+    .btn-join:hover { filter: brightness(1.1); }
+    .btn-leave {
+      background: var(--red); color: #fff; border: none; padding: 6px 14px;
+      border-radius: 6px; font-family: 'Exo 2', sans-serif; font-weight: 700;
+      font-size: 12px; cursor: pointer; text-transform: uppercase;
+    }
+    .btn-leave:hover { filter: brightness(1.1); }
+
+    .btn-sm {
+      padding: 5px 12px; font-size: 11px; border-radius: 6px;
+      border: none; cursor: pointer; font-family: 'Exo 2', sans-serif; font-weight: 700;
+    }
+    .btn-promote { background: rgba(0,229,255,0.15); color: var(--cyan); }
+    .btn-kick { background: rgba(255,71,87,0.15); color: var(--red); }
+    .btn-disband { background: var(--red); color: #fff; }
+
+    .no-clans { text-align: center; color: var(--muted); padding: 40px; font-size: 14px; }
+
+    @media (max-width: 640px) {
+      .clan-row { grid-template-columns: 30px 1fr 60px 60px 60px; padding: 10px; gap: 4px; }
+      .clan-header-row { grid-template-columns: 30px 1fr 60px 60px 60px; }
+      .clan-stat { font-size: 12px; }
+      .clan-name { font-size: 13px; }
+      .clan-banner { flex-direction: column; text-align: center; }
+      .clan-banner-emoji { font-size: 36px; }
+      .clan-banner-name { font-size: 22px; }
+      .form-row { flex-direction: column; gap: 0; }
+      .clan-stats-row { grid-template-columns: 1fr 1fr; }
+      .member-table { font-size: 11px; }
+      .member-table th, .member-table td { padding: 6px 4px; }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <div id="auth-nav"></div>
+
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="banpick.html">Ban Phase</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="history.html">History</a></li>
+        <li><a href="bounty.html">Bounty</a></li>
+        <li><a href="matches.html">Matches</a></li>
+        <li class="nav-dropdown">
+          <a href="#">More ▾</a>
+          <div class="nav-dropdown-menu">
+            <div class="dropdown-label">Data</div>
+            <a href="characters.html">Characters</a>
+            <a href="tierlist.html">Tier List</a>
+            <a href="analytics.html">Ban Analytics</a>
+            <a href="power-rankings.html">Power Rankings</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Community</div>
+            <a href="compare.html">Compare</a>
+            <a href="shop.html">Shop</a>
+            <a href="auction.html">Auction</a>
+            <a href="season.html">Season</a>
+            <a href="world-tournament.html">World Tournament</a>
+            <a href="feed.html">Live Feed</a>
+            <a href="rivalries.html">Rivalries</a>
+            <a href="betting.html">Betting</a>
+            <a href="clans.html" class="active">Clans</a>
+          </div>
+        </li>
+
+        <div id="auth-nav"></div>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container page page-enter">
+    <!-- Header -->
+    <div class="clans-header">
+      <h1 class="clans-title">⚔️ CLANS</h1>
+      <p class="clans-subtitle">Form your squad. Dominate together.</p>
+      <div id="agent-status"></div>
+    </div>
+
+    <!-- Create Clan (shown if logged in, not in a clan) -->
+    <div class="create-clan-section" id="create-clan-section" style="display:none;">
+      <h3>Create Your Clan</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Clan Name</label>
+          <input type="text" id="clan-name" maxlength="30" placeholder="e.g. Dragon Slayers" />
+        </div>
+        <div class="form-group" style="max-width:120px;">
+          <label>Tag (max 5)</label>
+          <input type="text" id="clan-tag" maxlength="5" placeholder="DS" style="text-transform:uppercase;" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="clan-desc" maxlength="120" placeholder="What is your clan about?"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Emblem</label>
+        <div class="emoji-picker-grid" id="emoji-picker"></div>
+      </div>
+      <div class="form-group">
+        <label>Color</label>
+        <div class="color-picker-grid" id="color-picker"></div>
+      </div>
+      <button class="btn btn-primary" onclick="createClan()" style="width:100%;margin-top:8px;">Create Clan</button>
+    </div>
+
+    <!-- Clan Detail View -->
+    <div class="clan-detail" id="clan-detail">
+      <button class="clan-detail-close" onclick="closeClanDetail()">✕</button>
+      <div id="clan-detail-content"></div>
+    </div>
+
+    <!-- Clan Leaderboard -->
+    <div class="clans-board">
+      <h3>Clan Leaderboard</h3>
+      <div class="clan-header-row">
+        <span>#</span>
+        <span style="text-align:left;">Clan</span>
+        <span>Members</span>
+        <span>Wins</span>
+        <span>Wars</span>
+      </div>
+      <div id="clans-list"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/activity-alerts.js"></script>
+  <script src="js/daily-rewards.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/clan-tag.js"></script>
+  <script src="js/toolbar.js"></script>
+  <script>
+    const EMOJIS = ['⚔️','🐉','🔥','💀','👑','🦁','🐍','🦅','⚡','🌙','💎','🎯','🛡️','🏴','☠️','🐺'];
+    const COLORS = ['#00e5ff','#ff2d78','#ffd740','#2ed573','#ff4757','#a55eea','#ff6b81','#1e90ff'];
+
+    let allClans = [];
+    let allMembers = [];
+    let allWars = [];
+    let currentUser = null;
+    let userMembership = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await AUTH.init();
+      currentUser = AUTH.getDiscordUsername();
+      initPickers();
+      await loadData();
+    });
+
+    function initPickers() {
+      const ep = document.getElementById('emoji-picker');
+      EMOJIS.forEach((e, i) => {
+        const d = document.createElement('div');
+        d.className = 'emoji-opt' + (i === 0 ? ' selected' : '');
+        d.textContent = e;
+        d.onclick = () => {
+          ep.querySelectorAll('.emoji-opt').forEach(x => x.classList.remove('selected'));
+          d.classList.add('selected');
+        };
+        ep.appendChild(d);
+      });
+      const cp = document.getElementById('color-picker');
+      COLORS.forEach((c, i) => {
+        const d = document.createElement('div');
+        d.className = 'color-opt' + (i === 0 ? ' selected' : '');
+        d.style.background = c;
+        d.onclick = () => {
+          cp.querySelectorAll('.color-opt').forEach(x => x.classList.remove('selected'));
+          d.classList.add('selected');
+        };
+        cp.appendChild(d);
+      });
+    }
+
+    async function loadData() {
+      const [clansRes, membersRes, warsRes] = await Promise.all([
+        supabaseClient.from('clans').select('*'),
+        supabaseClient.from('clan_members').select('*'),
+        supabaseClient.from('clan_wars').select('*')
+      ]);
+      allClans = clansRes.data || [];
+      allMembers = membersRes.data || [];
+      allWars = warsRes.data || [];
+
+      // Find user membership
+      if (currentUser) {
+        const m = allMembers.find(m => m.discord_username === currentUser);
+        userMembership = m || null;
+      }
+
+      updateUI();
+    }
+
+    function updateUI() {
+      // Free agent / create clan
+      const statusEl = document.getElementById('agent-status');
+      const createEl = document.getElementById('create-clan-section');
+
+      if (AUTH.isLoggedIn() && !userMembership) {
+        statusEl.innerHTML = '<span class="free-agent-badge">⚡ Free Agent</span>';
+        createEl.style.display = 'block';
+      } else if (AUTH.isLoggedIn() && userMembership) {
+        const clan = allClans.find(c => c.id === userMembership.clan_id);
+        statusEl.innerHTML = clan
+          ? `<span class="free-agent-badge" style="background:rgba(46,213,115,0.15);border-color:var(--green);color:var(--green);">${clan.logo_emoji} ${clan.name} [${clan.tag}]</span>`
+          : '';
+        createEl.style.display = 'none';
+      } else {
+        statusEl.innerHTML = '';
+        createEl.style.display = 'none';
+      }
+
+      renderLeaderboard();
+    }
+
+    function renderLeaderboard() {
+      // Build clan stats
+      const clanStats = allClans.map(c => {
+        const members = allMembers.filter(m => m.clan_id === c.id);
+        const totalWins = members.reduce((s, m) => s, 0); // placeholder — real wins from players table
+        // Clan wars record
+        let warWins = 0, warLosses = 0;
+        allWars.forEach(w => {
+          if (w.clan1_id === c.id) { warWins += w.clan1_wins; warLosses += w.clan2_wins; }
+          if (w.clan2_id === c.id) { warWins += w.clan2_wins; warLosses += w.clan1_wins; }
+        });
+        return { ...c, memberCount: members.length, warWins, warLosses, members };
+      });
+
+      clanStats.sort((a, b) => b.memberCount - a.memberCount || b.warWins - a.warWins);
+
+      const container = document.getElementById('clans-list');
+      if (clanStats.length === 0) {
+        container.innerHTML = '<div class="no-clans">No clans yet. Be the first to create one!</div>';
+        return;
+      }
+
+      container.innerHTML = clanStats.map((c, i) => `
+        <div class="clan-row" onclick="openClanDetail('${c.id}')">
+          <div class="clan-rank">${i + 1}</div>
+          <div class="clan-info">
+            <span class="clan-emoji">${c.logo_emoji}</span>
+            <div class="clan-name-block">
+              <div class="clan-name">${esc(c.name)}</div>
+              <span class="clan-tag-label" style="color:${c.color}">[${esc(c.tag)}]</span>
+            </div>
+          </div>
+          <div class="clan-stat">${c.memberCount}<small>Members</small></div>
+          <div class="clan-stat">${c.warWins}<small>Wins</small></div>
+          <div class="clan-stat"><span class="war-score"><span class="win">${c.warWins}</span>-<span class="loss">${c.warLosses}</span></span><small>Wars</small></div>
+        </div>
+      `).join('');
+    }
+
+    async function openClanDetail(clanId) {
+      const clan = allClans.find(c => c.id === clanId);
+      if (!clan) return;
+      const members = allMembers.filter(m => m.clan_id === clanId);
+      const isOwn = userMembership && userMembership.clan_id === clanId;
+      const isLeader = isOwn && userMembership.role === 'leader';
+      const isOfficer = isOwn && (userMembership.role === 'leader' || userMembership.role === 'officer');
+
+      // Clan war records
+      const wars = allWars.filter(w => w.clan1_id === clanId || w.clan2_id === clanId);
+
+      // Stats
+      let totalWarWins = 0, totalWarLosses = 0;
+      wars.forEach(w => {
+        if (w.clan1_id === clanId) { totalWarWins += w.clan1_wins; totalWarLosses += w.clan2_wins; }
+        else { totalWarWins += w.clan2_wins; totalWarLosses += w.clan1_wins; }
+      });
+
+      // Sort: leader first, then officers, then members
+      const roleOrder = { leader: 0, officer: 1, member: 2 };
+      members.sort((a, b) => (roleOrder[a.role] || 2) - (roleOrder[b.role] || 2));
+
+      const canJoin = AUTH.isLoggedIn() && !userMembership;
+      const cooldownKey = 'clan_leave_cooldown';
+      const cooldownUntil = localStorage.getItem(cooldownKey);
+      const onCooldown = cooldownUntil && Date.now() < parseInt(cooldownUntil);
+
+      let html = `
+        <div class="clan-banner">
+          <span class="clan-banner-emoji">${clan.logo_emoji}</span>
+          <div>
+            <div>
+              <span class="clan-banner-name" style="color:${clan.color}">${esc(clan.name)}</span>
+              <span class="clan-banner-tag" style="color:${clan.color}">[${esc(clan.tag)}]</span>
+            </div>
+            ${clan.description ? `<div class="clan-banner-desc">${esc(clan.description)}</div>` : ''}
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;">Created ${new Date(clan.created_at).toLocaleDateString()}</div>
+          </div>
+        </div>
+
+        <div class="clan-stats-row">
+          <div class="clan-stat-card"><div class="val">${members.length}</div><div class="lbl">Members</div></div>
+          <div class="clan-stat-card"><div class="val">${totalWarWins}</div><div class="lbl">War Wins</div></div>
+          <div class="clan-stat-card"><div class="val">${totalWarLosses}</div><div class="lbl">War Losses</div></div>
+          <div class="clan-stat-card"><div class="val">${members.length > 0 ? members[0].discord_username : '-'}</div><div class="lbl">Leader</div></div>
+        </div>
+
+        <table class="member-table">
+          <thead><tr>
+            <th>Player</th><th>Role</th><th>Joined</th>
+            ${isOfficer ? '<th>Actions</th>' : ''}
+          </tr></thead>
+          <tbody>
+            ${members.map(m => `<tr>
+              <td><a class="member-name-link" href="profile.html?player=${encodeURIComponent(m.discord_username)}">${esc(m.discord_username)}</a></td>
+              <td><span class="role-badge role-${m.role}">${m.role}</span></td>
+              <td style="color:var(--muted);font-size:12px;">${new Date(m.joined_at).toLocaleDateString()}</td>
+              ${isOfficer ? `<td>
+                ${isLeader && m.role === 'member' ? `<button class="btn-sm btn-promote" onclick="promoteMember('${m.id}',event)">Promote</button>` : ''}
+                ${isLeader && m.discord_username !== currentUser ? `<button class="btn-sm btn-kick" onclick="kickMember('${m.id}','${esc(m.discord_username)}',event)">Kick</button>` : ''}
+              </td>` : ''}
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      `;
+
+      // Clan Wars
+      if (wars.length > 0) {
+        html += `<div class="clan-wars-section"><h4>Clan War Records</h4>`;
+        wars.forEach(w => {
+          const opponentId = w.clan1_id === clanId ? w.clan2_id : w.clan1_id;
+          const opponent = allClans.find(c => c.id === opponentId);
+          const myWins = w.clan1_id === clanId ? w.clan1_wins : w.clan2_wins;
+          const theirWins = w.clan1_id === clanId ? w.clan2_wins : w.clan1_wins;
+          html += `<div class="war-row">
+            <span class="war-opponent">${opponent ? opponent.logo_emoji + ' ' + esc(opponent.name) : 'Unknown'}</span>
+            <span class="war-score"><span class="win">${myWins}W</span> - <span class="loss">${theirWins}L</span></span>
+          </div>`;
+        });
+        html += `</div>`;
+      }
+
+      // Actions
+      if (canJoin) {
+        if (onCooldown) {
+          const mins = Math.ceil((parseInt(cooldownUntil) - Date.now()) / 60000);
+          html += `<div style="margin-top:16px;color:var(--muted);font-size:12px;">You must wait ${mins} more minute(s) before joining a clan (cooldown).</div>`;
+        } else {
+          html += `<div style="margin-top:16px;"><button class="btn-join" onclick="joinClan('${clanId}')">Sign Contract &amp; Join</button></div>`;
+        }
+      }
+
+      if (isOwn && !isLeader) {
+        html += `<div style="margin-top:16px;"><button class="btn-leave" onclick="leaveClan()">Leave Clan</button></div>`;
+      }
+
+      if (isLeader) {
+        html += `
+          <div class="leader-tools">
+            <button class="btn btn-primary btn-sm" onclick="copyInvite('${clanId}')">📋 Copy Clan ID</button>
+            <button class="btn-sm btn-disband" onclick="disbandClan('${clanId}')">Disband Clan</button>
+          </div>`;
+      }
+
+      document.getElementById('clan-detail-content').innerHTML = html;
+      const detail = document.getElementById('clan-detail');
+      detail.classList.add('open');
+      detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function closeClanDetail() {
+      document.getElementById('clan-detail').classList.remove('open');
+    }
+
+    async function createClan() {
+      if (!AUTH.isLoggedIn()) { NotificationSystem.show('Log in to create a clan', 'error'); return; }
+      const name = document.getElementById('clan-name').value.trim();
+      const tag = document.getElementById('clan-tag').value.trim().toUpperCase();
+      const desc = document.getElementById('clan-desc').value.trim();
+      const emoji = document.querySelector('#emoji-picker .emoji-opt.selected')?.textContent || '⚔️';
+      const color = getComputedStyle(document.querySelector('#color-picker .color-opt.selected')).backgroundColor;
+      const colorHex = document.querySelector('#color-picker .color-opt.selected')?.style.background || '#00e5ff';
+
+      if (!name || !tag) { NotificationSystem.show('Clan name and tag are required', 'error'); return; }
+      if (tag.length > 5) { NotificationSystem.show('Tag must be 5 chars or less', 'error'); return; }
+
+      const { data: clan, error } = await supabaseClient.from('clans').insert({
+        name, tag, leader: currentUser, description: desc || null,
+        logo_emoji: emoji, color: colorHex
+      }).select().single();
+
+      if (error) {
+        NotificationSystem.show(error.message.includes('unique') ? 'Clan name or tag already taken' : error.message, 'error');
+        return;
+      }
+
+      // Add creator as leader
+      await supabaseClient.from('clan_members').insert({
+        clan_id: clan.id, discord_username: currentUser, role: 'leader'
+      });
+
+      NotificationSystem.show(`Clan [${tag}] created!`, 'success');
+      ClanTag.clearCache(currentUser);
+      sessionStorage.removeItem('clan_tag_' + currentUser);
+      await loadData();
+    }
+
+    async function joinClan(clanId) {
+      if (!AUTH.isLoggedIn()) { NotificationSystem.show('Log in first', 'error'); return; }
+      const cooldownKey = 'clan_leave_cooldown';
+      const cooldownUntil = localStorage.getItem(cooldownKey);
+      if (cooldownUntil && Date.now() < parseInt(cooldownUntil)) {
+        NotificationSystem.show('You are on cooldown. Wait before joining.', 'error');
+        return;
+      }
+
+      const { error } = await supabaseClient.from('clan_members').insert({
+        clan_id: clanId, discord_username: currentUser, role: 'member'
+      });
+
+      if (error) {
+        NotificationSystem.show(error.message.includes('unique') ? 'You are already in a clan' : error.message, 'error');
+        return;
+      }
+
+      NotificationSystem.show('Contract signed! Welcome to the clan.', 'success');
+      ClanTag.clearCache(currentUser);
+      sessionStorage.removeItem('clan_tag_' + currentUser);
+      await loadData();
+      openClanDetail(clanId);
+    }
+
+    async function leaveClan() {
+      if (!confirm('Leave your clan? You will have a 24h cooldown before joining another.')) return;
+      const { error } = await supabaseClient.from('clan_members')
+        .delete().eq('discord_username', currentUser);
+      if (error) { NotificationSystem.show(error.message, 'error'); return; }
+
+      localStorage.setItem('clan_leave_cooldown', String(Date.now() + 24 * 60 * 60 * 1000));
+      NotificationSystem.show('You left the clan. 24h cooldown active.', 'info');
+      ClanTag.clearCache(currentUser);
+      sessionStorage.removeItem('clan_tag_' + currentUser);
+      closeClanDetail();
+      await loadData();
+    }
+
+    async function promoteMember(memberId, event) {
+      event.stopPropagation();
+      const { error } = await supabaseClient.from('clan_members')
+        .update({ role: 'officer' }).eq('id', memberId);
+      if (error) { NotificationSystem.show(error.message, 'error'); return; }
+      NotificationSystem.show('Member promoted to Officer!', 'success');
+      await loadData();
+      if (userMembership) openClanDetail(userMembership.clan_id);
+    }
+
+    async function kickMember(memberId, username, event) {
+      event.stopPropagation();
+      if (!confirm(`Kick ${username} from the clan?`)) return;
+      const { error } = await supabaseClient.from('clan_members')
+        .delete().eq('id', memberId);
+      if (error) { NotificationSystem.show(error.message, 'error'); return; }
+      NotificationSystem.show(`${username} has been kicked.`, 'info');
+      ClanTag.clearCache(username);
+      await loadData();
+      if (userMembership) openClanDetail(userMembership.clan_id);
+    }
+
+    async function disbandClan(clanId) {
+      if (!confirm('DISBAND your clan? This cannot be undone! All members will be removed.')) return;
+      if (!confirm('Are you REALLY sure? Type YES mentally and click OK.')) return;
+
+      // Delete members first, then clan
+      await supabaseClient.from('clan_members').delete().eq('clan_id', clanId);
+      await supabaseClient.from('clan_wars').delete().or(`clan1_id.eq.${clanId},clan2_id.eq.${clanId}`);
+      const { error } = await supabaseClient.from('clans').delete().eq('id', clanId);
+      if (error) { NotificationSystem.show(error.message, 'error'); return; }
+
+      NotificationSystem.show('Clan disbanded.', 'info');
+      ClanTag.clearCache(currentUser);
+      sessionStorage.removeItem('clan_tag_' + currentUser);
+      closeClanDetail();
+      await loadData();
+    }
+
+    function copyInvite(clanId) {
+      navigator.clipboard.writeText(clanId).then(() => {
+        NotificationSystem.show('Clan ID copied to clipboard!', 'success');
+      });
+    }
+
+    function esc(s) {
+      const d = document.createElement('div');
+      d.textContent = s || '';
+      return d.innerHTML;
+    }
+  </script>
+</body>
+</html>

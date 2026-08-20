@@ -454,6 +454,7 @@
             <a href="../tierlist.html">Tier List</a>
             <a href="../characters.html">Characters</a>
             <a href="../season.html">Season</a>
+            <a href="../betting.html">Betting</a>
           </div>
         </li>
       
@@ -1080,6 +1081,27 @@
         <div class="form-group mt-2">
           <label>Custom Message (optional)</label>
           <input type="text" id="maintenance-message" placeholder="Custom maintenance message..." onchange="updateMaintenanceMessage()" />
+        </div>
+      </div>
+
+      <!-- Season Awards Voting -->
+      <div class="card mt-3">
+        <h3 class="mb-2" style="color:var(--gold);">Season Awards</h3>
+        <p class="text-muted mb-2" style="font-size:13px;">Control MVP voting for the current season. Players can vote for MVP, Most Improved, Best Newcomer, Clutch King, and Fan Favourite.</p>
+        <div class="form-group">
+          <label>Voting State</label>
+          <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+            <button class="btn btn-sm btn-secondary" id="awards-btn-closed" onclick="setAwardsVotingState('closed')">Closed</button>
+            <button class="btn btn-sm btn-secondary" id="awards-btn-open" onclick="setAwardsVotingState('open')" style="border-color:var(--green);color:var(--green);">Open Voting</button>
+            <button class="btn btn-sm btn-secondary" id="awards-btn-results" onclick="setAwardsVotingState('results')" style="border-color:var(--gold);color:var(--gold);">Reveal Results</button>
+          </div>
+          <p class="text-muted mt-1" style="font-size:12px;">Current state: <strong id="awards-current-state">—</strong></p>
+        </div>
+        <div class="form-group mt-2">
+          <div class="toggle-switch" onclick="toggleAwardsLiveResults()">
+            <div class="toggle-track" id="awards-live-toggle"></div>
+            <span>Show live vote counts to voters</span>
+          </div>
         </div>
       </div>
 
@@ -4062,6 +4084,54 @@ const _origLoadSettings3 = loadSettings;
 loadSettings = function() {
   _origLoadSettings3();
   loadWorldTournamentStatus();
+};
+// ── Season Awards Admin Controls ──
+async function getActiveSeasonId() {
+  try {
+    const { data } = await supabaseClient.from('seasons').select('id').order('created_at', { ascending: false }).limit(1);
+    return data && data[0] ? data[0].id : null;
+  } catch { return null; }
+}
+
+function setAwardsVotingState(state) {
+  getActiveSeasonId().then(id => {
+    if (!id) { alert('No active season found.'); return; }
+    const data = JSON.parse(localStorage.getItem('mvp_voting_state') || '{}');
+    data[id] = state;
+    localStorage.setItem('mvp_voting_state', JSON.stringify(data));
+    updateAwardsUI(state);
+  });
+}
+
+function updateAwardsUI(state) {
+  document.getElementById('awards-current-state').textContent = state.charAt(0).toUpperCase() + state.slice(1);
+  ['closed','open','results'].forEach(s => {
+    const btn = document.getElementById('awards-btn-' + s);
+    if (btn) btn.classList.toggle('active', s === state);
+  });
+}
+
+function toggleAwardsLiveResults() {
+  const current = localStorage.getItem('mvp_show_live_results') !== 'false';
+  localStorage.setItem('mvp_show_live_results', !current ? 'true' : 'false');
+  const track = document.getElementById('awards-live-toggle');
+  if (track) track.classList.toggle('active', !current);
+}
+
+function loadAwardsSettings() {
+  getActiveSeasonId().then(id => {
+    const state = id ? (JSON.parse(localStorage.getItem('mvp_voting_state') || '{}')[id] || 'closed') : 'closed';
+    updateAwardsUI(state);
+    const showLive = localStorage.getItem('mvp_show_live_results') !== 'false';
+    const track = document.getElementById('awards-live-toggle');
+    if (track) track.classList.toggle('active', showLive);
+  });
+}
+
+const _origLoadSettings4 = loadSettings;
+loadSettings = function() {
+  _origLoadSettings4();
+  loadAwardsSettings();
 };
 </script>
 </body>
