@@ -88,6 +88,20 @@
     .feed-icon.match { background: rgba(255, 215, 64, 0.15); }
     .feed-icon.ban { background: rgba(255, 45, 120, 0.15); }
     .feed-icon.tournament { background: rgba(95, 124, 255, 0.15); }
+    .feed-icon.shop { background: rgba(168, 85, 247, 0.15); }
+    .feed-icon.bounty { background: rgba(255, 69, 0, 0.15); }
+    .feed-icon.streak { background: rgba(255, 140, 0, 0.15); }
+    .feed-icon.milestone { background: rgba(46, 213, 115, 0.15); }
+    .feed-icon.ultimate { background: linear-gradient(135deg, rgba(0,255,204,0.15), rgba(168,85,247,0.15), rgba(255,45,120,0.15)); }
+
+    .feed-item.ultimate-event {
+      border: 1px solid rgba(0,255,204,0.3);
+      background: linear-gradient(135deg, rgba(0,255,204,0.05), rgba(168,85,247,0.05), rgba(255,45,120,0.05));
+      box-shadow: 0 0 15px rgba(0,255,204,0.1);
+    }
+    .feed-item.streak-event { border-left: 3px solid var(--gold); }
+    .feed-item.bounty-event { border-left: 3px solid #ff4500; }
+    .feed-item.milestone-event { border-left: 3px solid var(--green); }
     .feed-body {
       flex: 1;
       min-width: 0;
@@ -169,9 +183,11 @@
 
     <div class="feed-filters">
       <button class="feed-filter active" data-type="all" onclick="filterFeed('all')">All</button>
-      <button class="feed-filter" data-type="signup" onclick="filterFeed('signup')">Signups</button>
       <button class="feed-filter" data-type="match" onclick="filterFeed('match')">Matches</button>
-      <button class="feed-filter" data-type="ban" onclick="filterFeed('ban')">Bans</button>
+      <button class="feed-filter" data-type="signup" onclick="filterFeed('signup')">Signups</button>
+      <button class="feed-filter" data-type="bounty" onclick="filterFeed('bounty')">Bounty</button>
+      <button class="feed-filter" data-type="shop" onclick="filterFeed('shop')">Shop</button>
+      <button class="feed-filter" data-type="streak" onclick="filterFeed('streak')">Streaks</button>
       <button class="feed-filter" data-type="tournament" onclick="filterFeed('tournament')">Tournaments</button>
     </div>
 
@@ -220,7 +236,7 @@
       }
 
       list.innerHTML = filtered.map(e => `
-        <div class="feed-item">
+        <div class="feed-item ${e.cls || ''}">
           <div class="feed-icon ${e.type}">${e.icon}</div>
           <div class="feed-body">
             <div class="feed-text">${e.text}</div>
@@ -240,6 +256,7 @@
       try {
         const events = [];
 
+        // Tournaments
         const { data: tournaments } = await supabaseClient
           .from('tournaments')
           .select('id, name, status, created_at')
@@ -249,12 +266,13 @@
         (tournaments || []).forEach(t => {
           events.push({
             type: 'tournament',
-            icon: '&#127942;',
+            icon: '🏆',
             text: `Tournament <strong>${t.name}</strong> ${t.status === 'completed' ? 'completed' : t.status === 'signup' ? 'opened for signups' : 'is ' + t.status}`,
             time: t.created_at
           });
         });
 
+        // Signups + Matches + Bans from recent tournaments
         const recentTournaments = (tournaments || []).slice(0, 3);
         for (const t of recentTournaments) {
           const { data: signups } = await supabaseClient
@@ -268,7 +286,7 @@
             const teamNames = (s.team || []).map(c => c.name).slice(0, 3).join(', ');
             events.push({
               type: 'signup',
-              icon: '&#9998;',
+              icon: '✍️',
               text: `${profileLink(s.discord_username)} signed up for <strong>${t.name}</strong>${teamNames ? ` with ${teamNames}` : ''}`,
               time: s.created_at
             });
@@ -288,35 +306,140 @@
             if (winner && loser) {
               events.push({
                 type: 'match',
-                icon: '&#9876;',
-                text: `${profileLink(winner)} defeated ${profileLink(loser)} in Round ${m.round}`,
+                icon: '⚔️',
+                text: `${profileLink(winner)} defeated ${profileLink(loser)}${m.score ? ` (${m.score})` : ''} in <strong>Round ${m.round}</strong>`,
                 time: m.updated_at || m.created_at
-              });
-            }
-          });
-
-          const { data: bans } = await supabaseClient
-            .from('signups')
-            .select('discord_username, bans, updated_at')
-            .eq('tournament_id', t.id);
-
-          (bans || []).forEach(s => {
-            if (s.bans && Array.isArray(s.bans) && s.bans.length > 0) {
-              const banNames = s.bans.map(b => b.name || 'Unknown').join(', ');
-              events.push({
-                type: 'ban',
-                icon: '&#128683;',
-                text: `${profileLink(s.discord_username)}'s team was hit with bans: <strong>${banNames}</strong>`,
-                time: s.updated_at || s.created_at
               });
             }
           });
         }
 
-        allEvents = events.sort((a, b) => new Date(b.time) - new Date(a.time));
+        // Point transactions (shop purchases, streaks, milestones)
+        const { data: transactions } = await supabaseClient
+          .from('point_transactions')
+          .select('discord_username, amount, reason, reference_id, created_at')
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        (transactions || []).forEach(tx => {
+          if (tx.reason === 'purchase') {
+            events.push({
+              type: 'shop',
+              icon: '🛒',
+              text: `${profileLink(tx.discord_username)} bought an item from the shop`,
+              time: tx.created_at
+            });
+          } else if (tx.reason && tx.reason.startsWith('streak_bonus')) {
+            const streakNum = tx.reason.split('_').pop();
+            events.push({
+              type: 'streak',
+              icon: '🔥',
+              text: `${profileLink(tx.discord_username)} hit a <strong>${streakNum}-win streak</strong> and earned <strong>${tx.amount}</strong> bonus coins!`,
+              time: tx.created_at,
+              cls: 'streak-event'
+            });
+          }
+        });
+
+        // Shop purchases with item names
+        const { data: purchases } = await supabaseClient
+          .from('player_inventory')
+          .select('discord_username, purchased_at, item:shop_items(name, cost, metadata)')
+          .order('purchased_at', { ascending: false })
+          .limit(30);
+
+        (purchases || []).forEach(p => {
+          if (!p.item) return;
+          const isUltimate = p.item.metadata?.ultimate;
+          events.push({
+            type: isUltimate ? 'shop' : 'shop',
+            icon: isUltimate ? '💎' : '🛒',
+            text: isUltimate
+              ? `${profileLink(p.discord_username)} acquired the <strong style="background:linear-gradient(90deg,#00ffcc,#a855f7,#ff2d78);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${p.item.name}</strong> — ULTIMATE TIER!`
+              : `${profileLink(p.discord_username)} purchased <strong>${p.item.name}</strong> for ${p.item.cost} coins`,
+            time: p.purchased_at,
+            cls: isUltimate ? 'ultimate-event' : ''
+          });
+        });
+
+        // Bounty events
+        const { data: bountyData } = await supabaseClient
+          .from('bounties')
+          .select('discord_username, bounty, streak, wins, losses, status, updated_at')
+          .order('updated_at', { ascending: false })
+          .limit(20);
+
+        (bountyData || []).forEach(b => {
+          if (b.streak >= 5) {
+            events.push({
+              type: 'bounty',
+              icon: '💀',
+              text: `${profileLink(b.discord_username)} is on a <strong>${b.streak}-win bounty streak</strong> with a bounty of <strong>${b.bounty}</strong>! Who can stop them?`,
+              time: b.updated_at,
+              cls: 'bounty-event'
+            });
+          } else if (b.status === 'claimed') {
+            events.push({
+              type: 'bounty',
+              icon: '🎯',
+              text: `${profileLink(b.discord_username)}'s bounty was <strong>claimed!</strong>`,
+              time: b.updated_at,
+              cls: 'bounty-event'
+            });
+          }
+        });
+
+        // ELO milestones
+        const { data: eloData } = await supabaseClient
+          .from('elo_ratings')
+          .select('discord_username, elo, peak_elo, updated_at')
+          .gte('elo', 1200)
+          .order('updated_at', { ascending: false })
+          .limit(20);
+
+        (eloData || []).forEach(e => {
+          const tier = e.elo >= 1800 ? 'Diamond' : e.elo >= 1500 ? 'Platinum' : e.elo >= 1200 ? 'Gold' : null;
+          if (tier) {
+            events.push({
+              type: 'streak',
+              icon: '⭐',
+              text: `${profileLink(e.discord_username)} reached <strong>${tier} tier</strong> with ${e.elo} ELO!`,
+              time: e.updated_at,
+              cls: 'milestone-event'
+            });
+          }
+        });
+
+        // Player point milestones
+        const { data: richPlayers } = await supabaseClient
+          .from('player_points')
+          .select('discord_username, lifetime_earned, updated_at')
+          .gte('lifetime_earned', 1000)
+          .order('updated_at', { ascending: false })
+          .limit(10);
+
+        (richPlayers || []).forEach(p => {
+          const milestone = p.lifetime_earned >= 10000 ? '10,000' : p.lifetime_earned >= 5000 ? '5,000' : p.lifetime_earned >= 2500 ? '2,500' : '1,000';
+          events.push({
+            type: 'streak',
+            icon: '💰',
+            text: `${profileLink(p.discord_username)} earned over <strong>${milestone} lifetime coins!</strong>`,
+            time: p.updated_at,
+            cls: 'milestone-event'
+          });
+        });
+
+        // Deduplicate by unique key (type + username + rough time)
+        const seen = new Set();
+        allEvents = events.filter(e => {
+          const key = e.type + (e.text.match(/>([^<]+)<\/a>/)?.[1] || '') + Math.floor(new Date(e.time).getTime() / 60000);
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        }).sort((a, b) => new Date(b.time) - new Date(a.time));
+
         renderFeed();
 
-        // Subscribe to realtime for the most recent tournament
         if (recentTournaments.length > 0) {
           const latest = recentTournaments[0];
           subscribeToChanges(latest.id, {

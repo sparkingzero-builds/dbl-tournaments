@@ -1234,14 +1234,18 @@
         // Rival tracker
         const rivalCounts = {};
         matches.forEach(m => {
+          if (!m.winner_id) return;
           const isP1 = signupIds.includes(m.player1_id);
           const opponent = isP1 ? m.player2 : m.player1;
           if (opponent) {
             const name = opponent.discord_username;
-            rivalCounts[name] = (rivalCounts[name] || 0) + 1;
+            if (!rivalCounts[name]) rivalCounts[name] = { total: 0, wins: 0, losses: 0 };
+            rivalCounts[name].total++;
+            if (signupIds.includes(m.winner_id)) rivalCounts[name].wins++;
+            else rivalCounts[name].losses++;
           }
         });
-        const rivals = Object.entries(rivalCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        const rivals = Object.entries(rivalCounts).sort((a, b) => b[1].total - a[1].total).slice(0, 5);
 
         // Character affinity
         const charCounts = {};
@@ -1307,13 +1311,25 @@
             </div>
 
             <div class="profile-section">
-              <h3>Rival Tracker</h3>
-              ${rivals.length ? rivals.map(([name, count]) =>
-                `<div class="rival-row">
-                  <a class="rival-name" href="profile.html?player=${encodeURIComponent(name)}">${name}</a>
-                  <span class="rival-count">${count} match${count > 1 ? 'es' : ''}</span>
-                </div>`
-              ).join('') : '<div class="empty-state"><p>No match data yet.</p></div>'}
+              <h3>Head-to-Head</h3>
+              ${rivals.length ? rivals.map(([name, r]) => {
+                const winPct = r.total > 0 ? Math.round((r.wins / r.total) * 100) : 0;
+                const barColor = winPct >= 50 ? 'var(--green)' : 'var(--red)';
+                return `<div class="rival-row" style="flex-wrap:wrap;gap:6px;">
+                  <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:120px;">
+                    <a class="rival-name" href="profile.html?player=${encodeURIComponent(name)}">${name}</a>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="color:var(--green);font-weight:700;font-size:13px;">${r.wins}W</span>
+                    <span style="color:var(--muted);font-size:11px;">-</span>
+                    <span style="color:var(--red);font-weight:700;font-size:13px;">${r.losses}L</span>
+                    <span class="rival-count">${r.total} game${r.total > 1 ? 's' : ''}</span>
+                  </div>
+                  <div style="width:100%;height:4px;background:var(--line);border-radius:2px;overflow:hidden;">
+                    <div style="height:100%;width:${winPct}%;background:${barColor};border-radius:2px;transition:width 0.5s;"></div>
+                  </div>
+                </div>`;
+              }).join('') : '<div class="empty-state"><p>No match data yet.</p></div>'}
             </div>
 
             <div class="profile-section full-width">
@@ -1327,6 +1343,7 @@
                   <span class="mh-result">${won ? 'W' : 'L'}</span>
                   <span class="mh-vs">vs</span>
                   <a href="profile.html?player=${encodeURIComponent(opponent || '')}" class="mh-opponent">${opponent || 'Unknown'}</a>
+                  ${m.score ? `<span style="color:var(--muted);font-size:11px;font-family:'Chakra Petch',monospace;">${m.score}</span>` : ''}
                   <span class="mh-round">R${m.round || '?'}</span>
                 </div>`;
               }).join('') : '<div class="empty-state"><p>No match results yet.</p></div>'}
@@ -1345,8 +1362,64 @@
                 ).join('') : '<div class="empty-state"><p>No team data.</p></div>'}
               </div>
             </div>
+            <div class="profile-section full-width">
+              <h3>Recent Activity</h3>
+              <div id="profile-activity" style="max-height:250px;overflow-y:auto;">
+                <div class="empty-state"><p>Loading...</p></div>
+              </div>
+            </div>
           </div>
         `;
+
+        // Load recent activity
+        try {
+          const { data: txData } = await supabaseClient
+            .from('point_transactions')
+            .select('amount, reason, created_at')
+            .ilike('discord_username', playerName)
+            .order('created_at', { ascending: false })
+            .limit(15);
+
+          const actEl = document.getElementById('profile-activity');
+          if (actEl && txData && txData.length) {
+            const reasonLabels = {
+              match_win: { label: 'Match Win', icon: '⚔️', color: 'var(--green)' },
+              participation: { label: 'Participation', icon: '🤝', color: 'var(--muted)' },
+              purchase: { label: 'Purchase', icon: '🛒', color: 'var(--pink)' },
+              ban_vote: { label: 'Ban Vote', icon: '🗳️', color: 'var(--cyan)' },
+              placement_1st: { label: 'Champion', icon: '🏆', color: 'var(--gold)' },
+              placement_2nd: { label: 'Runner-up', icon: '🥈', color: '#c0c0c0' },
+              placement_3rd: { label: 'Third Place', icon: '🥉', color: '#cd7f32' },
+              admin_grant: { label: 'Admin Grant', icon: '⭐', color: 'var(--cyan)' },
+            };
+            actEl.innerHTML = txData.map(tx => {
+              const r = reasonLabels[tx.reason] || (tx.reason?.startsWith('streak_bonus') ? { label: 'Streak Bonus', icon: '🔥', color: 'var(--gold)' } : { label: tx.reason || 'Other', icon: '💫', color: 'var(--muted)' });
+              const sign = tx.amount >= 0 ? '+' : '';
+              const amtColor = tx.amount >= 0 ? 'var(--green)' : 'var(--red)';
+              const ago = timeAgo(tx.created_at);
+              return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);">
+                <span style="font-size:18px;">${r.icon}</span>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:13px;color:var(--text);font-weight:600;">${r.label}</div>
+                  <div style="font-size:11px;color:var(--muted);">${ago}</div>
+                </div>
+                <div style="font-family:'Chakra Petch',monospace;font-weight:700;font-size:14px;color:${amtColor};">${sign}${tx.amount}</div>
+              </div>`;
+            }).join('');
+          } else if (actEl) {
+            actEl.innerHTML = '<div class="empty-state"><p>No activity yet.</p></div>';
+          }
+        } catch (_) {}
+
+        function timeAgo(d) {
+          const diff = Date.now() - new Date(d).getTime();
+          const mins = Math.floor(diff / 60000);
+          if (mins < 1) return 'just now';
+          if (mins < 60) return mins + 'm ago';
+          const hrs = Math.floor(mins / 60);
+          if (hrs < 24) return hrs + 'h ago';
+          return Math.floor(hrs / 24) + 'd ago';
+        }
 
         // ── Bounty Hunter Section ──
         try {
