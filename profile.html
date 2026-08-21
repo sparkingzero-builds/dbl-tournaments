@@ -1189,11 +1189,6 @@
         // Get all signups for this player
         const signups = await db.getPlayerStats(playerName);
 
-        if (!signups.length) {
-          content.innerHTML = `<div class="empty-state"><h3>Player Not Found</h3><p>"${playerName}" hasn't entered any tournaments.</p></div>`;
-          return;
-        }
-
         // Get all matches for this player
         const signupIds = signups.map(s => s.id);
         const matches = await db.getPlayerMatches(playerName);
