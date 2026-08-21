@@ -355,10 +355,13 @@
             <a href="clans.html">Clans</a>
             <a href="mvp-vote.html">Season Awards</a>
             <a href="betting.html">Betting</a>
+            <a href="draft.html">Draft</a>
+            <a href="fight-night.html">Fight Night</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Account</div>
+            <a href="profile.html">Profile</a>
           </div>
         </li>
-      
-        <div id="auth-nav"></div>
       </ul>
     </div>
   </nav>
@@ -418,19 +421,19 @@
           </div>
         </div>
 
-        <div class=?shop-tabs? id=?main-tabs?>
-          <button class=?shop-tab active? onclick=?switchMainTab('shop')?>Shop</button>
-          <button class=?shop-tab? onclick=?switchMainTab('titles')?>Titles</button>
-          <button class=?shop-tab? onclick=?switchMainTab('inventory')?>Inventory</button>
-          <button class=?shop-tab? onclick=?switchMainTab('history')?>History</button>
+        <div class="shop-tabs" id="main-tabs">
+          <button class="shop-tab active" onclick="switchMainTab('shop')">Shop</button>
+          <button class="shop-tab" onclick="switchMainTab('titles')">Titles</button>
+          <button class="shop-tab" onclick="switchMainTab('inventory')">Inventory</button>
+          <button class="shop-tab" onclick="switchMainTab('history')">History</button>
         </div>
 
-        <div id=?tab-titles? class=?tab-section?>
-          <div class=?shop-section-header?><h2>Purchasable Titles</h2></div>
-          <div id=?titles-shop-grid? class=?item-grid? style=?grid-template-columns:repeat(auto-fill,minmax(220px,1fr));?></div>
+        <div id="tab-titles" class="tab-section">
+          <div class="shop-section-header"><h2>Purchasable Titles</h2></div>
+          <div id="titles-shop-grid" class="item-grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));"></div>
         </div>
 
-        <div id=?tab-shop? class=?tab-section active?>
+        <div id="tab-shop" class="tab-section active">
           <div class="shop-tabs" id="category-tabs"></div>
           <div id="shop-items-container">
             <div class="loader"><div class="loader-spinner"></div></div>
@@ -544,22 +547,22 @@
       "God of Destruction": `${DBGS}/sticker/44581_00000000B4FA1339.png`,
       "Frieza Force Commander": `${DBGS}/profile-icon/2643_0001BA308C86C5D4.png`,
       "Elite Saiyan": `${DBGS}/profile-icon/2992_0001BA30F5F387C4.png`,
-      "Super Saiyan": `${DBGS}/profile-icon/35636_000000006AE55468.png`,
+      "Super Saiyan": `${DBGS}/sticker/2735_0001BA3019FCD3D7.png`,
       "Z Fighter": `${DBGS}/profile-icon/2996_0001BA306E23FB5C.png`,
       "Namekian Elder": `${DBGS}/sticker/44626_00000000094EE5E1.png`,
       "Saiyan Warrior": `${DBGS}/profile-icon/2642_0001BA300242223F.png`,
       "Earthling": `${DBGS}/profile-icon/35597_0000000053203DD4.png`,
-      "Saiyan Pride Aura": `${DBGS}/profile-icon/2986_0001BA30A3996354.png`,
-      "Golden SSJ Aura": `${DBGS}/profile-icon/2988_0001BA30C2826A01.png`,
+      "Saiyan Pride Aura": `${DBGS}/sticker/44617_00000000DC3402D3.png`,
+      "Golden SSJ Aura": `${DBGS}/sticker/44599_000000007BCB5D18.png`,
       "Legendary Aura": `${DBGS}/profile-icon/2985_0001BA30D9760283.png`,
       "Blue Ki Aura": `${DBGS}/profile-icon/2984_0001BA3000526D71.png`,
-      "Dragon Fist Border": `${DBGS}/sticker/2712_0001BA30D7AD84D0.png`,
+      "Dragon Fist Border": `${DBGS}/sticker/35954_000000008C257CA7.png`,
       "Ranger Border": `${DBGS}/sticker/36111_00000000DFDBBCA4.png`,
       "Android 18 Border": `${DBGS}/sticker/44566_000000002BCE1AB5.png`,
       "Perfect Border": `${DBGS}/profile-icon/35632_000000009261B84E.png`,
-      "Training Grounds": `${DBGS}/profile-icon/35610_00000000552B8A08.png`,
+      "Training Grounds": `${DBGS}/sticker/44584_00000000CA2DD0A3.png`,
       "Shadow Realm": `${DBGS}/profile-icon/35608_000000001EF6F819.png`,
-      "Tournament Arena": `${DBGS}/profile-icon/35620_0000000010A53522.png`,
+      "Tournament Arena": `${DBGS}/sticker/36103_000000002C97FF8E.png`,
       "Scouter": `${DBGS}/helper-icon/17319_000000001E4B6C74.png`,
       "Ban Immunity": `${DBGS}/helper-icon/17450_00000000FF1582B1.png`,
       "Hype Bomb": `${DBGS}/helper-icon/12235_00000000FDB12817.png`,
