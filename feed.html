@@ -347,7 +347,7 @@
           const isUltimate = p.item.metadata?.ultimate;
           events.push({
             type: isUltimate ? 'shop' : 'shop',
-            icon: isUltimate ? '💎' : '🛒',
+            icon: isUltimate ? '✨' : '🛒',
             text: isUltimate
               ? `${profileLink(p.discord_username)} acquired the <strong style="background:linear-gradient(90deg,#00ffcc,#a855f7,#ff2d78);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${p.item.name}</strong> — ULTIMATE TIER!`
               : `${profileLink(p.discord_username)} purchased <strong>${p.item.name}</strong> for ${p.item.cost} coins`,

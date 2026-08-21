@@ -194,9 +194,9 @@
     }
     .card-price { display: flex; align-items: center; gap: 6px; }
     .price-coin {
-      width: 18px; height: 18px; background: linear-gradient(135deg, var(--gold), #ff8c00);
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 10px; box-shadow: 0 0 6px rgba(255,215,0,0.3);
+      width: 18px; height: 18px; border-radius: 50%;
+      background: url('https://dbgsbuilds.com/wp-content/themes/dbgsquad-lite/asset/badge/36195_00000000E3116FFB.png') center/contain no-repeat;
+      filter: drop-shadow(0 0 4px rgba(255,215,0,0.4));
     }
     .price-value { font-family: 'Exo 2', sans-serif; font-weight: 800; font-size: 15px; color: var(--gold); }
     .price-value.free { color: var(--green); }
@@ -457,7 +457,7 @@
 
         <div class="wallet-bar">
           <div class="wallet-left">
-            <div class="wallet-icon">⚡</div>
+            <div class="wallet-icon"><img src="https://dbgsbuilds.com/wp-content/themes/dbgsquad-lite/asset/badge/36195_00000000E3116FFB.png" alt="coins" style="width:28px;height:28px;filter:drop-shadow(0 0 6px rgba(255,215,0,0.5));"></div>
             <div>
               <div class="wallet-label">Balance</div>
               <div class="wallet-amount" id="balance-value">0</div>
@@ -719,7 +719,7 @@
           <div class="card-price-bar">
             <div class="card-price">
               ${item.cost > 0
-                ? `<div class="price-coin">⚡</div><span class="price-value">${item.cost.toLocaleString()}</span>`
+                ? `<div class="price-coin"></div><span class="price-value">${item.cost.toLocaleString()}</span>`
                 : '<span class="price-value free">FREE</span>'}
             </div>
             <button class="${btnClass}" ${btnDisabled ? 'disabled' : ''} onclick="event.stopPropagation();buyItem('${item.id}', ${item.cost}, '${escapeHtml(item.name).replace(/'/g, "\\'")}')">
@@ -756,7 +756,7 @@
 
       const priceEl = document.getElementById('modal-price');
       priceEl.innerHTML = item.cost > 0
-        ? `<div class="price-coin">⚡</div><span class="price-value">${item.cost.toLocaleString()}</span>`
+        ? `<div class="price-coin"></div><span class="price-value">${item.cost.toLocaleString()}</span>`
         : '<span class="price-value free">FREE</span>';
 
       const owned = ownedItemIds.has(item.id);
@@ -1020,7 +1020,7 @@
               </div>
               <div class="card-price-bar">
                 <div class="card-price">
-                  <div class="price-coin">&#9889;</div>
+                  <div class="price-coin"></div>
                   <span class="price-value">${t.price.toLocaleString()}</span>
                 </div>
                 <button class="btn-get ${owned ? 'owned' : ''}" ${owned || !canBuy ? 'disabled' : ''}
