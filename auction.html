@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Auction House â€” DBL Tournaments</title>
+  <title>Item Showcase - DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/bracket.css" />
@@ -283,8 +283,8 @@
   <main class="container page page-enter">
     <!-- Hero -->
     <div class="auction-hero">
-      <h1>Auction House</h1>
-      <p class="auction-subtitle">Trade cosmetics with other players</p>
+      <h1>Item Showcase</h1>
+      <p class="auction-subtitle">Browse the community's collection</p>
     </div>
 
     <!-- Wallet -->
@@ -300,10 +300,8 @@
 
     <!-- Tabs -->
     <div class="auction-tabs">
-      <button class="auction-tab active" data-tab="browse" onclick="switchTab('browse')">Browse Listings</button>
-      <button class="auction-tab" data-tab="create" onclick="switchTab('create')">Create Listing</button>
-      <button class="auction-tab" data-tab="my-listings" onclick="switchTab('my-listings')">My Listings</button>
-      <button class="auction-tab" data-tab="my-bids" onclick="switchTab('my-bids')">My Bids</button>
+      <button class="auction-tab active" data-tab="browse" onclick="switchTab('browse')">All Items</button>
+      <button class="auction-tab" data-tab="my-listings" onclick="switchTab('my-listings')">My Collection</button>
     </div>
 
     <!-- â•â•â• Browse Tab â•â•â• -->
@@ -320,11 +318,9 @@
           <option value="effect">Effect</option>
         </select>
         <select id="sort-by" onchange="filterListings()">
-          <option value="newest">Newest</option>
-          <option value="ending">Ending Soon</option>
-          <option value="price-low">Price: Low to High</option>
-          <option value="price-high">Price: High to Low</option>
-          <option value="bids">Most Bids</option>
+          <option value="newest">Default</option>
+          <option value="price-low">Value: Low to High</option>
+          <option value="price-high">Value: High to Low</option>
         </select>
       </div>
 
@@ -412,566 +408,8 @@
   <script src="js/particles.js"></script>
 
   <script>
-    let allListings = [];
+    let allItems = [];
     let currentUser = null;
-    let userBalance = 0;
-
-    // â”€â”€ Init â”€â”€
-    document.addEventListener('DOMContentLoaded', async () => {
-      if (AUTH.isLoggedIn()) {
-        currentUser = AUTH.getDiscordUsername();
-        document.getElementById('wallet-bar').style.display = 'flex';
-        await loadBalance();
-      }
-      await processExpiredListings();
-      await loadListings();
-    });
-
-    // â”€â”€ Balance â”€â”€
-    async function loadBalance() {
-      const { data } = await supabaseClient
-        .from('player_points')
-        .select('points')
-        .ilike('discord_username', currentUser)
-        .single();
-      userBalance = data?.points || 0;
-      document.getElementById('wallet-amount').textContent = userBalance.toLocaleString();
-    }
-
-    // â”€â”€ Tab switching â”€â”€
-    function switchTab(tab) {
-      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-      document.querySelectorAll('.auction-tab').forEach(el => el.classList.remove('active'));
-      document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-      document.getElementById(`tab-${tab}`).style.display = 'block';
-
-      if (tab === 'create') setupCreateTab();
-      if (tab === 'my-listings') loadMyListings();
-      if (tab === 'my-bids') loadMyBids();
-    }
-
-    // â”€â”€ Load active listings â”€â”€
-    async function loadListings() {
-      const { data, error } = await supabaseClient
-        .from('auction_listings')
-        .select('*')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
-
-      allListings = data || [];
-      filterListings();
-    }
-
-    // â”€â”€ Filter & render â”€â”€
-    function filterListings() {
-      const search = document.getElementById('search-input').value.toLowerCase();
-      const typeFilter = document.getElementById('filter-type').value;
-      const sortBy = document.getElementById('sort-by').value;
-
-      let filtered = allListings.filter(l => {
-        if (search && !l.item_name.toLowerCase().includes(search)) return false;
-        if (typeFilter && l.item_type !== typeFilter) return false;
-        return true;
-      });
-
-      // Sort
-      switch (sortBy) {
-        case 'newest': filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); break;
-        case 'ending': filtered.sort((a, b) => new Date(a.expires_at) - new Date(b.expires_at)); break;
-        case 'price-low': filtered.sort((a, b) => (a.current_bid || a.starting_price) - (b.current_bid || b.starting_price)); break;
-        case 'price-high': filtered.sort((a, b) => (b.current_bid || b.starting_price) - (a.current_bid || a.starting_price)); break;
-        case 'bids': filtered.sort((a, b) => b.bid_count - a.bid_count); break;
-      }
-
-      renderListings(filtered);
-    }
-
-    function renderListings(listings) {
-      const grid = document.getElementById('listings-grid');
-      if (!listings.length) {
-        grid.innerHTML = `<div class="empty-state"><div class="empty-icon">&#128722;</div><p>No listings found</p></div>`;
-        return;
-      }
-
-      grid.innerHTML = listings.map(l => {
-        const now = new Date();
-        const expires = new Date(l.expires_at);
-        const remaining = expires - now;
-        const endingSoon = remaining < 3600000; // < 1 hour
-        const timeStr = formatTimeRemaining(remaining);
-        const currentPrice = l.current_bid > 0 ? l.current_bid : l.starting_price;
-        const isSelf = currentUser && l.seller === currentUser;
-
-        return `
-          <div class="listing-card">
-            <div class="listing-header">
-              <span class="listing-type">${escHtml(l.item_type)}</span>
-              <span class="listing-timer ${endingSoon ? 'ending-soon' : ''}">${timeStr}</span>
-            </div>
-            <div class="listing-body">
-              <div class="listing-name">${escHtml(l.item_name)}</div>
-              <div class="listing-seller">Seller: <a href="profile.html?user=${encodeURIComponent(l.seller)}">${escHtml(l.seller)}</a></div>
-              <div class="listing-prices">
-                <div class="price-block">
-                  <span class="price-label">${l.current_bid > 0 ? 'Current Bid' : 'Starting Price'}</span>
-                  <span class="price-value">${currentPrice.toLocaleString()}</span>
-                </div>
-                ${l.buy_now_price ? `
-                  <div class="price-block">
-                    <span class="price-label">Buy Now</span>
-                    <span class="price-value buy-now">${l.buy_now_price.toLocaleString()}</span>
-                  </div>` : ''}
-              </div>
-              <div class="listing-bids">${l.bid_count} bid${l.bid_count !== 1 ? 's' : ''}</div>
-              ${!isSelf && currentUser ? `
-                <div class="listing-actions">
-                  <input type="number" id="bid-${l.id}" placeholder="Your bid..." min="${currentPrice + 1}" />
-                  <button class="btn-bid" onclick="placeBid('${l.id}')">Bid</button>
-                  ${l.buy_now_price ? `<button class="btn-buy-now" onclick="buyNow('${l.id}')">Buy Now</button>` : ''}
-                </div>` : ''}
-              ${!currentUser ? '<div style="font-size:11px;color:var(--muted);margin-top:8px">Log in to bid</div>' : ''}
-              ${isSelf ? '<div style="font-size:11px;color:var(--muted);margin-top:8px">Your listing</div>' : ''}
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    // â”€â”€ Place bid â”€â”€
-    async function placeBid(listingId) {
-      if (!currentUser) return;
-
-      const input = document.getElementById(`bid-${listingId}`);
-      const amount = parseInt(input.value);
-      if (!amount || isNaN(amount)) {
-        NotificationSystem.show('Enter a valid bid amount', 'error');
-        return;
-      }
-
-      // Refresh listing data
-      const { data: listing } = await supabaseClient
-        .from('auction_listings')
-        .select('*')
-        .eq('id', listingId)
-        .single();
-
-      if (!listing || listing.status !== 'active') {
-        NotificationSystem.show('This listing is no longer active', 'error');
-        return;
-      }
-
-      if (listing.seller === currentUser) {
-        NotificationSystem.show('Cannot bid on your own listing', 'error');
-        return;
-      }
-
-      const minBid = listing.current_bid > 0 ? listing.current_bid + 1 : listing.starting_price;
-      if (amount < minBid) {
-        NotificationSystem.show(`Bid must be at least ${minBid.toLocaleString()}`, 'error');
-        return;
-      }
-
-      // Check balance
-      await loadBalance();
-      if (amount > userBalance) {
-        NotificationSystem.show('Insufficient balance', 'error');
-        return;
-      }
-
-      // Deduct from bidder
-      await supabaseClient
-        .from('player_points')
-        .update({ points: userBalance - amount })
-        .ilike('discord_username', currentUser);
-
-      // Refund previous bidder
-      if (listing.current_bidder && listing.current_bid > 0) {
-        const { data: prevBidder } = await supabaseClient
-          .from('player_points')
-          .select('points')
-          .ilike('discord_username', listing.current_bidder)
-          .single();
-        if (prevBidder) {
-          await supabaseClient
-            .from('player_points')
-            .update({ points: prevBidder.points + listing.current_bid })
-            .ilike('discord_username', listing.current_bidder);
-        }
-      }
-
-      // Update listing
-      await supabaseClient
-        .from('auction_listings')
-        .update({
-          current_bid: amount,
-          current_bidder: currentUser,
-          bid_count: listing.bid_count + 1
-        })
-        .eq('id', listingId);
-
-      // Record bid
-      await supabaseClient
-        .from('auction_bids')
-        .insert({ listing_id: listingId, bidder: currentUser, amount });
-
-      NotificationSystem.show(`Bid of ${amount.toLocaleString()} placed!`, 'success');
-      await loadBalance();
-      await loadListings();
-    }
-
-    // â”€â”€ Buy now â”€â”€
-    async function buyNow(listingId) {
-      if (!currentUser) return;
-
-      const { data: listing } = await supabaseClient
-        .from('auction_listings')
-        .select('*')
-        .eq('id', listingId)
-        .single();
-
-      if (!listing || listing.status !== 'active' || !listing.buy_now_price) {
-        NotificationSystem.show('This listing is no longer available', 'error');
-        return;
-      }
-
-      if (listing.seller === currentUser) {
-        NotificationSystem.show('Cannot buy your own listing', 'error');
-        return;
-      }
-
-      await loadBalance();
-      if (listing.buy_now_price > userBalance) {
-        NotificationSystem.show('Insufficient balance', 'error');
-        return;
-      }
-
-      // Refund previous bidder if any
-      if (listing.current_bidder && listing.current_bid > 0) {
-        const { data: prevBidder } = await supabaseClient
-          .from('player_points')
-          .select('points')
-          .ilike('discord_username', listing.current_bidder)
-          .single();
-        if (prevBidder) {
-          await supabaseClient
-            .from('player_points')
-            .update({ points: prevBidder.points + listing.current_bid })
-            .ilike('discord_username', listing.current_bidder);
-        }
-      }
-
-      // Deduct from buyer
-      await supabaseClient
-        .from('player_points')
-        .update({ points: userBalance - listing.buy_now_price })
-        .ilike('discord_username', currentUser);
-
-      // Credit seller
-      const { data: seller } = await supabaseClient
-        .from('player_points')
-        .select('points')
-        .ilike('discord_username', listing.seller)
-        .single();
-      if (seller) {
-        await supabaseClient
-          .from('player_points')
-          .update({ points: seller.points + listing.buy_now_price })
-          .ilike('discord_username', listing.seller);
-      }
-
-      // Transfer item
-      await supabaseClient
-        .from('player_inventory')
-        .update({ discord_username: currentUser, equipped: false })
-        .eq('id', listing.inventory_id);
-
-      // Mark listing as sold
-      await supabaseClient
-        .from('auction_listings')
-        .update({ status: 'sold', current_bid: listing.buy_now_price, current_bidder: currentUser })
-        .eq('id', listingId);
-
-      NotificationSystem.show(`Purchased ${listing.item_name} for ${listing.buy_now_price.toLocaleString()}!`, 'success');
-      await loadBalance();
-      await loadListings();
-    }
-
-    // â”€â”€ Create listing tab setup â”€â”€
-    async function setupCreateTab() {
-      if (!currentUser) {
-        document.getElementById('create-login-check').innerHTML =
-          '<div class="login-prompt"><p>You must be logged in to create listings</p></div>';
-        document.getElementById('create-panel').style.display = 'none';
-        return;
-      }
-
-      document.getElementById('create-login-check').innerHTML = '';
-      document.getElementById('create-panel').style.display = 'block';
-
-      // Load unequipped inventory
-      const { data: inventory } = await supabaseClient
-        .from('player_inventory')
-        .select('*, shop_items(name, item_type, description)')
-        .ilike('discord_username', currentUser)
-        .eq('equipped', false);
-
-      const select = document.getElementById('inventory-select');
-      select.innerHTML = '<option value="">-- Select an item --</option>';
-      if (inventory && inventory.length) {
-        // Filter out items already listed
-        const { data: activeListed } = await supabaseClient
-          .from('auction_listings')
-          .select('inventory_id')
-          .eq('seller', currentUser)
-          .eq('status', 'active');
-        const listedIds = new Set((activeListed || []).map(l => l.inventory_id));
-
-        inventory.filter(i => !listedIds.has(i.id)).forEach(item => {
-          const name = item.shop_items?.name || 'Unknown Item';
-          const type = item.shop_items?.item_type || 'unknown';
-          const opt = document.createElement('option');
-          opt.value = JSON.stringify({ id: item.id, item_id: item.item_id, name, type });
-          opt.textContent = `${name} (${type})`;
-          select.appendChild(opt);
-        });
-      }
-    }
-
-    // â”€â”€ Create listing â”€â”€
-    async function createListing() {
-      if (!currentUser) return;
-
-      const selectVal = document.getElementById('inventory-select').value;
-      if (!selectVal) {
-        NotificationSystem.show('Select an item to list', 'error');
-        return;
-      }
-
-      const item = JSON.parse(selectVal);
-      const startingPrice = parseInt(document.getElementById('starting-price').value);
-      const buyNowVal = document.getElementById('buy-now-price').value;
-      const buyNowPrice = buyNowVal ? parseInt(buyNowVal) : null;
-      const hours = parseInt(document.getElementById('listing-duration').value);
-
-      if (!startingPrice || startingPrice < 1) {
-        NotificationSystem.show('Starting price must be at least 1', 'error');
-        return;
-      }
-      if (buyNowPrice !== null && buyNowPrice <= startingPrice) {
-        NotificationSystem.show('Buy-now price must be higher than starting price', 'error');
-        return;
-      }
-
-      const expiresAt = new Date(Date.now() + hours * 3600000).toISOString();
-
-      const { error } = await supabaseClient
-        .from('auction_listings')
-        .insert({
-          seller: currentUser,
-          inventory_id: item.id,
-          item_id: item.item_id,
-          item_name: item.name,
-          item_type: item.type,
-          starting_price: startingPrice,
-          buy_now_price: buyNowPrice,
-          expires_at: expiresAt
-        });
-
-      if (error) {
-        NotificationSystem.show('Failed to create listing: ' + error.message, 'error');
-        return;
-      }
-
-      NotificationSystem.show(`${item.name} listed for auction!`, 'success');
-      document.getElementById('starting-price').value = '100';
-      document.getElementById('buy-now-price').value = '';
-      await setupCreateTab();
-      await loadListings();
-    }
-
-    // â”€â”€ My listings â”€â”€
-    async function loadMyListings() {
-      if (!currentUser) {
-        document.getElementById('my-listings-login-check').innerHTML =
-          '<div class="login-prompt"><p>Log in to see your listings</p></div>';
-        document.getElementById('my-listings-content').style.display = 'none';
-        return;
-      }
-
-      document.getElementById('my-listings-login-check').innerHTML = '';
-      document.getElementById('my-listings-content').style.display = 'block';
-
-      const { data } = await supabaseClient
-        .from('auction_listings')
-        .select('*')
-        .eq('seller', currentUser)
-        .order('created_at', { ascending: false });
-
-      const tbody = document.getElementById('my-listings-body');
-      if (!data || !data.length) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">No listings yet</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = data.map(l => {
-        const price = l.current_bid > 0 ? l.current_bid : l.starting_price;
-        const timeStr = l.status === 'active' ? formatTimeRemaining(new Date(l.expires_at) - new Date()) : '-';
-        return `<tr>
-          <td>${escHtml(l.item_name)}</td>
-          <td>${escHtml(l.item_type)}</td>
-          <td>${price.toLocaleString()}</td>
-          <td>${l.bid_count}</td>
-          <td>${timeStr}</td>
-          <td><span class="status-badge status-${l.status}">${l.status}</span></td>
-          <td>${l.status === 'active' ? `<button class="btn-cancel" onclick="cancelListing('${l.id}')">Cancel</button>` : ''}</td>
-        </tr>`;
-      }).join('');
-    }
-
-    // â”€â”€ Cancel listing â”€â”€
-    async function cancelListing(listingId) {
-      const { data: listing } = await supabaseClient
-        .from('auction_listings')
-        .select('*')
-        .eq('id', listingId)
-        .single();
-
-      if (!listing || listing.status !== 'active') return;
-
-      // Refund current bidder if any
-      if (listing.current_bidder && listing.current_bid > 0) {
-        const { data: bidder } = await supabaseClient
-          .from('player_points')
-          .select('points')
-          .ilike('discord_username', listing.current_bidder)
-          .single();
-        if (bidder) {
-          await supabaseClient
-            .from('player_points')
-            .update({ points: bidder.points + listing.current_bid })
-            .ilike('discord_username', listing.current_bidder);
-        }
-      }
-
-      await supabaseClient
-        .from('auction_listings')
-        .update({ status: 'cancelled' })
-        .eq('id', listingId);
-
-      NotificationSystem.show('Listing cancelled', 'info');
-      await loadMyListings();
-      await loadListings();
-    }
-
-    // â”€â”€ My bids â”€â”€
-    async function loadMyBids() {
-      if (!currentUser) {
-        document.getElementById('my-bids-login-check').innerHTML =
-          '<div class="login-prompt"><p>Log in to see your bids</p></div>';
-        document.getElementById('my-bids-content').style.display = 'none';
-        return;
-      }
-
-      document.getElementById('my-bids-login-check').innerHTML = '';
-      document.getElementById('my-bids-content').style.display = 'block';
-
-      const { data: bids } = await supabaseClient
-        .from('auction_bids')
-        .select('*, auction_listings(*)')
-        .eq('bidder', currentUser)
-        .order('created_at', { ascending: false });
-
-      const tbody = document.getElementById('my-bids-body');
-      if (!bids || !bids.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px">No bids yet</td></tr>';
-        return;
-      }
-
-      // Deduplicate: show latest bid per listing
-      const seen = new Set();
-      const unique = bids.filter(b => {
-        if (seen.has(b.listing_id)) return false;
-        seen.add(b.listing_id);
-        return true;
-      });
-
-      tbody.innerHTML = unique.map(b => {
-        const l = b.auction_listings;
-        if (!l) return '';
-        const isWinning = l.current_bidder === currentUser;
-        const statusLabel = l.status === 'sold' && isWinning ? 'Won' :
-                            l.status === 'sold' ? 'Lost' :
-                            l.status === 'active' && isWinning ? 'Winning' :
-                            l.status === 'active' ? 'Outbid' : l.status;
-        const statusClass = l.status === 'sold' && isWinning ? 'status-sold' :
-                            l.status === 'active' && isWinning ? 'status-winning' :
-                            l.status === 'active' ? 'status-outbid' : `status-${l.status}`;
-        const timeStr = l.status === 'active' ? formatTimeRemaining(new Date(l.expires_at) - new Date()) : '-';
-        return `<tr>
-          <td>${escHtml(l.item_name)}</td>
-          <td><a href="profile.html?user=${encodeURIComponent(l.seller)}" style="color:var(--cyan)">${escHtml(l.seller)}</a></td>
-          <td>${b.amount.toLocaleString()}</td>
-          <td>${(l.current_bid || l.starting_price).toLocaleString()}</td>
-          <td>${timeStr}</td>
-          <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
-        </tr>`;
-      }).join('');
-    }
-
-    // â”€â”€ Process expired listings â”€â”€
-    async function processExpiredListings() {
-      const { data: expired } = await supabaseClient
-        .from('auction_listings')
-        .select('*')
-        .eq('status', 'active')
-        .lt('expires_at', new Date().toISOString());
-
-      if (!expired || !expired.length) return;
-
-      for (const listing of expired) {
-        if (listing.current_bidder && listing.current_bid > 0) {
-          // Sale completed - credit seller
-          const { data: seller } = await supabaseClient
-            .from('player_points')
-            .select('points')
-            .ilike('discord_username', listing.seller)
-            .single();
-          if (seller) {
-            await supabaseClient
-              .from('player_points')
-              .update({ points: seller.points + listing.current_bid })
-              .ilike('discord_username', listing.seller);
-          }
-
-          // Transfer item to winner
-          await supabaseClient
-            .from('player_inventory')
-            .update({ discord_username: listing.current_bidder, equipped: false })
-            .eq('id', listing.inventory_id);
-
-          // Mark sold
-          await supabaseClient
-            .from('auction_listings')
-            .update({ status: 'sold' })
-            .eq('id', listing.id);
-        } else {
-          // No bids - mark expired (item stays with seller)
-          await supabaseClient
-            .from('auction_listings')
-            .update({ status: 'expired' })
-            .eq('id', listing.id);
-        }
-      }
-    }
-
-    // â”€â”€ Helpers â”€â”€
-    function formatTimeRemaining(ms) {
-      if (ms <= 0) return 'Expired';
-      const h = Math.floor(ms / 3600000);
-      const m = Math.floor((ms % 3600000) / 60000);
-      if (h > 24) return `${Math.floor(h / 24)}d ${h % 24}h`;
-      if (h > 0) return `${h}h ${m}m`;
-      return `${m}m`;
-    }
 
     function escHtml(str) {
       const d = document.createElement('div');
@@ -979,12 +417,140 @@
       return d.innerHTML;
     }
 
-    // Refresh timers every minute
-    setInterval(() => {
-      if (document.getElementById('tab-browse').style.display !== 'none') {
-        filterListings();
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.auction-tab').forEach(el => el.classList.remove('active'));
+      document.querySelector(`[data-tab=”${tab}”]`).classList.add('active');
+      document.getElementById(`tab-${tab}`).style.display = 'block';
+      if (tab === 'my-listings') loadMyItems();
+    }
+
+    async function loadAllItems() {
+      const { data } = await supabaseClient
+        .from('player_inventory')
+        .select('discord_username, equipped, item:shop_items(name, type, cost, metadata, description)')
+        .not('item_id', 'is', null);
+
+      allItems = (data || []).filter(i => i.item);
+      filterListings();
+    }
+
+    function filterListings() {
+      const search = (document.getElementById('search-input')?.value || '').toLowerCase();
+      const typeFilter = document.getElementById('filter-type')?.value || '';
+      const sortBy = document.getElementById('sort-by')?.value || 'newest';
+
+      let filtered = allItems.filter(i => {
+        if (search && !i.item.name.toLowerCase().includes(search) && !i.discord_username.toLowerCase().includes(search)) return false;
+        if (typeFilter && i.item.type !== typeFilter) return false;
+        return true;
+      });
+
+      switch (sortBy) {
+        case 'price-high': filtered.sort((a,b) => (b.item.cost||0) - (a.item.cost||0)); break;
+        case 'price-low': filtered.sort((a,b) => (a.item.cost||0) - (b.item.cost||0)); break;
+        default: break;
       }
-    }, 60000);
+
+      renderListings(filtered);
+    }
+
+    function getRarity(item) {
+      const cost = item.cost || 0;
+      if (item.metadata?.ultimate) return { name: 'ULTIMATE', color: 'linear-gradient(90deg,#00ffcc,#a855f7,#ff2d78)' };
+      if (item.metadata?.exclusive) return { name: 'MYTHIC', color: '#ff2d78' };
+      if (cost >= 1000) return { name: 'LEGENDARY', color: '#ffd740' };
+      if (cost >= 500) return { name: 'EPIC', color: '#a855f7' };
+      if (cost >= 200) return { name: 'RARE', color: '#00e5ff' };
+      return { name: 'COMMON', color: '#9088b8' };
+    }
+
+    function renderListings(items) {
+      const grid = document.getElementById('listings-grid');
+      if (!items.length) {
+        grid.innerHTML = `<div class=”empty-state”><div class=”empty-icon”>&#128722;</div><p>No items found</p></div>`;
+        return;
+      }
+
+      const ownerCounts = {};
+      items.forEach(i => {
+        const key = i.item.name + '|' + i.discord_username;
+        if (!ownerCounts[key]) ownerCounts[key] = i;
+      });
+      const unique = Object.values(ownerCounts);
+
+      grid.innerHTML = unique.slice(0, 60).map(i => {
+        const rarity = getRarity(i.item);
+        const typeLabels = { flair_border: 'Border', flair_title: 'Title', profile_bg: 'Background', consumable: 'Consumable', aura: 'Aura' };
+        const typeLabel = typeLabels[i.item.type] || i.item.type || 'Item';
+        const isUltimate = i.item.metadata?.ultimate;
+
+        return `<div class=”listing-card” ${isUltimate ? 'style=”border-color:rgba(168,85,247,0.5);box-shadow:0 0 20px rgba(168,85,247,0.15);”' : ''}>
+          <div class=”listing-header”>
+            <span class=”listing-type”>${escHtml(typeLabel)}</span>
+            <span style=”font-size:10px;font-weight:700;letter-spacing:0.1em;${typeof rarity.color === 'string' && rarity.color.startsWith('linear') ? `background:${rarity.color};-webkit-background-clip:text;-webkit-text-fill-color:transparent;` : `color:${rarity.color};`}”>${rarity.name}</span>
+          </div>
+          <div class=”listing-body”>
+            <div class=”listing-name”>${escHtml(i.item.name)}</div>
+            <div class=”listing-seller”>Owner: <a href=”profile.html?player=${encodeURIComponent(i.discord_username)}”>${escHtml(i.discord_username)}</a></div>
+            <div class=”listing-prices”>
+              <div class=”price-block”>
+                <span class=”price-label”>Shop Value</span>
+                <span class=”price-value”>${(i.item.cost || 0).toLocaleString()}</span>
+              </div>
+            </div>
+            ${i.equipped ? '<div style=”font-size:10px;color:var(--cyan);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;”>Equipped</div>' : ''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function loadMyItems() {
+      if (!currentUser) {
+        document.getElementById('my-listings-login-check').innerHTML =
+          '<div class=”login-prompt”><p>Log in to see your collection</p></div>';
+        document.getElementById('my-listings-content').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('my-listings-login-check').innerHTML = '';
+      document.getElementById('my-listings-content').style.display = 'block';
+
+      const myItems = allItems.filter(i => i.discord_username.toLowerCase() === currentUser.toLowerCase());
+      const tbody = document.getElementById('my-listings-body');
+
+      if (!myItems.length) {
+        tbody.innerHTML = '<tr><td colspan=”7” style=”text-align:center;color:var(--muted);padding:30px”>No items yet. Visit the Shop to get some!</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = myItems.map(i => {
+        const rarity = getRarity(i.item);
+        const typeLabels = { flair_border: 'Border', flair_title: 'Title', profile_bg: 'Background', consumable: 'Consumable', aura: 'Aura' };
+        return `<tr>
+          <td>${escHtml(i.item.name)}</td>
+          <td>${typeLabels[i.item.type] || i.item.type || '?'}</td>
+          <td>${(i.item.cost || 0).toLocaleString()}</td>
+          <td>-</td>
+          <td>-</td>
+          <td><span class=”status-badge ${i.equipped ? 'status-active' : 'status-cancelled'}”>${i.equipped ? 'Equipped' : 'Owned'}</span></td>
+          <td></td>
+        </tr>`;
+      }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await AUTH.init();
+      if (AUTH.isLoggedIn()) {
+        currentUser = AUTH.getDiscordUsername();
+        document.getElementById('wallet-bar').style.display = 'flex';
+        try {
+          const pts = await db.getPoints(currentUser);
+          document.getElementById('wallet-amount').textContent = (pts.balance || 0).toLocaleString();
+        } catch {}
+      }
+      await loadAllItems();
+    });
   </script>
   <script src="js/toolbar.js"></script>
 </body>

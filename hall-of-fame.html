@@ -569,7 +569,6 @@
       return `<a href="profile.html?player=${encodeURIComponent(name)}">${escapeHtml(name)}</a>`;
     }
 
-    // Track record holders for Legends Tier
     const recordHolders = {};
     function addRecord(playerName, recordTitle) {
       if (!playerName) return;
@@ -577,73 +576,55 @@
       recordHolders[playerName].push(recordTitle);
     }
 
-    // ---- Tournament Champions ----
+    async function getChampionForTournament(tournamentId) {
+      const { data: matches } = await supabaseClient
+        .from('matches')
+        .select('winner_id, player1_id, player2_id, round, player1:signups!matches_player1_id_fkey(discord_username, team), player2:signups!matches_player2_id_fkey(discord_username, team)')
+        .eq('tournament_id', tournamentId)
+        .not('winner_id', 'is', null)
+        .order('round', { ascending: false })
+        .limit(1);
+      if (!matches?.length) return null;
+      const m = matches[0];
+      const isP1 = m.winner_id === m.player1_id;
+      const winner = isP1 ? m.player1 : m.player2;
+      return { name: winner?.discord_username, team: winner?.team };
+    }
+
     async function loadChampions() {
       const grid = document.getElementById('champions-grid');
       try {
-        const { data: tournaments, error } = await supabaseClient
+        const { data: tournaments } = await supabaseClient
           .from('tournaments')
           .select('id, name, created_at, start_date')
           .eq('status', 'completed')
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        if (!tournaments || tournaments.length === 0) {
+        if (!tournaments?.length) {
           grid.innerHTML = '<div class="champion-empty">No completed tournaments yet. Be the first champion!</div>';
           return;
         }
 
         let html = '';
         for (const t of tournaments) {
-          // Find the final match winner
-          const { data: finalMatch } = await supabaseClient
-            .from('matches')
-            .select('winner_name, round')
-            .eq('tournament_id', t.id)
-            .not('winner_name', 'is', null)
-            .order('round', { ascending: false })
-            .limit(1);
-
-          const champion = finalMatch && finalMatch.length > 0 ? finalMatch[0].winner_name : null;
-
-          // Try to get champion's team
+          const champ = await getChampionForTournament(t.id);
           let teamHtml = '';
-          if (champion) {
-            const { data: teamData } = await supabaseClient
-              .from('tournament_registrations')
-              .select('team')
-              .eq('tournament_id', t.id)
-              .eq('player_name', champion)
-              .limit(1);
-
-            if (teamData && teamData.length > 0 && teamData[0].team) {
-              const team = typeof teamData[0].team === 'string' ? JSON.parse(teamData[0].team) : teamData[0].team;
-              if (Array.isArray(team)) {
-                teamHtml = '<div class="champion-team">' +
-                  team.slice(0, 6).map(c => {
-                    const img = typeof c === 'object' ? (c.image_url || c.icon || '') : '';
-                    const name = typeof c === 'object' ? (c.name || c.character_name || '') : c;
-                    return img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" title="${escapeHtml(name)}">` : '';
-                  }).filter(Boolean).join('') +
-                  '</div>';
-              }
-            }
+          if (champ?.team && Array.isArray(champ.team)) {
+            teamHtml = '<div class="champion-team">' +
+              champ.team.slice(0, 6).map(c =>
+                c.image ? `<img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}" title="${escapeHtml(c.name)}">` : ''
+              ).filter(Boolean).join('') + '</div>';
           }
-
           const date = t.start_date || t.created_at;
           const dateStr = date ? new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-
-          html += `
-            <div class="champion-card">
-              <div class="champion-trophy">&#127942;</div>
-              <div class="champion-tournament">${escapeHtml(t.name)}</div>
-              <div class="champion-date">${dateStr}</div>
-              <div class="champion-name">${champion ? profileLink(champion) : '<span class="record-empty">Unknown</span>'}</div>
-              ${teamHtml}
-            </div>
-          `;
+          html += `<div class="champion-card">
+            <div class="champion-trophy">&#127942;</div>
+            <div class="champion-tournament">${escapeHtml(t.name)}</div>
+            <div class="champion-date">${dateStr}</div>
+            <div class="champion-name">${champ?.name ? profileLink(champ.name) : '<span class="record-empty">Unknown</span>'}</div>
+            ${teamHtml}
+          </div>`;
         }
-
         grid.innerHTML = html || '<div class="champion-empty">No champions found.</div>';
       } catch (e) {
         console.error('Champions error:', e);
@@ -651,207 +632,120 @@
       }
     }
 
-    // ---- All-Time Records ----
     async function loadRecords() {
       const grid = document.getElementById('records-grid');
       const records = [];
 
-      // 1. Highest ELO Ever
+      // 1. Highest ELO
       try {
-        const { data } = await supabaseClient
-          .from('elo_ratings')
-          .select('player_name, peak_elo')
-          .order('peak_elo', { ascending: false })
-          .limit(1);
-        if (data && data.length > 0 && data[0].peak_elo) {
-          records.push({ icon: '&#9889;', title: 'Highest ELO Ever', holder: data[0].player_name, value: data[0].peak_elo });
-          addRecord(data[0].player_name, 'Highest ELO');
-        } else {
-          records.push({ icon: '&#9889;', title: 'Highest ELO Ever', holder: null, value: null });
-        }
+        const { data } = await supabaseClient.from('elo_ratings')
+          .select('discord_username, peak_elo').order('peak_elo', { ascending: false }).limit(1);
+        if (data?.[0]?.peak_elo) {
+          records.push({ icon: '&#9889;', title: 'Highest ELO Ever', holder: data[0].discord_username, value: data[0].peak_elo });
+          addRecord(data[0].discord_username, 'Highest ELO');
+        } else records.push({ icon: '&#9889;', title: 'Highest ELO Ever', holder: null, value: null });
       } catch(e) { records.push({ icon: '&#9889;', title: 'Highest ELO Ever', holder: null, value: null }); }
 
       // 2. Most Tournament Wins
       try {
-        const { data: tournaments } = await supabaseClient
-          .from('tournaments')
-          .select('id')
-          .eq('status', 'completed');
-
-        if (tournaments && tournaments.length > 0) {
+        const { data: tournaments } = await supabaseClient.from('tournaments')
+          .select('id').eq('status', 'completed');
+        if (tournaments?.length) {
           const winCounts = {};
           for (const t of tournaments) {
-            const { data: fm } = await supabaseClient
-              .from('matches')
-              .select('winner_name, round')
-              .eq('tournament_id', t.id)
-              .not('winner_name', 'is', null)
-              .order('round', { ascending: false })
-              .limit(1);
-            if (fm && fm.length > 0 && fm[0].winner_name) {
-              winCounts[fm[0].winner_name] = (winCounts[fm[0].winner_name] || 0) + 1;
-            }
+            const champ = await getChampionForTournament(t.id);
+            if (champ?.name) winCounts[champ.name] = (winCounts[champ.name] || 0) + 1;
           }
           const top = Object.entries(winCounts).sort((a,b) => b[1]-a[1])[0];
           if (top) {
             records.push({ icon: '&#127942;', title: 'Most Tournament Wins', holder: top[0], value: top[1] });
             addRecord(top[0], 'Most Tournament Wins');
-          } else {
-            records.push({ icon: '&#127942;', title: 'Most Tournament Wins', holder: null, value: null });
-          }
-        } else {
-          records.push({ icon: '&#127942;', title: 'Most Tournament Wins', holder: null, value: null });
-        }
+          } else records.push({ icon: '&#127942;', title: 'Most Tournament Wins', holder: null, value: null });
+        } else records.push({ icon: '&#127942;', title: 'Most Tournament Wins', holder: null, value: null });
       } catch(e) { records.push({ icon: '&#127942;', title: 'Most Tournament Wins', holder: null, value: null }); }
 
       // 3. Longest Win Streak
       try {
-        const { data } = await supabaseClient
-          .from('bounties')
-          .select('player_name, streak')
-          .order('streak', { ascending: false })
-          .limit(1);
-        if (data && data.length > 0 && data[0].streak) {
-          records.push({ icon: '&#128293;', title: 'Longest Win Streak', holder: data[0].player_name, value: data[0].streak });
-          addRecord(data[0].player_name, 'Longest Win Streak');
-        } else {
-          records.push({ icon: '&#128293;', title: 'Longest Win Streak', holder: null, value: null });
-        }
+        const { data } = await supabaseClient.from('bounties')
+          .select('discord_username, streak').order('streak', { ascending: false }).limit(1);
+        if (data?.[0]?.streak) {
+          records.push({ icon: '&#128293;', title: 'Longest Win Streak', holder: data[0].discord_username, value: data[0].streak });
+          addRecord(data[0].discord_username, 'Longest Win Streak');
+        } else records.push({ icon: '&#128293;', title: 'Longest Win Streak', holder: null, value: null });
       } catch(e) { records.push({ icon: '&#128293;', title: 'Longest Win Streak', holder: null, value: null }); }
 
-      // 4. Highest Bounty Ever
+      // 4. Highest Bounty
       try {
-        const { data } = await supabaseClient
-          .from('bounties')
-          .select('player_name, peak_bounty')
-          .order('peak_bounty', { ascending: false })
-          .limit(1);
-        if (data && data.length > 0 && data[0].peak_bounty) {
-          records.push({ icon: '&#128176;', title: 'Highest Bounty Ever', holder: data[0].player_name, value: data[0].peak_bounty.toLocaleString() });
-          addRecord(data[0].player_name, 'Highest Bounty');
-        } else {
-          records.push({ icon: '&#128176;', title: 'Highest Bounty Ever', holder: null, value: null });
-        }
+        const { data } = await supabaseClient.from('bounties')
+          .select('discord_username, peak_bounty').order('peak_bounty', { ascending: false }).limit(1);
+        if (data?.[0]?.peak_bounty) {
+          records.push({ icon: '&#128176;', title: 'Highest Bounty Ever', holder: data[0].discord_username, value: data[0].peak_bounty.toLocaleString() });
+          addRecord(data[0].discord_username, 'Highest Bounty');
+        } else records.push({ icon: '&#128176;', title: 'Highest Bounty Ever', holder: null, value: null });
       } catch(e) { records.push({ icon: '&#128176;', title: 'Highest Bounty Ever', holder: null, value: null }); }
 
       // 5. Most Matches Played
       try {
-        const { data } = await supabaseClient.rpc('get_most_matches_player');
-        if (data && data.length > 0) {
-          records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: data[0].player_name, value: data[0].match_count });
-          addRecord(data[0].player_name, 'Most Matches');
-        } else {
-          // Fallback: manual count
-          const { data: matches } = await supabaseClient
-            .from('matches')
-            .select('player1_name, player2_name');
-          if (matches && matches.length > 0) {
-            const counts = {};
-            matches.forEach(m => {
-              if (m.player1_name) counts[m.player1_name] = (counts[m.player1_name] || 0) + 1;
-              if (m.player2_name) counts[m.player2_name] = (counts[m.player2_name] || 0) + 1;
-            });
-            const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
-            if (top) {
-              records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: top[0], value: top[1] });
-              addRecord(top[0], 'Most Matches');
-            } else {
-              records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: null, value: null });
-            }
-          } else {
-            records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: null, value: null });
-          }
-        }
-      } catch(e) {
-        // Fallback: manual count
-        try {
-          const { data: matches } = await supabaseClient
-            .from('matches')
-            .select('player1_name, player2_name');
-          if (matches && matches.length > 0) {
-            const counts = {};
-            matches.forEach(m => {
-              if (m.player1_name) counts[m.player1_name] = (counts[m.player1_name] || 0) + 1;
-              if (m.player2_name) counts[m.player2_name] = (counts[m.player2_name] || 0) + 1;
-            });
-            const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
-            if (top) {
-              records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: top[0], value: top[1] });
-              addRecord(top[0], 'Most Matches');
-            } else {
-              records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: null, value: null });
-            }
-          } else {
-            records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: null, value: null });
-          }
-        } catch(e2) {
-          records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: null, value: null });
-        }
-      }
-
-      // 6. Richest Player (most lifetime points)
-      try {
-        const { data } = await supabaseClient
-          .from('player_points')
-          .select('player_name, lifetime_earned')
-          .order('lifetime_earned', { ascending: false })
-          .limit(1);
-        if (data && data.length > 0 && data[0].lifetime_earned) {
-          records.push({ icon: '&#128176;', title: 'Richest Player', holder: data[0].player_name, value: data[0].lifetime_earned.toLocaleString() + ' pts' });
-          addRecord(data[0].player_name, 'Richest Player');
-        } else {
-          records.push({ icon: '&#128176;', title: 'Richest Player', holder: null, value: null });
-        }
-      } catch(e) { records.push({ icon: '&#128176;', title: 'Richest Player', holder: null, value: null }); }
-
-      // 7. Most Bounties Claimed
-      try {
-        const { data } = await supabaseClient
-          .from('bounties')
-          .select('player_name, wins')
-          .order('wins', { ascending: false })
-          .limit(1);
-        if (data && data.length > 0 && data[0].wins) {
-          records.push({ icon: '&#127919;', title: 'Most Bounties Claimed', holder: data[0].player_name, value: data[0].wins });
-          addRecord(data[0].player_name, 'Most Bounties Claimed');
-        } else {
-          records.push({ icon: '&#127919;', title: 'Most Bounties Claimed', holder: null, value: null });
-        }
-      } catch(e) { records.push({ icon: '&#127919;', title: 'Most Bounties Claimed', holder: null, value: null }); }
-
-      // 8. Most Active Player (matches + bounty challenges)
-      try {
-        const { data: matches } = await supabaseClient
-          .from('matches')
-          .select('player1_name, player2_name');
-        const { data: challenges } = await supabaseClient
-          .from('bounty_challenges')
-          .select('challenger_name, target_name');
-
-        const activity = {};
+        const { data: matches } = await supabaseClient.from('matches')
+          .select('player1:signups!matches_player1_id_fkey(discord_username), player2:signups!matches_player2_id_fkey(discord_username)')
+          .not('winner_id', 'is', null);
+        const counts = {};
         if (matches) {
           matches.forEach(m => {
-            if (m.player1_name) activity[m.player1_name] = (activity[m.player1_name] || 0) + 1;
-            if (m.player2_name) activity[m.player2_name] = (activity[m.player2_name] || 0) + 1;
+            const p1 = m.player1?.discord_username;
+            const p2 = m.player2?.discord_username;
+            if (p1) counts[p1] = (counts[p1] || 0) + 1;
+            if (p2) counts[p2] = (counts[p2] || 0) + 1;
           });
         }
-        if (challenges) {
-          challenges.forEach(c => {
-            if (c.challenger_name) activity[c.challenger_name] = (activity[c.challenger_name] || 0) + 1;
-            if (c.target_name) activity[c.target_name] = (activity[c.target_name] || 0) + 1;
-          });
-        }
-
-        const top = Object.entries(activity).sort((a,b) => b[1]-a[1])[0];
+        const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
         if (top) {
-          records.push({ icon: '&#9733;', title: 'Most Active Player', holder: top[0], value: top[1] + ' activities' });
-          addRecord(top[0], 'Most Active');
-        } else {
-          records.push({ icon: '&#9733;', title: 'Most Active Player', holder: null, value: null });
-        }
-      } catch(e) { records.push({ icon: '&#9733;', title: 'Most Active Player', holder: null, value: null }); }
+          records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: top[0], value: top[1] });
+          addRecord(top[0], 'Most Matches');
+        } else records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: null, value: null });
+      } catch(e) { records.push({ icon: '&#9876;', title: 'Most Matches Played', holder: null, value: null }); }
 
-      // Render records
+      // 6. Richest Player
+      try {
+        const { data } = await supabaseClient.from('player_points')
+          .select('discord_username, lifetime_earned').order('lifetime_earned', { ascending: false }).limit(1);
+        if (data?.[0]?.lifetime_earned) {
+          records.push({ icon: '&#128176;', title: 'Richest Player', holder: data[0].discord_username, value: data[0].lifetime_earned.toLocaleString() + ' pts' });
+          addRecord(data[0].discord_username, 'Richest Player');
+        } else records.push({ icon: '&#128176;', title: 'Richest Player', holder: null, value: null });
+      } catch(e) { records.push({ icon: '&#128176;', title: 'Richest Player', holder: null, value: null }); }
+
+      // 7. Most Bounties Won
+      try {
+        const { data } = await supabaseClient.from('bounties')
+          .select('discord_username, wins').order('wins', { ascending: false }).limit(1);
+        if (data?.[0]?.wins) {
+          records.push({ icon: '&#127919;', title: 'Most Bounties Won', holder: data[0].discord_username, value: data[0].wins });
+          addRecord(data[0].discord_username, 'Most Bounties Won');
+        } else records.push({ icon: '&#127919;', title: 'Most Bounties Won', holder: null, value: null });
+      } catch(e) { records.push({ icon: '&#127919;', title: 'Most Bounties Won', holder: null, value: null }); }
+
+      // 8. Most Tournaments Entered
+      try {
+        const { data: signups } = await supabaseClient.from('signups')
+          .select('discord_username, tournament_id');
+        const enterCounts = {};
+        if (signups) {
+          const seen = new Set();
+          signups.forEach(s => {
+            const key = s.discord_username + '|' + s.tournament_id;
+            if (seen.has(key)) return;
+            seen.add(key);
+            enterCounts[s.discord_username] = (enterCounts[s.discord_username] || 0) + 1;
+          });
+        }
+        const top = Object.entries(enterCounts).sort((a,b) => b[1]-a[1])[0];
+        if (top) {
+          records.push({ icon: '&#9733;', title: 'Most Tournaments Entered', holder: top[0], value: top[1] });
+          addRecord(top[0], 'Most Tournaments Entered');
+        } else records.push({ icon: '&#9733;', title: 'Most Tournaments Entered', holder: null, value: null });
+      } catch(e) { records.push({ icon: '&#9733;', title: 'Most Tournaments Entered', holder: null, value: null }); }
+
       grid.innerHTML = records.map(r => `
         <div class="record-card">
           <div class="record-icon">${r.icon}</div>
@@ -859,83 +753,31 @@
           ${r.holder
             ? `<div class="record-holder">${profileLink(r.holder)}</div>
                <div class="record-value">${r.value}</div>`
-            : '<div class="record-empty">No record yet</div>'
-          }
-        </div>
-      `).join('');
+            : '<div class="record-empty">No record yet</div>'}
+        </div>`).join('');
     }
 
-    // ---- Season Champions ----
     async function loadSeasonChampions() {
       const list = document.getElementById('season-list');
-      try {
-        const { data: seasons, error } = await supabaseClient
-          .from('seasons')
-          .select('*')
-          .eq('status', 'completed')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        if (!seasons || seasons.length === 0) {
-          list.innerHTML = '<div class="season-empty">No completed seasons yet.</div>';
-          return;
-        }
-
-        let html = '';
-        for (const s of seasons) {
-          // Find winner by most XP
-          const { data: xpData } = await supabaseClient
-            .from('season_xp')
-            .select('player_name, xp')
-            .eq('season_id', s.id)
-            .order('xp', { ascending: false })
-            .limit(1);
-
-          const winner = xpData && xpData.length > 0 ? xpData[0] : null;
-          const seasonNum = s.season_number || s.name || '?';
-
-          html += `
-            <div class="season-card">
-              <div class="season-badge">S${seasonNum}</div>
-              <div class="season-info">
-                <div class="season-name">${escapeHtml(s.name || 'Season ' + seasonNum)}</div>
-                <div class="season-winner">${winner ? profileLink(winner.player_name) : 'No winner'}</div>
-                ${winner ? `<div class="season-xp">${winner.xp.toLocaleString()} XP</div>` : ''}
-              </div>
-            </div>
-          `;
-        }
-
-        list.innerHTML = html || '<div class="season-empty">No season data available.</div>';
-      } catch(e) {
-        console.error('Seasons error:', e);
-        list.innerHTML = '<div class="season-empty">No season data available.</div>';
-      }
+      list.innerHTML = '<div class="season-empty">No completed seasons yet. Seasons are coming soon!</div>';
     }
 
-    // ---- Legends Tier ----
     function renderLegendsTier() {
-      const legends = Object.entries(recordHolders).filter(([_, records]) => records.length >= 3);
-      if (legends.length === 0) return;
-
+      const legends = Object.entries(recordHolders).filter(([_, r]) => r.length >= 3);
+      if (!legends.length) return;
       document.getElementById('legends-tier').style.display = 'block';
       const grid = document.getElementById('legends-grid');
-
-      grid.innerHTML = legends
-        .sort((a, b) => b[1].length - a[1].length)
-        .map(([name, records]) => `
-          <div class="legend-card">
-            <div class="legend-crown">&#128081;</div>
-            <div class="legend-name">${profileLink(name)}</div>
-            <div class="legend-records">
-              <span class="legend-record-count">${records.length} Records:</span>
-              ${records.join(' &bull; ')}
-            </div>
+      grid.innerHTML = legends.sort((a, b) => b[1].length - a[1].length).map(([name, records]) => `
+        <div class="legend-card">
+          <div class="legend-crown">&#128081;</div>
+          <div class="legend-name">${profileLink(name)}</div>
+          <div class="legend-records">
+            <span class="legend-record-count">${records.length} Records:</span>
+            ${records.join(' &bull; ')}
           </div>
-        `).join('');
+        </div>`).join('');
     }
 
-    // ---- Sparkle effects ----
     function createSparkles() {
       const container = document.getElementById('sparkles');
       if (!container) return;
@@ -950,7 +792,6 @@
       }
     }
 
-    // ---- Init ----
     document.addEventListener('DOMContentLoaded', async () => {
       createSparkles();
       await loadChampions();

@@ -280,8 +280,8 @@
 
     <!-- Hero -->
     <div class="betting-hero">
-      <h1><span class="chip-icon">🎰</span> Betting House <span class="chip-icon">🎰</span></h1>
-      <div class="subtitle">Put your Zeni where your mouth is</div>
+      <h1><span class="chip-icon">🎰</span> Predictions <span class="chip-icon">🎰</span></h1>
+      <div class="subtitle">Call the winner before the fight</div>
     </div>
 
     <!-- Wallet -->
@@ -348,22 +348,26 @@
   <script src="js/toolbar.js"></script>
   <script>
     let currentUser = null;
-    let currentBalance = 0;
     let activeTournament = null;
     let allMatches = [];
-    let allBets = [];
     let eloMap = {};
 
-    // ── Odds Calculation ──
-    function calculateOdds(elo1, elo2) {
-      const expected1 = 1 / (1 + Math.pow(10, (elo2 - elo1) / 400));
-      const expected2 = 1 - expected1;
-      const odds1 = Math.max(1.1, parseFloat((1 / expected1).toFixed(2)));
-      const odds2 = Math.max(1.1, parseFloat((1 / expected2).toFixed(2)));
-      return { odds1, odds2 };
+    const PREDICTIONS_KEY = 'dbl_predictions';
+    function getPredictions() {
+      try { return JSON.parse(localStorage.getItem(PREDICTIONS_KEY) || '{}'); } catch { return {}; }
+    }
+    function savePrediction(matchId, pick) {
+      const p = getPredictions();
+      p[matchId] = pick;
+      localStorage.setItem(PREDICTIONS_KEY, JSON.stringify(p));
     }
 
-    // ── Tabs ──
+    function calculateOdds(elo1, elo2) {
+      const e1 = 1 / (1 + Math.pow(10, (elo2 - elo1) / 400));
+      const e2 = 1 - e1;
+      return { odds1: Math.max(1.1, +(1/e1).toFixed(2)), odds2: Math.max(1.1, +(1/e2).toFixed(2)), pct1: Math.round(e1*100), pct2: Math.round(e2*100) };
+    }
+
     document.querySelectorAll('.betting-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.betting-tab').forEach(t => t.classList.remove('active'));
@@ -373,165 +377,31 @@
       });
     });
 
-    // ── Load Balance ──
-    async function refreshBalance() {
-      try {
-        const pts = await db.getPoints(currentUser);
-        currentBalance = pts.balance || 0;
-        document.getElementById('balance-value').textContent = currentBalance.toLocaleString();
-      } catch (e) { console.error('Failed to load balance', e); }
-    }
-
-    // ── Load ELO for all players ──
     async function loadEloMap() {
       try {
         const lb = await db.getLeaderboard();
         lb.forEach(p => { eloMap[p.discord_username] = p; });
-      } catch (e) { console.error('Failed to load ELO data', e); }
+      } catch (e) {}
     }
 
-    // ── Get bets for a match ──
-    async function getBetsForMatch(matchId) {
-      const { data, error } = await supabaseClient
-        .from('bets')
-        .select('*')
-        .eq('match_id', matchId);
-      if (error) throw error;
-      return data || [];
+    function makePrediction(matchId, playerName) {
+      savePrediction(matchId, playerName);
+      renderMatches();
+      if (typeof NotificationSystem !== 'undefined') NotificationSystem.show(`Predicted ${playerName} to win!`, 'success');
     }
 
-    // ── Get all bets for current user ──
-    async function getMyBets() {
-      const { data, error } = await supabaseClient
-        .from('bets')
-        .select('*')
-        .eq('bettor', currentUser)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data || [];
-    }
-
-    // ── Place a bet ──
-    async function placeBet(matchId, tournamentId, betOn, amount, odds) {
-      if (!AUTH.isLoggedIn()) {
-        NotificationSystem.show('You must be logged in to bet.', 'error');
-        return;
-      }
-      if (amount < 50) {
-        NotificationSystem.show('Minimum bet is 50 Zeni.', 'error');
-        return;
-      }
-      const maxBet = Math.min(500, currentBalance);
-      if (amount > maxBet) {
-        NotificationSystem.show(`Maximum bet is ${maxBet.toLocaleString()} Zeni.`, 'error');
-        return;
-      }
-
-      try {
-        // Deduct balance
-        const pts = await db.getPoints(currentUser);
-        if (pts.balance < amount) {
-          NotificationSystem.show('Insufficient Zeni balance!', 'error');
-          return;
-        }
-
-        // Insert bet
-        const { error } = await supabaseClient
-          .from('bets')
-          .insert({
-            match_id: matchId,
-            tournament_id: tournamentId,
-            bettor: currentUser,
-            bet_on: betOn,
-            amount: amount,
-            odds: odds,
-            status: 'pending',
-            payout: 0
-          });
-        if (error) {
-          if (error.code === '23505') {
-            NotificationSystem.show('You already placed a bet on this match!', 'error');
-            return;
-          }
-          throw error;
-        }
-
-        // Deduct from balance
-        await db.awardPoints(currentUser, -amount, 'bet_placed');
-
-        NotificationSystem.show(`Bet placed! ${amount} Zeni on ${betOn} at ${odds}x`, 'success');
-        await refreshBalance();
-        await renderMatches();
-        await renderMyBets();
-      } catch (e) {
-        console.error('Failed to place bet', e);
-        NotificationSystem.show('Failed to place bet. Try again.', 'error');
-      }
-    }
-
-    // ── Resolve Bets ──
-    async function resolveBets() {
-      if (!activeTournament) return;
-
-      // Get all matches with winners
-      const completedMatches = allMatches.filter(m => m.winner_id);
-
-      for (const match of completedMatches) {
-        // Get pending bets for this match
-        const { data: pendingBets, error } = await supabaseClient
-          .from('bets')
-          .select('*')
-          .eq('match_id', match.id)
-          .eq('status', 'pending');
-        if (error || !pendingBets || pendingBets.length === 0) continue;
-
-        const winnerName = match.winner_id === match.player1_id
-          ? match.player1?.discord_username
-          : match.player2?.discord_username;
-
-        for (const bet of pendingBets) {
-          const isWin = bet.bet_on === winnerName;
-          const payout = isWin ? Math.floor(bet.amount * bet.odds) : 0;
-          const status = isWin ? 'won' : 'lost';
-
-          // Update bet
-          await supabaseClient
-            .from('bets')
-            .update({ status, payout })
-            .eq('id', bet.id);
-
-          // Credit winnings to bettor
-          if (isWin && payout > 0) {
-            await db.awardPoints(bet.bettor, payout, 'bet_won');
-          }
-        }
-      }
-    }
-
-    // ── Render Match Cards ──
     async function renderMatches() {
       const container = document.getElementById('matches-list');
-
       if (!activeTournament) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">🎲</div>
-            <h3>No Active Tournament</h3>
-            <p>Check back when a tournament is running to place your bets.</p>
-          </div>`;
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">&#127922;</div><h3>No Active Tournament</h3><p>Check back when a tournament is running to make predictions.</p></div>`;
+        return;
+      }
+      if (!allMatches.length) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">&#9203;</div><h3>No Matches Yet</h3><p>Matches haven't been created yet. Check back soon!</p></div>`;
         return;
       }
 
-      if (allMatches.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">⏳</div>
-            <h3>No Matches Yet</h3>
-            <p>Matches haven't been created yet. Check back soon!</p>
-          </div>`;
-        return;
-      }
-
+      const predictions = getPredictions();
       let html = '';
       for (const match of allMatches) {
         const p1Name = match.player1?.discord_username || 'TBD';
@@ -540,235 +410,166 @@
         const p2Elo = eloMap[p2Name]?.elo || 1000;
         const p1Stats = eloMap[p1Name];
         const p2Stats = eloMap[p2Name];
-        const p1WL = p1Stats ? `${p1Stats.wins}W - ${p1Stats.losses}L` : '0W - 0L';
-        const p2WL = p2Stats ? `${p2Stats.wins}W - ${p2Stats.losses}L` : '0W - 0L';
+        const p1WL = p1Stats ? `${p1Stats.wins||0}W - ${p1Stats.losses||0}L` : '0W - 0L';
+        const p2WL = p2Stats ? `${p2Stats.wins||0}W - ${p2Stats.losses||0}L` : '0W - 0L';
+        const { odds1, odds2, pct1, pct2 } = calculateOdds(p1Elo, p2Elo);
+        const isCompleted = !!match.winner_id;
+        const isReady = p1Name !== 'TBD' && p2Name !== 'TBD';
+        const myPick = predictions[match.id];
+        const winnerName = isCompleted ? (match.winner_id === match.player1_id ? p1Name : p2Name) : null;
+        const gotItRight = myPick && winnerName && myPick === winnerName;
+        const gotItWrong = myPick && winnerName && myPick !== winnerName;
 
-        const { odds1, odds2 } = calculateOdds(p1Elo, p2Elo);
-        const isLocked = !!match.winner_id || p1Name === 'TBD' || p2Name === 'TBD';
-
-        // Get pool amounts
-        let pool1 = 0, pool2 = 0, userBet = null;
-        try {
-          const bets = await getBetsForMatch(match.id);
-          bets.forEach(b => {
-            if (b.bet_on === p1Name) pool1 += b.amount;
-            else pool2 += b.amount;
-            if (b.bettor === currentUser) userBet = b;
-          });
-        } catch (e) { /* ignore */ }
-
-        const hasUserBet = !!userBet;
-
-        html += `
-          <div class="match-bet-card ${isLocked ? 'locked' : ''}">
-            <div class="match-header">
-              <span class="match-round">Round ${match.round || '?'} &middot; Match ${match.match_number || '?'}</span>
-              <span class="match-status-badge ${isLocked ? 'badge-locked' : 'badge-open'}">
-                ${isLocked ? (match.winner_id ? 'COMPLETED' : 'LOCKED') : (hasUserBet ? 'BET PLACED' : 'OPEN')}
-              </span>
+        html += `<div class="match-bet-card ${isCompleted ? 'locked' : ''}">
+          <div class="match-header">
+            <span class="match-round">Round ${match.round || '?'} &middot; Match ${match.match_number || '?'}</span>
+            <span class="match-status-badge ${isCompleted ? 'badge-locked' : 'badge-open'}">
+              ${isCompleted ? (gotItRight ? '&#10004; CORRECT' : gotItWrong ? '&#10008; WRONG' : 'COMPLETED')
+                : myPick ? 'PREDICTED' : isReady ? 'OPEN' : 'TBD'}
+            </span>
+          </div>
+          <div class="versus-row">
+            <div class="player-side">
+              <div class="player-name" ${winnerName === p1Name ? 'style="color:var(--green)"' : ''}>${p1Name}</div>
+              <div class="player-stats">${p1WL}</div>
+              <div class="player-elo">ELO ${p1Elo}</div>
+              <div class="odds-display">${pct1}%</div>
+              <div class="pool-amount">Odds: <span>${odds1}x</span></div>
             </div>
-            <div class="versus-row">
-              <div class="player-side">
-                <div class="player-name">${p1Name}</div>
-                <div class="player-stats">${p1WL}</div>
-                <div class="player-elo">ELO ${p1Elo}</div>
-                <div class="odds-display">${odds1}x</div>
-                <div class="pool-amount">Pool: <span>${pool1.toLocaleString()}</span> Zeni</div>
-              </div>
-              <div class="vs-divider">VS</div>
-              <div class="player-side">
-                <div class="player-name">${p2Name}</div>
-                <div class="player-stats">${p2WL}</div>
-                <div class="player-elo">ELO ${p2Elo}</div>
-                <div class="odds-display">${odds2}x</div>
-                <div class="pool-amount">Pool: <span>${pool2.toLocaleString()}</span> Zeni</div>
+            <div class="vs-divider">VS</div>
+            <div class="player-side">
+              <div class="player-name" ${winnerName === p2Name ? 'style="color:var(--green)"' : ''}>${p2Name}</div>
+              <div class="player-stats">${p2WL}</div>
+              <div class="player-elo">ELO ${p2Elo}</div>
+              <div class="odds-display">${pct2}%</div>
+              <div class="pool-amount">Odds: <span>${odds2}x</span></div>
+            </div>
+          </div>
+          ${!isCompleted && !myPick && isReady ? `
+            <div class="bet-controls">
+              <button class="btn-bet btn-bet-p1" onclick="makePrediction('${match.id}','${p1Name.replace(/'/g,"\\'")}')">Pick ${p1Name}</button>
+              <button class="btn-bet btn-bet-p2" onclick="makePrediction('${match.id}','${p2Name.replace(/'/g,"\\'")}')">Pick ${p2Name}</button>
+            </div>
+            <div class="bet-limits">Free predictions &middot; No points required</div>
+          ` : myPick && !isCompleted ? `
+            <div class="bet-controls">
+              <div style="color:var(--gold);font-weight:700;font-size:13px;">
+                Your pick: ${myPick}
               </div>
             </div>
-            ${!isLocked && !hasUserBet ? `
-              <div class="bet-controls">
-                <button class="btn-bet btn-bet-p1" onclick="handleBet('${match.id}', '${activeTournament.id}', '${p1Name}', ${odds1}, this)">
-                  Bet on ${p1Name}
-                </button>
-                <input type="number" class="bet-input" id="bet-amt-${match.id}" min="50" max="${Math.min(500, currentBalance)}" placeholder="Amount" />
-                <button class="btn-bet btn-bet-p2" onclick="handleBet('${match.id}', '${activeTournament.id}', '${p2Name}', ${odds2}, this)">
-                  Bet on ${p2Name}
-                </button>
+          ` : gotItRight ? `
+            <div class="bet-controls">
+              <div style="color:var(--green);font-weight:700;font-size:13px;">
+                &#10004; You predicted ${myPick} correctly!
               </div>
-              <div class="bet-limits">Min: 50 &middot; Max: ${Math.min(500, currentBalance).toLocaleString()} Zeni</div>
-            ` : hasUserBet ? `
-              <div class="bet-controls">
-                <div style="color:var(--gold);font-weight:700;font-size:13px;">
-                  You bet ${userBet.amount.toLocaleString()} Zeni on ${userBet.bet_on} at ${userBet.odds}x
-                  ${userBet.status === 'won' ? '<span style="color:var(--green);"> — WON ' + userBet.payout.toLocaleString() + ' Zeni!</span>' : ''}
-                  ${userBet.status === 'lost' ? '<span style="color:var(--red);"> — LOST</span>' : ''}
-                </div>
+            </div>
+          ` : gotItWrong ? `
+            <div class="bet-controls">
+              <div style="color:var(--red);font-weight:700;font-size:13px;">
+                &#10008; You picked ${myPick} &mdash; ${winnerName} won
               </div>
-            ` : ''}
-          </div>`;
+            </div>
+          ` : ''}
+        </div>`;
       }
       container.innerHTML = html;
     }
 
-    function handleBet(matchId, tournamentId, betOn, odds, btn) {
-      const input = document.getElementById('bet-amt-' + matchId);
-      const amount = parseInt(input?.value);
-      if (!amount || isNaN(amount)) {
-        NotificationSystem.show('Enter a bet amount.', 'error');
-        return;
-      }
-      placeBet(matchId, tournamentId, betOn, amount, odds);
-    }
-
-    // ── Render My Bets ──
     async function renderMyBets() {
       const container = document.getElementById('my-bets-list');
-      try {
-        const bets = await getMyBets();
-        if (bets.length === 0) {
-          container.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-icon">📋</div>
-              <h3>No Bets Yet</h3>
-              <p>Place your first bet on an active match!</p>
-            </div>`;
-          return;
-        }
-
-        let html = '';
-        for (const bet of bets) {
-          const statusClass = bet.status === 'won' ? 'won' : bet.status === 'lost' ? 'lost' : '';
-          html += `
-            <div class="my-bet-row ${statusClass}">
-              <span class="my-bet-match">Match ${bet.match_id.slice(0, 8)}...</span>
-              <span class="my-bet-on">${bet.bet_on}</span>
-              <span class="my-bet-amount">${bet.amount.toLocaleString()}</span>
-              <span class="my-bet-odds">${bet.odds}x</span>
-              <span class="my-bet-status status-${bet.status}">
-                ${bet.status}${bet.status === 'won' ? ' +' + bet.payout.toLocaleString() : ''}
-              </span>
-            </div>`;
-        }
-        container.innerHTML = html;
-      } catch (e) {
-        console.error('Failed to load my bets', e);
-        container.innerHTML = '<div class="empty-state"><p>Failed to load bets.</p></div>';
+      const predictions = getPredictions();
+      const entries = Object.entries(predictions);
+      if (!entries.length) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">&#128203;</div><h3>No Predictions Yet</h3><p>Pick a winner on an active match!</p></div>`;
+        return;
       }
+
+      let correct = 0, wrong = 0, pending = 0;
+      let html = '';
+      for (const [matchId, pick] of entries) {
+        const match = allMatches.find(m => m.id === matchId);
+        if (!match) continue;
+        const winnerName = match.winner_id ? (match.winner_id === match.player1_id ? match.player1?.discord_username : match.player2?.discord_username) : null;
+        const status = !winnerName ? 'pending' : pick === winnerName ? 'won' : 'lost';
+        if (status === 'won') correct++;
+        else if (status === 'lost') wrong++;
+        else pending++;
+        html += `<div class="my-bet-row ${status}">
+          <span class="my-bet-match">R${match.round || '?'} M${match.match_number || '?'}</span>
+          <span class="my-bet-on">${pick}</span>
+          <span class="my-bet-amount">${match.player1?.discord_username || '?'} vs ${match.player2?.discord_username || '?'}</span>
+          <span class="my-bet-odds">&nbsp;</span>
+          <span class="my-bet-status status-${status}">${status === 'won' ? 'Correct' : status === 'lost' ? 'Wrong' : 'Pending'}</span>
+        </div>`;
+      }
+
+      const total = correct + wrong;
+      const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+      const header = `<div style="text-align:center;margin-bottom:16px;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);">
+        <span style="color:var(--green);font-weight:700;">${correct} Correct</span> &middot;
+        <span style="color:var(--red);font-weight:700;">${wrong} Wrong</span> &middot;
+        <span style="color:var(--gold);font-weight:700;">${pending} Pending</span>
+        ${total > 0 ? ` &middot; <span style="color:var(--cyan);font-weight:700;">${accuracy}% Accuracy</span>` : ''}
+      </div>`;
+      container.innerHTML = header + html;
     }
 
-    // ── Render Leaderboard ──
     async function renderLeaderboard() {
       const container = document.getElementById('leaderboard-content');
       try {
-        const { data: allBetsData, error } = await supabaseClient
-          .from('bets')
-          .select('*')
-          .in('status', ['won', 'lost']);
-        if (error) throw error;
-
-        if (!allBetsData || allBetsData.length === 0) {
-          container.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-icon">🏆</div>
-              <h3>No Betting History</h3>
-              <p>Be the first to place a bet and make the leaderboard!</p>
-            </div>`;
+        const lb = await db.getLeaderboard();
+        if (!lb?.length) {
+          container.innerHTML = `<div class="empty-state"><div class="empty-icon">&#127942;</div><h3>No ELO Data</h3><p>Play some matches to appear on the leaderboard!</p></div>`;
           return;
         }
-
-        // Aggregate by bettor
-        const stats = {};
-        allBetsData.forEach(bet => {
-          if (!stats[bet.bettor]) {
-            stats[bet.bettor] = { profit: 0, wins: 0, total: 0, biggestWin: 0 };
-          }
-          const s = stats[bet.bettor];
-          s.total++;
-          if (bet.status === 'won') {
-            s.wins++;
-            const net = bet.payout - bet.amount;
-            s.profit += net;
-            if (net > s.biggestWin) s.biggestWin = net;
-          } else {
-            s.profit -= bet.amount;
-          }
+        let html = `<div style="overflow-x:auto;"><table class="lb-table"><thead><tr>
+          <th>#</th><th>Player</th><th>ELO</th><th>W/L</th><th>Win Rate</th><th>Peak</th>
+        </tr></thead><tbody>`;
+        lb.sort((a,b) => (b.elo||1000) - (a.elo||1000)).slice(0, 20).forEach((p, i) => {
+          const w = p.wins || 0, l = p.losses || 0;
+          const wr = (w+l) > 0 ? Math.round((w/(w+l))*100) : 0;
+          html += `<tr>
+            <td class="lb-rank">${i+1}</td>
+            <td class="lb-name"><a href="profile.html?player=${encodeURIComponent(p.discord_username)}" style="color:var(--text);text-decoration:none">${p.discord_username}</a></td>
+            <td style="color:var(--cyan);font-weight:700">${p.elo || 1000}</td>
+            <td style="color:var(--muted)">${w}/${l}</td>
+            <td class="lb-winrate">${wr}%</td>
+            <td class="lb-biggest">${p.peak_elo || p.elo || 1000}</td>
+          </tr>`;
         });
-
-        // Sort by profit
-        const sorted = Object.entries(stats)
-          .sort(([, a], [, b]) => b.profit - a.profit);
-
-        let html = `
-          <div style="overflow-x:auto;">
-          <table class="lb-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Bettor</th>
-                <th>Profit</th>
-                <th>Win Rate</th>
-                <th>Bets</th>
-                <th>Biggest Win</th>
-              </tr>
-            </thead>
-            <tbody>`;
-
-        sorted.forEach(([name, s], i) => {
-          const winRate = s.total > 0 ? Math.round((s.wins / s.total) * 100) : 0;
-          html += `
-              <tr>
-                <td class="lb-rank">${i + 1}</td>
-                <td class="lb-name">${name}</td>
-                <td class="${s.profit >= 0 ? 'lb-profit-pos' : 'lb-profit-neg'}">
-                  ${s.profit >= 0 ? '+' : ''}${s.profit.toLocaleString()}
-                </td>
-                <td class="lb-winrate">${winRate}%</td>
-                <td style="color:var(--muted)">${s.wins}/${s.total}</td>
-                <td class="lb-biggest">${s.biggestWin > 0 ? '+' + s.biggestWin.toLocaleString() : '—'}</td>
-              </tr>`;
-        });
-
         html += '</tbody></table></div>';
         container.innerHTML = html;
       } catch (e) {
-        console.error('Failed to load leaderboard', e);
         container.innerHTML = '<div class="empty-state"><p>Failed to load leaderboard.</p></div>';
       }
     }
 
-    // ── Init ──
     document.addEventListener('DOMContentLoaded', async () => {
       setTimeout(async () => {
         await AUTH.init();
+        currentUser = AUTH.getDiscordUsername();
 
-        if (AUTH.isLoggedIn()) {
-          currentUser = AUTH.getDiscordUsername();
+        if (currentUser) {
           document.getElementById('wallet-bar').style.display = 'flex';
-          document.getElementById('betting-content').style.display = 'block';
-          document.getElementById('login-prompt').style.display = 'none';
           document.getElementById('wallet-username').textContent = currentUser;
-
-          await refreshBalance();
-          await loadEloMap();
-
-          // Load active tournament and matches
           try {
-            activeTournament = await db.getActiveTournament();
-            if (activeTournament) {
-              allMatches = await db.getMatches(activeTournament.id);
-              // Resolve any completed bets
-              await resolveBets();
-              await refreshBalance();
-            }
-          } catch (e) { console.error('Failed to load tournament', e); }
-
-          await renderMatches();
-          await renderMyBets();
-          await renderLeaderboard();
-        } else {
-          document.getElementById('login-prompt').style.display = 'block';
-          document.getElementById('wallet-bar').style.display = 'none';
-          document.getElementById('betting-content').style.display = 'none';
+            const pts = await db.getPoints(currentUser);
+            document.getElementById('balance-value').textContent = (pts.balance || 0).toLocaleString();
+          } catch {}
         }
+
+        document.getElementById('betting-content').style.display = 'block';
+        document.getElementById('login-prompt').style.display = 'none';
+
+        await loadEloMap();
+        try {
+          activeTournament = await db.getActiveTournament();
+          if (activeTournament) allMatches = await db.getMatches(activeTournament.id);
+        } catch (e) {}
+
+        await renderMatches();
+        await renderMyBets();
+        await renderLeaderboard();
       }, 200);
     });
   </script>
