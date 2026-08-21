@@ -271,9 +271,21 @@
       return b && (b.streak || 0) >= 5;
     }
 
+    let goldenNamePlayers = new Set();
+    async function loadGoldenNames() {
+      try {
+        const { data } = await supabaseClient.from('player_inventory')
+          .select('discord_username, equipped, item:shop_items!inner(metadata)')
+          .eq('equipped', true);
+        if (data) data.filter(d => d.item?.metadata?.perk === 'all_perks' || d.item?.metadata?.goldenName).forEach(d => goldenNamePlayers.add(d.discord_username.toLowerCase()));
+      } catch (_) {}
+    }
+
     function playerLink(name) {
-      const skull = isVillain(name) ? ' <span title="Villain" style="color:#8b0000;font-size:14px;">&#9760;</span>' : '';
-      return `<a class="lb-name" href="profile.html?player=${encodeURIComponent(name)}">${name}</a>${skull}`;
+      const skull = isVillain(name) ? ' <span title=”Villain” style=”color:#8b0000;font-size:14px;”>&#9760;</span>' : '';
+      const golden = goldenNamePlayers.has(name.toLowerCase());
+      const style = golden ? ' style=”background:linear-gradient(90deg,#ffd700,#fff4b0,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900;”' : '';
+      return `<a class=”lb-name” href=”profile.html?player=${encodeURIComponent(name)}”${style}>${name}</a>${skull}`;
     }
 
     /* â”€â”€ Data Loading â”€â”€ */
@@ -471,7 +483,7 @@
     /* â”€â”€ Init â”€â”€ */
     document.addEventListener('DOMContentLoaded', async () => {
       try {
-        await loadAllData();
+        await Promise.all([loadAllData(), loadGoldenNames()]);
         render();
       } catch (e) {
         console.error('Rankings load error:', e);

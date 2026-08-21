@@ -619,6 +619,21 @@ const db = {
     return data || [];
   },
 
+  async getPlayerPerks(username) {
+    try {
+      const equipped = await this.getEquippedItems(username);
+      const perks = { pointsBonus: 0, extraBans: 0, goldenName: false };
+      for (const inv of equipped) {
+        const meta = inv.item?.metadata;
+        if (!meta?.ultimate) continue;
+        if (meta.perk === 'points_boost') perks.pointsBonus = Math.max(perks.pointsBonus, meta.boost || 0.1);
+        if (meta.perk === 'extra_ban') perks.extraBans = Math.max(perks.extraBans, meta.extra_bans || 1);
+        if (meta.perk === 'all_perks') { perks.pointsBonus = Math.max(perks.pointsBonus, 0.1); perks.extraBans = Math.max(perks.extraBans, 1); perks.goldenName = true; }
+      }
+      return perks;
+    } catch (e) { return { pointsBonus: 0, extraBans: 0, goldenName: false }; }
+  },
+
   async getPlayerMatches(discordUsername) {
     // First get all signup IDs for this player
     const signups = await this.getPlayerStats(discordUsername);

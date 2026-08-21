@@ -592,8 +592,13 @@
       btn.textContent = 'Submitting...';
 
       try {
-        await db.updateSignupBans(mySignup.id, [selectedVote]);
-        mySignup.bans = [selectedVote];
+        let banVotes = [selectedVote];
+        try {
+          const perks = await db.getPlayerPerks(mySignup.discord_username);
+          if (perks.extraBans > 0) banVotes = [selectedVote, selectedVote];
+        } catch (_) {}
+        await db.updateSignupBans(mySignup.id, banVotes);
+        mySignup.bans = banVotes;
 
         // Award points for ban vote
         try {

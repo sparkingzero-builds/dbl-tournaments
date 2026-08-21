@@ -98,6 +98,10 @@
     .item-card[data-rarity="epic"] { --rarity-gradient: linear-gradient(135deg, #a855f7, #7c3aed); --rarity-bg: linear-gradient(160deg, #1f0a3a 0%, #150828 50%, #2d1455 100%); --rarity-color: #a855f7; }
     .item-card[data-rarity="legendary"] { --rarity-gradient: linear-gradient(135deg, #f59e0b, #d97706, #fbbf24); --rarity-bg: linear-gradient(160deg, #2a1a05 0%, #1f1200 50%, #3d2a0a 100%); --rarity-color: #f59e0b; }
     .item-card[data-rarity="mythic"] { --rarity-gradient: linear-gradient(135deg, #ff2d78, #ff6b00, #ffd700); --rarity-bg: linear-gradient(160deg, #2a0515 0%, #1f0008 50%, #3d0a20 100%); --rarity-color: #ff2d78; }
+    .item-card[data-rarity="ultimate"] { --rarity-gradient: conic-gradient(from 0deg, #00ffcc, #00e5ff, #a855f7, #ff2d78, #ffd700, #00ffcc); --rarity-bg: linear-gradient(160deg, #001a1a 0%, #0a0020 50%, #001a10 100%); --rarity-color: #00ffcc; }
+    .item-card[data-rarity="ultimate"]::before { animation: ultimate-spin 3s linear infinite; }
+    .item-card[data-rarity="ultimate"] .card-bg-effect { background: radial-gradient(circle at 50% 60%, #00ffcc 0%, transparent 50%), radial-gradient(circle at 30% 30%, #a855f7 0%, transparent 40%), radial-gradient(circle at 70% 70%, #ff2d78 0%, transparent 40%); animation: aura-pulse 2s ease-in-out infinite; opacity: 0.5; }
+    @keyframes ultimate-spin { from { --rarity-angle: 0deg; } to { --rarity-angle: 360deg; } }
 
     .card-visual {
       flex: 1; background: var(--rarity-bg); display: flex; align-items: center; justify-content: center;
@@ -516,6 +520,7 @@
 
     function getRarity(item) {
       const cost = item.cost || 0;
+      if (item.metadata?.ultimate) return 'ultimate';
       if (item.metadata?.exclusive) return 'mythic';
       if (cost >= 500) return 'legendary';
       if (cost >= 300) return 'epic';
@@ -526,12 +531,12 @@
 
     const RARITY_LABELS = {
       common: 'Common', uncommon: 'Uncommon', rare: 'Rare',
-      epic: 'Epic', legendary: 'Legendary', mythic: 'Mythic'
+      epic: 'Epic', legendary: 'Legendary', mythic: 'Mythic', ultimate: 'Ultimate'
     };
 
     const RARITY_COLORS = {
       common: '#9ca3af', uncommon: '#22c55e', rare: '#3b82f6',
-      epic: '#a855f7', legendary: '#f59e0b', mythic: '#ff2d78'
+      epic: '#a855f7', legendary: '#f59e0b', mythic: '#ff2d78', ultimate: '#00ffcc'
     };
 
     const DBGS = 'https://dbgsbuilds.com/wp-content/themes/dbgsquad-lite/asset';
@@ -572,11 +577,17 @@
       "Elder's Wisdom": `${DBGS}/profile-icon/35640_00000000361FD067.png`,
       "Dragon Ball Collector": `${DBGS}/sticker/2712_0001BA30D7AD84D0.png`,
       "First Blood Badge": `${DBGS}/badge/2748_0001BA3067C1A908.png`,
-      "Tournament of Power Survivor": `${DBGS}/badge/2747_0001BA30D63701BD.png`
+      "Tournament of Power Survivor": `${DBGS}/badge/2747_0001BA30D63701BD.png`,
+      "The Ultimate Fusion": `${DBGS}/badge/36369_00000000C9D9D8EA.png`,
+      "Warrior through Time": `${DBGS}/badge/36372_000000004D83D0AD.png`,
+      "Unrelenting Evil": `${DBGS}/badge/36439_000000009B5AE8D6.png`
     };
 
+    const ITEM_IMAGE_MAP_LOWER = {};
+    Object.keys(ITEM_IMAGE_MAP).forEach(k => { ITEM_IMAGE_MAP_LOWER[k.toLowerCase()] = ITEM_IMAGE_MAP[k]; });
+
     function getItemImage(item) {
-      return ITEM_IMAGE_MAP[item.name] || `${DBGS}/profile-icon/2980_0001BA30757A1501.png`;
+      return ITEM_IMAGE_MAP[item.name] || ITEM_IMAGE_MAP_LOWER[(item.name || '').toLowerCase()] || `${DBGS}/profile-icon/2980_0001BA30757A1501.png`;
     }
 
     function makeCardVisual(item, size) {
@@ -824,10 +835,17 @@
       let items = allItems;
       if (activeCategory !== 'all') items = allItems.filter(i => (CATEGORY_MAP[i.type] || 'other') === activeCategory);
 
+      const ultimate = items.filter(i => getRarity(i) === 'ultimate');
       const featured = items.filter(i => getRarity(i) === 'legendary' || getRarity(i) === 'mythic');
-      const regular = items.filter(i => getRarity(i) !== 'legendary' && getRarity(i) !== 'mythic');
+      const regular = items.filter(i => !['legendary', 'mythic', 'ultimate'].includes(getRarity(i)));
 
       let html = '';
+      if (ultimate.length) {
+        html += '<div class="shop-section-header"><h2 style="background:linear-gradient(90deg,#00ffcc,#a855f7,#ff2d78);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:22px;">ULTIMATE</h2></div>';
+        html += '<div class="item-grid featured" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));">';
+        ultimate.forEach(item => { html += renderItemCard(item, true); });
+        html += '</div>';
+      }
       if (featured.length) {
         html += '<div class="shop-section-header"><h2>⭐ Featured</h2></div>';
         html += '<div class="item-grid featured">';

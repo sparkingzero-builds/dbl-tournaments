@@ -2167,11 +2167,18 @@
               const loserName = awardMatch.winner_id === awardMatch.player1_id
                 ? awardMatch.player2.discord_username
                 : awardMatch.player1.discord_username;
-              await db.awardPoints(winnerName, 100, 'match_win', matchId);
+              let winPts = 100, losePts = 25;
+              try {
+                const winnerPerks = await db.getPlayerPerks(winnerName);
+                if (winnerPerks.pointsBonus > 0) winPts = Math.round(winPts * (1 + winnerPerks.pointsBonus));
+                const loserPerks = await db.getPlayerPerks(loserName);
+                if (loserPerks.pointsBonus > 0) losePts = Math.round(losePts * (1 + loserPerks.pointsBonus));
+              } catch (_) {}
+              await db.awardPoints(winnerName, winPts, 'match_win', matchId);
               const _s1 = await getActiveSeason();
-              if (_s1) await db.addSeasonXP(_s1.id, winnerName, 100);
-              await db.awardPoints(loserName, 25, 'participation', matchId);
-              if (_s1) await db.addSeasonXP(_s1.id, loserName, 25);
+              if (_s1) await db.addSeasonXP(_s1.id, winnerName, winPts);
+              await db.awardPoints(loserName, losePts, 'participation', matchId);
+              if (_s1) await db.addSeasonXP(_s1.id, loserName, losePts);
 
               // Update win streaks
               try {

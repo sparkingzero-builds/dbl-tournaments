@@ -1758,6 +1758,7 @@
           let flairBorderClass = '';
           let flairTitle = '';
           let profileBg = '';
+          let ultimateAura = null;
           try {
             const { data: equipped } = await supabaseClient
               .from('player_inventory')
@@ -1777,9 +1778,38 @@
                 if (t === 'profile_bg' && meta.bg) {
                   profileBg = meta.bg;
                 }
+                if (meta.ultimate && meta.aura) {
+                  ultimateAura = meta.aura;
+                }
               }
             }
           } catch (_) {}
+
+          if (ultimateAura) {
+            const auraColors = {
+              divine_silver: { glow: 'rgba(192,192,255,0.4)', gradient: 'radial-gradient(circle, rgba(192,192,255,0.15) 0%, transparent 70%)' },
+              hakai_purple: { glow: 'rgba(168,85,247,0.4)', gradient: 'radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 70%)' },
+              dragon_flame: { glow: 'rgba(255,215,0,0.4)', gradient: 'radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,45,120,0.08) 40%, transparent 70%)' }
+            };
+            const ac = auraColors[ultimateAura] || auraColors.dragon_flame;
+            const profileCard = document.querySelector('.profile-card') || document.querySelector('.card');
+            if (profileCard) {
+              profileCard.style.boxShadow = `0 0 30px ${ac.glow}, 0 0 60px ${ac.glow}`;
+              profileCard.style.animation = 'ultimate-profile-pulse 3s ease-in-out infinite';
+              const auraDiv = document.createElement('div');
+              auraDiv.style.cssText = `position:absolute;inset:-20px;background:${ac.gradient};pointer-events:none;z-index:0;border-radius:inherit;animation:aura-pulse 3s ease-in-out infinite;`;
+              profileCard.style.position = 'relative';
+              profileCard.style.overflow = 'visible';
+              profileCard.prepend(auraDiv);
+            }
+            const nameEl = document.querySelector('.profile-name');
+            if (nameEl && ultimateAura === 'dragon_flame') {
+              nameEl.style.background = 'linear-gradient(90deg,#ffd700,#fff4b0,#ff8c00)';
+              nameEl.style.webkitBackgroundClip = 'text';
+              nameEl.style.webkitTextFillColor = 'transparent';
+              nameEl.style.fontWeight = '900';
+            }
+          }
 
           // Points
           let pointsVal = null;
