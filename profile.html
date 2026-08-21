@@ -1440,7 +1440,7 @@
           const { data: bountyData } = await supabaseClient
             .from('bounties')
             .select('*')
-            .eq('discord_username', playerName)
+            .ilike('discord_username', playerName)
             .limit(1);
 
           const { data: challengeData } = await supabaseClient
@@ -1577,7 +1577,7 @@
             const { data: spendRows } = await supabaseClient
               .from('point_transactions')
               .select('amount')
-              .eq('discord_username', playerName)
+              .ilike('discord_username', playerName)
               .eq('type', 'spend');
             if (spendRows) totalSpent = spendRows.reduce((s, r) => s + Math.abs(r.amount || 0), 0);
           } catch (_) {}
@@ -1586,7 +1586,7 @@
             const { count: invCount } = await supabaseClient
               .from('player_inventory')
               .select('id', { count: 'exact', head: true })
-              .eq('discord_username', playerName);
+              .ilike('discord_username', playerName);
             if (invCount !== null) inventoryCount = invCount;
           } catch (_) {}
 
@@ -1850,7 +1850,7 @@
             const { data: equipped } = await supabaseClient
               .from('player_inventory')
               .select('*, item:shop_items(*)')
-              .eq('discord_username', playerName)
+              .ilike('discord_username', playerName)
               .eq('equipped', true);
             if (equipped) {
               for (const inv of equipped) {
@@ -1904,7 +1904,7 @@
             const { data: points } = await supabaseClient
               .from('player_points')
               .select('*')
-              .eq('discord_username', playerName)
+              .ilike('discord_username', playerName)
               .single();
             if (points) pointsVal = points.points;
           } catch (_) {}
@@ -2017,7 +2017,7 @@
             }
             // Best streak
             const { data: pts } = await supabaseClient.from('player_points')
-              .select('best_streak, current_streak').eq('discord_username', playerName).single();
+              .select('best_streak, current_streak').ilike('discord_username', playerName).single();
             if (pts?.best_streak >= 3) accolades.push({ icon: '🔥', label: `Best Streak: ${pts.best_streak}` });
             if (pts?.current_streak >= 2) accolades.push({ icon: '⚡', label: `On ${pts.current_streak} Win Streak` });
 
@@ -2101,7 +2101,7 @@
             const { data: inventory } = await supabaseClient
               .from('player_inventory')
               .select('*, item:shop_items(*)')
-              .eq('discord_username', playerName);
+              .ilike('discord_username', playerName);
             if (inventory?.length) {
               const cosmetics = inventory.filter(inv => {
                 const t = inv.item?.type || inv.item?.item_type || '';
