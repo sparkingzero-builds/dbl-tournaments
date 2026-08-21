@@ -534,7 +534,7 @@
 
       try {
         const { data: signups } = await supabaseClient
-          .from('tournament_signups')
+          .from('signups')
           .select('team');
 
         let picked = 0;

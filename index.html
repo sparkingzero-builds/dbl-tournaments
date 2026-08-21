@@ -759,7 +759,7 @@
       const grid = document.getElementById('top-players-grid');
       try {
         const { data: players, error } = await supabaseClient
-          .from('player_elo')
+          .from('elo_ratings')
           .select('*')
           .order('elo', { ascending: false })
           .limit(3);

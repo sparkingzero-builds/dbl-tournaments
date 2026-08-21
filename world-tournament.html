@@ -601,7 +601,7 @@
       try {
         /* Fetch ELO data */
         const { data: eloData, error: eloErr } = await supabaseClient
-          .from('player_elo')
+          .from('elo_ratings')
           .select('player_name, elo')
           .order('elo', { ascending: false })
           .limit(30);

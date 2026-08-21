@@ -702,7 +702,7 @@
     async function leaveClan() {
       if (!confirm('Leave your clan? You will have a 24h cooldown before joining another.')) return;
       const { error } = await supabaseClient.from('clan_members')
-        .delete().eq('discord_username', currentUser);
+        .delete().ilike('discord_username', currentUser);
       if (error) { NotificationSystem.show(error.message, 'error'); return; }
 
       localStorage.setItem('clan_leave_cooldown', String(Date.now() + 24 * 60 * 60 * 1000));

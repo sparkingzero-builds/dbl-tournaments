@@ -581,14 +581,14 @@
       document.getElementById('draft-main').style.display = '';
 
       // Determine player order
-      let playerNames = players.map(p => p.discord_name);
+      let playerNames = players.map(p => p.discord_username);
       if (tournament.draft_order === 'elo') {
         // Sort by ELO ascending (highest picks last)
         try {
-          const { data: elos } = await supabaseClient.from('player_elo').select('discord_name, elo');
+          const { data: elos } = await supabaseClient.from('elo_ratings').select('discord_username, elo');
           if (elos) {
             const eloMap = {};
-            elos.forEach(e => eloMap[e.discord_name] = e.elo || 1000);
+            elos.forEach(e => eloMap[e.discord_username] = e.elo || 1000);
             playerNames.sort((a, b) => (eloMap[b] || 1000) - (eloMap[a] || 1000));
           }
         } catch (e) { /* keep random order */ }
@@ -800,7 +800,7 @@
         if (error) throw error;
 
         // Update signup team
-        const signup = players.find(p => p.discord_name.toLowerCase() === myUsername.toLowerCase());
+        const signup = players.find(p => p.discord_username.toLowerCase() === myUsername.toLowerCase());
         if (signup) {
           const char = allCharacters.find(c => String(c.id) === String(selectedCharId));
           const currentTeam = signup.team || [];

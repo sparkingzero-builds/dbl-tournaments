@@ -1414,7 +1414,7 @@
       const { data } = await supabaseClient
         .from('bounties')
         .select('id')
-        .eq('discord_username', username)
+        .ilike('discord_username', username)
         .limit(1);
       if (!data || data.length === 0) {
         await supabaseClient.from('bounties').insert({
@@ -1435,7 +1435,7 @@
         const { data } = await supabaseClient
           .from('bounties')
           .select('*')
-          .eq('discord_username', currentUser)
+          .ilike('discord_username', currentUser)
           .limit(1);
         if (data && data.length > 0) {
           const b = data[0];
@@ -1564,8 +1564,8 @@
       const loserUsername = winnerUsername === challenge.challenger ? challenge.target : challenge.challenger;
 
       // Get both bounties
-      const { data: winnerBounties } = await supabaseClient.from('bounties').select('*').eq('discord_username', winnerUsername).limit(1);
-      const { data: loserBounties } = await supabaseClient.from('bounties').select('*').eq('discord_username', loserUsername).limit(1);
+      const { data: winnerBounties } = await supabaseClient.from('bounties').select('*').ilike('discord_username', winnerUsername).limit(1);
+      const { data: loserBounties } = await supabaseClient.from('bounties').select('*').ilike('discord_username', loserUsername).limit(1);
 
       const winner = winnerBounties?.[0] || { bounty: 0, streak: 0, wins: 0, losses: 0, peak_bounty: 0 };
       const loser = loserBounties?.[0] || { bounty: 0, streak: 0, wins: 0, losses: 0, peak_bounty: 0 };
@@ -1596,7 +1596,7 @@
         threat_level: calcThreatLevel(newWinnerBounty),
         last_active: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      }).eq('discord_username', winnerUsername);
+      }).ilike('discord_username', winnerUsername);
 
       // Reset loser
       await supabaseClient.from('bounties').update({
@@ -1606,7 +1606,7 @@
         status: 'claimed',
         last_active: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      }).eq('discord_username', loserUsername);
+      }).ilike('discord_username', loserUsername);
 
       // Award currency
       if (currencyReward > 0) {
@@ -1708,8 +1708,8 @@
         ? challenge.target
         : challenge.challenger;
 
-      const { data: winnerBounties } = await supabaseClient.from('bounties').select('*').eq('discord_username', winnerUsername).limit(1);
-      const { data: loserBounties } = await supabaseClient.from('bounties').select('*').eq('discord_username', loserUsername).limit(1);
+      const { data: winnerBounties } = await supabaseClient.from('bounties').select('*').ilike('discord_username', winnerUsername).limit(1);
+      const { data: loserBounties } = await supabaseClient.from('bounties').select('*').ilike('discord_username', loserUsername).limit(1);
 
       const winner = winnerBounties?.[0] || { bounty: 0, streak: 0, wins: 0, losses: 0, peak_bounty: 0 };
       const loser = loserBounties?.[0] || { bounty: 0, streak: 0, wins: 0, losses: 0, peak_bounty: 0 };
@@ -1738,7 +1738,7 @@
         threat_level: calcThreatLevel(newWinnerBounty),
         last_active: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      }).eq('discord_username', winnerUsername);
+      }).ilike('discord_username', winnerUsername);
 
       await supabaseClient.from('bounties').update({
         bounty: 0,
@@ -1747,7 +1747,7 @@
         status: 'claimed',
         last_active: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      }).eq('discord_username', loserUsername);
+      }).ilike('discord_username', loserUsername);
 
       if (currencyReward > 0) {
         await db.awardPoints(winnerUsername, currencyReward, loserWasVillain ? 'villain_slayer' : 'bounty_win', challengeId);

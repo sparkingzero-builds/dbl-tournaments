@@ -432,7 +432,7 @@
       const { data } = await supabaseClient
         .from('player_points')
         .select('points')
-        .eq('discord_username', currentUser)
+        .ilike('discord_username', currentUser)
         .single();
       userBalance = data?.points || 0;
       document.getElementById('wallet-amount').textContent = userBalance.toLocaleString();
@@ -581,20 +581,20 @@
       await supabaseClient
         .from('player_points')
         .update({ points: userBalance - amount })
-        .eq('discord_username', currentUser);
+        .ilike('discord_username', currentUser);
 
       // Refund previous bidder
       if (listing.current_bidder && listing.current_bid > 0) {
         const { data: prevBidder } = await supabaseClient
           .from('player_points')
           .select('points')
-          .eq('discord_username', listing.current_bidder)
+          .ilike('discord_username', listing.current_bidder)
           .single();
         if (prevBidder) {
           await supabaseClient
             .from('player_points')
             .update({ points: prevBidder.points + listing.current_bid })
-            .eq('discord_username', listing.current_bidder);
+            .ilike('discord_username', listing.current_bidder);
         }
       }
 
@@ -649,13 +649,13 @@
         const { data: prevBidder } = await supabaseClient
           .from('player_points')
           .select('points')
-          .eq('discord_username', listing.current_bidder)
+          .ilike('discord_username', listing.current_bidder)
           .single();
         if (prevBidder) {
           await supabaseClient
             .from('player_points')
             .update({ points: prevBidder.points + listing.current_bid })
-            .eq('discord_username', listing.current_bidder);
+            .ilike('discord_username', listing.current_bidder);
         }
       }
 
@@ -663,19 +663,19 @@
       await supabaseClient
         .from('player_points')
         .update({ points: userBalance - listing.buy_now_price })
-        .eq('discord_username', currentUser);
+        .ilike('discord_username', currentUser);
 
       // Credit seller
       const { data: seller } = await supabaseClient
         .from('player_points')
         .select('points')
-        .eq('discord_username', listing.seller)
+        .ilike('discord_username', listing.seller)
         .single();
       if (seller) {
         await supabaseClient
           .from('player_points')
           .update({ points: seller.points + listing.buy_now_price })
-          .eq('discord_username', listing.seller);
+          .ilike('discord_username', listing.seller);
       }
 
       // Transfer item
@@ -711,7 +711,7 @@
       const { data: inventory } = await supabaseClient
         .from('player_inventory')
         .select('*, shop_items(name, item_type, description)')
-        .eq('discord_username', currentUser)
+        .ilike('discord_username', currentUser)
         .eq('equipped', false);
 
       const select = document.getElementById('inventory-select');
@@ -842,13 +842,13 @@
         const { data: bidder } = await supabaseClient
           .from('player_points')
           .select('points')
-          .eq('discord_username', listing.current_bidder)
+          .ilike('discord_username', listing.current_bidder)
           .single();
         if (bidder) {
           await supabaseClient
             .from('player_points')
             .update({ points: bidder.points + listing.current_bid })
-            .eq('discord_username', listing.current_bidder);
+            .ilike('discord_username', listing.current_bidder);
         }
       }
 
@@ -933,13 +933,13 @@
           const { data: seller } = await supabaseClient
             .from('player_points')
             .select('points')
-            .eq('discord_username', listing.seller)
+            .ilike('discord_username', listing.seller)
             .single();
           if (seller) {
             await supabaseClient
               .from('player_points')
               .update({ points: seller.points + listing.current_bid })
-              .eq('discord_username', listing.seller);
+              .ilike('discord_username', listing.seller);
           }
 
           // Transfer item to winner

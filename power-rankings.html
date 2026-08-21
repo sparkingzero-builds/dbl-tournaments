@@ -534,7 +534,7 @@
           challengesRes,
           charResp
         ] = await Promise.all([
-          supabaseClient.from('player_elo').select('discord_username, elo, peak_elo'),
+          supabaseClient.from('elo_ratings').select('discord_username, elo, peak_elo'),
           supabaseClient.from('bounties').select('discord_username, bounty, wins, losses, streak'),
           supabaseClient.from('tournaments').select('id, name, status, created_at').order('created_at', { ascending: false }),
           supabaseClient.from('bounty_challenges').select('*').gte('created_at', weekAgoISO),

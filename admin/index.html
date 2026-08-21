@@ -2185,14 +2185,14 @@
                 const { data: winnerPts } = await supabaseClient
                   .from('player_points')
                   .select('current_streak, best_streak')
-                  .eq('discord_username', winnerName)
+                  .ilike('discord_username', winnerName)
                   .single();
                 if (winnerPts) {
                   const newStreak = (winnerPts.current_streak || 0) + 1;
                   const newBest = Math.max(newStreak, winnerPts.best_streak || 0);
                   await supabaseClient.from('player_points')
                     .update({ current_streak: newStreak, best_streak: newBest })
-                    .eq('discord_username', winnerName);
+                    .ilike('discord_username', winnerName);
 
                   // Streak bonus: 2x at 3 wins, 3x at 5 wins
                   let bonus = 0;
@@ -2206,7 +2206,7 @@
                 // Reset loser streak
                 await supabaseClient.from('player_points')
                   .update({ current_streak: 0 })
-                  .eq('discord_username', loserName);
+                  .ilike('discord_username', loserName);
               } catch (streakErr) {
                 console.error('Streak update error:', streakErr);
               }
@@ -3664,22 +3664,22 @@
       let matchHistory = [];
 
       try {
-        const { data: eloData } = await supabaseClient.from('elo_ratings').select('*').eq('discord_username', username).single();
+        const { data: eloData } = await supabaseClient.from('elo_ratings').select('*').ilike('discord_username', username).single();
         if (eloData) { elo = eloData.elo; wins = eloData.wins || 0; losses = eloData.losses || 0; peakElo = eloData.peak_elo || elo; }
       } catch (e) {}
 
       try {
-        const { data: ptsData } = await supabaseClient.from('player_points').select('balance').eq('discord_username', username).single();
+        const { data: ptsData } = await supabaseClient.from('player_points').select('balance').ilike('discord_username', username).single();
         if (ptsData) balance = ptsData.balance || 0;
       } catch (e) {}
 
       try {
-        const { data: bountyData } = await supabaseClient.from('bounties').select('amount').eq('discord_username', username).single();
+        const { data: bountyData } = await supabaseClient.from('bounties').select('amount').ilike('discord_username', username).single();
         if (bountyData) bountyAmt = bountyData.bounty;
       } catch (e) {}
 
       try {
-        const { data: txns } = await supabaseClient.from('point_transactions').select('amount, reason, created_at').eq('discord_username', username).order('created_at', { ascending: false }).limit(10);
+        const { data: txns } = await supabaseClient.from('point_transactions').select('amount, reason, created_at').ilike('discord_username', username).order('created_at', { ascending: false }).limit(10);
         if (txns) matchHistory = txns;
       } catch (e) {}
 
@@ -3965,7 +3965,7 @@
       try {
         const { error } = await supabaseClient.from('bounties')
           .update({ bounty: 0, wins: 0, losses: 0, streak: 0 })
-          .eq('discord_username', username);
+          .ilike('discord_username', username);
         if (error) throw error;
         AdminLog.log('bounty', `Reset all bounty stats for "${username}"`);
         NotificationSystem.show(`Bounty stats reset for ${username}`, 'warning');
@@ -3995,7 +3995,7 @@
       try {
         const { error } = await supabaseClient.from('bounties')
           .delete()
-          .eq('discord_username', username);
+          .ilike('discord_username', username);
         if (error) throw error;
         AdminLog.log('bounty', `Removed bounty for "${username}"`);
         NotificationSystem.show(`Bounty removed for ${username}`, 'ko');
@@ -4770,7 +4770,7 @@ async function startWorldTournament() {
   if (!confirm('Start a World Tournament with the top 8 qualifiers?')) return;
   try {
     // Get top 8 by ELO
-    const { data: players } = await supabaseClient.from('player_elo').select('*').order('elo', { ascending: false }).limit(8);
+    const { data: players } = await supabaseClient.from('elo_ratings').select('*').order('elo', { ascending: false }).limit(8);
     if (!players || players.length < 2) { alert('Not enough qualified players'); return; }
 
     // Create world tournament

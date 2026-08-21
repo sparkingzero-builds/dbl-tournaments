@@ -2006,7 +2006,7 @@
               .select('id').eq('status', 'completed').order('created_at', { ascending: false }).limit(1);
             if (ct?.length) {
               const { data: fm } = await supabaseClient.from('matches')
-                .select('winner_id, player1_id, player2_id, player1:tournament_signups!matches_player1_id_fkey(discord_username), player2:tournament_signups!matches_player2_id_fkey(discord_username)')
+                .select('winner_id, player1_id, player2_id, player1:signups!matches_player1_id_fkey(discord_username), player2:signups!matches_player2_id_fkey(discord_username)')
                 .eq('tournament_id', ct[0].id).not('winner_id', 'is', null)
                 .order('round', { ascending: false }).limit(1);
               if (fm?.length) {
