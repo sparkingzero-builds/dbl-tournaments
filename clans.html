@@ -84,7 +84,7 @@
       letter-spacing: 0.06em;
     }
     .clan-row {
-      display: grid; grid-template-columns: 40px 1fr 80px 80px 80px;
+      display: grid; grid-template-columns: 40px 1fr 80px 80px 80px; /* rank, name, members, elo, wins */
       align-items: center; padding: 14px 16px; background: var(--panel);
       border: 1px solid var(--line); border-radius: var(--radius);
       margin-bottom: 6px; cursor: pointer; transition: all 0.15s;
@@ -119,7 +119,7 @@
     }
 
     .clan-header-row {
-      display: grid; grid-template-columns: 40px 1fr 80px 80px 80px;
+      display: grid; grid-template-columns: 40px 1fr 80px 80px 80px; /* rank, name, members, elo, wins */
       padding: 4px 16px; margin-bottom: 6px;
     }
     .clan-header-row span {
@@ -360,8 +360,8 @@
         <span>#</span>
         <span style="text-align:left;">Clan</span>
         <span>Members</span>
+        <span>Avg ELO</span>
         <span>Wins</span>
-        <span>Wars</span>
       </div>
       <div id="clans-list"></div>
     </div>
@@ -404,6 +404,7 @@
     let allClans = [];
     let allMembers = [];
     let allWars = [];
+    let allElos = [];
     let currentUser = null;
     let userMembership = null;
 
@@ -448,18 +449,26 @@
     }
 
     async function loadData() {
-      const [clansRes, membersRes, warsRes] = await Promise.all([
+      const [clansRes, membersRes] = await Promise.all([
         supabaseClient.from('clans').select('*'),
-        supabaseClient.from('clan_members').select('*'),
-        supabaseClient.from('clan_wars').select('*')
+        supabaseClient.from('clan_members').select('*')
       ]);
       allClans = clansRes.data || [];
       allMembers = membersRes.data || [];
-      allWars = warsRes.data || [];
 
-      // Find user membership
+      try {
+        const warsRes = await supabaseClient.from('clan_wars').select('*');
+        allWars = warsRes.data || [];
+      } catch { allWars = []; }
+
+      try {
+        const { data: elos } = await supabaseClient.from('elo_ratings').select('discord_username, elo, wins, losses');
+        allElos = elos || [];
+      } catch { allElos = []; }
+
       if (currentUser) {
-        const m = allMembers.find(m => m.discord_username === currentUser);
+        const lower = currentUser.toLowerCase();
+        const m = allMembers.find(m => m.discord_username?.toLowerCase() === lower);
         userMembership = m || null;
       }
 
@@ -488,21 +497,27 @@
       renderLeaderboard();
     }
 
+    function getMemberElo(username) {
+      const e = allElos.find(r => r.discord_username?.toLowerCase() === username?.toLowerCase());
+      return e || { elo: 1000, wins: 0, losses: 0 };
+    }
+
     function renderLeaderboard() {
-      // Build clan stats
       const clanStats = allClans.map(c => {
         const members = allMembers.filter(m => m.clan_id === c.id);
-        const totalWins = members.reduce((s, m) => s, 0); // placeholder — real wins from players table
-        // Clan wars record
+        const totalWins = members.reduce((s, m) => s + getMemberElo(m.discord_username).wins, 0);
+        const avgElo = members.length > 0
+          ? Math.round(members.reduce((s, m) => s + getMemberElo(m.discord_username).elo, 0) / members.length)
+          : 1000;
         let warWins = 0, warLosses = 0;
         allWars.forEach(w => {
           if (w.clan1_id === c.id) { warWins += w.clan1_wins; warLosses += w.clan2_wins; }
           if (w.clan2_id === c.id) { warWins += w.clan2_wins; warLosses += w.clan1_wins; }
         });
-        return { ...c, memberCount: members.length, warWins, warLosses, members };
+        return { ...c, memberCount: members.length, totalWins, avgElo, warWins, warLosses, members };
       });
 
-      clanStats.sort((a, b) => b.memberCount - a.memberCount || b.warWins - a.warWins);
+      clanStats.sort((a, b) => b.avgElo - a.avgElo || b.totalWins - a.totalWins);
 
       const container = document.getElementById('clans-list');
       if (clanStats.length === 0) {
@@ -521,8 +536,8 @@
             </div>
           </div>
           <div class="clan-stat">${c.memberCount}<small>Members</small></div>
-          <div class="clan-stat">${c.warWins}<small>Wins</small></div>
-          <div class="clan-stat"><span class="war-score"><span class="win">${c.warWins}</span>-<span class="loss">${c.warLosses}</span></span><small>Wars</small></div>
+          <div class="clan-stat" style="color:var(--cyan)">${c.avgElo}<small>Avg ELO</small></div>
+          <div class="clan-stat" style="color:var(--green)">${c.totalWins}<small>Wins</small></div>
         </div>
       `).join('');
     }
@@ -569,26 +584,30 @@
 
         <div class="clan-stats-row">
           <div class="clan-stat-card"><div class="val">${members.length}</div><div class="lbl">Members</div></div>
-          <div class="clan-stat-card"><div class="val">${totalWarWins}</div><div class="lbl">War Wins</div></div>
-          <div class="clan-stat-card"><div class="val">${totalWarLosses}</div><div class="lbl">War Losses</div></div>
-          <div class="clan-stat-card"><div class="val">${members.length > 0 ? members[0].discord_username : '-'}</div><div class="lbl">Leader</div></div>
+          <div class="clan-stat-card"><div class="val">${members.length > 0 ? Math.round(members.reduce((s,m) => s + getMemberElo(m.discord_username).elo, 0) / members.length) : '-'}</div><div class="lbl">Avg ELO</div></div>
+          <div class="clan-stat-card"><div class="val">${members.reduce((s,m) => s + getMemberElo(m.discord_username).wins, 0)}</div><div class="lbl">Total Wins</div></div>
+          <div class="clan-stat-card"><div class="val">${members.length > 0 ? esc(members.find(m => m.role === 'leader')?.discord_username || members[0].discord_username) : '-'}</div><div class="lbl">Leader</div></div>
         </div>
 
         <table class="member-table">
           <thead><tr>
-            <th>Player</th><th>Role</th><th>Joined</th>
+            <th>Player</th><th>Role</th><th>ELO</th><th>W/L</th><th>Joined</th>
             ${isOfficer ? '<th>Actions</th>' : ''}
           </tr></thead>
           <tbody>
-            ${members.map(m => `<tr>
+            ${members.map(m => {
+              const elo = getMemberElo(m.discord_username);
+              return `<tr>
               <td><a class="member-name-link" href="profile.html?player=${encodeURIComponent(m.discord_username)}">${esc(m.discord_username)}</a></td>
               <td><span class="role-badge role-${m.role}">${m.role}</span></td>
+              <td style="color:var(--cyan);font-family:'Exo 2',sans-serif;font-weight:700;">${elo.elo}</td>
+              <td><span style="color:var(--green)">${elo.wins}W</span> <span style="color:var(--red)">${elo.losses}L</span></td>
               <td style="color:var(--muted);font-size:12px;">${new Date(m.joined_at).toLocaleDateString()}</td>
               ${isOfficer ? `<td>
                 ${isLeader && m.role === 'member' ? `<button class="btn-sm btn-promote" onclick="promoteMember('${m.id}',event)">Promote</button>` : ''}
                 ${isLeader && m.discord_username !== currentUser ? `<button class="btn-sm btn-kick" onclick="kickMember('${m.id}','${esc(m.discord_username)}',event)">Kick</button>` : ''}
               </td>` : ''}
-            </tr>`).join('')}
+            </tr>`;}).join('')}
           </tbody>
         </table>
       `;

@@ -751,7 +751,7 @@ const db = {
       .from('season_progress')
       .select('*')
       .eq('season_id', seasonId)
-      .eq('discord_username', username)
+      .ilike('discord_username', username)
       .single();
     if (error && error.code === 'PGRST116') return null;
     if (error) throw error;
