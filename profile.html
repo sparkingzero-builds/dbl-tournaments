@@ -1148,13 +1148,38 @@
       });
     }
 
+    function goToProfile() {
+      const val = document.getElementById('profile-search')?.value?.trim();
+      if (val) window.location.href = `profile.html?player=${encodeURIComponent(val)}`;
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       const params = new URLSearchParams(window.location.search);
-      const playerName = params.get('player');
+      let playerName = params.get('player');
       const content = document.getElementById('profile-content');
 
       if (!playerName) {
-        content.innerHTML = '<div class="empty-state"><h3>No Player Specified</h3><p>Add ?player=Username to the URL.</p></div>';
+        // Try to get logged-in user
+        if (typeof AUTH !== 'undefined') {
+          await AUTH.init();
+          const discordName = AUTH.getDiscordUsername();
+          if (discordName) {
+            playerName = discordName;
+            history.replaceState(null, '', `?player=${encodeURIComponent(playerName)}`);
+          }
+        }
+      }
+
+      if (!playerName) {
+        content.innerHTML = `
+          <div class="empty-state" style="padding:60px 20px;">
+            <h3 style="margin-bottom:12px;">Player Profile</h3>
+            <p style="color:var(--muted);margin-bottom:20px;">Login with Discord to see your profile, or search for a player.</p>
+            <div style="max-width:320px;margin:0 auto;">
+              <input type="text" id="profile-search" placeholder="Enter a player name..." onkeydown="if(event.key==='Enter')goToProfile()" style="width:100%;margin-bottom:10px;" />
+              <button class="btn btn-primary" onclick="goToProfile()" style="width:100%;">View Profile</button>
+            </div>
+          </div>`;
         return;
       }
 
