@@ -81,6 +81,8 @@
   border-radius: 50%;
   opacity: 0;
   animation: particleFloat linear infinite;
+  will-change: transform, opacity;
+  contain: layout style;
 }
 
 @keyframes particleFloat {
@@ -119,7 +121,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Scan line overlay (subtle) */
+/* Scan line overlay (subtle) — uses will-change to promote to own layer */
 .scanlines::after {
   content: '';
   position: fixed;
@@ -133,4 +135,6 @@
     rgba(0, 0, 0, 0.03) 2px,
     rgba(0, 0, 0, 0.03) 4px
   );
+  will-change: transform;
+  contain: strict;
 }

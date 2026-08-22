@@ -7,8 +7,11 @@
     if (!username) return;
 
     const lastCheck = localStorage.getItem(LAST_CHECK_KEY);
-    const since = lastCheck ? new Date(parseInt(lastCheck)) : new Date(Date.now() - 86400000);
-    localStorage.setItem(LAST_CHECK_KEY, Date.now().toString());
+    const now = Date.now();
+    // Only check once every 5 minutes to avoid hammering the DB on every page load
+    if (lastCheck && (now - parseInt(lastCheck)) < 300000) return;
+    const since = lastCheck ? new Date(parseInt(lastCheck)) : new Date(now - 86400000);
+    localStorage.setItem(LAST_CHECK_KEY, now.toString());
 
     try {
       await Promise.all([
@@ -100,9 +103,9 @@
     try {
       const stored = localStorage.getItem('dbl_last_elo_' + username);
       const { data } = await supabaseClient
-        .from('player_elo')
+        .from('elo_ratings')
         .select('elo, peak_elo')
-        .eq('discord_username', username)
+        .ilike('discord_username', username)
         .limit(1);
 
       const current = data?.[0];

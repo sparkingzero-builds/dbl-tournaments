@@ -1,5 +1,5 @@
 function initParticles(container) {
-  const count = 25;
+  const count = 12;
   const colors = ['#00e5ff', '#ff2d78', '#a55eea'];
   for (let i = 0; i < count; i++) {
     const p = document.createElement('div');
