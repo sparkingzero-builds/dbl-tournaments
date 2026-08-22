@@ -1906,7 +1906,7 @@
               .select('*')
               .ilike('discord_username', playerName)
               .single();
-            if (points) pointsVal = points.points;
+            if (points) pointsVal = points.balance || 0;
           } catch (_) {}
 
           // Top 3 characters for the card
