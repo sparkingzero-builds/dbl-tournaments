@@ -81,8 +81,8 @@
       const { data } = await supabaseClient
         .from('point_transactions')
         .select('amount, reason, created_at')
-        .eq('discord_username', username)
-        .eq('type', 'earn')
+        .ilike('discord_username', username)
+        .gt('amount', 0)
         .gt('created_at', since.toISOString())
         .order('created_at', { ascending: false })
         .limit(3);

@@ -335,7 +335,7 @@ const db = {
       const { data, error } = await supabaseClient
         .from('elo_ratings')
         .update(updates)
-        .eq('discord_username', discordUsername)
+        .ilike('discord_username', discordUsername)
         .select()
         .single();
       if (error) throw error;
@@ -476,7 +476,7 @@ const db = {
     const { data, error } = await supabaseClient
       .from('point_transactions')
       .select('*')
-      .eq('discord_username', username)
+      .ilike('discord_username', username)
       .order('created_at', { ascending: false })
       .limit(50);
     if (error) throw error;
@@ -555,7 +555,7 @@ const db = {
           balance: points.balance - cost,
           updated_at: new Date().toISOString()
         })
-        .eq('discord_username', username)
+        .ilike('discord_username', username)
         .gte('balance', cost)
         .select();
       if (deductError) throw deductError;
@@ -590,7 +590,7 @@ const db = {
       .from('player_inventory')
       .update({ equipped: true })
       .eq('id', inventoryId)
-      .eq('discord_username', username)
+      .ilike('discord_username', username)
       .select()
       .single();
     if (error) throw error;
@@ -602,7 +602,7 @@ const db = {
       .from('player_inventory')
       .update({ equipped: false })
       .eq('id', inventoryId)
-      .eq('discord_username', username)
+      .ilike('discord_username', username)
       .select()
       .single();
     if (error) throw error;

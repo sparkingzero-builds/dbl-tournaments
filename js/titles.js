@@ -85,7 +85,7 @@
         const { data: bountyData } = await supabaseClient
           .from('bounties')
           .select('streak')
-          .eq('discord_username', username)
+          .ilike('discord_username', username)
           .limit(1);
         if (bountyData?.[0]?.streak >= 5) earned.push('the_unbreakable');
       } catch (_) {}
@@ -104,8 +104,8 @@
         const { data: spendRows } = await supabaseClient
           .from('point_transactions')
           .select('amount')
-          .eq('discord_username', username)
-          .eq('type', 'spend');
+          .ilike('discord_username', username)
+          .eq('reason', 'purchase');
         if (spendRows) {
           const totalSpent = spendRows.reduce((s, r) => s + Math.abs(r.amount || 0), 0);
           if (totalSpent >= 5000) earned.push('whale');
@@ -124,7 +124,7 @@
         const { count } = await supabaseClient
           .from('bets')
           .select('id', { count: 'exact', head: true })
-          .eq('discord_username', username)
+          .ilike('discord_username', username)
           .eq('result', 'won');
         if (count >= 10) earned.push('gambler');
       } catch (_) {
@@ -154,7 +154,7 @@
       const { data } = await supabaseClient
         .from('player_titles')
         .select('title_id')
-        .eq('discord_username', username)
+        .ilike('discord_username', username)
         .eq('equipped', true)
         .limit(1);
       if (data?.length && this.TITLES[data[0].title_id]) {
@@ -172,12 +172,12 @@
       await supabaseClient
         .from('player_titles')
         .update({ equipped: false })
-        .eq('discord_username', username);
+        .ilike('discord_username', username);
       // Equip the selected one
       await supabaseClient
         .from('player_titles')
         .update({ equipped: true })
-        .eq('discord_username', username)
+        .ilike('discord_username', username)
         .eq('title_id', titleId);
     } catch (e) {
       console.error('Equip title error:', e);
@@ -192,7 +192,7 @@
       const { data } = await supabaseClient
         .from('player_titles')
         .select('*')
-        .eq('discord_username', username)
+        .ilike('discord_username', username)
         .order('earned_at', { ascending: true });
       return data || [];
     } catch (_) {
@@ -220,7 +220,7 @@
         balance: points.balance - title.price,
         updated_at: new Date().toISOString()
       })
-      .eq('discord_username', username)
+      .ilike('discord_username', username)
       .gte('balance', title.price)
       .select();
     if (deductError) throw deductError;

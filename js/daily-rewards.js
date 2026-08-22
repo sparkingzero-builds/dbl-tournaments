@@ -113,7 +113,7 @@ const DailyRewards = (() => {
       const { data: record } = await supabaseClient
         .from('daily_logins')
         .select('*')
-        .eq('discord_username', username)
+        .ilike('discord_username', username)
         .single();
 
       const today = todayStr();
@@ -143,28 +143,29 @@ const DailyRewards = (() => {
       // Fetch current balance and add reward
       const { data: pointsData } = await supabaseClient
         .from('player_points')
-        .select('balance')
-        .eq('discord_username', username)
+        .select('balance, lifetime_earned')
+        .ilike('discord_username', username)
         .single();
 
       const currentBalance = pointsData ? pointsData.balance : 0;
       const newBalance = currentBalance + reward;
 
       // Update balance
+      const currentLifetime = pointsData ? pointsData.lifetime_earned || 0 : 0;
       await supabaseClient.from('player_points').upsert({
         discord_username: username,
         balance: newBalance,
+        lifetime_earned: currentLifetime + reward,
         updated_at: new Date().toISOString()
-      });
+      }, { onConflict: 'discord_username' });
 
       // Log transaction
       try {
         await supabaseClient.from('point_transactions').insert({
-          player_name: username,
+          discord_username: username,
           amount: reward,
-          type: 'daily_login',
-          description: `Daily login reward (Day ${newStreak})`,
-          created_at: new Date().toISOString()
+          reason: 'daily_login',
+          reference_id: `day_${newStreak}`
         });
       } catch (e) { /* non-critical */ }
 
