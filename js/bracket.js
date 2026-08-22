@@ -141,7 +141,7 @@ const BracketManager = (() => {
         const card = document.createElement('div');
         card.className = 'match-card';
         if (round === totalRounds) card.classList.add('final');
-        if (options.admin && match.player1_id && match.player2_id && !match.winner_id) {
+        if (options.admin && match.player1_id && match.player2_id) {
           card.classList.add('clickable');
         }
 
