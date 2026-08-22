@@ -2222,7 +2222,8 @@
         if (completedMatch) {
           const propagation = BracketManager.propagateWinner(matches, completedMatch);
           if (propagation) {
-            await db.updateMatch(propagation.id, propagation);
+            const { id: nextId, ...updates } = propagation;
+            await db.updateMatch(nextId, updates);
           }
         }
 
