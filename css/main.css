@@ -688,18 +688,25 @@ textarea:focus {
     background: rgba(13, 10, 26, 0.98);
     backdrop-filter: blur(12px);
     padding: 10px;
-    gap: 4px;
+    gap: 2px;
     border-bottom: 1px solid var(--line);
+    max-height: calc(100vh - 58px);
+    overflow-y: auto;
+    z-index: 1001;
   }
 
   .navbar-links a {
-    padding: 12px 16px;
-    font-size: 14px;
+    padding: 14px 16px;
+    font-size: 15px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
   }
 
   .navbar-links.open { display: flex; }
 
   .nav-dropdown-menu {
+    display: none;
     position: static;
     background: none;
     border: none;
@@ -708,12 +715,21 @@ textarea:focus {
     min-width: 0;
     backdrop-filter: none;
   }
-  .nav-dropdown-menu a {
-    padding: 12px 16px 12px 28px;
-    font-size: 14px;
+  .nav-dropdown-menu.open {
+    display: flex;
+    flex-direction: column;
   }
-  .nav-dropdown:hover .nav-dropdown-menu,
-  .nav-dropdown .nav-dropdown-menu {
+  .nav-dropdown-menu a {
+    padding: 14px 16px 14px 28px;
+    font-size: 14px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+  }
+  .nav-dropdown:hover .nav-dropdown-menu {
+    display: none;
+  }
+  .nav-dropdown:hover .nav-dropdown-menu.open {
     display: flex;
     flex-direction: column;
   }

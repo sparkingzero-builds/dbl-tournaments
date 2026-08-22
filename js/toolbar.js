@@ -1,3 +1,26 @@
+// Mobile nav: make "More" dropdown toggle on click instead of always open
+document.addEventListener('DOMContentLoaded', () => {
+  const dropdown = document.querySelector('.nav-dropdown > a');
+  if (dropdown) {
+    dropdown.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768) {
+        e.preventDefault();
+        e.stopPropagation();
+        const menu = dropdown.parentElement.querySelector('.nav-dropdown-menu');
+        if (menu) menu.classList.toggle('open');
+      }
+    });
+  }
+  // Close nav when a link is tapped on mobile
+  document.querySelectorAll('.navbar-links a:not(.nav-dropdown > a)').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        document.querySelector('.navbar-links')?.classList.remove('open');
+      }
+    });
+  });
+});
+
 const Toolbar = (() => {
   let soundMuted = localStorage.getItem('dbl_sound_muted') === 'true';
   let currentTheme = localStorage.getItem('dbl_theme') || 'cyberpunk';
