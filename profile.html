@@ -1551,6 +1551,7 @@
         }
 
         // --- Achievement Badges ---
+        const earned = new Set();
         try {
           // -- Fetch extra data for new badges --
           let bountyWinCount = 0;
@@ -1620,7 +1621,6 @@
             { id: 'tenacious',      icon: '\u{1F9E0}', name: 'Tenacious',      desc: 'Lost 3+ but still won the tournament' },
           ];
 
-          const earned = new Set();
           const badgeProgress = {}; // id -> { current, target }
           const badgeTierLevel = {}; // id -> 'bronze'|'silver'|'gold'
 
