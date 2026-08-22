@@ -602,7 +602,7 @@
         /* Fetch ELO data */
         const { data: eloData, error: eloErr } = await supabaseClient
           .from('elo_ratings')
-          .select('player_name, elo')
+          .select('discord_username, elo')
           .order('elo', { ascending: false })
           .limit(30);
 
@@ -612,7 +612,7 @@
         }
 
         const maxElo = Math.max(...eloData.map(p => p.elo)) || 1;
-        const playerNames = eloData.map(p => p.player_name);
+        const playerNames = eloData.map(p => p.discord_username);
 
         /* Fetch bounty wins */
         let bountyMap = {};
@@ -638,7 +638,7 @@
         try {
           const { data: signups } = await supabaseClient
             .from('signups')
-            .select('player_name, tournament_id');
+            .select('discord_username, tournament_id');
           const { data: tournaments } = await supabaseClient
             .from('tournaments')
             .select('id, winner')
@@ -657,12 +657,12 @@
         let xpMap = {};
         try {
           const { data: xpData } = await supabaseClient
-            .from('season_xp')
-            .select('player_name, xp')
-            .in('player_name', playerNames);
+            .from('season_progress')
+            .select('discord_username, xp')
+            .in('discord_username', playerNames);
 
           if (xpData) {
-            for (const x of xpData) xpMap[x.player_name] = x.xp || 0;
+            for (const x of xpData) xpMap[x.discord_username] = x.xp || 0;
           }
         } catch { /* table may not exist */ }
 
@@ -673,11 +673,11 @@
         /* Compute composite */
         const scored = eloData.map(p => {
           const eloNorm = p.elo / maxElo;
-          const bountyNorm = (bountyMap[p.player_name] || 0) / maxBounty;
-          const winsNorm = (winsMap[p.player_name] || 0) / maxWins;
-          const xpNorm = (xpMap[p.player_name] || 0) / maxXp;
+          const bountyNorm = (bountyMap[p.discord_username] || 0) / maxBounty;
+          const winsNorm = (winsMap[p.discord_username] || 0) / maxWins;
+          const xpNorm = (xpMap[p.discord_username] || 0) / maxXp;
           const composite = (eloNorm * 0.4) + (bountyNorm * 0.3) + (winsNorm * 0.2) + (xpNorm * 0.1);
-          return { ...p, bounties: bountyMap[p.player_name] || 0, wins: winsMap[p.player_name] || 0, composite };
+          return { ...p, bounties: bountyMap[p.discord_username] || 0, wins: winsMap[p.discord_username] || 0, composite };
         });
 
         scored.sort((a, b) => b.composite - a.composite);
@@ -691,7 +691,7 @@
             <div class="qualifier-card${rankClass}">
               <div class="qualifier-rank">${medal}</div>
               <div class="qualifier-name">
-                <a href="profile.html?name=${encodeURIComponent(p.player_name)}">${p.player_name}</a>
+                <a href="profile.html?player=${encodeURIComponent(p.discord_username)}">${p.discord_username}</a>
               </div>
               <div class="qualifier-stats">
                 <span>ELO ${p.elo}</span>

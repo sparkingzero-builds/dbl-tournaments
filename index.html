@@ -722,7 +722,7 @@
     async function loadStats() {
       try {
         const [playersRes, tournamentsRes, matchesRes, bountiesRes] = await Promise.allSettled([
-          supabaseClient.from('signups').select('player_name', { count: 'exact', head: true }),
+          supabaseClient.from('signups').select('discord_username', { count: 'exact', head: true }),
           supabaseClient.from('tournaments').select('*', { count: 'exact', head: true }),
           supabaseClient.from('matches').select('*', { count: 'exact', head: true }),
           supabaseClient.from('bounty_challenges').select('*', { count: 'exact', head: true }).eq('status', 'pending')
@@ -774,7 +774,7 @@
           return `
             <div class="player-card">
               <div class="player-rank rank-${i + 1}">#${i + 1}</div>
-              <div class="player-name"><a href="profile.html?player=${encodeURIComponent(p.player_name)}">${escapeHtml(p.player_name)}</a></div>
+              <div class="player-name"><a href="profile.html?player=${encodeURIComponent(p.discord_username)}">${escapeHtml(p.discord_username)}</a></div>
               <div class="player-elo">${p.elo || 1000}</div>
               <div class="player-tier" style="background:${tier.bg};color:${tier.color}">${tier.name}</div>
               <div class="player-record">
@@ -844,14 +844,14 @@
         try {
           const { data: txns } = await supabaseClient
             .from('point_transactions')
-            .select('player_name, description, created_at')
+            .select('discord_username, reason, created_at')
             .order('created_at', { ascending: false })
             .limit(3);
           if (txns) {
             txns.forEach(t => {
               items.push({
                 icon: '🛒',
-                text: `<strong>${escapeHtml(t.player_name)}</strong> ${escapeHtml(t.description || 'made a purchase')}`,
+                text: `<strong>${escapeHtml(t.discord_username)}</strong> ${escapeHtml(t.reason || 'made a purchase')}`,
                 time: t.created_at
               });
             });

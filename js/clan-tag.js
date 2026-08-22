@@ -14,7 +14,7 @@ const ClanTag = {
       const { data } = await supabaseClient
         .from('clan_members')
         .select('clan_id, role, clans(tag, logo_emoji, color, name)')
-        .eq('discord_username', username)
+        .ilike('discord_username', username)
         .single();
 
       if (data) {
