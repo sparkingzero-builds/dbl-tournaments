@@ -533,7 +533,7 @@
     </div>
   </main>
 
-  <div class="particles-bg" id="particles"></div>
+  <!-- particles removed: too many layered animations cause lag -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-client.js"></script>
@@ -961,7 +961,7 @@
   <script src="js/notification-inbox.js"></script>
   <script src="js/toolbar.js"></script>
   <script>
-    if (typeof initParticles === 'function') initParticles(document.getElementById('particles'));
+    // particles disabled on this page to reduce animation lag
   </script>
 </body>
 </html>
