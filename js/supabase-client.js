@@ -912,18 +912,18 @@ const db = {
   async getPlayerSeasonStats(seasonId, username) {
     let matchesPlayed = 0, bountyWins = 0, tournamentsEntered = 0;
     try {
-      const [{ data: m1 }, { data: m2 }] = await Promise.all([
-        supabaseClient.from('matches').select('id', { count: 'exact', head: true }).ilike('player1_id', username),
-        supabaseClient.from('matches').select('id', { count: 'exact', head: true }).ilike('player2_id', username)
-      ]);
-    } catch {}
-    try {
-      const [{ count: c1 }, { count: c2 }] = await Promise.all([
-        supabaseClient.from('matches').select('*', { count: 'exact', head: true }).ilike('player1_id', username),
-        supabaseClient.from('matches').select('*', { count: 'exact', head: true }).ilike('player2_id', username)
-      ]);
-      matchesPlayed = (c1 || 0) + (c2 || 0);
-    } catch {}
+      const { data: signups } = await supabaseClient
+        .from('signups').select('id').ilike('discord_username', username);
+      const signupIds = (signups || []).map(s => s.id);
+      tournamentsEntered = signupIds.length;
+      if (signupIds.length > 0) {
+        const [{ count: c1 }, { count: c2 }] = await Promise.all([
+          supabaseClient.from('matches').select('*', { count: 'exact', head: true }).in('player1_id', signupIds),
+          supabaseClient.from('matches').select('*', { count: 'exact', head: true }).in('player2_id', signupIds)
+        ]);
+        matchesPlayed = (c1 || 0) + (c2 || 0);
+      }
+    } catch (e) { console.warn('Match stats error:', e); }
     try {
       const { count } = await supabaseClient
         .from('bounty_challenges')
@@ -931,14 +931,7 @@ const db = {
         .ilike('challenger', username)
         .eq('status', 'completed');
       bountyWins = count || 0;
-    } catch {}
-    try {
-      const { count } = await supabaseClient
-        .from('signups')
-        .select('*', { count: 'exact', head: true })
-        .ilike('discord_username', username);
-      tournamentsEntered = count || 0;
-    } catch {}
+    } catch (e) { console.warn('Bounty stats error:', e); }
     return { matchesPlayed, bountyWins, tournamentsEntered };
   },
 
