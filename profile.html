@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -1086,6 +1086,9 @@
             <a href="season.html">Season</a>
             <a href="matches.html">Matches</a>
             <a href="history.html">History</a>
+            <a href="world-tournament.html">World Tournament</a>
+            <a href="compare.html">Compare</a>
+            <a href="mvp-vote.html">MVP Vote</a>
           </div>
         </li>
       </ul>
@@ -1189,6 +1192,22 @@
       try {
         // Get all signups for this player
         const signups = await db.getPlayerStats(playerName);
+
+        // Check if player exists (has any signups, ELO, or points)
+        const { data: eloCheck } = await supabaseClient.from('elo_ratings').select('id').ilike('discord_username', playerName).limit(1);
+        const { data: ptsCheck } = await supabaseClient.from('player_points').select('discord_username').ilike('discord_username', playerName).limit(1);
+        if (!signups.length && !eloCheck?.length && !ptsCheck?.length) {
+          content.innerHTML = `
+            <div class="empty-state" style="padding:60px 20px;text-align:center;">
+              <h3 style="margin-bottom:12px;color:var(--red);">Player Not Found</h3>
+              <p style="color:var(--muted);margin-bottom:20px;">No player named "<strong style="color:var(--text);">${playerName.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</strong>" was found.</p>
+              <div style="max-width:320px;margin:0 auto;">
+                <input type="text" id="profile-search" placeholder="Try another name..." onkeydown="if(event.key==='Enter')goToProfile()" style="width:100%;margin-bottom:10px;" />
+                <button class="btn btn-primary" onclick="goToProfile()" style="width:100%;">Search</button>
+              </div>
+            </div>`;
+          return;
+        }
 
         // Get all matches for this player
         const signupIds = signups.map(s => s.id);
@@ -2147,6 +2166,7 @@
   <script src="js/toolbar.js"></script>
 </body>
 </html>
+
 
 
 
