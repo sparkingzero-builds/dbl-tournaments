@@ -5,6 +5,10 @@ const NotifInbox = (() => {
   let bellEl = null;
   let panelEl = null;
   let pollInterval = null;
+  let initialized = false;
+  let fetching = false;
+  const isAdmin = window.location.pathname.includes('/admin/');
+  const pathPrefix = isAdmin ? '../' : '';
 
   function getReadKey() { return 'dbl_notif_read_' + username; }
   function getReadIds() {
@@ -12,28 +16,36 @@ const NotifInbox = (() => {
   }
   function markRead(id) {
     const read = getReadIds();
-    if (!read.includes(id)) { read.push(id); localStorage.setItem(getReadKey(), JSON.stringify(read.slice(-200))); }
+    if (!read.includes(id)) {
+      read.push(id);
+      try { localStorage.setItem(getReadKey(), JSON.stringify(read.slice(-200))); } catch {}
+    }
   }
   function markAllRead() {
     const ids = notifications.map(n => n.id);
     const read = getReadIds();
     ids.forEach(id => { if (!read.includes(id)) read.push(id); });
-    localStorage.setItem(getReadKey(), JSON.stringify(read.slice(-200)));
+    try { localStorage.setItem(getReadKey(), JSON.stringify(read.slice(-200))); } catch {}
     updateBadge();
     renderList();
   }
 
   function init() {
+    if (initialized) return;
     if (typeof AUTH === 'undefined' || !AUTH.isLoggedIn()) return;
     username = AUTH.getDiscordUsername();
     if (!username) return;
 
+    initialized = true;
     createUI();
     fetchAll();
+    if (pollInterval) clearInterval(pollInterval);
     pollInterval = setInterval(fetchAll, 60000);
   }
 
   function createUI() {
+    if (bellEl) return;
+
     bellEl = document.createElement('div');
     bellEl.className = 'notif-bell';
     bellEl.innerHTML = `
@@ -42,7 +54,7 @@ const NotifInbox = (() => {
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
           <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
         </svg>
-        <span class="notif-badge" id="notif-badge" style="display:none;">0</span>
+        <span class="notif-badge" style="display:none;">0</span>
       </button>
     `;
 
@@ -52,12 +64,14 @@ const NotifInbox = (() => {
     panelEl.innerHTML = `
       <div class="notif-panel-header">
         <span class="notif-panel-title">Notifications</span>
-        <button class="notif-mark-all" onclick="NotifInbox.markAllRead()">Mark all read</button>
+        <button class="notif-mark-all">Mark all read</button>
       </div>
-      <div class="notif-panel-list" id="notif-list">
+      <div class="notif-panel-list">
         <div class="notif-empty">No notifications</div>
       </div>
     `;
+
+    panelEl.querySelector('.notif-mark-all').addEventListener('click', () => markAllRead());
 
     bellEl.querySelector('.notif-bell-btn').addEventListener('click', (e) => {
       e.stopPropagation();
@@ -83,9 +97,7 @@ const NotifInbox = (() => {
     injectStyles();
   }
 
-  function toggle() {
-    isOpen ? close() : open();
-  }
+  function toggle() { isOpen ? close() : open(); }
   function open() {
     isOpen = true;
     panelEl.style.display = '';
@@ -98,17 +110,19 @@ const NotifInbox = (() => {
   }
 
   async function fetchAll() {
-    if (!username) return;
+    if (!username || fetching) return;
+    fetching = true;
     const items = [];
 
     try {
-      const { data: pending } = await supabaseClient
+      const { data: pending, error } = await supabaseClient
         .from('bounty_challenges')
         .select('id, challenger, target, created_at, bounty_at_stake')
         .ilike('target', username)
         .eq('status', 'pending')
         .order('created_at', { ascending: false })
         .limit(10);
+      if (error) console.warn('NotifInbox: pending challenges query failed', error.message);
 
       if (pending) pending.forEach(c => {
         items.push({
@@ -118,22 +132,28 @@ const NotifInbox = (() => {
           title: 'Bounty Challenge!',
           body: `<strong>${esc(c.challenger)}</strong> challenged you! Stake: <span style="color:var(--gold);">${(c.bounty_at_stake || 0).toLocaleString()}</span>`,
           time: c.created_at,
-          action: 'bounty.html',
+          action: pathPrefix + 'bounty.html',
           priority: 3
         });
       });
-    } catch {}
+    } catch (e) { console.warn('NotifInbox: pending challenges error', e); }
 
+    // Accepted challenges — use two separate queries to avoid .or() injection
     try {
-      const { data: accepted } = await supabaseClient
-        .from('bounty_challenges')
-        .select('id, challenger, target, created_at')
-        .or(`challenger.ilike.${username},target.ilike.${username}`)
-        .eq('status', 'accepted')
-        .order('created_at', { ascending: false })
-        .limit(10);
+      const [r1, r2] = await Promise.all([
+        supabaseClient.from('bounty_challenges').select('id, challenger, target, created_at')
+          .ilike('challenger', username).eq('status', 'accepted').order('created_at', { ascending: false }).limit(10),
+        supabaseClient.from('bounty_challenges').select('id, challenger, target, created_at')
+          .ilike('target', username).eq('status', 'accepted').order('created_at', { ascending: false }).limit(10)
+      ]);
+      if (r1.error) console.warn('NotifInbox: accepted q1 failed', r1.error.message);
+      if (r2.error) console.warn('NotifInbox: accepted q2 failed', r2.error.message);
 
-      if (accepted) accepted.forEach(c => {
+      const accepted = [...(r1.data || []), ...(r2.data || [])];
+      const seen = new Set();
+      accepted.forEach(c => {
+        if (seen.has(c.id)) return;
+        seen.add(c.id);
         const opponent = c.challenger.toLowerCase() === username.toLowerCase() ? c.target : c.challenger;
         items.push({
           id: 'bc_accepted_' + c.id,
@@ -142,22 +162,26 @@ const NotifInbox = (() => {
           title: 'Match Awaiting',
           body: `Your bounty match vs <strong>${esc(opponent)}</strong> is active! Report the result.`,
           time: c.created_at,
-          action: 'bounty.html',
+          action: pathPrefix + 'bounty.html',
           priority: 2
         });
       });
-    } catch {}
+    } catch (e) { console.warn('NotifInbox: accepted challenges error', e); }
 
+    // Completed challenges — same approach, two queries
     try {
-      const { data: completed } = await supabaseClient
-        .from('bounty_challenges')
-        .select('id, challenger, target, winner, resolved_at')
-        .or(`challenger.ilike.${username},target.ilike.${username}`)
-        .eq('status', 'completed')
-        .order('resolved_at', { ascending: false })
-        .limit(5);
+      const [r1, r2] = await Promise.all([
+        supabaseClient.from('bounty_challenges').select('id, challenger, target, winner, resolved_at')
+          .ilike('challenger', username).eq('status', 'completed').order('resolved_at', { ascending: false }).limit(5),
+        supabaseClient.from('bounty_challenges').select('id, challenger, target, winner, resolved_at')
+          .ilike('target', username).eq('status', 'completed').order('resolved_at', { ascending: false }).limit(5)
+      ]);
 
-      if (completed) completed.forEach(c => {
+      const completed = [...(r1.data || []), ...(r2.data || [])];
+      const seen = new Set();
+      completed.forEach(c => {
+        if (seen.has(c.id)) return;
+        seen.add(c.id);
         const won = c.winner && c.winner.toLowerCase() === username.toLowerCase();
         const opponent = c.challenger.toLowerCase() === username.toLowerCase() ? c.target : c.challenger;
         items.push({
@@ -169,19 +193,20 @@ const NotifInbox = (() => {
             ? `You defeated <strong>${esc(opponent)}</strong> and claimed their bounty!`
             : `<strong>${esc(opponent)}</strong> claimed your bounty.`,
           time: c.resolved_at,
-          action: 'bounty.html',
+          action: pathPrefix + 'bounty.html',
           priority: 1
         });
       });
-    } catch {}
+    } catch (e) { console.warn('NotifInbox: completed challenges error', e); }
 
     try {
-      const { data: tournaments } = await supabaseClient
+      const { data: tournaments, error } = await supabaseClient
         .from('tournaments')
         .select('id, name, status, date, created_at')
         .in('status', ['open', 'active'])
         .order('created_at', { ascending: false })
         .limit(3);
+      if (error) console.warn('NotifInbox: tournaments query failed', error.message);
 
       if (tournaments) tournaments.forEach(t => {
         if (t.status === 'open') {
@@ -192,7 +217,7 @@ const NotifInbox = (() => {
             title: 'Tournament Open!',
             body: `<strong>${esc(t.name)}</strong> is now accepting sign-ups!`,
             time: t.created_at,
-            action: 'tournament.html',
+            action: pathPrefix + 'tournament.html',
             priority: 3
           });
         } else if (t.status === 'active') {
@@ -203,12 +228,12 @@ const NotifInbox = (() => {
             title: 'Tournament Live!',
             body: `<strong>${esc(t.name)}</strong> is underway!`,
             time: t.created_at,
-            action: 'bracket.html',
+            action: pathPrefix + 'bracket.html',
             priority: 2
           });
         }
       });
-    } catch {}
+    } catch (e) { console.warn('NotifInbox: tournaments error', e); }
 
     try {
       const { data: signups } = await supabaseClient
@@ -220,15 +245,29 @@ const NotifInbox = (() => {
         const tids = signups.map(s => s.tournament_id);
         const sids = signups.map(s => s.id);
 
-        const { data: recentMatches } = await supabaseClient
+        const { data: recentMatches, error } = await supabaseClient
           .from('matches')
           .select('id, player1_id, player2_id, winner_id, round, created_at, tournament_id')
           .in('tournament_id', tids)
-          .or(`player1_id.in.(${sids.join(',')}),player2_id.in.(${sids.join(',')})`)
+          .in('player1_id', sids)
           .order('created_at', { ascending: false })
           .limit(5);
 
-        if (recentMatches) recentMatches.forEach(m => {
+        const { data: recentMatches2 } = await supabaseClient
+          .from('matches')
+          .select('id, player1_id, player2_id, winner_id, round, created_at, tournament_id')
+          .in('tournament_id', tids)
+          .in('player2_id', sids)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (error) console.warn('NotifInbox: matches query failed', error.message);
+
+        const allMatches = [...(recentMatches || []), ...(recentMatches2 || [])];
+        const seenM = new Set();
+        allMatches.forEach(m => {
+          if (seenM.has(m.id)) return;
+          seenM.add(m.id);
           if (!m.winner_id) {
             items.push({
               id: 'match_sched_' + m.id,
@@ -237,7 +276,7 @@ const NotifInbox = (() => {
               title: 'Match Scheduled',
               body: `Round ${m.round} match is waiting to be played!`,
               time: m.created_at,
-              action: 'bracket.html',
+              action: pathPrefix + 'bracket.html',
               priority: 2
             });
           } else {
@@ -249,20 +288,21 @@ const NotifInbox = (() => {
               title: won ? 'Match Won!' : 'Match Lost',
               body: `Round ${m.round} result recorded.`,
               time: m.created_at,
-              action: 'bracket.html',
+              action: pathPrefix + 'bracket.html',
               priority: 1
             });
           }
         });
       }
-    } catch {}
+    } catch (e) { console.warn('NotifInbox: matches error', e); }
 
     try {
-      const { data: shopItems } = await supabaseClient
+      const { data: shopItems, error } = await supabaseClient
         .from('shop_items')
         .select('id, name, created_at')
         .order('created_at', { ascending: false })
         .limit(3);
+      if (error) console.warn('NotifInbox: shop query failed', error.message);
 
       const oneDayAgo = new Date(Date.now() - 86400000).toISOString();
       if (shopItems) shopItems.forEach(item => {
@@ -274,12 +314,12 @@ const NotifInbox = (() => {
             title: 'New in Shop!',
             body: `<strong>${esc(item.name)}</strong> just dropped!`,
             time: item.created_at,
-            action: 'shop.html',
+            action: pathPrefix + 'shop.html',
             priority: 1
           });
         }
       });
-    } catch {}
+    } catch (e) { console.warn('NotifInbox: shop error', e); }
 
     items.sort((a, b) => {
       if (a.priority !== b.priority) return b.priority - a.priority;
@@ -289,6 +329,7 @@ const NotifInbox = (() => {
     notifications = items;
     updateBadge();
     renderList();
+    fetching = false;
   }
 
   function esc(s) {
@@ -314,7 +355,7 @@ const NotifInbox = (() => {
   function updateBadge() {
     const read = getReadIds();
     const unread = notifications.filter(n => !read.includes(n.id)).length;
-    const badge = document.getElementById('notif-badge');
+    const badge = bellEl?.querySelector('.notif-badge');
     if (!badge) return;
     if (unread > 0) {
       badge.textContent = unread > 99 ? '99+' : unread;
@@ -327,7 +368,7 @@ const NotifInbox = (() => {
   }
 
   function renderList() {
-    const list = document.getElementById('notif-list');
+    const list = panelEl?.querySelector('.notif-panel-list');
     if (!list) return;
     const read = getReadIds();
 
@@ -339,8 +380,9 @@ const NotifInbox = (() => {
     list.innerHTML = notifications.slice(0, 20).map(n => {
       const isRead = read.includes(n.id);
       const priorityClass = n.priority >= 3 ? 'notif-urgent' : n.priority >= 2 ? 'notif-important' : '';
+      const safeId = esc(n.id);
       return `
-        <a href="${n.action}" class="notif-item ${isRead ? 'read' : 'unread'} ${priorityClass}" onclick="NotifInbox.onClickItem('${n.id}')">
+        <a href="${n.action}" class="notif-item ${isRead ? 'read' : 'unread'} ${priorityClass}" data-notif-id="${safeId}">
           <div class="notif-item-icon">${n.icon}</div>
           <div class="notif-item-content">
             <div class="notif-item-title">${n.title}</div>
@@ -351,11 +393,13 @@ const NotifInbox = (() => {
         </a>
       `;
     }).join('');
-  }
 
-  function onClickItem(id) {
-    markRead(id);
-    updateBadge();
+    list.querySelectorAll('.notif-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const id = el.dataset.notifId;
+        if (id) { markRead(id); updateBadge(); }
+      });
+    });
   }
 
   function injectStyles() {
@@ -561,5 +605,5 @@ const NotifInbox = (() => {
 
   setTimeout(() => init(), 400);
 
-  return { init, markAllRead, onClickItem, refresh: fetchAll };
+  return { init, markAllRead, refresh: fetchAll };
 })();
