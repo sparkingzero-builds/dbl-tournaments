@@ -1541,9 +1541,7 @@
     <div class="tab-content" id="tab-seasons">
       <div class="card mb-3">
         <h3 class="mb-2">Current Season</h3>
-        <div id="season-tab-active-info">
-          <p class="text-muted">Loading...</p>
-        </div>
+        <div id="season-tab-active-info"><p class="text-muted">Loading...</p></div>
         <div class="flex gap-2 mt-3">
           <button class="btn btn-danger" id="btn-season-end" onclick="endCurrentSeason()" style="display:none;">End Season</button>
         </div>
@@ -1555,6 +1553,82 @@
           <button class="btn btn-primary" onclick="startNewSeasonTab()">Start New Season</button>
         </div>
       </div>
+
+      <!-- Rewards Management -->
+      <div class="card mb-3" id="season-rewards-card" style="display:none;">
+        <div class="flex justify-between items-center mb-2">
+          <h3>Season Rewards</h3>
+          <button class="btn btn-sm btn-primary" onclick="showAddRewardForm()">+ Add Reward</button>
+        </div>
+        <div id="add-reward-form" style="display:none;margin-bottom:16px;padding:16px;background:var(--bg);border:1px solid var(--line);border-radius:8px;">
+          <div class="form-row mb-2">
+            <div class="form-group"><label>Tier (1-20)</label><input type="number" id="rw-tier" min="1" max="20" /></div>
+            <div class="form-group"><label>Name</label><input type="text" id="rw-name" placeholder="e.g. 100 Zeni" /></div>
+          </div>
+          <div class="form-row mb-2">
+            <div class="form-group">
+              <label>Type</label>
+              <select id="rw-type"><option value="points">Points</option><option value="flair_title">Title</option><option value="aura">Aura</option><option value="flair_border">Border</option><option value="badge">Badge</option><option value="victory_quote">Victory Quote</option><option value="kings_commentary">King's Commentary</option><option value="hype_bomb">Hype Bomb</option><option value="profile_bg">Profile BG</option></select>
+            </div>
+            <div class="form-group">
+              <label>Track</label>
+              <select id="rw-track"><option value="free">Free</option><option value="premium">Premium</option></select>
+            </div>
+          </div>
+          <div class="form-group mb-2"><label>Description</label><input type="text" id="rw-desc" placeholder="Optional description" /></div>
+          <div class="form-row mb-2">
+            <div class="form-group"><label>Metadata (JSON)</label><input type="text" id="rw-meta" placeholder='e.g. {"amount": 100}' /></div>
+            <div class="form-group"><label>Premium Cost</label><input type="number" id="rw-cost" value="0" min="0" /></div>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn btn-primary" onclick="saveReward()">Save Reward</button>
+            <button class="btn btn-secondary" onclick="cancelRewardForm()">Cancel</button>
+          </div>
+        </div>
+        <div id="season-rewards-list"><p class="text-muted">Loading...</p></div>
+      </div>
+
+      <!-- Challenges Management -->
+      <div class="card mb-3" id="season-challenges-card" style="display:none;">
+        <div class="flex justify-between items-center mb-2">
+          <h3>Season Challenges</h3>
+          <button class="btn btn-sm btn-primary" onclick="showAddChallengeForm()">+ Add Challenge</button>
+        </div>
+        <div id="add-challenge-form" style="display:none;margin-bottom:16px;padding:16px;background:var(--bg);border:1px solid var(--line);border-radius:8px;">
+          <div class="form-row mb-2">
+            <div class="form-group"><label>Name</label><input type="text" id="ch-name" placeholder="e.g. Bounty Hunter" /></div>
+            <div class="form-group">
+              <label>Type</label>
+              <select id="ch-type"><option value="daily">Daily</option><option value="weekly">Weekly</option></select>
+            </div>
+          </div>
+          <div class="form-group mb-2"><label>Description</label><input type="text" id="ch-desc" placeholder="e.g. Win 2 bounty matches" /></div>
+          <div class="form-row mb-2">
+            <div class="form-group"><label>XP Reward</label><input type="number" id="ch-xp" value="50" min="1" /></div>
+            <div class="form-group"><label>Goal</label><input type="number" id="ch-goal" value="1" min="1" /></div>
+          </div>
+          <div class="form-group mb-2">
+            <label>Track Stat</label>
+            <select id="ch-stat"><option value="login">Login</option><option value="bounty_wins">Bounty Wins</option><option value="matches">Matches</option><option value="visits">Visits</option><option value="claims">Claims</option><option value="xp">XP</option></select>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn btn-primary" onclick="saveChallenge()">Save Challenge</button>
+            <button class="btn btn-secondary" onclick="cancelChallengeForm()">Cancel</button>
+          </div>
+        </div>
+        <div id="season-challenges-list"><p class="text-muted">Loading...</p></div>
+      </div>
+
+      <!-- Player Progress -->
+      <div class="card mb-3" id="season-progress-card" style="display:none;">
+        <div class="flex justify-between items-center mb-2">
+          <h3>Player Progress</h3>
+          <button class="btn btn-sm btn-secondary" onclick="loadSeasonProgress()">Refresh</button>
+        </div>
+        <div id="season-progress-list"><p class="text-muted">Loading...</p></div>
+      </div>
+
+      <!-- History -->
       <div class="card">
         <h3 class="mb-2">Season History</h3>
         <div id="season-tab-history"><p class="text-muted">No archived seasons yet.</p></div>
@@ -4452,27 +4526,258 @@
     // -- Seasons Tab: Seasonal leaderboard reset -----------------
     // ============================================================
 
+    let _adminActiveSeason = null;
+
     async function loadSeasonsTab() {
       const infoEl = document.getElementById('season-tab-active-info');
       const endBtn = document.getElementById('btn-season-end');
       const startCard = document.getElementById('season-tab-start-card');
+      const rewardsCard = document.getElementById('season-rewards-card');
+      const challengesCard = document.getElementById('season-challenges-card');
+      const progressCard = document.getElementById('season-progress-card');
       try {
-        const season = await db.getActiveSeason();
-        if (season) {
+        _adminActiveSeason = await db.getActiveSeason();
+        if (_adminActiveSeason) {
+          const s = _adminActiveSeason;
+          const endsAt = s.ends_at ? new Date(s.ends_at).toLocaleDateString() : 'No end date';
           infoEl.innerHTML = `
-            <p><strong style="color:var(--cyan);">${season.name}</strong></p>
-            <p class="text-muted">Started: ${new Date(season.started_at || season.created_at).toLocaleDateString()} &middot; Status: ${season.status}</p>`;
+            <p><strong style="color:var(--cyan);">${esc(s.name)}</strong></p>
+            <p class="text-muted">Started: ${new Date(s.started_at || s.created_at).toLocaleDateString()} &middot; Ends: ${endsAt} &middot; Tiers: ${s.total_tiers || 20}</p>
+            <p class="text-muted" style="margin-top:4px;">ID: <code style="font-size:10px;color:var(--muted);">${s.id}</code></p>`;
           endBtn.style.display = '';
           startCard.style.display = 'none';
+          rewardsCard.style.display = '';
+          challengesCard.style.display = '';
+          progressCard.style.display = '';
+          loadSeasonRewards(); loadSeasonChallenges(); loadSeasonProgress();
         } else {
           infoEl.innerHTML = '<p class="text-muted">No active season.</p>';
           endBtn.style.display = 'none';
           startCard.style.display = '';
+          rewardsCard.style.display = 'none';
+          challengesCard.style.display = 'none';
+          progressCard.style.display = 'none';
         }
       } catch (e) {
         infoEl.innerHTML = '<p class="text-muted">Could not load season info.</p>';
       }
       await loadSeasonHistory();
+    }
+
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    // -- Rewards CRUD --
+    let _editRewardId = null;
+
+    function showAddRewardForm() {
+      _editRewardId = null;
+      document.getElementById('rw-tier').value = '';
+      document.getElementById('rw-name').value = '';
+      document.getElementById('rw-type').value = 'points';
+      document.getElementById('rw-track').value = 'free';
+      document.getElementById('rw-desc').value = '';
+      document.getElementById('rw-meta').value = '';
+      document.getElementById('rw-cost').value = '0';
+      document.getElementById('add-reward-form').style.display = '';
+    }
+    function cancelRewardForm() { document.getElementById('add-reward-form').style.display = 'none'; }
+
+    function editReward(id) {
+      const el = document.querySelector(`[data-reward-id="${id}"]`);
+      if (!el) return;
+      _editRewardId = id;
+      document.getElementById('rw-tier').value = el.dataset.tier;
+      document.getElementById('rw-name').value = el.dataset.name;
+      document.getElementById('rw-type').value = el.dataset.type;
+      document.getElementById('rw-track').value = el.dataset.track;
+      document.getElementById('rw-desc').value = el.dataset.desc || '';
+      document.getElementById('rw-meta').value = el.dataset.meta || '';
+      document.getElementById('rw-cost').value = el.dataset.cost || '0';
+      document.getElementById('add-reward-form').style.display = '';
+    }
+
+    async function saveReward() {
+      const tier = parseInt(document.getElementById('rw-tier').value);
+      const name = document.getElementById('rw-name').value.trim();
+      const type = document.getElementById('rw-type').value;
+      const track = document.getElementById('rw-track').value;
+      const desc = document.getElementById('rw-desc').value.trim();
+      const cost = parseInt(document.getElementById('rw-cost').value) || 0;
+      let meta = {};
+      try { meta = JSON.parse(document.getElementById('rw-meta').value || '{}'); } catch { NotificationSystem.show('Invalid JSON in metadata', 'error'); return; }
+
+      if (!tier || tier < 1 || tier > 20) { NotificationSystem.show('Tier must be 1-20', 'error'); return; }
+      if (!name) { NotificationSystem.show('Enter a reward name', 'error'); return; }
+
+      try {
+        if (_editRewardId) {
+          await db.updateSeasonReward(_editRewardId, { tier, name, type, track, description: desc, metadata: meta, premium_cost: cost });
+          NotificationSystem.show('Reward updated', 'success');
+        } else {
+          await db.createSeasonReward({ season_id: _adminActiveSeason.id, tier, name, type, track, description: desc, metadata: meta, premium_cost: cost });
+          NotificationSystem.show('Reward added', 'success');
+        }
+        cancelRewardForm();
+        loadSeasonRewards();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function deleteReward(id) {
+      if (!confirm('Delete this reward?')) return;
+      try {
+        await db.deleteSeasonReward(id);
+        NotificationSystem.show('Reward deleted', 'info');
+        loadSeasonRewards();
+      } catch (e) { NotificationSystem.show('Error: ' + e.message, 'error'); }
+    }
+
+    async function loadSeasonRewards() {
+      const el = document.getElementById('season-rewards-list');
+      try {
+        const rewards = await db.getSeasonRewards(_adminActiveSeason.id);
+        if (!rewards.length) { el.innerHTML = '<p class="text-muted">No rewards configured. Add rewards for tiers 1-20.</p>'; return; }
+
+        const icons = { points:'🪙', flair_title:'✨', aura:'🔥', flair_border:'🖼️', badge:'🏅', victory_quote:'💬', kings_commentary:'👑', hype_bomb:'💥', profile_bg:'🎨' };
+        el.innerHTML = `
+          <table class="signup-table">
+            <thead><tr><th>Tier</th><th>Reward</th><th>Type</th><th>Track</th><th>Actions</th></tr></thead>
+            <tbody>${rewards.map(r => `<tr data-reward-id="${r.id}" data-tier="${r.tier}" data-name="${esc(r.name)}" data-type="${r.type}" data-track="${r.track}" data-desc="${esc(r.description || '')}" data-meta='${esc(JSON.stringify(r.metadata || {}))}' data-cost="${r.premium_cost || 0}">
+              <td style="font-weight:700;color:var(--cyan);">${r.tier}</td>
+              <td>${icons[r.type] || '🏆'} ${esc(r.name)}</td>
+              <td style="font-size:11px;color:var(--muted);">${r.type}</td>
+              <td><span style="color:${r.track === 'premium' ? 'var(--gold)' : '#a55eea'};font-weight:700;font-size:11px;text-transform:uppercase;">${r.track}</span></td>
+              <td>
+                <button class="btn btn-sm btn-secondary" onclick="editReward('${r.id}')" style="margin-right:4px;">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteReward('${r.id}')">Del</button>
+              </td>
+            </tr>`).join('')}</tbody>
+          </table>
+          <p class="text-muted" style="margin-top:8px;font-size:11px;">${rewards.length}/20 tiers configured</p>`;
+      } catch (e) { el.innerHTML = '<p class="text-muted">Error loading rewards.</p>'; }
+    }
+
+    // -- Challenges CRUD --
+    function showAddChallengeForm() {
+      document.getElementById('ch-name').value = '';
+      document.getElementById('ch-type').value = 'daily';
+      document.getElementById('ch-desc').value = '';
+      document.getElementById('ch-xp').value = '50';
+      document.getElementById('ch-goal').value = '1';
+      document.getElementById('ch-stat').value = 'login';
+      document.getElementById('add-challenge-form').style.display = '';
+    }
+    function cancelChallengeForm() { document.getElementById('add-challenge-form').style.display = 'none'; }
+
+    async function saveChallenge() {
+      const name = document.getElementById('ch-name').value.trim();
+      const type = document.getElementById('ch-type').value;
+      const desc = document.getElementById('ch-desc').value.trim();
+      const xp = parseInt(document.getElementById('ch-xp').value) || 0;
+      const goal = parseInt(document.getElementById('ch-goal').value) || 1;
+      const stat = document.getElementById('ch-stat').value;
+      if (!name || !desc) { NotificationSystem.show('Name and description required', 'error'); return; }
+      try {
+        const { error } = await supabaseClient.from('season_challenges').insert({
+          season_id: _adminActiveSeason.id, name, description: desc, type, xp_reward: xp, goal, track_stat: stat
+        });
+        if (error) throw error;
+        NotificationSystem.show('Challenge added', 'success');
+        cancelChallengeForm();
+        loadSeasonChallenges();
+      } catch (e) { NotificationSystem.show('Error: ' + e.message, 'error'); }
+    }
+
+    async function deleteChallenge(id) {
+      if (!confirm('Delete this challenge? Player progress for it will also be removed.')) return;
+      try {
+        await supabaseClient.from('challenge_progress').delete().eq('challenge_id', id);
+        const { error } = await supabaseClient.from('season_challenges').delete().eq('id', id);
+        if (error) throw error;
+        NotificationSystem.show('Challenge deleted', 'info');
+        loadSeasonChallenges();
+      } catch (e) { NotificationSystem.show('Error: ' + e.message, 'error'); }
+    }
+
+    async function loadSeasonChallenges() {
+      const el = document.getElementById('season-challenges-list');
+      try {
+        const challenges = await db.getSeasonChallenges(_adminActiveSeason.id);
+        if (!challenges.length) { el.innerHTML = '<p class="text-muted">No challenges configured.</p>'; return; }
+        const daily = challenges.filter(c => c.type === 'daily');
+        const weekly = challenges.filter(c => c.type === 'weekly');
+        el.innerHTML = `
+          <table class="signup-table">
+            <thead><tr><th>Name</th><th>Type</th><th>XP</th><th>Goal</th><th>Stat</th><th>Actions</th></tr></thead>
+            <tbody>
+              ${daily.length ? '<tr><td colspan="6" style="color:var(--cyan);font-weight:700;font-size:11px;text-transform:uppercase;padding:8px 14px;">Daily</td></tr>' : ''}
+              ${daily.map(c => `<tr>
+                <td>${esc(c.name)}</td>
+                <td style="font-size:11px;color:var(--muted);">daily</td>
+                <td style="color:var(--cyan);font-weight:700;">+${c.xp_reward}</td>
+                <td>${c.goal}</td>
+                <td style="font-size:11px;color:var(--muted);">${c.track_stat || '-'}</td>
+                <td><button class="btn btn-sm btn-danger" onclick="deleteChallenge('${c.id}')">Del</button></td>
+              </tr>`).join('')}
+              ${weekly.length ? '<tr><td colspan="6" style="color:var(--gold);font-weight:700;font-size:11px;text-transform:uppercase;padding:8px 14px;">Weekly</td></tr>' : ''}
+              ${weekly.map(c => `<tr>
+                <td>${esc(c.name)}</td>
+                <td style="font-size:11px;color:var(--muted);">weekly</td>
+                <td style="color:var(--cyan);font-weight:700;">+${c.xp_reward}</td>
+                <td>${c.goal}</td>
+                <td style="font-size:11px;color:var(--muted);">${c.track_stat || '-'}</td>
+                <td><button class="btn btn-sm btn-danger" onclick="deleteChallenge('${c.id}')">Del</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+          <p class="text-muted" style="margin-top:8px;font-size:11px;">${daily.length} daily, ${weekly.length} weekly</p>`;
+      } catch (e) { el.innerHTML = '<p class="text-muted">Error loading challenges.</p>'; }
+    }
+
+    // -- Player Progress --
+    async function loadSeasonProgress() {
+      const el = document.getElementById('season-progress-list');
+      try {
+        const data = await db.getSeasonLeaderboard(_adminActiveSeason.id);
+        if (!data.length) { el.innerHTML = '<p class="text-muted">No players have progress yet.</p>'; return; }
+        function getTier(xp) { for (let t = 20; t >= 1; t--) { if (xp >= t * 100) return t; } return 0; }
+        el.innerHTML = `
+          <table class="signup-table">
+            <thead><tr><th>#</th><th>Player</th><th>XP</th><th>Tier</th><th>Premium</th><th>Claimed</th><th>Actions</th></tr></thead>
+            <tbody>${data.map((p, i) => `<tr>
+              <td>${i + 1}</td>
+              <td style="font-weight:700;">${esc(p.discord_username)}</td>
+              <td style="color:var(--cyan);font-weight:700;">${(p.xp || 0).toLocaleString()}</td>
+              <td style="color:var(--gold);font-weight:700;">${getTier(p.xp || 0)}</td>
+              <td>${p.is_premium ? '<span style="color:var(--gold);font-weight:700;">PRO</span>' : '-'}</td>
+              <td style="font-size:11px;color:var(--muted);">${(p.claimed_tiers || []).length}/20</td>
+              <td>
+                <button class="btn btn-sm btn-secondary" onclick="addXPToPlayer('${esc(p.discord_username)}')">+XP</button>
+                <button class="btn btn-sm btn-secondary" onclick="togglePlayerPremium('${esc(p.discord_username)}', ${!p.is_premium})" style="margin-left:4px;">${p.is_premium ? 'Unprem' : 'Prem'}</button>
+              </td>
+            </tr>`).join('')}</tbody>
+          </table>
+          <p class="text-muted" style="margin-top:8px;font-size:11px;">${data.length} players</p>`;
+      } catch (e) { el.innerHTML = '<p class="text-muted">Error loading progress.</p>'; console.error(e); }
+    }
+
+    async function addXPToPlayer(username) {
+      const amount = prompt('How much XP to add?');
+      if (!amount || isNaN(parseInt(amount))) return;
+      try {
+        await db.addSeasonXP(_adminActiveSeason.id, username, parseInt(amount));
+        NotificationSystem.show(`Added ${amount} XP to ${username}`, 'success');
+        loadSeasonProgress();
+      } catch (e) { NotificationSystem.show('Error: ' + e.message, 'error'); }
+    }
+
+    async function togglePlayerPremium(username, newVal) {
+      try {
+        await db.setSeasonPremium(_adminActiveSeason.id, username, newVal);
+        NotificationSystem.show(`${username} premium: ${newVal ? 'ON' : 'OFF'}`, 'success');
+        loadSeasonProgress();
+      } catch (e) { NotificationSystem.show('Error: ' + e.message, 'error'); }
     }
 
     async function loadSeasonHistory() {
