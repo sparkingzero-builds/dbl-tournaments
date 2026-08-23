@@ -639,6 +639,9 @@
     .activity-feed-item .af-icon.purchase { background: rgba(255,45,120,0.1); }
     .activity-feed-item .af-icon.points { background: rgba(165,94,234,0.1); }
     .activity-feed-item .af-icon.elo { background: rgba(0,229,255,0.1); }
+    @keyframes af-enter { from { opacity:0; transform:translateX(-12px); } to { opacity:1; transform:translateX(0); } }
+    .af-player { color: var(--cyan); cursor: pointer; transition: color .15s; }
+    .af-player:hover { color: var(--pink); text-decoration: underline; }
     .activity-feed-item .af-body { flex: 1; min-width: 0; }
     .activity-feed-item .af-title {
       font-size: 13px;
@@ -1766,7 +1769,7 @@
 
       <div class="card">
         <h3 class="mb-2">Live Stats</h3>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;" id="activity-stats">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;" id="activity-stats">
           <div class="stat-box"><div class="stat-val" id="stat-signups-today">-</div><div class="stat-label">Signups Today</div></div>
           <div class="stat-box"><div class="stat-val" id="stat-matches-today">-</div><div class="stat-label">Matches Today</div></div>
           <div class="stat-box"><div class="stat-val" id="stat-bounties-today">-</div><div class="stat-label">Bounties Today</div></div>
@@ -5321,7 +5324,8 @@ loadSettings = function() {
 // ══════════════════════════════════════════
 // Activity Feed / Notifications
 // ══════════════════════════════════════════
-let _activityOffset = 0;
+let _activityCursor = null;
+let _activityHasMore = true;
 const ACTIVITY_PAGE_SIZE = 30;
 
 function activityTimeAgo(d) {
@@ -5336,8 +5340,16 @@ function activityTimeAgo(d) {
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
+// Auto-update relative timestamps every 60s
+setInterval(() => {
+  document.querySelectorAll('.af-time[data-time]').forEach(el => {
+    el.textContent = activityTimeAgo(el.dataset.time);
+  });
+}, 60000);
+
 async function loadActivityFeed(append) {
-  if (!append) _activityOffset = 0;
+  if (!append) { _activityCursor = null; _activityHasMore = true; }
+  if (!_activityHasMore && append) return;
   const filter = document.getElementById('activity-filter')?.value || 'all';
   const container = document.getElementById('activity-feed-list');
   if (!append) container.innerHTML = '<p class="text-muted">Loading activity...</p>';
@@ -5345,19 +5357,26 @@ async function loadActivityFeed(append) {
   try {
     const events = [];
     const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString();
+    const perTable = ACTIVITY_PAGE_SIZE + 10;
 
-    // Fetch data based on filter
     const fetches = [];
+
+    function addTimeCursor(q) {
+      return _activityCursor ? q.lt('created_at', _activityCursor) : q;
+    }
+    function addTimeCursorUpdated(q) {
+      return _activityCursor ? q.lt('updated_at', _activityCursor) : q;
+    }
 
     if (filter === 'all' || filter === 'signups') {
       fetches.push(
-        supabaseClient.from('signups').select('id, discord_username, tournament_id, created_at, tournament:tournaments(name)')
-          .order('created_at', { ascending: false }).range(_activityOffset, _activityOffset + ACTIVITY_PAGE_SIZE - 1)
+        addTimeCursor(supabaseClient.from('signups').select('id, discord_username, tournament_id, created_at, tournament:tournaments(name)')
+          .order('created_at', { ascending: false })).limit(perTable)
           .then(({ data }) => {
             (data || []).forEach(s => events.push({
               type: 'signup', icon: '📝', iconCls: 'signup',
-              title: `${esc(s.discord_username)} signed up for a tournament`,
+              title: `<span class="af-player" onclick="switchToPlayer('${esc(s.discord_username)}')">${esc(s.discord_username)}</span> signed up for a tournament`,
               detail: s.tournament?.name ? esc(s.tournament.name) : '',
               player: s.discord_username,
               time: s.created_at
@@ -5368,18 +5387,18 @@ async function loadActivityFeed(append) {
 
     if (filter === 'all' || filter === 'matches') {
       fetches.push(
-        supabaseClient.from('matches')
-          .select('id, round, score, winner_id, created_at, player1:signups!matches_player1_id_fkey(discord_username), player2:signups!matches_player2_id_fkey(discord_username)')
+        addTimeCursor(supabaseClient.from('matches')
+          .select('id, round, score, winner_id, player1_id, player2_id, created_at, player1:signups!matches_player1_id_fkey(discord_username), player2:signups!matches_player2_id_fkey(discord_username)')
           .not('winner_id', 'is', null)
-          .order('created_at', { ascending: false }).range(_activityOffset, _activityOffset + ACTIVITY_PAGE_SIZE - 1)
+          .order('created_at', { ascending: false })).limit(perTable)
           .then(({ data }) => {
             (data || []).forEach(m => {
-              const winner = m.winner_id === m.player1?.id ? m.player1?.discord_username : m.player2?.discord_username;
+              const winner = m.winner_id === m.player1_id ? m.player1?.discord_username : m.player2?.discord_username;
               const p1 = m.player1?.discord_username || '?';
               const p2 = m.player2?.discord_username || '?';
               events.push({
                 type: 'match', icon: '⚔️', iconCls: 'match',
-                title: `${esc(p1)} vs ${esc(p2)}`,
+                title: `<span class="af-player" onclick="switchToPlayer('${esc(p1)}')">${esc(p1)}</span> vs <span class="af-player" onclick="switchToPlayer('${esc(p2)}')">${esc(p2)}</span>`,
                 detail: `${m.score ? esc(m.score) + ' · ' : ''}Round ${m.round || '?'}${winner ? ' · Winner: ' + esc(winner) : ''}`,
                 player: winner || p1,
                 time: m.created_at
@@ -5391,9 +5410,9 @@ async function loadActivityFeed(append) {
 
     if (filter === 'all' || filter === 'bounties') {
       fetches.push(
-        supabaseClient.from('bounty_challenges')
+        addTimeCursor(supabaseClient.from('bounty_challenges')
           .select('id, challenger, target, winner, bounty_at_stake, currency_reward, status, resolved_at, created_at')
-          .order('created_at', { ascending: false }).range(_activityOffset, _activityOffset + ACTIVITY_PAGE_SIZE - 1)
+          .order('created_at', { ascending: false })).limit(perTable)
           .then(({ data }) => {
             (data || []).forEach(b => {
               const isPending = b.status === 'pending';
@@ -5401,9 +5420,9 @@ async function loadActivityFeed(append) {
               events.push({
                 type: 'bounty', icon: isPending ? '🎯' : (isComplete ? '💰' : '❌'), iconCls: 'bounty',
                 title: isPending
-                  ? `${esc(b.challenger)} challenged ${esc(b.target)}`
+                  ? `<span class="af-player" onclick="switchToPlayer('${esc(b.challenger)}')">${esc(b.challenger)}</span> challenged <span class="af-player" onclick="switchToPlayer('${esc(b.target)}')">${esc(b.target)}</span>`
                   : isComplete
-                    ? `${esc(b.winner || '?')} won bounty vs ${esc(b.winner === b.challenger ? b.target : b.challenger)}`
+                    ? `<span class="af-player" onclick="switchToPlayer('${esc(b.winner || '?')}')">${esc(b.winner || '?')}</span> won bounty vs ${esc(b.winner === b.challenger ? b.target : b.challenger)}`
                     : `Bounty ${b.status}: ${esc(b.challenger)} vs ${esc(b.target)}`,
                 detail: `Z ${(b.bounty_at_stake || 0).toLocaleString()} at stake${b.currency_reward ? ' · +' + b.currency_reward + ' pts' : ''}`,
                 player: b.challenger,
@@ -5416,14 +5435,14 @@ async function loadActivityFeed(append) {
 
     if (filter === 'all' || filter === 'purchases') {
       fetches.push(
-        supabaseClient.from('point_transactions')
+        addTimeCursor(supabaseClient.from('point_transactions')
           .select('discord_username, amount, reason, created_at')
           .eq('reason', 'purchase')
-          .order('created_at', { ascending: false }).range(_activityOffset, _activityOffset + ACTIVITY_PAGE_SIZE - 1)
+          .order('created_at', { ascending: false })).limit(perTable)
           .then(({ data }) => {
             (data || []).forEach(tx => events.push({
               type: 'purchase', icon: '🛒', iconCls: 'purchase',
-              title: `${esc(tx.discord_username)} made a purchase`,
+              title: `<span class="af-player" onclick="switchToPlayer('${esc(tx.discord_username)}')">${esc(tx.discord_username)}</span> made a purchase`,
               detail: `${tx.amount} points spent`,
               player: tx.discord_username,
               time: tx.created_at
@@ -5434,10 +5453,10 @@ async function loadActivityFeed(append) {
 
     if (filter === 'all' || filter === 'points') {
       fetches.push(
-        supabaseClient.from('point_transactions')
+        addTimeCursor(supabaseClient.from('point_transactions')
           .select('discord_username, amount, reason, created_at')
           .neq('reason', 'purchase')
-          .order('created_at', { ascending: false }).range(_activityOffset, _activityOffset + ACTIVITY_PAGE_SIZE - 1)
+          .order('created_at', { ascending: false })).limit(perTable)
           .then(({ data }) => {
             const reasonLabels = {
               match_win: 'Match Win', participation: 'Participation', ban_vote: 'Ban Vote',
@@ -5450,7 +5469,7 @@ async function loadActivityFeed(append) {
               const sign = tx.amount >= 0 ? '+' : '';
               events.push({
                 type: 'points', icon: tx.amount >= 0 ? '💫' : '💸', iconCls: 'points',
-                title: `${esc(tx.discord_username)} · ${label}`,
+                title: `<span class="af-player" onclick="switchToPlayer('${esc(tx.discord_username)}')">${esc(tx.discord_username)}</span> · ${label}`,
                 detail: `${sign}${tx.amount} points`,
                 player: tx.discord_username,
                 time: tx.created_at
@@ -5461,14 +5480,16 @@ async function loadActivityFeed(append) {
     }
 
     if (filter === 'all' || filter === 'elo') {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
       fetches.push(
-        supabaseClient.from('elo_ratings')
+        addTimeCursorUpdated(supabaseClient.from('elo_ratings')
           .select('discord_username, elo, peak_elo, updated_at')
-          .order('updated_at', { ascending: false }).range(_activityOffset, _activityOffset + ACTIVITY_PAGE_SIZE - 1)
+          .gte('updated_at', sevenDaysAgo)
+          .order('updated_at', { ascending: false })).limit(perTable)
           .then(({ data }) => {
             (data || []).forEach(e => events.push({
               type: 'elo', icon: '📊', iconCls: 'elo',
-              title: `${esc(e.discord_username)} ELO updated`,
+              title: `<span class="af-player" onclick="switchToPlayer('${esc(e.discord_username)}')">${esc(e.discord_username)}</span> ELO updated`,
               detail: `Current: ${e.elo}${e.peak_elo > e.elo ? ' · Peak: ' + e.peak_elo : ''}`,
               player: e.discord_username,
               time: e.updated_at
@@ -5479,24 +5500,28 @@ async function loadActivityFeed(append) {
 
     await Promise.all(fetches);
 
-    // Sort all events by time, newest first
     events.sort((a, b) => new Date(b.time) - new Date(a.time));
     const pageEvents = events.slice(0, ACTIVITY_PAGE_SIZE);
 
+    if (pageEvents.length > 0) {
+      _activityCursor = pageEvents[pageEvents.length - 1].time;
+    }
+    _activityHasMore = pageEvents.length >= ACTIVITY_PAGE_SIZE;
+
     if (!append && pageEvents.length === 0) {
-      container.innerHTML = '<p class="text-muted">No activity found.</p>';
+      container.innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="font-size:2rem;margin-bottom:8px;">📭</div><p class="text-muted">No activity yet.</p><p class="text-muted" style="font-size:.85rem;">Events will appear here during tournaments.</p></div>';
       document.getElementById('activity-load-more').style.display = 'none';
       return;
     }
 
     const html = pageEvents.map(ev => `
-      <div class="activity-feed-item">
+      <div class="activity-feed-item" style="animation:af-enter .25s ease-out">
         <div class="af-icon ${ev.iconCls}">${ev.icon}</div>
         <div class="af-body">
           <div class="af-title">${ev.title}</div>
           ${ev.detail ? `<div class="af-detail">${ev.detail}</div>` : ''}
         </div>
-        <div class="af-time">${activityTimeAgo(ev.time)}</div>
+        <div class="af-time" data-time="${ev.time}">${activityTimeAgo(ev.time)}</div>
       </div>
     `).join('');
 
@@ -5506,9 +5531,8 @@ async function loadActivityFeed(append) {
       container.innerHTML = html;
     }
 
-    document.getElementById('activity-load-more').style.display = pageEvents.length >= ACTIVITY_PAGE_SIZE ? '' : 'none';
+    document.getElementById('activity-load-more').style.display = _activityHasMore ? '' : 'none';
 
-    // Load today's stats (only on fresh load)
     if (!append) loadActivityStats(todayStart);
 
   } catch (e) {
@@ -5517,8 +5541,18 @@ async function loadActivityFeed(append) {
   }
 }
 
+function switchToPlayer(name) {
+  const playersTab = document.querySelector('.sidebar-item[data-tab="players"]');
+  if (playersTab) {
+    playersTab.click();
+    setTimeout(() => {
+      const search = document.getElementById('player-search');
+      if (search) { search.value = name; search.dispatchEvent(new Event('input')); }
+    }, 200);
+  }
+}
+
 function loadMoreActivity() {
-  _activityOffset += ACTIVITY_PAGE_SIZE;
   loadActivityFeed(true);
 }
 
@@ -5530,12 +5564,13 @@ async function loadActivityStats(todayStart) {
       supabaseClient.from('bounty_challenges').select('id', { count: 'exact', head: true }).gte('created_at', todayStart),
       supabaseClient.from('point_transactions').select('id', { count: 'exact', head: true }).eq('reason', 'purchase').gte('created_at', todayStart)
     ]);
-    document.getElementById('stat-signups-today').textContent = signups.count || 0;
-    document.getElementById('stat-matches-today').textContent = matches.count || 0;
-    document.getElementById('stat-bounties-today').textContent = bounties.count || 0;
-    document.getElementById('stat-purchases-today').textContent = purchases.count || 0;
+    document.getElementById('stat-signups-today').textContent = signups.count ?? 0;
+    document.getElementById('stat-matches-today').textContent = matches.count ?? 0;
+    document.getElementById('stat-bounties-today').textContent = bounties.count ?? 0;
+    document.getElementById('stat-purchases-today').textContent = purchases.count ?? 0;
   } catch (e) {
     console.error('Activity stats error:', e);
+    document.querySelectorAll('#stat-signups-today,#stat-matches-today,#stat-bounties-today,#stat-purchases-today').forEach(el => el.textContent = '!');
   }
 }
 </script>
