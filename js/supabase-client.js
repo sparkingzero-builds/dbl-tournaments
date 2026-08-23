@@ -832,6 +832,116 @@ const db = {
     return data?.[0] || null;
   },
 
+  async setSeasonPremium(seasonId, username, isPremium) {
+    const progress = await this.getSeasonProgress(seasonId, username);
+    if (!progress) {
+      const { data, error } = await supabaseClient
+        .from('season_progress')
+        .insert({ season_id: seasonId, discord_username: username, xp: 0, is_premium: isPremium })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    }
+    const { data, error } = await supabaseClient
+      .from('season_progress')
+      .update({ is_premium: isPremium })
+      .eq('id', progress.id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async getSeasonChallenges(seasonId) {
+    const { data, error } = await supabaseClient
+      .from('season_challenges')
+      .select('*')
+      .eq('season_id', seasonId)
+      .order('type', { ascending: true });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async getChallengeProgress(seasonId, username) {
+    const { data, error } = await supabaseClient
+      .from('challenge_progress')
+      .select('*')
+      .eq('season_id', seasonId)
+      .ilike('discord_username', username);
+    if (error) throw error;
+    return data || [];
+  },
+
+  async upsertChallengeProgress(seasonId, challengeId, username, period, progress, completed) {
+    const updates = { progress, completed };
+    if (completed) updates.completed_at = new Date().toISOString();
+    const { data: existing } = await supabaseClient
+      .from('challenge_progress')
+      .select('id')
+      .eq('challenge_id', challengeId)
+      .ilike('discord_username', username)
+      .eq('period', period)
+      .limit(1);
+    if (existing?.length) {
+      const { data, error } = await supabaseClient
+        .from('challenge_progress')
+        .update(updates)
+        .eq('id', existing[0].id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    } else {
+      const { data, error } = await supabaseClient
+        .from('challenge_progress')
+        .insert({
+          season_id: seasonId,
+          challenge_id: challengeId,
+          discord_username: username,
+          period,
+          ...updates
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    }
+  },
+
+  async getPlayerSeasonStats(seasonId, username) {
+    let matchesPlayed = 0, bountyWins = 0, tournamentsEntered = 0;
+    try {
+      const [{ data: m1 }, { data: m2 }] = await Promise.all([
+        supabaseClient.from('matches').select('id', { count: 'exact', head: true }).ilike('player1_id', username),
+        supabaseClient.from('matches').select('id', { count: 'exact', head: true }).ilike('player2_id', username)
+      ]);
+    } catch {}
+    try {
+      const [{ count: c1 }, { count: c2 }] = await Promise.all([
+        supabaseClient.from('matches').select('*', { count: 'exact', head: true }).ilike('player1_id', username),
+        supabaseClient.from('matches').select('*', { count: 'exact', head: true }).ilike('player2_id', username)
+      ]);
+      matchesPlayed = (c1 || 0) + (c2 || 0);
+    } catch {}
+    try {
+      const { count } = await supabaseClient
+        .from('bounty_challenges')
+        .select('*', { count: 'exact', head: true })
+        .ilike('challenger', username)
+        .eq('status', 'completed');
+      bountyWins = count || 0;
+    } catch {}
+    try {
+      const { count } = await supabaseClient
+        .from('signups')
+        .select('*', { count: 'exact', head: true })
+        .ilike('discord_username', username);
+      tournamentsEntered = count || 0;
+    } catch {}
+    return { matchesPlayed, bountyWins, tournamentsEntered };
+  },
+
   async getSeasonLeaderboard(seasonId) {
     const { data, error } = await supabaseClient
       .from('season_progress')

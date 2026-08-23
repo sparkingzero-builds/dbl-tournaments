@@ -37,8 +37,36 @@ CREATE TABLE IF NOT EXISTS season_progress (
   claimed_tiers JSONB DEFAULT '[]',
   matches_played INTEGER DEFAULT 0,
   bounty_wins INTEGER DEFAULT 0,
+  is_premium BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE(season_id, discord_username)
+);
+
+-- Season challenges (admin-defined per season)
+CREATE TABLE IF NOT EXISTS season_challenges (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  season_id UUID NOT NULL REFERENCES seasons(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('daily', 'weekly')),
+  xp_reward INTEGER NOT NULL DEFAULT 0,
+  goal INTEGER NOT NULL DEFAULT 1,
+  track_stat TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Player challenge progress
+CREATE TABLE IF NOT EXISTS challenge_progress (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  season_id UUID NOT NULL REFERENCES seasons(id) ON DELETE CASCADE,
+  challenge_id UUID NOT NULL REFERENCES season_challenges(id) ON DELETE CASCADE,
+  discord_username TEXT NOT NULL,
+  progress INTEGER DEFAULT 0,
+  completed BOOLEAN DEFAULT false,
+  period TEXT NOT NULL,
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(challenge_id, discord_username, period)
 );
 
 -- Clan wars table (if not already created)
@@ -56,19 +84,28 @@ CREATE TABLE IF NOT EXISTS clan_wars (
 ALTER TABLE seasons ENABLE ROW LEVEL SECURITY;
 ALTER TABLE season_rewards ENABLE ROW LEVEL SECURITY;
 ALTER TABLE season_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE season_challenges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE challenge_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE clan_wars ENABLE ROW LEVEL SECURITY;
 
 -- Read access for all
 CREATE POLICY "seasons_read" ON seasons FOR SELECT USING (true);
 CREATE POLICY "season_rewards_read" ON season_rewards FOR SELECT USING (true);
 CREATE POLICY "season_progress_read" ON season_progress FOR SELECT USING (true);
+CREATE POLICY "season_challenges_read" ON season_challenges FOR SELECT USING (true);
+CREATE POLICY "challenge_progress_read" ON challenge_progress FOR SELECT USING (true);
 CREATE POLICY "clan_wars_read" ON clan_wars FOR SELECT USING (true);
 
 -- Write access for all (anon key, admin gated in app)
 CREATE POLICY "seasons_write" ON seasons FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "season_rewards_write" ON season_rewards FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "season_progress_write" ON season_progress FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "season_challenges_write" ON season_challenges FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "challenge_progress_write" ON challenge_progress FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "clan_wars_write" ON clan_wars FOR ALL USING (true) WITH CHECK (true);
+
+-- If season_progress already exists but is missing is_premium column:
+-- ALTER TABLE season_progress ADD COLUMN IF NOT EXISTS is_premium BOOLEAN DEFAULT false;
 
 -- Seed Season 1 with rewards
 INSERT INTO seasons (name, status, started_at, ends_at, total_tiers)
@@ -102,4 +139,15 @@ BEGIN
     (s_id, 18, 'Season 1 Badge',      'badge',        'free',    'Exclusive S1 badge',         '{"icon": "🏆", "exclusive": true}'),
     (s_id, 19, 'Kings Commentary',    'kings_commentary','premium','Gold trash talk effect',   '{}'),
     (s_id, 20, 'Season Champion',     'flair_title',  'free',    'The ultimate S1 title',      '{"title": "Season 1 Champion", "exclusive": true}');
+
+  -- Seed default challenges for Season 1
+  INSERT INTO season_challenges (season_id, name, description, type, xp_reward, goal, track_stat) VALUES
+    (s_id, 'Daily Check-In',      'Log into the season pass',          'daily',  5,   1,   'login'),
+    (s_id, 'Bounty Hunter',       'Win 2 bounty matches today',        'daily',  50,  2,   'bounty_wins'),
+    (s_id, 'Tournament Fighter',  'Complete a tournament match',       'daily',  30,  1,   'matches'),
+    (s_id, 'Explorer',            'Visit 5 different pages',           'daily',  10,  5,   'visits'),
+    (s_id, 'Bounty Veteran',      'Win 10 bounty matches this week',   'weekly', 200, 10,  'bounty_wins'),
+    (s_id, 'Arena Regular',       'Complete 5 tournament matches',     'weekly', 150, 5,   'matches'),
+    (s_id, 'Reward Collector',    'Claim 3 season rewards',            'weekly', 100, 3,   'claims'),
+    (s_id, 'XP Grinder',          'Earn 500 total XP this week',       'weekly', 250, 500, 'xp');
 END $$;

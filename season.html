@@ -579,66 +579,47 @@
 
     let activeSeason = null, seasonRewards = [], myProgress = null, myUsername = null;
     let countdownInterval = null, currentChallengeTab = 'daily';
+    let seasonChallenges = [], challengeProgressMap = {};
 
-    const CHALLENGE_DEFS = {
-      daily: [
-        { id: 'daily_bounty_2', name: 'Bounty Hunter', desc: 'Win 2 bounty matches', xp: 50, goal: 2 },
-        { id: 'daily_tournament_1', name: 'Tournament Fighter', desc: 'Complete a tournament match', xp: 30, goal: 1 },
-        { id: 'daily_visit_5', name: 'Explorer', desc: 'Visit 5 different pages', xp: 10, goal: 5 },
-        { id: 'daily_login', name: 'Daily Check-In', desc: 'Log into the season pass', xp: 5, goal: 1 },
-      ],
-      weekly: [
-        { id: 'weekly_bounty_10', name: 'Bounty Veteran', desc: 'Win 10 bounty matches this week', xp: 200, goal: 10 },
-        { id: 'weekly_tournament_5', name: 'Arena Regular', desc: 'Complete 5 tournament matches', xp: 150, goal: 5 },
-        { id: 'weekly_claim_3', name: 'Reward Collector', desc: 'Claim 3 season rewards', xp: 100, goal: 3 },
-        { id: 'weekly_xp_500', name: 'XP Grinder', desc: 'Earn 500 total XP this week', xp: 250, goal: 500 },
-      ]
-    };
-
-    function getChallengeKey(id) {
-      return activeSeason && myUsername ? `season_ch_${activeSeason.id}_${myUsername}_${id}` : null;
-    }
-    function getDailyReset() {
+    function getDailyPeriod() {
       const n = new Date();
       return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
     }
-    function getWeeklyReset() {
+    function getWeeklyPeriod() {
       const n = new Date(), d = n.getDay(), diff = n.getDate() - d + (d === 0 ? -6 : 1);
-      const m = new Date(n.setDate(diff));
+      const m = new Date(new Date(n).setDate(diff));
       return `${m.getFullYear()}-${String(m.getMonth()+1).padStart(2,'0')}-${String(m.getDate()).padStart(2,'0')}`;
     }
-    function getChallengeProgress(ch, type) {
-      const key = getChallengeKey(ch.id);
-      if (!key) return { progress: 0, completed: false };
-      try {
-        const d = JSON.parse(localStorage.getItem(key) || 'null');
-        if (!d) return { progress: 0, completed: false };
-        const rk = type === 'daily' ? getDailyReset() : getWeeklyReset();
-        if (d.period !== rk) return { progress: 0, completed: false };
-        return { progress: d.progress || 0, completed: d.completed || false };
-      } catch { return { progress: 0, completed: false }; }
+    function getPeriodForType(type) {
+      return type === 'daily' ? getDailyPeriod() : getWeeklyPeriod();
     }
-    function setChallengeProgress(ch, type, progress, completed) {
-      const key = getChallengeKey(ch.id);
-      if (!key) return;
-      try { localStorage.setItem(key, JSON.stringify({ period: type === 'daily' ? getDailyReset() : getWeeklyReset(), progress, completed })); } catch {}
+
+    function getChallengeState(challengeId, type) {
+      const period = getPeriodForType(type);
+      const key = `${challengeId}_${period}`;
+      return challengeProgressMap[key] || { progress: 0, completed: false };
     }
 
     function isPremium() {
-      return activeSeason && myUsername && localStorage.getItem(`premium_pass_${activeSeason.id}_${myUsername}`) === 'true';
+      return myProgress?.is_premium === true;
     }
-    function togglePremium() {
+
+    async function togglePremium() {
       if (!activeSeason || !myUsername) return;
-      const key = `premium_pass_${activeSeason.id}_${myUsername}`;
-      if (isPremium()) {
-        localStorage.removeItem(key);
-        NotificationSystem.show('Premium Pass deactivated', 'info');
-      } else {
-        localStorage.setItem(key, 'true');
-        NotificationSystem.show('Premium Pass activated! Gold rewards unlocked', 'ko');
-        try { playSound('claim'); } catch {}
+      const newVal = !isPremium();
+      try {
+        myProgress = await db.setSeasonPremium(activeSeason.id, myUsername, newVal);
+        if (newVal) {
+          NotificationSystem.show('Premium Pass activated! Gold rewards unlocked', 'ko');
+          try { playSound('claim'); } catch {}
+        } else {
+          NotificationSystem.show('Premium Pass deactivated', 'info');
+        }
+        renderPremiumBar(); renderRewardTrack(); loadLeaderboard();
+      } catch (e) {
+        NotificationSystem.show('Failed to update premium status', 'error');
+        console.error(e);
       }
-      renderPremiumBar(); renderRewardTrack(); loadLeaderboard();
     }
 
     function renderPremiumBar() {
@@ -786,12 +767,15 @@
         }
       } catch {}
 
+      let realStats = { matchesPlayed: 0, bountyWins: 0, tournamentsEntered: 0 };
+      try { realStats = await db.getPlayerSeasonStats(activeSeason.id, myUsername); } catch {}
+
       panel.innerHTML = `
         <div class="s-stat"><span class="s-val">${xp.toLocaleString()}</span><span class="s-label">Total XP</span><div class="s-sub">Avg: ${avgXP}</div></div>
         <div class="s-stat"><span class="s-val">${tier}</span><span class="s-label">Current Tier</span><div class="s-sub">Avg: ${avgTier}</div></div>
-        <div class="s-stat"><span class="s-val">${myProgress?.matches_played || 0}</span><span class="s-label">Matches</span></div>
-        <div class="s-stat"><span class="s-val">${myProgress?.bounty_wins || 0}</span><span class="s-label">Bounty Wins</span></div>
-        <div class="s-stat"><span class="s-val">${days}</span><span class="s-label">Days Active</span></div>
+        <div class="s-stat"><span class="s-val">${realStats.matchesPlayed}</span><span class="s-label">Matches</span></div>
+        <div class="s-stat"><span class="s-val">${realStats.bountyWins}</span><span class="s-label">Bounty Wins</span></div>
+        <div class="s-stat"><span class="s-val">${realStats.tournamentsEntered}</span><span class="s-label">Tournaments</span></div>
         <div class="s-stat"><span class="s-val">${totalPlayers}</span><span class="s-label">Participants</span></div>
       `;
     }
@@ -803,27 +787,58 @@
       renderChallenges();
     }
 
-    function renderChallenges() {
-      const grid = document.getElementById('ch-grid');
-      const defs = CHALLENGE_DEFS[currentChallengeTab] || [];
+    async function loadChallenges() {
+      try {
+        seasonChallenges = await db.getSeasonChallenges(activeSeason.id);
+      } catch (e) {
+        console.warn('Failed to load challenges from DB, using empty list:', e);
+        seasonChallenges = [];
+      }
+      try {
+        const allProgress = await db.getChallengeProgress(activeSeason.id, myUsername);
+        challengeProgressMap = {};
+        for (const p of allProgress) {
+          challengeProgressMap[`${p.challenge_id}_${p.period}`] = { progress: p.progress, completed: p.completed };
+        }
+      } catch (e) {
+        console.warn('Failed to load challenge progress:', e);
+        challengeProgressMap = {};
+      }
 
-      if (currentChallengeTab === 'daily') {
-        const login = defs.find(c => c.id === 'daily_login');
-        if (login && !getChallengeProgress(login, 'daily').completed) {
-          setChallengeProgress(login, 'daily', 1, true);
+      // Auto-complete daily login challenge
+      const loginChallenge = seasonChallenges.find(c => c.track_stat === 'login' && c.type === 'daily');
+      if (loginChallenge) {
+        const state = getChallengeState(loginChallenge.id, 'daily');
+        if (!state.completed) {
+          try {
+            await db.upsertChallengeProgress(activeSeason.id, loginChallenge.id, myUsername, getDailyPeriod(), 1, true);
+            challengeProgressMap[`${loginChallenge.id}_${getDailyPeriod()}`] = { progress: 1, completed: true };
+          } catch (e) { console.warn('Login challenge auto-complete failed:', e); }
         }
       }
 
-      grid.innerHTML = defs.map(ch => {
-        const { progress, completed } = getChallengeProgress(ch, currentChallengeTab);
+      renderChallenges();
+    }
+
+    function renderChallenges() {
+      const grid = document.getElementById('ch-grid');
+      const filtered = seasonChallenges.filter(c => c.type === currentChallengeTab);
+
+      if (!filtered.length) {
+        grid.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px;grid-column:1/-1;">No challenges configured for this season yet</div>';
+        return;
+      }
+
+      grid.innerHTML = filtered.map(ch => {
+        const { progress, completed } = getChallengeState(ch.id, ch.type);
         const pct = Math.min((progress / ch.goal) * 100, 100);
         return `
           <div class="ch-item${completed ? ' done' : ''}">
             <div class="ch-top">
               <span class="ch-name">${completed ? '✅ ' : ''}${ch.name}</span>
-              <span class="ch-xp">+${ch.xp} XP</span>
+              <span class="ch-xp">+${ch.xp_reward} XP</span>
             </div>
-            <div class="ch-desc">${ch.desc}</div>
+            <div class="ch-desc">${ch.description}</div>
             <div class="ch-bar"><div class="ch-bar-fill" style="width:${pct}%"></div></div>
             <div class="ch-prog">${progress} / ${ch.goal}</div>
           </div>
@@ -839,17 +854,10 @@
           tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);text-align:center;padding:20px;">No players yet</td></tr>';
           return;
         }
-        const premiumUsers = new Set();
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k?.startsWith(`premium_pass_${activeSeason.id}_`) && localStorage.getItem(k) === 'true') {
-            premiumUsers.add(k.replace(`premium_pass_${activeSeason.id}_`, ''));
-          }
-        }
         const medals = ['👑', '🥈', '🥉'];
         tbody.innerHTML = data.map((p, i) => {
           const t = getCurrentTier(p.xp);
-          const badge = premiumUsers.has(p.discord_username) ? '<span class="lb-premium-badge">PRO</span>' : '';
+          const badge = p.is_premium ? '<span class="lb-premium-badge">PRO</span>' : '';
           return `<tr>
             <td class="lb-rank">${medals[i] || (i + 1)}</td>
             <td><a href="profile.html?player=${encodeURIComponent(p.discord_username)}" style="color:var(--text);text-decoration:none;font-weight:700;">${p.discord_username}</a>${badge}</td>
@@ -947,7 +955,7 @@
       document.getElementById('season-content').style.display = 'block';
 
       startCountdown(); renderPremiumBar(); renderXPBar(); renderRewardTrack();
-      renderStats(); renderChallenges(); await loadLeaderboard(); loadArchive();
+      renderStats(); await loadChallenges(); await loadLeaderboard(); loadArchive();
     }
   </script>
   <script src="js/notification-inbox.js"></script>
