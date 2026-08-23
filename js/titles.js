@@ -95,7 +95,7 @@
         const { count } = await supabaseClient
           .from('bounty_challenges')
           .select('id', { count: 'exact', head: true })
-          .eq('winner', username);
+          .ilike('winner', username);
         if (count >= 3) earned.push('bounty_hunter');
       } catch (_) {}
 

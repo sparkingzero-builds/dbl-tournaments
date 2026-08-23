@@ -880,7 +880,7 @@
     }
   </style>
 </head>
-<body>
+<body class="scanlines">
 
   <div class="hazard-top"></div>
   <div class="hazard-bottom"></div>
@@ -1088,6 +1088,12 @@
     <script src="js/titles.js"></script>
     <script src="js/activity-alerts.js"></script>
     <script src="js/daily-rewards.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/sounds.js"></script>
+    <script src="js/confetti.js"></script>
+    <script src="js/themes.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/clan-tag.js"></script>
   <script>
     const DBGS = 'https://dbgsbuilds.com/wp-content/themes/dbgsquad-lite/asset';
     const CHARACTER_ARTS = [
@@ -1219,7 +1225,7 @@
         const { data: challenges } = await supabaseClient
           .from('bounty_challenges')
           .select('winner, challenger, target')
-          .or(`challenger.eq.${username},target.eq.${username}`)
+          .or(`challenger.ilike.${username},target.ilike.${username}`)
           .eq('status', 'completed')
           .order('resolved_at', { ascending: false })
           .limit(10);
@@ -1366,7 +1372,7 @@
       initCurrentUser();
       const btn = document.getElementById('wanted-challenge-btn');
       const target = btn.dataset.target;
-      if (!currentUser) return alert('Could not determine your username. Please log in with Discord.');
+      if (!currentUser) return void NotificationSystem.show('Could not determine your username. Please log in with Discord.');
       await submitChallenge(currentUser, target);
     }
 
@@ -1377,8 +1383,8 @@
       initCurrentUser();
       const self = currentUser || document.getElementById('challenge-self').value.trim();
       const target = document.getElementById('challenge-target').value.trim();
-      if (!self || !target) return alert('Fill in both usernames.');
-      if (self.toLowerCase() === target.toLowerCase()) return alert("You can't challenge yourself!");
+      if (!self || !target) return void NotificationSystem.show('Fill in both usernames.');
+      if (self.toLowerCase() === target.toLowerCase()) return void NotificationSystem.show("You can't challenge yourself!");
       currentUser = self;
       await submitChallenge(self, target);
     }
@@ -1402,12 +1408,12 @@
           });
         if (error) throw error;
 
-        alert(`Challenge sent to ${target}! They need to accept it.`);
+        NotificationSystem.show(`Challenge sent to ${target}! They need to accept it.`, 'success', 5000);
         closeWanted();
         loadPendingChallenges();
       } catch (e) {
         console.error(e);
-        alert('Failed to send challenge: ' + e.message);
+        NotificationSystem.show('Failed to send challenge: ' + e.message, 'error');
       }
     }
 
@@ -1456,7 +1462,7 @@
         const { data } = await supabaseClient
           .from('bounty_challenges')
           .select('*')
-          .eq('target', currentUser)
+          .ilike('target', currentUser)
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
 
@@ -1467,13 +1473,13 @@
         const { data: acceptedAsTarget } = await supabaseClient
           .from('bounty_challenges')
           .select('*')
-          .eq('target', currentUser)
+          .ilike('target', currentUser)
           .eq('status', 'accepted');
 
         const { data: acceptedAsChallenger } = await supabaseClient
           .from('bounty_challenges')
           .select('*')
-          .eq('challenger', currentUser)
+          .ilike('challenger', currentUser)
           .eq('status', 'accepted');
 
         const accepted = [...(acceptedAsTarget || []), ...(acceptedAsChallenger || [])];
@@ -1535,10 +1541,10 @@
     async function acceptChallenge(id) {
       try {
         await supabaseClient.from('bounty_challenges').update({ status: 'accepted' }).eq('id', id);
-        alert('Challenge accepted! Play your match and report the result to an admin.');
+        NotificationSystem.show('Challenge accepted! Play your match and report the result.', 'success', 5000);
         loadPendingChallenges();
       } catch (e) {
-        alert('Error: ' + e.message);
+        NotificationSystem.show('Error: ' + e.message, 'error');
       }
     }
 
@@ -1547,13 +1553,13 @@
         await supabaseClient.from('bounty_challenges').update({ status: 'declined' }).eq('id', id);
         loadPendingChallenges();
       } catch (e) {
-        alert('Error: ' + e.message);
+        NotificationSystem.show('Error: ' + e.message, 'error');
       }
     }
 
     // ── Admin: resolve a challenge ──
     async function resolveChallenge(challengeId, winnerUsername) {
-      if (!isAdmin()) return alert('Admin only');
+      if (!isAdmin()) return void NotificationSystem.show('Admin only');
 
       const { data: challenge } = await supabaseClient
         .from('bounty_challenges')
@@ -1636,7 +1642,7 @@
       if (loserWasVillain && typeof NotificationSystem !== 'undefined') {
         NotificationSystem.show(`VILLAIN SLAYER! ${winnerUsername} defeated the villain ${loserUsername} for 2x rewards!`, 'success');
       }
-      alert(`${winnerUsername} wins! Bounty +${bountyGain}, Currency +${currencyReward}${loserWasVillain ? ' (2x VILLAIN BONUS)' : ''}${zenkaiBonusCurrency > 0 ? ` (+${zenkaiBonusCurrency} ZENKAI BOOST)` : ''}, ELO +${eloChange}`);
+      NotificationSystem.show(`${winnerUsername} wins! Bounty +${bountyGain}, Currency +${currencyReward}${loserWasVillain ? ' (2x VILLAIN BONUS)' : ''}${zenkaiBonusCurrency > 0 ? ` (+${zenkaiBonusCurrency} ZENKAI BOOST)` : ''}, ELO +${eloChange}`, 'success', 8000);
       loadBountyBoard();
       loadMyBounty();
     }
@@ -1660,7 +1666,7 @@
         .select('*')
         .eq('id', challengeId)
         .single();
-      if (!challenge) return alert('Challenge not found.');
+      if (!challenge) return void NotificationSystem.show('Challenge not found.');
 
       const otherPlayer = reporter.toLowerCase() === challenge.challenger.toLowerCase()
         ? challenge.target
@@ -1669,7 +1675,7 @@
       const otherReport = getStoredReport(challengeId, otherPlayer);
 
       if (!otherReport) {
-        alert('Your result has been recorded. Waiting for the other player to report.');
+        NotificationSystem.show('Your result has been recorded. Waiting for the other player.', 'info', 5000);
         loadReportableChallenges();
         return;
       }
@@ -1681,13 +1687,13 @@
         // Clean up localStorage
         localStorage.removeItem(getReportKey(challengeId, reporter));
         localStorage.removeItem(getReportKey(challengeId, otherPlayer));
-        alert(`Both players agreed: ${claimedWinner} wins! Match resolved.`);
+        NotificationSystem.show(`Both players agreed: ${claimedWinner} wins! Match resolved.`, 'success', 5000);
       } else {
         // Disagreement — flag as disputed (using 'expired' status)
         await supabaseClient.from('bounty_challenges').update({
           status: 'expired'
         }).eq('id', challengeId);
-        alert('Reports conflict! This match has been flagged for admin review.');
+        NotificationSystem.show('Reports conflict! Flagged for admin review.', 'error', 5000);
         // Clean up localStorage
         localStorage.removeItem(getReportKey(challengeId, reporter));
         localStorage.removeItem(getReportKey(challengeId, otherPlayer));
@@ -1784,13 +1790,13 @@
         const { data: asChallenger } = await supabaseClient
           .from('bounty_challenges')
           .select('*')
-          .eq('challenger', currentUser)
+          .ilike('challenger', currentUser)
           .eq('status', 'accepted');
 
         const { data: asTarget } = await supabaseClient
           .from('bounty_challenges')
           .select('*')
-          .eq('target', currentUser)
+          .ilike('target', currentUser)
           .eq('status', 'accepted');
 
         const challenges = [...(asChallenger || []), ...(asTarget || [])];
@@ -1806,13 +1812,13 @@
         const { data: disputedAsChallenger } = await supabaseClient
           .from('bounty_challenges')
           .select('*')
-          .eq('challenger', currentUser)
+          .ilike('challenger', currentUser)
           .eq('status', 'expired');
 
         const { data: disputedAsTarget } = await supabaseClient
           .from('bounty_challenges')
           .select('*')
-          .eq('target', currentUser)
+          .ilike('target', currentUser)
           .eq('status', 'expired');
 
         const disputed = [...(disputedAsChallenger || []), ...(disputedAsTarget || [])];
@@ -1893,6 +1899,10 @@
         await loadReportableChallenges();
       }, 200);
     });
+  </script>
+  <script src="js/toolbar.js"></script>
+  <script>
+    if (typeof initParticles === 'function') initParticles(document.getElementById('particles'));
   </script>
 
 </body>

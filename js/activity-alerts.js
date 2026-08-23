@@ -30,7 +30,7 @@
       const { data } = await supabaseClient
         .from('bounty_challenges')
         .select('challenger, target, status, created_at')
-        .eq('target', username)
+        .ilike('target', username)
         .eq('status', 'pending')
         .order('created_at', { ascending: false })
         .limit(5);
@@ -52,7 +52,7 @@
         .from('bounty_challenges')
         .select('challenger, target, winner, currency_reward, resolved_at')
         .eq('status', 'completed')
-        .or(`challenger.eq.${username},target.eq.${username}`)
+        .or(`challenger.ilike.${username},target.ilike.${username}`)
         .gt('resolved_at', since.toISOString())
         .order('resolved_at', { ascending: false })
         .limit(5);

@@ -1184,7 +1184,7 @@
         return;
       }
 
-      document.title = `${playerName} — DBL Tournaments`;
+      document.title = `${playerName.replace(/</g,'&lt;').replace(/>/g,'&gt;')} — DBL Tournaments`;
 
       try {
         // Get all signups for this player
@@ -1278,7 +1278,7 @@
         // Render
         content.innerHTML = `
           <div class="profile-header">
-            <h1 class="profile-name">${playerName}</h1>
+            <h1 class="profile-name">${playerName.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}</h1>
             <div id="player-title-display"></div>
             <div class="profile-subtitle">Player Profile</div>
           </div>
@@ -1448,7 +1448,7 @@
             .from('bounty_challenges')
             .select('*')
             .eq('status', 'completed')
-            .or(`challenger.eq.${playerName},target.eq.${playerName}`)
+            .or(`challenger.ilike.${playerName},target.ilike.${playerName}`)
             .order('resolved_at', { ascending: false })
             .limit(20);
 
@@ -1562,16 +1562,10 @@
           let playerCurrentElo = 0;
 
           try {
-            const { data: bWins } = await supabaseClient
-              .from('bounty_challenges')
-              .select('id', { count: 'exact', head: true })
-              .eq('winner', playerName);
-            bountyWinCount = bWins ? bWins.length : 0;
-            // fallback: use count
             const { count: bCount } = await supabaseClient
               .from('bounty_challenges')
               .select('id', { count: 'exact', head: true })
-              .eq('winner', playerName);
+              .ilike('winner', playerName);
             if (bCount !== null) bountyWinCount = bCount;
           } catch (_) {}
 

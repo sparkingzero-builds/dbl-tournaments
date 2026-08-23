@@ -791,10 +791,11 @@
 
     function getEloTier(elo) {
       if (elo >= 1800) return { name: 'Master', color: '#ffd740', bg: 'rgba(255,215,64,0.15)' };
-      if (elo >= 1500) return { name: 'Diamond', color: '#00e5ff', bg: 'rgba(0,229,255,0.15)' };
-      if (elo >= 1300) return { name: 'Platinum', color: '#b266ff', bg: 'rgba(178,102,255,0.15)' };
+      if (elo >= 1400) return { name: 'Diamond', color: '#00e5ff', bg: 'rgba(0,229,255,0.15)' };
+      if (elo >= 1200) return { name: 'Platinum', color: '#b266ff', bg: 'rgba(178,102,255,0.15)' };
       if (elo >= 1100) return { name: 'Gold', color: '#ffd740', bg: 'rgba(255,215,64,0.1)' };
-      return { name: 'Silver', color: '#9088b8', bg: 'rgba(144,136,184,0.1)' };
+      if (elo >= 1000) return { name: 'Silver', color: '#9088b8', bg: 'rgba(144,136,184,0.1)' };
+      return { name: 'Bronze', color: '#8b6f47', bg: 'rgba(139,111,71,0.1)' };
     }
 
     // ── Activity Feed ──

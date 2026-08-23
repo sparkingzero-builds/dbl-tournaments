@@ -826,12 +826,6 @@
         balance += change;
         updateBalanceDisplay();
         try {
-          if (change < 0) {
-            await supabaseClient.from('player_points').update({
-              balance: supabaseClient.raw ? balance : undefined,
-              updated_at: new Date().toISOString()
-            }).ilike('discord_username', username);
-          }
           const pts = await db.getPoints(username);
           const newBal = Math.max((pts.balance || 0) + change, 0);
           await supabaseClient.from('player_points').update({
