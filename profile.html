@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -9,350 +9,688 @@
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/themes.css" />
   <style>
-    /* ── Villain Arc ── */
-    @keyframes villain-pulse {
-      0%, 100% { box-shadow: 0 0 12px rgba(180,0,30,0.4), inset 0 0 8px rgba(180,0,30,0.1); }
-      50% { box-shadow: 0 0 28px rgba(180,0,30,0.7), inset 0 0 14px rgba(180,0,30,0.2); }
+    /* ══════════════════════════════════════════
+       FORTNITE-STYLE PROFILE — FULL OVERHAUL
+       ══════════════════════════════════════════ */
+
+    /* ── Layout Shell ── */
+    .profile-shell {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 0;
+      min-height: calc(100vh - 60px);
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0;
     }
-    .villain-card .player-card {
-      border-image: conic-gradient(#8b0000, #4a0020, #8b0000, #4a0020, #8b0000) 1 !important;
-      animation: villain-pulse 2.5s ease-in-out infinite;
+
+    /* ── Sidebar ── */
+    .profile-sidebar {
+      background: linear-gradient(180deg, rgba(16,12,34,0.98) 0%, rgba(10,8,24,0.99) 100%);
+      border-right: 1px solid var(--line);
+      padding: 24px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
     }
-    .villain-arc-badge {
-      display: inline-block;
-      background: linear-gradient(135deg, #8b0000, #ff2d2d);
-      color: #fff;
+
+    .sidebar-player-mini {
+      padding: 16px 20px 20px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .sidebar-player-name {
       font-family: 'Exo 2', sans-serif;
+      font-size: 16px;
       font-weight: 900;
-      font-size: 10px;
-      letter-spacing: 0.15em;
+      color: #fff;
+      text-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-player-tier {
+      font-size: 11px;
+      font-weight: 700;
       text-transform: uppercase;
-      padding: 3px 12px;
-      border-radius: 4px;
+      letter-spacing: 0.1em;
       margin-top: 4px;
     }
-    .villain-profile-overlay {
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(ellipse at center, rgba(139,0,0,0.08) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
+
+    .sidebar-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+      user-select: none;
     }
 
-    .profile-header {
-      text-align: center;
-      padding: 40px 0 20px;
+    .sidebar-nav-item:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.03);
     }
 
-    .profile-name {
-      font-size: clamp(24px, 5vw, 40px);
+    .sidebar-nav-item.active {
       color: var(--cyan);
+      background: rgba(0, 229, 255, 0.06);
+      border-left-color: var(--cyan);
+    }
+
+    .sidebar-nav-item .nav-icon {
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .sidebar-nav-item .nav-badge {
+      margin-left: auto;
+      font-size: 10px;
+      background: rgba(0, 229, 255, 0.15);
+      color: var(--cyan);
+      padding: 1px 6px;
+      border-radius: 8px;
+      font-weight: 800;
+    }
+
+    .sidebar-spacer { flex: 1; }
+
+    .sidebar-actions {
+      padding: 12px 20px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sidebar-action-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(0, 229, 255, 0.08);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      border-radius: 6px;
+      color: var(--cyan);
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .sidebar-action-btn:hover {
+      background: rgba(0, 229, 255, 0.15);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.15);
+    }
+
+    /* ── Main Content ── */
+    .profile-main {
+      padding: 24px 28px;
+      overflow-y: auto;
+    }
+
+    /* ── Hero Banner ── */
+    .profile-hero {
+      position: relative;
+      background: linear-gradient(135deg, rgba(0,229,255,0.08) 0%, rgba(255,45,120,0.05) 50%, rgba(255,215,64,0.04) 100%);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .profile-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-layout {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-player-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .hero-name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 900;
+      color: #fff;
       text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+      line-height: 1.1;
       margin-bottom: 4px;
     }
 
-    .profile-subtitle {
-      color: var(--muted);
+    #hero-title-display {
+      margin-bottom: 8px;
+    }
+
+    .hero-equipped-title {
+      font-family: 'Exo 2', sans-serif;
       font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      text-shadow: 0 0 10px currentColor;
+    }
+
+    .hero-tier-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero-elo-big {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--cyan);
+      line-height: 1;
+    }
+
+    .hero-tier-badge {
+      display: inline-block;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.1em;
+      padding: 4px 14px;
+      border-radius: 20px;
     }
 
-    /* Stats row */
-    .profile-stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      max-width: 700px;
-      margin: 24px auto 36px;
+    .hero-tier-badge.tier-diamond  { background: rgba(0,229,255,0.15); color: var(--cyan); box-shadow: 0 0 16px rgba(0,229,255,0.3); }
+    .hero-tier-badge.tier-platinum { background: rgba(180,220,255,0.12); color: #b4dcff; box-shadow: 0 0 12px rgba(180,220,255,0.2); }
+    .hero-tier-badge.tier-gold     { background: rgba(255,215,0,0.12); color: var(--gold); box-shadow: 0 0 12px rgba(255,215,0,0.2); }
+    .hero-tier-badge.tier-silver   { background: rgba(192,192,192,0.12); color: #c0c0c0; box-shadow: 0 0 10px rgba(192,192,192,0.15); }
+    .hero-tier-badge.tier-bronze   { background: rgba(205,127,50,0.12); color: #cd7f32; box-shadow: 0 0 10px rgba(205,127,50,0.15); }
+
+    .hero-peak-elo {
+      font-size: 11px;
+      color: var(--muted);
     }
 
-    .p-stat {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 16px 10px;
+    .hero-points-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cyan);
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid rgba(0, 229, 255, 0.25);
+      border-radius: 20px;
+      padding: 3px 12px;
+    }
+
+    .hero-stats-row {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .hero-stat {
       text-align: center;
     }
 
-    .p-stat-value {
+    .hero-stat-val {
       font-family: 'Exo 2', sans-serif;
       font-size: 1.6rem;
       font-weight: 900;
       line-height: 1;
     }
 
-    .p-stat-value.cyan { color: var(--cyan); }
-    .p-stat-value.green { color: var(--green); }
-    .p-stat-value.red { color: var(--red); }
-    .p-stat-value.gold { color: var(--gold); }
-
-    .p-stat-label {
+    .hero-stat-lbl {
       font-size: 10px;
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      margin-top: 4px;
+      margin-top: 2px;
       font-weight: 600;
     }
 
-    /* Sections */
-    .profile-sections {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      max-width: 900px;
-      margin: 0 auto;
+    .hero-winrate-bar {
+      width: 160px;
+      height: 4px;
+      background: var(--line);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 6px;
     }
 
-    .profile-section {
+    .hero-winrate-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+      border-radius: 2px;
+      transition: width 0.6s ease;
+    }
+
+    /* Hero right side: top characters */
+    .hero-chars {
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .hero-char {
+      width: 72px;
+      height: 72px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid var(--line);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .hero-char:hover {
+      transform: scale(1.08);
+      box-shadow: 0 4px 20px rgba(0, 229, 255, 0.3);
+      border-color: var(--cyan);
+    }
+
+    .hero-char img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hero-char-label {
+      font-size: 9px;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 72px;
+    }
+
+    /* Hero badges row */
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .hero-badge-mini {
+      font-size: 18px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px;
+      transition: transform 0.15s;
+    }
+
+    .hero-badge-mini:hover { transform: scale(1.15); }
+
+    .hero-accolades {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .hero-accolade {
+      font-size: 18px;
+      cursor: help;
+      transition: transform 0.15s;
+    }
+
+    .hero-accolade:hover { transform: scale(1.3); }
+
+    /* ── Tab Content Panels ── */
+    .tab-panel {
+      display: none;
+      animation: panelFadeIn 0.25s ease;
+    }
+
+    .tab-panel.active { display: block; }
+
+    @keyframes panelFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-header {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 18px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--line);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .panel-header .ph-icon { font-size: 22px; }
+
+    .panel-header .ph-count {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-left: auto;
+    }
+
+    /* ── Grid Cards ── */
+    .content-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .content-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+    .content-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+    .content-card {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: var(--radius);
+      border-radius: 12px;
       padding: 20px;
+      transition: border-color 0.2s;
     }
 
-    .profile-section h3 {
-      font-size: 14px;
+    .content-card:hover {
+      border-color: rgba(0, 229, 255, 0.3);
+    }
+
+    .content-card h3 {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
       color: var(--cyan);
       margin-bottom: 14px;
       padding-bottom: 8px;
       border-bottom: 1px solid var(--line);
     }
 
-    .profile-section.full-width {
-      grid-column: 1 / -1;
-    }
+    .content-card.full-span { grid-column: 1 / -1; }
 
-    /* Tournament history list */
-    .tourney-history-item {
+    /* ── Tourney History ── */
+    .tourney-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 12px;
-      background: var(--bg-2);
+      padding: 10px 14px;
+      background: rgba(0,0,0,0.2);
       border: 1px solid var(--line);
-      border-radius: 6px;
+      border-radius: 8px;
       margin-bottom: 6px;
       font-size: 13px;
+      transition: border-color 0.15s;
     }
 
-    .tourney-history-item .t-name {
-      font-weight: 600;
-    }
+    .tourney-item:hover { border-color: rgba(0, 229, 255, 0.3); }
 
-    .tourney-history-item .t-date {
-      color: var(--muted);
-      font-size: 11px;
-    }
+    .tourney-item .t-name { font-weight: 700; }
+    .tourney-item .t-date { color: var(--muted); font-size: 11px; }
 
     .placement {
       font-family: 'Exo 2', sans-serif;
       font-weight: 800;
-      font-size: 13px;
+      font-size: 12px;
+      padding: 2px 10px;
+      border-radius: 4px;
     }
 
-    .placement.gold { color: var(--gold); }
-    .placement.silver { color: #c0c0c0; }
+    .placement.gold { color: var(--gold); background: rgba(255,215,0,0.1); }
+    .placement.silver { color: #c0c0c0; background: rgba(192,192,192,0.08); }
     .placement.normal { color: var(--muted); }
 
-    /* Bounty Section */
-    .bounty-profile-card {
-      background: linear-gradient(135deg, rgba(255,215,64,0.08), rgba(255,140,0,0.04));
-      border: 1px solid rgba(255,215,64,0.25);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 12px;
-    }
-    .bounty-profile-card h3 {
-      font-size: 14px;
-      color: var(--gold);
-      margin-bottom: 14px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(255,215,64,0.2);
-    }
-    .bounty-stats-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
+    /* ── Match/Rival/Char rows ── */
+    .data-row {
+      display: flex;
+      align-items: center;
       gap: 10px;
-      margin-bottom: 14px;
-    }
-    .b-stat {
-      text-align: center;
+      padding: 10px 14px;
       background: rgba(0,0,0,0.2);
+      border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 12px 6px;
-    }
-    .b-stat-val {
-      font-family: 'Exo 2', sans-serif;
-      font-weight: 900;
-      font-size: 1.3rem;
-      line-height: 1;
-    }
-    .b-stat-lbl {
-      font-size: 10px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-top: 4px;
-    }
-    .bounty-challenge-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
-      background: var(--bg-2);
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
       font-size: 13px;
+      transition: border-color 0.15s;
     }
-    .bounty-challenge-row.won { border-left: 3px solid var(--green); }
-    .bounty-challenge-row.lost { border-left: 3px solid var(--red); }
-    .bc-result {
+
+    .data-row:hover { border-color: rgba(0, 229, 255, 0.25); }
+
+    .data-row.win { border-left: 3px solid var(--green); }
+    .data-row.loss { border-left: 3px solid var(--red); }
+
+    .data-row .result-tag {
       font-family: 'Exo 2', sans-serif;
       font-weight: 800;
       font-size: 14px;
-      width: 20px;
-    }
-    .bounty-challenge-row.won .bc-result { color: var(--green); }
-    .bounty-challenge-row.lost .bc-result { color: var(--red); }
-    .bc-opponent { flex: 1; font-weight: 600; color: var(--text); text-decoration: none; }
-    .bc-opponent:hover { color: var(--cyan); }
-    .bc-bounty { color: var(--gold); font-weight: 700; font-size: 12px; }
-    .bc-currency { color: var(--green); font-weight: 700; font-size: 12px; }
-
-    /* Rival / character rows */
-    .rival-row, .char-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 12px;
-      background: var(--bg-2);
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      margin-bottom: 4px;
-      font-size: 13px;
+      width: 22px;
+      text-align: center;
     }
 
-    .rival-row .rival-name {
-      font-weight: 600;
-    }
+    .data-row.win .result-tag { color: var(--green); }
+    .data-row.loss .result-tag { color: var(--red); }
 
-    .rival-row .rival-count, .char-row .char-count {
-      color: var(--cyan);
-      font-weight: 700;
-      font-size: 12px;
-    }
+    .data-row .vs-tag { color: var(--muted); font-size: 11px; }
 
-    .char-row {
-      gap: 10px;
-    }
-
-    .char-row img {
-      width: 30px;
-      height: 30px;
-      border-radius: 5px;
-      border: 1px solid var(--line);
-      object-fit: cover;
-    }
-
-    .char-row .char-name {
-      flex: 1;
-      font-weight: 600;
-    }
-
-    /* Match History */
-    .match-history-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
-      background: var(--bg-2);
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      margin-bottom: 4px;
-      font-size: 13px;
-    }
-    .match-history-row.win { border-left: 3px solid var(--green); }
-    .match-history-row.loss { border-left: 3px solid var(--red, #e74c3c); }
-    .mh-result {
-      font-family: 'Exo 2', sans-serif;
-      font-weight: 800;
-      font-size: 14px;
-      width: 20px;
-    }
-    .match-history-row.win .mh-result { color: var(--green); }
-    .match-history-row.loss .mh-result { color: var(--red, #e74c3c); }
-    .mh-vs { color: var(--muted); font-size: 11px; }
-    .mh-opponent {
+    .data-row .opponent-link {
       flex: 1;
       font-weight: 600;
       color: var(--text);
       text-decoration: none;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
-    .mh-opponent:hover { color: var(--cyan); }
-    .mh-round {
+
+    .data-row .opponent-link:hover { color: var(--cyan); }
+
+    .data-row .round-tag {
       font-family: 'Exo 2', sans-serif;
       font-size: 11px;
       color: var(--muted);
       font-weight: 700;
     }
 
-    /* Win rate bar */
-    .winrate-bar-bg {
-      width: 100%;
-      height: 6px;
+    .data-row .score-tag {
+      color: var(--muted);
+      font-size: 11px;
+      font-family: 'Chakra Petch', monospace;
+    }
+
+    /* Rival rows */
+    .rival-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      transition: border-color 0.15s;
+    }
+
+    .rival-row:hover { border-color: rgba(0, 229, 255, 0.25); }
+
+    .rival-name-link {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text);
+      text-decoration: none;
+      flex: 1;
+    }
+
+    .rival-name-link:hover { color: var(--cyan); }
+
+    .rival-record {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .rival-bar {
+      width: 80px;
+      height: 4px;
       background: var(--line);
-      border-radius: 3px;
-      margin-top: 8px;
+      border-radius: 2px;
       overflow: hidden;
     }
 
-    .winrate-bar-fill {
+    .rival-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--cyan), var(--green));
-      border-radius: 3px;
-      transition: width 0.5s ease;
+      border-radius: 2px;
+      transition: width 0.5s;
     }
 
-    /* Achievement Badges */
-    .achievements-section {
-      max-width: 700px;
-      margin: 0 auto 28px;
+    /* Char rows */
+    .char-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 5px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s;
     }
 
-    .achievements-title {
-      font-family: 'Exo 2', sans-serif;
-      font-size: 14px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--cyan);
-      margin-bottom: 14px;
-      padding-bottom: 8px;
+    .char-item:hover { border-color: rgba(0, 229, 255, 0.25); }
+
+    .char-item img {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      object-fit: cover;
+    }
+
+    .char-item .char-name { flex: 1; font-weight: 600; font-size: 13px; }
+    .char-item .char-count { color: var(--cyan); font-weight: 700; font-size: 13px; }
+
+    /* ── Activity Feed ── */
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
       border-bottom: 1px solid var(--line);
     }
 
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon { font-size: 20px; }
+    .activity-info { flex: 1; min-width: 0; }
+    .activity-label { font-size: 13px; font-weight: 600; color: var(--text); }
+    .activity-time { font-size: 11px; color: var(--muted); }
+    .activity-amount { font-family: 'Chakra Petch', monospace; font-weight: 700; font-size: 14px; }
+
+    /* ── Bounty Panel ── */
+    .bounty-hero-card {
+      background: linear-gradient(135deg, rgba(255,215,64,0.08), rgba(255,140,0,0.04));
+      border: 1px solid rgba(255,215,64,0.25);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .bounty-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .bounty-stat {
+      text-align: center;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: 14px 8px;
+    }
+
+    .bounty-stat-val {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 900;
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+
+    .bounty-stat-lbl {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+
+    .bounty-peak {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    /* ── Achievement Badges ── */
     .badges-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
       gap: 10px;
     }
 
     .badge-card {
-      background: var(--panel);
+      background: rgba(0,0,0,0.2);
       border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 14px 8px 10px;
+      border-radius: 10px;
+      padding: 16px 10px 12px;
       text-align: center;
       position: relative;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     }
 
     .badge-card.earned {
       border-color: var(--cyan);
-      box-shadow: 0 0 12px rgba(0, 229, 255, 0.15);
+      box-shadow: 0 0 14px rgba(0, 229, 255, 0.15);
     }
 
     .badge-card.earned.tier-gold-badge {
@@ -361,12 +699,12 @@
     }
 
     .badge-card.earned:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 0 22px rgba(0, 229, 255, 0.3);
     }
 
     .badge-card.earned.tier-gold-badge:hover {
-      box-shadow: 0 0 24px rgba(255, 215, 0, 0.4);
+      box-shadow: 0 0 28px rgba(255, 215, 0, 0.4);
     }
 
     .badge-card.locked {
@@ -374,11 +712,7 @@
       filter: grayscale(1);
     }
 
-    .badge-icon {
-      font-size: 28px;
-      line-height: 1;
-      margin-bottom: 6px;
-    }
+    .badge-icon { font-size: 30px; line-height: 1; margin-bottom: 6px; }
 
     .badge-card.locked .badge-icon::after {
       content: '🔒';
@@ -396,13 +730,8 @@
       margin-bottom: 2px;
     }
 
-    .badge-desc {
-      font-size: 9px;
-      color: var(--muted);
-      line-height: 1.3;
-    }
+    .badge-desc { font-size: 9px; color: var(--muted); line-height: 1.3; }
 
-    /* Milestone tier dots */
     .badge-tier-dot {
       width: 8px; height: 8px;
       border-radius: 50%;
@@ -414,7 +743,6 @@
     .badge-tier-dot.tier-silver { background: #c0c0c0; }
     .badge-tier-dot.tier-gold   { background: var(--gold); box-shadow: 0 0 6px rgba(255,215,0,0.5); }
 
-    /* Progress bar on locked badges */
     .badge-progress {
       margin-top: 5px;
       background: rgba(255,255,255,0.06);
@@ -422,34 +750,33 @@
       height: 4px;
       overflow: hidden;
     }
+
     .badge-progress-fill {
       height: 100%;
       background: var(--cyan);
       border-radius: 3px;
       transition: width 0.6s ease;
     }
-    .badge-progress-label {
-      font-size: 8px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
 
-    /* Unlock animation on newly earned badges */
+    .badge-progress-label { font-size: 8px; color: var(--muted); margin-top: 2px; }
+
     @keyframes badgeUnlock {
       0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
       60%  { transform: scale(1.2) rotate(3deg); opacity: 1; }
       80%  { transform: scale(0.95) rotate(-1deg); }
       100% { transform: scale(1) rotate(0); }
     }
+
     @keyframes badgeGlow {
       0%, 100% { box-shadow: 0 0 12px rgba(0,229,255,0.15); }
       50%      { box-shadow: 0 0 30px rgba(0,229,255,0.6), 0 0 60px rgba(0,229,255,0.2); }
     }
+
     .badge-card.newly-unlocked {
       animation: badgeUnlock 0.6s ease forwards, badgeGlow 1.5s ease 0.6s 2;
     }
 
-    /* Unlock celebration modal */
+    /* Unlock celebration */
     .badge-unlock-overlay {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.75);
@@ -457,7 +784,9 @@
       display: flex; align-items: center; justify-content: center;
       opacity: 0; animation: fadeInOverlay 0.3s ease forwards;
     }
+
     @keyframes fadeInOverlay { to { opacity: 1; } }
+
     .badge-unlock-modal {
       background: var(--panel);
       border: 2px solid var(--cyan);
@@ -468,424 +797,88 @@
       animation: badgeUnlock 0.5s ease forwards;
       box-shadow: 0 0 40px rgba(0,229,255,0.3);
     }
-    .badge-unlock-modal .unlock-icon {
-      font-size: 56px;
-      margin-bottom: 12px;
-    }
-    .badge-unlock-modal .unlock-label {
-      font-size: 10px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--gold);
-      margin-bottom: 6px;
-    }
-    .badge-unlock-modal .unlock-name {
-      font-family: 'Exo 2', sans-serif;
-      font-size: 22px;
-      font-weight: 900;
-      color: var(--cyan);
-      margin-bottom: 4px;
-    }
-    .badge-unlock-modal .unlock-desc {
-      font-size: 12px;
-      color: var(--muted);
-    }
 
-    /* ── Player Card ── */
-    @keyframes cardBorderRotate {
-      0% { --card-angle: 0deg; }
-      100% { --card-angle: 360deg; }
-    }
+    .badge-unlock-modal .unlock-icon { font-size: 56px; margin-bottom: 12px; }
+    .badge-unlock-modal .unlock-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gold); margin-bottom: 6px; }
+    .badge-unlock-modal .unlock-name { font-family: 'Exo 2', sans-serif; font-size: 22px; font-weight: 900; color: var(--cyan); margin-bottom: 4px; }
+    .badge-unlock-modal .unlock-desc { font-size: 12px; color: var(--muted); }
 
-    @property --card-angle {
-      syntax: '<angle>';
-      initial-value: 0deg;
-      inherits: false;
-    }
-
-    .player-card-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 0 auto 32px;
-      max-width: 370px;
-      position: relative;
-      animation: card-entrance 1.2s ease-out;
-    }
-
-    @keyframes card-entrance {
-      0% {
-        opacity: 0;
-        transform: scale(0.8) translateY(30px);
-        filter: brightness(3) blur(8px);
-      }
-      30% {
-        opacity: 1;
-        filter: brightness(2) blur(2px);
-      }
-      60% {
-        transform: scale(1.02) translateY(-5px);
-        filter: brightness(1.2) blur(0);
-      }
-      100% {
-        transform: scale(1) translateY(0);
-        filter: brightness(1) blur(0);
-      }
-    }
-
-    .player-card-wrap::before {
-      content: '';
-      position: absolute;
-      inset: -20px;
-      border-radius: 20px;
-      background: radial-gradient(circle, rgba(0, 229, 255, 0.4) 0%, transparent 70%);
-      animation: energy-burst 1s ease-out forwards;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    @keyframes energy-burst {
-      0% { transform: scale(0.5); opacity: 1; }
-      100% { transform: scale(2); opacity: 0; }
-    }
-
-    .player-card {
-      position: relative;
-      width: 350px;
-      min-height: 480px;
-      border-radius: 16px;
-      padding: 3px;
-      background: conic-gradient(from var(--card-angle, 0deg), var(--cyan), var(--pink), var(--gold), var(--cyan));
-      animation: cardBorderRotate 4s linear infinite;
-      box-shadow: 0 0 30px rgba(0, 229, 255, 0.2), 0 0 60px rgba(255, 0, 200, 0.1);
-    }
-
-    .player-card-inner {
-      background: linear-gradient(160deg, rgba(20, 20, 40, 0.95), rgba(10, 10, 25, 0.98));
-      backdrop-filter: blur(12px);
-      border-radius: 14px;
-      padding: 28px 24px 20px;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .player-card-inner::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(ellipse at 30% 20%, rgba(0, 229, 255, 0.06) 0%, transparent 50%),
-                  radial-gradient(ellipse at 70% 80%, rgba(255, 0, 200, 0.04) 0%, transparent 50%);
-      pointer-events: none;
-    }
-
-    .card-top {
-      text-align: center;
-      position: relative;
-      z-index: 1;
-    }
-
-    .card-player-name {
-      font-family: 'Exo 2', sans-serif;
-      font-size: 1.8rem;
-      font-weight: 900;
-      color: #fff;
-      text-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
-      line-height: 1.1;
-      margin-bottom: 4px;
-    }
-
-    .card-flair-title {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--gold);
-      text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
-      margin-bottom: 6px;
-    }
-
-    .card-tier-badge {
-      display: inline-block;
-      font-family: 'Exo 2', sans-serif;
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      padding: 3px 14px;
-      border-radius: 20px;
-      margin-top: 4px;
-    }
-
-    .card-tier-badge.tier-diamond  { background: rgba(0, 229, 255, 0.15); color: var(--cyan); box-shadow: 0 0 16px rgba(0, 229, 255, 0.3); }
-    .card-tier-badge.tier-platinum { background: rgba(180, 220, 255, 0.12); color: #b4dcff; box-shadow: 0 0 12px rgba(180, 220, 255, 0.2); }
-    .card-tier-badge.tier-gold     { background: rgba(255, 215, 0, 0.12); color: var(--gold); box-shadow: 0 0 12px rgba(255, 215, 0, 0.2); }
-    .card-tier-badge.tier-silver   { background: rgba(192, 192, 192, 0.12); color: #c0c0c0; box-shadow: 0 0 10px rgba(192, 192, 192, 0.15); }
-    .card-tier-badge.tier-bronze   { background: rgba(205, 127, 50, 0.12); color: #cd7f32; box-shadow: 0 0 10px rgba(205, 127, 50, 0.15); }
-
-    .card-elo-value {
-      font-family: 'Exo 2', sans-serif;
-      font-size: 2rem;
-      font-weight: 900;
-      color: var(--cyan);
-      line-height: 1;
-      margin-top: 6px;
-    }
-
-    .card-points-badge {
-      display: inline-block;
-      font-family: 'Exo 2', sans-serif;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--cyan);
-      background: rgba(0, 229, 255, 0.1);
-      border: 1px solid rgba(0, 229, 255, 0.25);
-      border-radius: 20px;
-      padding: 2px 12px;
-      margin-top: 6px;
-    }
-
-    /* Characters row */
-    .card-chars {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .card-char {
-      width: 80px;
-      height: 80px;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 2px solid var(--line);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .card-char:hover {
-      transform: scale(1.08);
-      box-shadow: 0 4px 20px rgba(0, 229, 255, 0.3);
-    }
-
-    .card-char img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .card-char-label {
-      font-size: 9px;
-      color: var(--muted);
-      text-align: center;
-      margin-top: 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 80px;
-    }
-
-    /* Stats row on card */
-    .card-stats {
+    /* ── Titles ── */
+    .titles-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      position: relative;
-      z-index: 1;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
     }
 
-    .card-stat {
+    .title-card {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
       text-align: center;
-      padding: 8px 4px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 8px;
-    }
-
-    .card-stat-val {
-      font-family: 'Exo 2', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 800;
-      line-height: 1;
-    }
-
-    .card-stat-lbl {
-      font-size: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      margin-top: 2px;
-      font-weight: 600;
-    }
-
-    /* Card badges */
-    .card-badges {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 6px;
       position: relative;
-      z-index: 1;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
     }
 
-    .card-badge-mini {
-      font-size: 20px;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 8px;
-      transition: transform 0.2s;
-    }
+    .title-card:hover { transform: translateY(-2px); }
+    .title-card.owned { border-color: var(--cyan); }
+    .title-card.owned:hover { box-shadow: 0 0 16px rgba(0, 229, 255, 0.2); }
+    .title-card.equipped-card { border-color: var(--gold); box-shadow: 0 0 16px rgba(255, 215, 0, 0.2); }
+    .title-card.locked { opacity: 0.35; filter: grayscale(0.8); }
 
-    .card-badge-mini:hover {
-      transform: scale(1.15);
-    }
-
-    /* Share button */
-    .card-share-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 12px;
-      padding: 8px 20px;
-      background: rgba(0, 229, 255, 0.1);
-      border: 1px solid rgba(0, 229, 255, 0.3);
-      border-radius: 8px;
-      color: var(--cyan);
-      font-family: 'Exo 2', sans-serif;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s, box-shadow 0.2s;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .card-share-btn:hover {
-      background: rgba(0, 229, 255, 0.2);
-      box-shadow: 0 0 16px rgba(0, 229, 255, 0.2);
-    }
-
-    /* Flair border overrides */
-    .player-card.flair-fire {
-      background: conic-gradient(from var(--card-angle, 0deg), #ff4500, #ff8c00, #ffd700, #ff4500);
-      box-shadow: 0 0 30px rgba(255, 69, 0, 0.3), 0 0 60px rgba(255, 140, 0, 0.15);
-    }
-    .player-card.flair-ice {
-      background: conic-gradient(from var(--card-angle, 0deg), #00bfff, #e0f7ff, #00bfff, #4dd0e1);
-      box-shadow: 0 0 30px rgba(0, 191, 255, 0.3), 0 0 60px rgba(77, 208, 225, 0.15);
-    }
-    .player-card.flair-royal {
-      background: conic-gradient(from var(--card-angle, 0deg), #9b59b6, #ffd700, #9b59b6, #e74c3c);
-      box-shadow: 0 0 30px rgba(155, 89, 182, 0.3), 0 0 60px rgba(255, 215, 0, 0.15);
-    }
-    .player-card.flair-shadow {
-      background: conic-gradient(from var(--card-angle, 0deg), #1a1a2e, #6c3483, #1a1a2e, #2c3e50);
-      box-shadow: 0 0 30px rgba(108, 52, 131, 0.3), 0 0 60px rgba(44, 62, 80, 0.15);
-    }
-    .player-card.flair-champion {
-      background: conic-gradient(from var(--card-angle, 0deg), #ffd700, #ff6b00, #ff0080, #8b00ff, #00d4ff, #ffd700);
-      box-shadow: 0 0 40px rgba(255, 215, 0, 0.4), 0 0 80px rgba(255, 0, 128, 0.2);
-      animation: champion-pulse 3s ease-in-out infinite;
-    }
-    @keyframes champion-pulse {
-      0%, 100% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.4), 0 0 80px rgba(255, 0, 128, 0.2); }
-      50% { box-shadow: 0 0 60px rgba(255, 215, 0, 0.6), 0 0 120px rgba(255, 0, 128, 0.35); }
-    }
-
-    /* Profile Backgrounds */
-    .profile-bg-tournament-arena {
-      background: linear-gradient(135deg, rgba(20,20,40,0.95), rgba(40,20,60,0.95)),
-        repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,215,0,0.03) 40px, rgba(255,215,0,0.03) 41px),
-        repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,215,0,0.03) 40px, rgba(255,215,0,0.03) 41px);
-    }
-    .profile-bg-world-of-void {
-      background: radial-gradient(ellipse at center, rgba(30,0,50,0.95) 0%, rgba(5,0,15,0.98) 60%, #000 100%);
-    }
-    .profile-bg-time-chamber {
-      background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(200,200,220,0.04) 40%, rgba(20,20,40,0.95) 100%);
-    }
-
-    .card-accolades {
-      display: flex;
-      gap: 6px;
-      justify-content: center;
-      margin-top: 6px;
-    }
-    .card-accolade {
-      font-size: 18px;
-      cursor: help;
-      transition: transform 0.15s;
-    }
-    .card-accolade:hover {
-      transform: scale(1.3);
-    }
-
-    @media (max-width: 700px) {
-      .profile-stats { grid-template-columns: repeat(2, 1fr); }
-      .profile-sections { grid-template-columns: 1fr; }
-      .badges-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
-      .player-card { width: 100%; max-width: 350px; }
-      .card-char { width: 65px; height: 65px; }
-      .cosmetic-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
-    }
-
-    .cosmetic-collection {
-      max-width: 900px;
-      margin: 28px auto;
-    }
-    .cosmetic-collection h3 {
+    .title-card-name {
       font-family: 'Exo 2', sans-serif;
       font-size: 14px;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--cyan);
-      margin-bottom: 14px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--line);
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
     }
+
+    .title-card-desc { font-size: 10px; color: var(--muted); margin-bottom: 8px; line-height: 1.3; }
+
+    .title-card-source {
+      font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+      padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px;
+    }
+
+    .title-card-source.earned { background: rgba(0, 229, 255, 0.12); color: var(--cyan); }
+    .title-card-source.shop { background: rgba(255, 215, 0, 0.12); color: var(--gold); }
+
+    .title-equip-btn {
+      width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--muted);
+      padding: 6px; border-radius: 6px; font-family: 'Exo 2', sans-serif; font-weight: 700;
+      font-size: 10px; text-transform: uppercase; cursor: pointer; transition: all 0.2s;
+    }
+
+    .title-equip-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .title-equip-btn.is-equipped { border-color: var(--gold); color: var(--gold); background: rgba(255, 215, 0, 0.08); }
+    .title-lock-hint { font-size: 9px; color: var(--muted); font-style: italic; }
+
+    /* ── Cosmetics ── */
     .cosmetic-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
     }
+
     .cosmetic-item {
-      background: var(--panel);
+      background: rgba(0,0,0,0.2);
       border: 1px solid var(--line);
-      border-radius: var(--radius);
+      border-radius: 10px;
       padding: 14px;
       text-align: center;
       position: relative;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .cosmetic-item.equipped {
-      border-color: var(--cyan);
-      box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+
+    .cosmetic-item.equipped { border-color: var(--cyan); box-shadow: 0 0 12px rgba(0, 229, 255, 0.2); }
+
+    .cosmetic-preview {
+      width: 80px; height: 50px; margin: 0 auto 10px; border-radius: 6px; position: relative;
     }
-    .cosmetic-item .cosmetic-preview {
-      width: 80px;
-      height: 50px;
-      margin: 0 auto 10px;
-      border-radius: 6px;
-      position: relative;
-    }
-    .cosmetic-item .cosmetic-preview.border-preview {
-      border: 3px solid transparent;
-      background-clip: padding-box;
-    }
+
+    .cosmetic-preview.border-preview { border: 3px solid transparent; background-clip: padding-box; }
     .cosmetic-preview.flair-fire { background: conic-gradient(from 0deg, #ff4500, #ff8c00, #ffd700, #ff4500); }
     .cosmetic-preview.flair-ice { background: conic-gradient(from 0deg, #00bfff, #e0f7ff, #00bfff, #4dd0e1); }
     .cosmetic-preview.flair-royal { background: conic-gradient(from 0deg, #9b59b6, #ffd700, #9b59b6, #e74c3c); }
@@ -895,159 +888,177 @@
     .cosmetic-preview.tournament-arena { background: linear-gradient(135deg, rgba(20,20,40,0.95), rgba(40,20,60,0.95)); }
     .cosmetic-preview.world-of-void { background: radial-gradient(ellipse at center, rgba(30,0,50,0.95) 0%, #000 100%); }
     .cosmetic-preview.time-chamber { background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(20,20,40,0.95) 100%); }
-    .cosmetic-name {
-      font-family: 'Exo 2', sans-serif;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 2px;
-    }
-    .cosmetic-type {
-      font-size: 10px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
+
+    .cosmetic-name { font-family: 'Exo 2', sans-serif; font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+    .cosmetic-type { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
     .cosmetic-equipped-badge {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      font-size: 9px;
-      font-weight: 800;
-      color: var(--cyan);
-      background: rgba(0, 229, 255, 0.12);
-      padding: 1px 6px;
-      border-radius: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+      position: absolute; top: 6px; right: 6px; font-size: 9px; font-weight: 800;
+      color: var(--cyan); background: rgba(0, 229, 255, 0.12);
+      padding: 1px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.08em;
     }
+
     .cosmetic-title-preview {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--gold);
-      text-shadow: 0 0 6px rgba(255, 215, 0, 0.3);
-      margin-top: 4px;
+      font-size: 11px; font-weight: 700; color: var(--gold);
+      text-shadow: 0 0 6px rgba(255, 215, 0, 0.3); margin-top: 4px;
     }
 
-    /* -- Player Titles -- */
-    .profile-equipped-title {
-      font-family: 'Exo 2', sans-serif;
-      font-size: 13px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      margin-top: 4px;
-      text-shadow: 0 0 10px currentColor;
+    /* ── Villain Arc ── */
+    @keyframes villain-pulse {
+      0%, 100% { box-shadow: 0 0 12px rgba(180,0,30,0.4), inset 0 0 8px rgba(180,0,30,0.1); }
+      50% { box-shadow: 0 0 28px rgba(180,0,30,0.7), inset 0 0 14px rgba(180,0,30,0.2); }
     }
-    .titles-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 10px;
+
+    .villain-hero .profile-hero {
+      border-color: rgba(139,0,0,0.5);
+      animation: villain-pulse 2.5s ease-in-out infinite;
     }
-    .title-card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 14px;
-      text-align: center;
-      position: relative;
-      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-    }
-    .title-card:hover { transform: translateY(-2px); }
-    .title-card.owned { border-color: var(--cyan); }
-    .title-card.owned:hover { box-shadow: 0 0 16px rgba(0, 229, 255, 0.2); }
-    .title-card.equipped-card {
-      border-color: var(--gold);
-      box-shadow: 0 0 16px rgba(255, 215, 0, 0.2);
-    }
-    .title-card.locked {
-      opacity: 0.35;
-      filter: grayscale(0.8);
-    }
-    .title-card-name {
-      font-family: 'Exo 2', sans-serif;
-      font-size: 14px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 4px;
-    }
-    .title-card-desc {
-      font-size: 10px;
-      color: var(--muted);
-      margin-bottom: 8px;
-      line-height: 1.3;
-    }
-    .title-card-source {
-      font-size: 9px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      padding: 2px 8px;
-      border-radius: 4px;
+
+    .villain-arc-badge {
       display: inline-block;
-      margin-bottom: 8px;
-    }
-    .title-card-source.earned { background: rgba(0, 229, 255, 0.12); color: var(--cyan); }
-    .title-card-source.shop { background: rgba(255, 215, 0, 0.12); color: var(--gold); }
-    .title-equip-btn {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--line);
-      color: var(--muted);
-      padding: 6px;
-      border-radius: 6px;
+      background: linear-gradient(135deg, #8b0000, #ff2d2d);
+      color: #fff;
       font-family: 'Exo 2', sans-serif;
-      font-weight: 700;
+      font-weight: 900;
       font-size: 10px;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .title-equip-btn:hover { border-color: var(--cyan); color: var(--cyan); }
-    .title-equip-btn.is-equipped { border-color: var(--gold); color: var(--gold); background: rgba(255, 215, 0, 0.08); }
-    .title-lock-hint {
-      font-size: 9px;
-      color: var(--muted);
-      font-style: italic;
+      padding: 3px 12px;
+      border-radius: 4px;
+      margin-left: 10px;
     }
 
-    /* ── Zenkai Indicator ── */
-    .zenkai-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: linear-gradient(135deg, rgba(0,119,182,0.2), rgba(0,229,255,0.1));
-      border: 1px solid rgba(0,229,255,0.4);
-      border-radius: 6px;
-      padding: 6px 14px;
-      margin-bottom: 12px;
-      animation: zenkai-pulse 2s ease-in-out infinite;
+    .villain-profile-overlay {
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse at center, rgba(139,0,0,0.08) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
     }
+
+    /* ── Zenkai ── */
+    .zenkai-indicator {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg, rgba(0,119,182,0.2), rgba(0,229,255,0.1));
+      border: 1px solid rgba(0,229,255,0.4); border-radius: 6px;
+      padding: 6px 14px; margin-bottom: 12px; animation: zenkai-pulse 2s ease-in-out infinite;
+    }
+
     @keyframes zenkai-pulse {
       0%, 100% { box-shadow: 0 0 6px rgba(0,229,255,0.2); }
       50% { box-shadow: 0 0 16px rgba(0,229,255,0.5); }
     }
-    .zenkai-indicator .zenkai-flame {
-      font-size: 18px;
-      filter: hue-rotate(180deg) brightness(1.5);
+
+    .zenkai-indicator .zenkai-flame { font-size: 18px; filter: hue-rotate(180deg) brightness(1.5); }
+    .zenkai-indicator .zenkai-text { font-family: 'Exo 2', sans-serif; font-weight: 900; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cyan); }
+    .zenkai-indicator .zenkai-level { font-family: 'Exo 2', sans-serif; font-weight: 900; font-size: 14px; color: #fff; background: linear-gradient(135deg, #0077b6, #00e5ff); border-radius: 4px; padding: 1px 6px; }
+
+    /* ── Profile Backgrounds ── */
+    .profile-bg-tournament-arena { background: linear-gradient(135deg, rgba(20,20,40,0.95), rgba(40,20,60,0.95)), repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,215,0,0.03) 40px, rgba(255,215,0,0.03) 41px), repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,215,0,0.03) 40px, rgba(255,215,0,0.03) 41px); }
+    .profile-bg-world-of-void { background: radial-gradient(ellipse at center, rgba(30,0,50,0.95) 0%, rgba(5,0,15,0.98) 60%, #000 100%); }
+    .profile-bg-time-chamber { background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(200,200,220,0.04) 40%, rgba(20,20,40,0.95) 100%); }
+
+    /* Flair border overrides on hero */
+    .hero-flair-fire { border-image: conic-gradient(#ff4500, #ff8c00, #ffd700, #ff4500) 1; }
+    .hero-flair-ice { border-image: conic-gradient(#00bfff, #e0f7ff, #00bfff, #4dd0e1) 1; }
+
+    /* ── Scrollbar ── */
+    .scroll-area {
+      max-height: 320px;
+      overflow-y: auto;
     }
-    .zenkai-indicator .zenkai-text {
-      font-family: 'Exo 2', sans-serif;
-      font-weight: 900;
-      font-size: 12px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--cyan);
+
+    .scroll-area::-webkit-scrollbar { width: 4px; }
+    .scroll-area::-webkit-scrollbar-track { background: transparent; }
+    .scroll-area::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+
+    /* ── Empty States ── */
+    .empty-msg {
+      font-size: 13px;
+      color: var(--muted);
+      font-style: italic;
+      padding: 20px;
+      text-align: center;
     }
-    .zenkai-indicator .zenkai-level {
+
+    /* ── Search/Login State ── */
+    .profile-landing {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+    }
+
+    .landing-box {
+      text-align: center;
+      max-width: 360px;
+      padding: 40px;
+    }
+
+    .landing-box h3 {
       font-family: 'Exo 2', sans-serif;
+      font-size: 20px;
       font-weight: 900;
-      font-size: 14px;
-      color: #fff;
-      background: linear-gradient(135deg, #0077b6, #00e5ff);
-      border-radius: 4px;
-      padding: 1px 6px;
+      margin-bottom: 12px;
+    }
+
+    .landing-box p {
+      color: var(--muted);
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .profile-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-sidebar {
+        position: relative;
+        top: 0;
+        height: auto;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 0;
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+        gap: 0;
+      }
+
+      .sidebar-player-mini { display: none; }
+      .sidebar-spacer { display: none; }
+      .sidebar-actions { display: none; }
+
+      .sidebar-nav-item {
+        padding: 12px 16px;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        white-space: nowrap;
+        font-size: 11px;
+      }
+
+      .sidebar-nav-item.active {
+        border-left-color: transparent;
+        border-bottom-color: var(--cyan);
+      }
+
+      .profile-main { padding: 16px; }
+
+      .hero-layout { flex-direction: column; text-align: center; }
+      .hero-stats-row { justify-content: center; }
+      .hero-chars { justify-content: center; }
+      .hero-badges { justify-content: center; }
+      .hero-accolades { justify-content: center; }
+
+      .content-grid.cols-2 { grid-template-columns: 1fr; }
+      .content-grid.cols-3 { grid-template-columns: 1fr; }
+
+      .bounty-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 500px) {
+      .hero-chars { flex-wrap: wrap; }
+      .hero-char { width: 56px; height: 56px; }
     }
   </style>
 </head>
@@ -1066,7 +1077,7 @@
         <li><a href="shop.html">Shop</a></li>
         <li><a href="profile.html" class="active">Profile</a></li>
         <li class="nav-dropdown">
-          <a href="#">More ▾</a>
+          <a href="#">More &#9662;</a>
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Stats</div>
             <a href="tierlist.html">Tier List</a>
@@ -1095,9 +1106,9 @@
     </div>
   </nav>
 
-  <div class="particles-bg" id="particles"></div>
+  <div id="villain-overlay-slot"></div>
 
-  <main class="page container page-enter">
+  <main class="page page-enter" style="padding:0;max-width:none;">
     <div id="profile-content">
       <div class="loader"><div class="loader-spinner"></div></div>
     </div>
@@ -1107,14 +1118,13 @@
   <script src="js/supabase-client.js"></script>
   <script src="js/maintenance.js"></script>
   <script src="js/auth.js"></script>
-    <script src="js/titles.js"></script>
-    <script src="js/activity-alerts.js"></script>
-    <script src="js/daily-rewards.js"></script>
+  <script src="js/titles.js"></script>
+  <script src="js/activity-alerts.js"></script>
+  <script src="js/daily-rewards.js"></script>
   <script src="js/notifications.js"></script>
   <script src="js/sounds.js"></script>
-  <script src="js/particles.js"></script>
   <script>
-    initParticles(document.getElementById('particles'));
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
     async function equipPlayerTitle(titleId) {
       try {
@@ -1135,20 +1145,15 @@
 
     function copyProfileLink() {
       navigator.clipboard.writeText(window.location.href).then(() => {
-        if (typeof NotificationSystem !== 'undefined') {
-          NotificationSystem.show('Profile link copied to clipboard!', 'success');
-        }
+        if (typeof NotificationSystem !== 'undefined') NotificationSystem.show('Profile link copied!', 'success');
       }).catch(() => {
-        // Fallback
         const ta = document.createElement('textarea');
         ta.value = window.location.href;
         document.body.appendChild(ta);
         ta.select();
         document.execCommand('copy');
         document.body.removeChild(ta);
-        if (typeof NotificationSystem !== 'undefined') {
-          NotificationSystem.show('Profile link copied to clipboard!', 'success');
-        }
+        if (typeof NotificationSystem !== 'undefined') NotificationSystem.show('Profile link copied!', 'success');
       });
     }
 
@@ -1157,13 +1162,17 @@
       if (val) window.location.href = `profile.html?player=${encodeURIComponent(val)}`;
     }
 
+    function switchTab(tabId) {
+      document.querySelectorAll('.sidebar-nav-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tabId));
+      document.querySelectorAll('.tab-panel').forEach(el => el.classList.toggle('active', el.id === 'tab-' + tabId));
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       const params = new URLSearchParams(window.location.search);
       let playerName = params.get('player');
       const content = document.getElementById('profile-content');
 
       if (!playerName) {
-        // Try to get logged-in user
         if (typeof AUTH !== 'undefined') {
           await AUTH.init();
           const discordName = AUTH.getDiscordUsername();
@@ -1176,10 +1185,10 @@
 
       if (!playerName) {
         content.innerHTML = `
-          <div class="empty-state" style="padding:60px 20px;">
-            <h3 style="margin-bottom:12px;">Player Profile</h3>
-            <p style="color:var(--muted);margin-bottom:20px;">Login with Discord to see your profile, or search for a player.</p>
-            <div style="max-width:320px;margin:0 auto;">
+          <div class="profile-landing">
+            <div class="landing-box">
+              <h3>Player Profile</h3>
+              <p>Login with Discord to see your profile, or search for a player.</p>
               <input type="text" id="profile-search" placeholder="Enter a player name..." onkeydown="if(event.key==='Enter')goToProfile()" style="width:100%;margin-bottom:10px;" />
               <button class="btn btn-primary" onclick="goToProfile()" style="width:100%;">View Profile</button>
             </div>
@@ -1187,21 +1196,19 @@
         return;
       }
 
-      document.title = `${playerName.replace(/</g,'&lt;').replace(/>/g,'&gt;')} — DBL Tournaments`;
+      document.title = `${esc(playerName)} — DBL Tournaments`;
 
       try {
-        // Get all signups for this player
         const signups = await db.getPlayerStats(playerName);
-
-        // Check if player exists (has any signups, ELO, or points)
         const { data: eloCheck } = await supabaseClient.from('elo_ratings').select('id').ilike('discord_username', playerName).limit(1);
         const { data: ptsCheck } = await supabaseClient.from('player_points').select('discord_username').ilike('discord_username', playerName).limit(1);
+
         if (!signups.length && !eloCheck?.length && !ptsCheck?.length) {
           content.innerHTML = `
-            <div class="empty-state" style="padding:60px 20px;text-align:center;">
-              <h3 style="margin-bottom:12px;color:var(--red);">Player Not Found</h3>
-              <p style="color:var(--muted);margin-bottom:20px;">No player named "<strong style="color:var(--text);">${playerName.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</strong>" was found.</p>
-              <div style="max-width:320px;margin:0 auto;">
+            <div class="profile-landing">
+              <div class="landing-box">
+                <h3 style="color:var(--red);">Player Not Found</h3>
+                <p>No player named "<strong style="color:var(--text);">${esc(playerName)}</strong>" was found.</p>
                 <input type="text" id="profile-search" placeholder="Try another name..." onkeydown="if(event.key==='Enter')goToProfile()" style="width:100%;margin-bottom:10px;" />
                 <button class="btn btn-primary" onclick="goToProfile()" style="width:100%;">Search</button>
               </div>
@@ -1209,25 +1216,18 @@
           return;
         }
 
-        // Get all matches for this player
         const signupIds = signups.map(s => s.id);
         const matches = await db.getPlayerMatches(playerName);
 
-        // Calculate stats
-        let wins = 0;
-        let losses = 0;
+        let wins = 0, losses = 0;
         matches.forEach(m => {
           if (!m.winner_id) return;
-          if (signupIds.includes(m.winner_id)) {
-            wins++;
-          } else {
-            losses++;
-          }
+          if (signupIds.includes(m.winner_id)) wins++;
+          else losses++;
         });
         const totalMatches = wins + losses;
         const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
 
-        // Tournament history with placement
         const tournamentIds = [...new Set(signups.map(s => s.tournament_id))];
         const tournamentDetails = [];
         for (const tid of tournamentIds) {
@@ -1235,37 +1235,26 @@
             const t = await db.getTournament(tid);
             const tMatches = await db.getMatches(tid);
             const playerSignup = signups.find(s => s.tournament_id === tid);
-
-            // Determine placement
-            let placement = 'Participated';
-            let placementClass = 'normal';
+            let placement = 'Participated', placementClass = 'normal';
             if (tMatches.length) {
               const maxRound = Math.max(...tMatches.map(m => m.round));
               const finalMatch = tMatches.find(m => m.round === maxRound && m.winner_id);
               if (finalMatch && finalMatch.winner_id === playerSignup?.id) {
-                placement = 'Champion';
-                placementClass = 'gold';
+                placement = 'Champion'; placementClass = 'gold';
               } else if (finalMatch && (finalMatch.player1_id === playerSignup?.id || finalMatch.player2_id === playerSignup?.id)) {
-                placement = 'Runner-up';
-                placementClass = 'silver';
+                placement = 'Runner-up'; placementClass = 'silver';
               } else {
-                // Find the round they lost in
-                const lostMatch = tMatches.find(m => m.winner_id &&
-                  (m.player1_id === playerSignup?.id || m.player2_id === playerSignup?.id) &&
-                  m.winner_id !== playerSignup?.id
-                );
+                const lostMatch = tMatches.find(m => m.winner_id && (m.player1_id === playerSignup?.id || m.player2_id === playerSignup?.id) && m.winner_id !== playerSignup?.id);
                 if (lostMatch) {
                   const roundName = lostMatch.round === maxRound - 1 ? 'Semi-Finals' : `Round ${lostMatch.round}`;
                   placement = `Eliminated ${roundName}`;
                 }
               }
             }
-
-            tournamentDetails.push({ tournament: t, placement, placementClass });
+            tournamentDetails.push({ tournament: t, placement, placementClass, id: tid });
           } catch (e) {}
         }
 
-        // Rival tracker
         const rivalCounts = {};
         matches.forEach(m => {
           if (!m.winner_id) return;
@@ -1281,7 +1270,6 @@
         });
         const rivals = Object.entries(rivalCounts).sort((a, b) => b[1].total - a[1].total).slice(0, 5);
 
-        // Character affinity
         const charCounts = {};
         signups.forEach(s => {
           if (s.team) {
@@ -1294,118 +1282,203 @@
         });
         const topChars = Object.values(charCounts).sort((a, b) => b.count - a.count).slice(0, 6);
 
-        // Render
+        // Build sidebar nav items
+        const navItems = [
+          { id: 'overview', icon: '🎮', label: 'Overview' },
+          { id: 'matches', icon: '⚔️', label: 'Matches', count: totalMatches },
+          { id: 'bounty', icon: '💰', label: 'Bounty' },
+          { id: 'achievements', icon: '🏆', label: 'Achievements' },
+          { id: 'titles', icon: '👑', label: 'Titles' },
+          { id: 'cosmetics', icon: '✨', label: 'Cosmetics' },
+        ];
+
         content.innerHTML = `
-          <div class="profile-header">
-            <h1 class="profile-name">${playerName.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}</h1>
-            <div id="player-title-display"></div>
-            <div class="profile-subtitle">Player Profile</div>
-          </div>
-          <div id="villain-overlay-slot"></div>
-
-          <div id="elo-section"></div>
-
-          <div id="achievements-section"></div>
-
-          <div id="titles-section" class="achievements-section" style="display:none;"></div>
-
-          <div class="profile-stats stagger">
-            <div class="p-stat">
-              <div class="p-stat-value cyan">${totalMatches}</div>
-              <div class="p-stat-label">Matches</div>
-            </div>
-            <div class="p-stat">
-              <div class="p-stat-value green">${wins}</div>
-              <div class="p-stat-label">Wins</div>
-            </div>
-            <div class="p-stat">
-              <div class="p-stat-value red">${losses}</div>
-              <div class="p-stat-label">Losses</div>
-            </div>
-            <div class="p-stat">
-              <div class="p-stat-value gold">${winRate}%</div>
-              <div class="p-stat-label">Win Rate</div>
-              <div class="winrate-bar-bg"><div class="winrate-bar-fill" style="width:${winRate}%"></div></div>
-            </div>
-          </div>
-
-          <div class="profile-sections">
-            <div class="profile-section">
-              <h3>Tournament History</h3>
-              ${tournamentDetails.length ? tournamentDetails.map(td => {
-                const date = new Date(td.tournament.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-                return `<div class="tourney-history-item">
-                  <div>
-                    <div class="t-name">${td.tournament.name}</div>
-                    <div class="t-date">${date}</div>
-                  </div>
-                  <div class="placement ${td.placementClass}">${td.placement}</div>
-                </div>`;
-              }).join('') : '<div class="empty-state"><p>No tournament data yet.</p></div>'}
-            </div>
-
-            <div class="profile-section">
-              <h3>Head-to-Head</h3>
-              ${rivals.length ? rivals.map(([name, r]) => {
-                const winPct = r.total > 0 ? Math.round((r.wins / r.total) * 100) : 0;
-                const barColor = winPct >= 50 ? 'var(--green)' : 'var(--red)';
-                return `<div class="rival-row" style="flex-wrap:wrap;gap:6px;">
-                  <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:120px;">
-                    <a class="rival-name" href="profile.html?player=${encodeURIComponent(name)}">${name}</a>
-                  </div>
-                  <div style="display:flex;align-items:center;gap:10px;">
-                    <span style="color:var(--green);font-weight:700;font-size:13px;">${r.wins}W</span>
-                    <span style="color:var(--muted);font-size:11px;">-</span>
-                    <span style="color:var(--red);font-weight:700;font-size:13px;">${r.losses}L</span>
-                    <span class="rival-count">${r.total} game${r.total > 1 ? 's' : ''}</span>
-                  </div>
-                  <div style="width:100%;height:4px;background:var(--line);border-radius:2px;overflow:hidden;">
-                    <div style="height:100%;width:${winPct}%;background:${barColor};border-radius:2px;transition:width 0.5s;"></div>
-                  </div>
-                </div>`;
-              }).join('') : '<div class="empty-state"><p>No match data yet.</p></div>'}
-            </div>
-
-            <div class="profile-section full-width">
-              <h3>Match History</h3>
-              <div style="max-height:300px;overflow-y:auto;">
-              ${matches.filter(m => m.winner_id).length ? matches.filter(m => m.winner_id).reverse().map(m => {
-                const isP1 = signupIds.includes(m.player1_id);
-                const opponent = isP1 ? m.player2?.discord_username : m.player1?.discord_username;
-                const won = signupIds.includes(m.winner_id);
-                return `<div class="match-history-row ${won ? 'win' : 'loss'}">
-                  <span class="mh-result">${won ? 'W' : 'L'}</span>
-                  <span class="mh-vs">vs</span>
-                  <a href="profile.html?player=${encodeURIComponent(opponent || '')}" class="mh-opponent">${opponent || 'Unknown'}</a>
-                  ${m.score ? `<span style="color:var(--muted);font-size:11px;font-family:'Chakra Petch',monospace;">${m.score}</span>` : ''}
-                  <span class="mh-round">R${m.round || '?'}</span>
-                </div>`;
-              }).join('') : '<div class="empty-state"><p>No match results yet.</p></div>'}
+          <div class="profile-shell" id="profile-shell">
+            <div class="profile-sidebar">
+              <div class="sidebar-player-mini">
+                <div class="sidebar-player-name">${esc(playerName)}</div>
+                <div class="sidebar-player-tier" id="sidebar-tier"></div>
+              </div>
+              ${navItems.map((n, i) => `
+                <div class="sidebar-nav-item ${i === 0 ? 'active' : ''}" data-tab="${n.id}" onclick="switchTab('${n.id}')">
+                  <span class="nav-icon">${n.icon}</span>
+                  <span>${n.label}</span>
+                  ${n.count ? `<span class="nav-badge">${n.count}</span>` : ''}
+                </div>
+              `).join('')}
+              <div class="sidebar-spacer"></div>
+              <div class="sidebar-actions">
+                <button class="sidebar-action-btn" onclick="copyProfileLink()"><span>📋</span> Share Profile</button>
               </div>
             </div>
 
-            <div class="profile-section full-width">
-              <h3>Character Affinity</h3>
-              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;">
-                ${topChars.length ? topChars.map(c =>
-                  `<a href="character.html?id=${c.id}" class="char-row" style="text-decoration:none;color:inherit;">
-                    <img src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
-                    <span class="char-name">${c.name}</span>
-                    <span class="char-count">${c.count}x</span>
-                  </a>`
-                ).join('') : '<div class="empty-state"><p>No team data.</p></div>'}
+            <div class="profile-main">
+              <!-- Hero Banner -->
+              <div class="profile-hero" id="profile-hero">
+                <div class="hero-layout">
+                  <div class="hero-player-info">
+                    <div class="hero-name">${esc(playerName)}</div>
+                    <div id="hero-title-display"></div>
+                    <div class="hero-tier-row" id="hero-tier-row"></div>
+                    <div class="hero-stats-row">
+                      <div class="hero-stat">
+                        <div class="hero-stat-val" style="color:var(--cyan)">${totalMatches}</div>
+                        <div class="hero-stat-lbl">Matches</div>
+                      </div>
+                      <div class="hero-stat">
+                        <div class="hero-stat-val" style="color:var(--green)">${wins}</div>
+                        <div class="hero-stat-lbl">Wins</div>
+                      </div>
+                      <div class="hero-stat">
+                        <div class="hero-stat-val" style="color:var(--red)">${losses}</div>
+                        <div class="hero-stat-lbl">Losses</div>
+                      </div>
+                      <div class="hero-stat">
+                        <div class="hero-stat-val" style="color:var(--gold)">${winRate}%</div>
+                        <div class="hero-stat-lbl">Win Rate</div>
+                        <div class="hero-winrate-bar"><div class="hero-winrate-fill" style="width:${winRate}%"></div></div>
+                      </div>
+                    </div>
+                    <div id="hero-badges-slot"></div>
+                    <div id="hero-accolades-slot"></div>
+                  </div>
+                  ${topChars.length ? `
+                    <div class="hero-chars">
+                      ${topChars.slice(0, 3).map(c => `
+                        <a href="character.html?id=${c.id}" style="text-decoration:none;color:inherit;text-align:center;">
+                          <div class="hero-char">
+                            <img src="${c.image}" alt="${esc(c.name)}" onerror="this.parentElement.style.display='none'" />
+                          </div>
+                          <div class="hero-char-label">${esc(c.name.split(' ').slice(0, 2).join(' '))}</div>
+                        </a>
+                      `).join('')}
+                    </div>
+                  ` : ''}
+                </div>
               </div>
-            </div>
-            <div class="profile-section full-width">
-              <h3>Recent Activity</h3>
-              <div id="profile-activity" style="max-height:250px;overflow-y:auto;">
-                <div class="empty-state"><p>Loading...</p></div>
+
+              <!-- Tab: Overview -->
+              <div class="tab-panel active" id="tab-overview">
+                <div class="content-grid cols-2">
+                  <div class="content-card">
+                    <h3>Tournament History</h3>
+                    <div class="scroll-area">
+                      ${tournamentDetails.length ? tournamentDetails.map(td => {
+                        const date = new Date(td.tournament.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                        return `<div class="tourney-item">
+                          <div>
+                            <div class="t-name">${esc(td.tournament.name)}</div>
+                            <div class="t-date">${date}</div>
+                          </div>
+                          <div class="placement ${td.placementClass}">${td.placement}</div>
+                        </div>`;
+                      }).join('') : '<div class="empty-msg">No tournament data yet.</div>'}
+                    </div>
+                  </div>
+
+                  <div class="content-card">
+                    <h3>Head-to-Head</h3>
+                    <div class="scroll-area">
+                      ${rivals.length ? rivals.map(([name, r]) => {
+                        const winPct = r.total > 0 ? Math.round((r.wins / r.total) * 100) : 0;
+                        const barColor = winPct >= 50 ? 'var(--green)' : 'var(--red)';
+                        return `<div class="rival-row">
+                          <a class="rival-name-link" href="profile.html?player=${encodeURIComponent(name)}">${esc(name)}</a>
+                          <div class="rival-record">
+                            <span style="color:var(--green);font-weight:700;">${r.wins}W</span>
+                            <span style="color:var(--muted);font-size:11px;">-</span>
+                            <span style="color:var(--red);font-weight:700;">${r.losses}L</span>
+                          </div>
+                          <div class="rival-bar"><div class="rival-bar-fill" style="width:${winPct}%;background:${barColor};"></div></div>
+                        </div>`;
+                      }).join('') : '<div class="empty-msg">No rivals yet.</div>'}
+                    </div>
+                  </div>
+
+                  <div class="content-card full-span">
+                    <h3>Character Affinity</h3>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;">
+                      ${topChars.length ? topChars.map(c =>
+                        `<a href="character.html?id=${c.id}" class="char-item">
+                          <img src="${c.image}" alt="${esc(c.name)}" onerror="this.style.display='none'" />
+                          <span class="char-name">${esc(c.name)}</span>
+                          <span class="char-count">${c.count}x</span>
+                        </a>`
+                      ).join('') : '<div class="empty-msg">No team data.</div>'}
+                    </div>
+                  </div>
+
+                  <div class="content-card full-span">
+                    <h3>Recent Activity</h3>
+                    <div id="profile-activity" class="scroll-area">
+                      <div class="empty-msg">Loading...</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab: Matches -->
+              <div class="tab-panel" id="tab-matches">
+                <div class="panel-header">
+                  <span class="ph-icon">⚔️</span> Match History
+                  <span class="ph-count">${totalMatches} matches</span>
+                </div>
+                <div class="scroll-area" style="max-height:600px;">
+                  ${matches.filter(m => m.winner_id).length ? matches.filter(m => m.winner_id).reverse().map(m => {
+                    const isP1 = signupIds.includes(m.player1_id);
+                    const opponent = isP1 ? m.player2?.discord_username : m.player1?.discord_username;
+                    const won = signupIds.includes(m.winner_id);
+                    return `<div class="data-row ${won ? 'win' : 'loss'}">
+                      <span class="result-tag">${won ? 'W' : 'L'}</span>
+                      <span class="vs-tag">vs</span>
+                      <a href="profile.html?player=${encodeURIComponent(opponent || '')}" class="opponent-link">${esc(opponent || 'Unknown')}</a>
+                      ${m.score ? `<span class="score-tag">${esc(m.score)}</span>` : ''}
+                      <span class="round-tag">R${m.round || '?'}</span>
+                    </div>`;
+                  }).join('') : '<div class="empty-msg">No match results yet.</div>'}
+                </div>
+              </div>
+
+              <!-- Tab: Bounty -->
+              <div class="tab-panel" id="tab-bounty">
+                <div class="panel-header">
+                  <span class="ph-icon">💰</span> Bounty Hunter
+                </div>
+                <div id="bounty-content"><div class="empty-msg">Loading bounty data...</div></div>
+              </div>
+
+              <!-- Tab: Achievements -->
+              <div class="tab-panel" id="tab-achievements">
+                <div class="panel-header">
+                  <span class="ph-icon">🏆</span> Achievements
+                  <span class="ph-count" id="badge-count"></span>
+                </div>
+                <div id="badges-content"></div>
+              </div>
+
+              <!-- Tab: Titles -->
+              <div class="tab-panel" id="tab-titles">
+                <div class="panel-header">
+                  <span class="ph-icon">👑</span> Titles
+                  <span class="ph-count" id="titles-count"></span>
+                </div>
+                <div id="titles-content"></div>
+              </div>
+
+              <!-- Tab: Cosmetics -->
+              <div class="tab-panel" id="tab-cosmetics">
+                <div class="panel-header">
+                  <span class="ph-icon">✨</span> Cosmetics
+                </div>
+                <div id="cosmetics-content"><div class="empty-msg">Loading...</div></div>
               </div>
             </div>
           </div>
         `;
 
-        // Load recent activity
+        playSound('powerup');
+
+        // ── Load Recent Activity ──
         try {
           const { data: txData } = await supabaseClient
             .from('point_transactions')
@@ -1431,17 +1504,17 @@
               const sign = tx.amount >= 0 ? '+' : '';
               const amtColor = tx.amount >= 0 ? 'var(--green)' : 'var(--red)';
               const ago = timeAgo(tx.created_at);
-              return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);">
-                <span style="font-size:18px;">${r.icon}</span>
-                <div style="flex:1;min-width:0;">
-                  <div style="font-size:13px;color:var(--text);font-weight:600;">${r.label}</div>
-                  <div style="font-size:11px;color:var(--muted);">${ago}</div>
+              return `<div class="activity-item">
+                <span class="activity-icon">${r.icon}</span>
+                <div class="activity-info">
+                  <div class="activity-label">${r.label}</div>
+                  <div class="activity-time">${ago}</div>
                 </div>
-                <div style="font-family:'Chakra Petch',monospace;font-weight:700;font-size:14px;color:${amtColor};">${sign}${tx.amount}</div>
+                <div class="activity-amount" style="color:${amtColor};">${sign}${tx.amount}</div>
               </div>`;
             }).join('');
           } else if (actEl) {
-            actEl.innerHTML = '<div class="empty-state"><p>No activity yet.</p></div>';
+            actEl.innerHTML = '<div class="empty-msg">No activity yet.</div>';
           }
         } catch (_) {}
 
@@ -1455,7 +1528,7 @@
           return Math.floor(hrs / 24) + 'd ago';
         }
 
-        // ── Bounty Hunter Section ──
+        // ── Bounty Section ──
         try {
           const { data: bountyData } = await supabaseClient
             .from('bounties')
@@ -1463,182 +1536,256 @@
             .ilike('discord_username', playerName)
             .limit(1);
 
-          const { data: challengeData } = await supabaseClient
-            .from('bounty_challenges')
-            .select('*')
-            .eq('status', 'completed')
-            .or(`challenger.ilike.${playerName},target.ilike.${playerName}`)
-            .order('resolved_at', { ascending: false })
-            .limit(20);
+          const [{ data: cData1 }, { data: cData2 }] = await Promise.all([
+            supabaseClient.from('bounty_challenges').select('*').eq('status', 'completed').ilike('challenger', playerName).order('resolved_at', { ascending: false }).limit(20),
+            supabaseClient.from('bounty_challenges').select('*').eq('status', 'completed').ilike('target', playerName).order('resolved_at', { ascending: false }).limit(20)
+          ]);
+          const seenIds = new Set();
+          const challengeData = [...(cData1 || []), ...(cData2 || [])].filter(c => {
+            if (seenIds.has(c.id)) return false;
+            seenIds.add(c.id);
+            return true;
+          }).sort((a, b) => new Date(b.resolved_at) - new Date(a.resolved_at)).slice(0, 20);
 
           const b = bountyData?.[0];
           const challenges = challengeData || [];
           const isVillain = b && (b.streak || 0) >= 5;
 
-          // Apply villain visual treatment
           window._isVillain = isVillain;
           if (isVillain) {
-            const nameEl = document.querySelector('.profile-name');
-            if (nameEl) nameEl.insertAdjacentHTML('afterend', '<div class="villain-arc-badge">VILLAIN ARC</div>');
+            document.getElementById('profile-shell')?.classList.add('villain-hero');
+            const heroName = document.querySelector('.hero-name');
+            if (heroName) heroName.insertAdjacentHTML('afterend', '<span class="villain-arc-badge">VILLAIN ARC</span>');
             const overlaySlot = document.getElementById('villain-overlay-slot');
             if (overlaySlot) overlaySlot.innerHTML = '<div class="villain-profile-overlay"></div>';
           }
 
-          if (b || challenges.length) {
-            const sectionsEl = document.querySelector('.profile-sections');
-            const bountyHtml = `
-              <div class="profile-section full-width bounty-profile-card">
-                <h3>Bounty Hunter</h3>
+          const bountyEl = document.getElementById('bounty-content');
+          if (bountyEl) {
+            if (b || challenges.length) {
+              bountyEl.innerHTML = `
                 ${b ? `
-                  <div class="bounty-stats-row">
-                    <div class="b-stat">
-                      <div class="b-stat-val" style="color:var(--gold);">Z ${(b.bounty || 0).toLocaleString()}</div>
-                      <div class="b-stat-lbl">Current Bounty</div>
+                  <div class="bounty-hero-card">
+                    <div class="bounty-stats-grid">
+                      <div class="bounty-stat">
+                        <div class="bounty-stat-val" style="color:var(--gold);">Z ${(b.bounty || 0).toLocaleString()}</div>
+                        <div class="bounty-stat-lbl">Current Bounty</div>
+                      </div>
+                      <div class="bounty-stat">
+                        <div class="bounty-stat-val" style="color:var(--cyan);">${b.streak || 0}</div>
+                        <div class="bounty-stat-lbl">Win Streak</div>
+                      </div>
+                      <div class="bounty-stat">
+                        <div class="bounty-stat-val" style="color:var(--green);">${b.wins || 0}</div>
+                        <div class="bounty-stat-lbl">Bounty Wins</div>
+                      </div>
+                      <div class="bounty-stat">
+                        <div class="bounty-stat-val" style="color:var(--red);">${b.losses || 0}</div>
+                        <div class="bounty-stat-lbl">Bounty Losses</div>
+                      </div>
                     </div>
-                    <div class="b-stat">
-                      <div class="b-stat-val" style="color:var(--cyan);">${b.streak || 0}</div>
-                      <div class="b-stat-lbl">Win Streak</div>
-                    </div>
-                    <div class="b-stat">
-                      <div class="b-stat-val" style="color:var(--green);">${b.wins || 0}</div>
-                      <div class="b-stat-lbl">Bounty Wins</div>
-                    </div>
-                    <div class="b-stat">
-                      <div class="b-stat-val" style="color:var(--red);">${b.losses || 0}</div>
-                      <div class="b-stat-lbl">Bounty Losses</div>
-                    </div>
+                    ${b.peak_bounty ? `<div class="bounty-peak">Peak Bounty: <span style="color:var(--gold);font-weight:700;">Z ${b.peak_bounty.toLocaleString()}</span></div>` : ''}
+                    ${(() => {
+                      try {
+                        const raw = localStorage.getItem('dbl_zenkai_' + playerName.toLowerCase());
+                        if (!raw) return '';
+                        const z = JSON.parse(raw);
+                        if (!z.active || Date.now() - z.activatedAt > 86400000) return '';
+                        return '<div class="zenkai-indicator"><span class="zenkai-flame">🔥</span><span class="zenkai-text">Zenkai Active</span><span class="zenkai-level">Lv' + z.level + '</span></div>';
+                      } catch { return ''; }
+                    })()}
                   </div>
-                  ${b.peak_bounty ? `<div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Peak Bounty: <span style="color:var(--gold);font-weight:700;">Z ${b.peak_bounty.toLocaleString()}</span></div>` : ''}
-                  ${(() => {
-                    try {
-                      const raw = localStorage.getItem('dbl_zenkai_' + playerName.toLowerCase());
-                      if (!raw) return '';
-                      const z = JSON.parse(raw);
-                      if (!z.active || Date.now() - z.activatedAt > 86400000) return '';
-                      return '<div class="zenkai-indicator"><span class="zenkai-flame">🔥</span><span class="zenkai-text">Zenkai Active</span><span class="zenkai-level">Lv' + z.level + '</span></div>';
-                    } catch { return ''; }
-                  })()}
                 ` : ''}
                 ${challenges.length ? `
-                  <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:8px;">Recent Bounty Matches</div>
-                  <div style="max-height:200px;overflow-y:auto;">
+                  <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:10px;">Recent Bounty Matches</div>
+                  <div class="scroll-area">
                     ${challenges.map(c => {
-                      const won = c.winner === playerName;
-                      const opponent = c.challenger === playerName ? c.target : c.challenger;
-                      return `<div class="bounty-challenge-row ${won ? 'won' : 'lost'}">
-                        <span class="bc-result">${won ? 'W' : 'L'}</span>
-                        <span style="color:var(--muted);font-size:11px;">vs</span>
-                        <a href="profile.html?player=${encodeURIComponent(opponent)}" class="bc-opponent">${opponent}</a>
-                        ${c.currency_reward && won ? `<span class="bc-currency">+${c.currency_reward}</span>` : ''}
-                        <span class="bc-bounty">Z ${(c.bounty_at_stake || 0).toLocaleString()}</span>
+                      const won = c.winner && c.winner.toLowerCase() === playerName.toLowerCase();
+                      const opponent = c.challenger.toLowerCase() === playerName.toLowerCase() ? c.target : c.challenger;
+                      return `<div class="data-row ${won ? 'win' : 'loss'}">
+                        <span class="result-tag">${won ? 'W' : 'L'}</span>
+                        <span class="vs-tag">vs</span>
+                        <a href="profile.html?player=${encodeURIComponent(opponent)}" class="opponent-link">${esc(opponent)}</a>
+                        ${c.currency_reward && won ? `<span style="color:var(--green);font-weight:700;font-size:12px;">+${c.currency_reward}</span>` : ''}
+                        <span style="color:var(--gold);font-weight:700;font-size:12px;">Z ${(c.bounty_at_stake || 0).toLocaleString()}</span>
                       </div>`;
                     }).join('')}
                   </div>
-                ` : '<div style="font-size:13px;color:var(--muted);font-style:italic;">No bounty matches yet.</div>'}
-                <div style="margin-top:12px;">
+                ` : '<div class="empty-msg">No bounty matches yet.</div>'}
+                <div style="margin-top:16px;">
                   <a href="bounty.html" style="color:var(--gold);font-size:13px;font-weight:700;text-decoration:none;">View Bounty Board →</a>
                 </div>
-              </div>
-            `;
-            if (sectionsEl) sectionsEl.insertAdjacentHTML('beforeend', bountyHtml);
+              `;
+            } else {
+              bountyEl.innerHTML = '<div class="empty-msg">No bounty data for this player.</div>';
+            }
           }
         } catch (e) {
           console.error('Bounty profile error:', e);
         }
 
-        // Load ELO rating
+        // ── ELO / Hero Tier ──
+        let playerCurrentElo = 0, playerPeakElo = 0;
         try {
           const eloData = await db.getPlayerElo(playerName);
           if (eloData) {
-            const tier = eloData.elo >= 1400 ? { name: 'Diamond', cls: 'tier-diamond' }
-              : eloData.elo >= 1200 ? { name: 'Platinum', cls: 'tier-platinum' }
-              : eloData.elo >= 1100 ? { name: 'Gold', cls: 'tier-gold' }
-              : eloData.elo >= 1000 ? { name: 'Silver', cls: 'tier-silver' }
-              : { name: 'Bronze', cls: 'tier-bronze' };
+            playerCurrentElo = eloData.elo || 0;
+            playerPeakElo = eloData.peak_elo || eloData.elo || 0;
+            const tier = eloData.elo >= 1800 ? { name: 'Master', icon: '💉', cls: 'tier-diamond' }
+              : eloData.elo >= 1400 ? { name: 'Diamond', icon: '💎', cls: 'tier-diamond' }
+              : eloData.elo >= 1200 ? { name: 'Platinum', icon: '⚡', cls: 'tier-platinum' }
+              : eloData.elo >= 1100 ? { name: 'Gold', icon: '🥇', cls: 'tier-gold' }
+              : eloData.elo >= 1000 ? { name: 'Silver', icon: '🥈', cls: 'tier-silver' }
+              : { name: 'Bronze', icon: '🥉', cls: 'tier-bronze' };
 
-            document.getElementById('elo-section').innerHTML = `
-              <div class="card" style="max-width:400px;margin:0 auto 24px;text-align:center;padding:20px;">
-                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:6px;">ELO Rating</div>
-                <div style="font-family:'Exo 2',sans-serif;font-size:2.4rem;font-weight:900;color:var(--cyan);line-height:1;">${eloData.elo}</div>
-                <span style="display:inline-block;margin-top:6px;font-size:10px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;padding:2px 8px;border-radius:3px;"
-                  class="${tier.cls}">${tier.name}</span>
-                ${eloData.peak_elo > eloData.elo ? `<div style="font-size:11px;color:var(--muted);margin-top:6px;">Peak: ${eloData.peak_elo}</div>` : ''}
-              </div>
-            `;
+            const tierRow = document.getElementById('hero-tier-row');
+            if (tierRow) {
+              tierRow.innerHTML = `
+                <div class="hero-elo-big">${eloData.elo}</div>
+                <span class="hero-tier-badge ${tier.cls}">${tier.icon} ${tier.name}</span>
+                ${eloData.peak_elo > eloData.elo ? `<span class="hero-peak-elo">Peak: ${eloData.peak_elo}</span>` : ''}
+              `;
+            }
+
+            const sidebarTier = document.getElementById('sidebar-tier');
+            if (sidebarTier) {
+              sidebarTier.innerHTML = `<span class="${tier.cls}">${tier.icon} ${tier.name} • ${eloData.elo}</span>`;
+            }
           }
         } catch (e) {
           console.error('ELO load error:', e);
         }
 
-        // --- Achievement Badges ---
+        // Points
+        try {
+          const { data: points } = await supabaseClient
+            .from('player_points')
+            .select('*')
+            .ilike('discord_username', playerName)
+            .single();
+          if (points) {
+            const tierRow = document.getElementById('hero-tier-row');
+            if (tierRow) {
+              tierRow.insertAdjacentHTML('beforeend', `
+                <span class="hero-points-badge">
+                  <img src="https://dbgsbuilds.com/wp-content/themes/dbgsquad-lite/asset/badge/36195_00000000E3116FFB.png" alt="" style="width:14px;height:14px;filter:drop-shadow(0 0 3px rgba(255,215,0,0.4));">
+                  ${(points.balance || 0).toLocaleString()} pts
+                </span>
+              `);
+            }
+          }
+        } catch (_) {}
+
+        // Equipped flair items
+        let flairBorderClass = '', ultimateAura = null, profileBg = '';
+        try {
+          const { data: equipped } = await supabaseClient
+            .from('player_inventory')
+            .select('*, item:shop_items(*)')
+            .ilike('discord_username', playerName)
+            .eq('equipped', true);
+          if (equipped) {
+            for (const inv of equipped) {
+              const t = inv.item?.type || inv.item?.item_type;
+              const meta = inv.item?.metadata || {};
+              if (t === 'flair_border' && (meta.effect || inv.item?.effect)) flairBorderClass = meta.effect || inv.item.effect;
+              if (t === 'profile_bg' && meta.bg) profileBg = meta.bg;
+              if (meta.ultimate && meta.aura) ultimateAura = meta.aura;
+            }
+          }
+        } catch (_) {}
+
+        if (profileBg) document.body.classList.add('profile-bg-' + profileBg);
+
+        if (ultimateAura) {
+          const auraColors = {
+            divine_silver: { glow: 'rgba(192,192,255,0.4)', gradient: 'radial-gradient(circle, rgba(192,192,255,0.15) 0%, transparent 70%)' },
+            hakai_purple: { glow: 'rgba(168,85,247,0.4)', gradient: 'radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 70%)' },
+            dragon_flame: { glow: 'rgba(255,215,0,0.4)', gradient: 'radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,45,120,0.08) 40%, transparent 70%)' }
+          };
+          const ac = auraColors[ultimateAura] || auraColors.dragon_flame;
+          const heroEl = document.getElementById('profile-hero');
+          if (heroEl) {
+            heroEl.style.boxShadow = `0 0 30px ${ac.glow}, 0 0 60px ${ac.glow}`;
+            heroEl.style.animation = 'ultimate-profile-pulse 3s ease-in-out infinite';
+          }
+          const nameEl = document.querySelector('.hero-name');
+          if (nameEl && ultimateAura === 'dragon_flame') {
+            nameEl.style.background = 'linear-gradient(90deg,#ffd700,#fff4b0,#ff8c00)';
+            nameEl.style.webkitBackgroundClip = 'text';
+            nameEl.style.webkitTextFillColor = 'transparent';
+            nameEl.style.fontWeight = '900';
+          }
+        }
+
+        // Accolades
+        try {
+          const accolades = [];
+          const { data: ct } = await supabaseClient.from('tournaments').select('id').eq('status', 'completed').order('created_at', { ascending: false }).limit(1);
+          if (ct?.length) {
+            const { data: fm } = await supabaseClient.from('matches')
+              .select('winner_id, player1_id, player2_id, player1:signups!matches_player1_id_fkey(discord_username), player2:signups!matches_player2_id_fkey(discord_username)')
+              .eq('tournament_id', ct[0].id).not('winner_id', 'is', null).order('round', { ascending: false }).limit(1);
+            if (fm?.length) {
+              const w = fm[0];
+              const champName = w.winner_id === w.player1_id ? w.player1?.discord_username : w.player2?.discord_username;
+              if (champName === playerName) accolades.push({ icon: '🏆', label: 'Current Champion' });
+            }
+          }
+          const { data: pts } = await supabaseClient.from('player_points').select('best_streak, current_streak').ilike('discord_username', playerName).single();
+          if (pts?.best_streak >= 3) accolades.push({ icon: '🔥', label: `Best Streak: ${pts.best_streak}` });
+          if (pts?.current_streak >= 2) accolades.push({ icon: '⚡', label: `On ${pts.current_streak} Win Streak` });
+
+          if (accolades.length > 0) {
+            const slot = document.getElementById('hero-accolades-slot');
+            if (slot) slot.innerHTML = `<div class="hero-accolades">${accolades.map(a => `<span class="hero-accolade" title="${a.label}">${a.icon}</span>`).join('')}</div>`;
+          }
+        } catch (_) {}
+
+        // ── Achievement Badges ──
         const earned = new Set();
         try {
-          // -- Fetch extra data for new badges --
-          let bountyWinCount = 0;
-          let totalSpent = 0;
-          let inventoryCount = 0;
-          let playerPeakElo = 0;
-          let playerCurrentElo = 0;
+          let bountyWinCount = 0, totalSpent = 0, inventoryCount = 0;
 
           try {
-            const { count: bCount } = await supabaseClient
-              .from('bounty_challenges')
-              .select('id', { count: 'exact', head: true })
-              .ilike('winner', playerName);
+            const { count: bCount } = await supabaseClient.from('bounty_challenges').select('id', { count: 'exact', head: true }).ilike('winner', playerName);
             if (bCount !== null) bountyWinCount = bCount;
           } catch (_) {}
 
           try {
-            const { data: spendRows } = await supabaseClient
-              .from('point_transactions')
-              .select('amount')
-              .ilike('discord_username', playerName)
-              .eq('reason', 'purchase');
+            const { data: spendRows } = await supabaseClient.from('point_transactions').select('amount').ilike('discord_username', playerName).eq('reason', 'purchase');
             if (spendRows) totalSpent = spendRows.reduce((s, r) => s + Math.abs(r.amount || 0), 0);
           } catch (_) {}
 
           try {
-            const { count: invCount } = await supabaseClient
-              .from('player_inventory')
-              .select('id', { count: 'exact', head: true })
-              .ilike('discord_username', playerName);
+            const { count: invCount } = await supabaseClient.from('player_inventory').select('id', { count: 'exact', head: true }).ilike('discord_username', playerName);
             if (invCount !== null) inventoryCount = invCount;
           } catch (_) {}
 
-          try {
-            const eloInfo = await db.getPlayerElo(playerName);
-            if (eloInfo) {
-              playerCurrentElo = eloInfo.elo || 0;
-              playerPeakElo = eloInfo.peak_elo || eloInfo.elo || 0;
-            }
-          } catch (_) {}
-
-          // -- Badge definitions with tiers --
           const badgeDefs = [
-            { id: 'first_blood',    icon: '\u{1F31F}', name: 'First Blood',    desc: 'Won their first ever match' },
-            { id: 'champion',       icon: '\u{1F3C6}', name: 'Champion',       desc: 'Won a tournament',                  tiers: [1, 3, 5], tierLabel: 'tournament wins' },
-            { id: 'dynasty',        icon: '\u{1F451}', name: 'Dynasty',        desc: 'Won 2+ tournaments',                gold: true },
-            { id: 'on_fire',        icon: '\u{1F525}', name: 'On Fire',        desc: 'Won 3+ matches in a row',           tiers: [3, 5, 10], tierLabel: 'win streak' },
-            { id: 'streak_master',  icon: '\u{26A1}', name: 'Streak Master',  desc: 'Won 5+ matches in a row' },
-            { id: 'veteran',        icon: '\u{2694}\uFE0F', name: 'Veteran',        desc: 'Played in 3+ tournaments',          tiers: [3, 7, 15], tierLabel: 'tournaments' },
-            { id: 'socialite',      icon: '\u{1F91D}', name: 'Socialite',      desc: 'Played in 5+ tournaments' },
-            { id: 'sharpshooter',   icon: '\u{1F3AF}', name: 'Sharpshooter',   desc: '75%+ win rate (min 4 matches)' },
-            { id: 'iron_wall',      icon: '\u{1F6E1}\uFE0F', name: 'Iron Wall',      desc: 'Never lost in a tournament (min 2)' },
-            { id: 'underdog',       icon: '\u{1F4AA}', name: 'Underdog',       desc: 'Beat a player with higher ELO' },
-            { id: 'rising_star',    icon: '\u{2B50}', name: 'Rising Star',    desc: 'Reached 1100+ ELO' },
-            { id: 'elite',          icon: '\u{1F48E}', name: 'Elite',          desc: 'Reached 1300+ ELO' },
-            { id: 'bounty_hunter',  icon: '\u{1F4B0}', name: 'Bounty Hunter',  desc: 'Won 5+ bounty matches',             tiers: [5, 15, 30], tierLabel: 'bounty wins' },
-            { id: 'bounty_king',    icon: '\u{1F934}', name: 'Bounty King',    desc: 'Won 15+ bounty matches' },
-            { id: 'big_spender',    icon: '\u{1F4B8}', name: 'Big Spender',    desc: 'Spent 1000+ points total' },
-            { id: 'collector',      icon: '\u{1F4E6}', name: 'Collector',      desc: 'Own 5+ shop items' },
-            { id: 'perfect_season', icon: '\u{2728}', name: 'Perfect Season', desc: 'Won a tournament without losing' },
-            { id: 'tenacious',      icon: '\u{1F9E0}', name: 'Tenacious',      desc: 'Lost 3+ but still won the tournament' },
+            { id: 'first_blood',    icon: '🌟', name: 'First Blood',    desc: 'Won their first ever match' },
+            { id: 'champion',       icon: '🏆', name: 'Champion',       desc: 'Won a tournament',                  tiers: [1, 3, 5], tierLabel: 'tournament wins' },
+            { id: 'dynasty',        icon: '👑', name: 'Dynasty',        desc: 'Won 2+ tournaments',                gold: true },
+            { id: 'on_fire',        icon: '🔥', name: 'On Fire',        desc: 'Won 3+ matches in a row',           tiers: [3, 5, 10], tierLabel: 'win streak' },
+            { id: 'streak_master',  icon: '⚡',  name: 'Streak Master',  desc: 'Won 5+ matches in a row' },
+            { id: 'veteran',        icon: '⚔️', name: 'Veteran',        desc: 'Played in 3+ tournaments',          tiers: [3, 7, 15], tierLabel: 'tournaments' },
+            { id: 'socialite',      icon: '🤝', name: 'Socialite',      desc: 'Played in 5+ tournaments' },
+            { id: 'sharpshooter',   icon: '🎯', name: 'Sharpshooter',   desc: '75%+ win rate (min 4 matches)' },
+            { id: 'iron_wall',      icon: '🛡️', name: 'Iron Wall',      desc: 'Never lost in a tournament (min 2)' },
+            { id: 'underdog',       icon: '💪', name: 'Underdog',       desc: 'Beat a player with higher ELO' },
+            { id: 'rising_star',    icon: '⭐', name: 'Rising Star',    desc: 'Reached 1100+ ELO' },
+            { id: 'elite',          icon: '💎', name: 'Elite',          desc: 'Reached 1300+ ELO' },
+            { id: 'bounty_hunter',  icon: '💰', name: 'Bounty Hunter',  desc: 'Won 5+ bounty matches',             tiers: [5, 15, 30], tierLabel: 'bounty wins' },
+            { id: 'bounty_king',    icon: '🤴', name: 'Bounty King',    desc: 'Won 15+ bounty matches' },
+            { id: 'big_spender',    icon: '💸', name: 'Big Spender',    desc: 'Spent 1000+ points total' },
+            { id: 'collector',      icon: '📦', name: 'Collector',      desc: 'Own 5+ shop items' },
+            { id: 'perfect_season', icon: '✨', name: 'Perfect Season', desc: 'Won a tournament without losing' },
+            { id: 'tenacious',      icon: '🧠', name: 'Tenacious',      desc: 'Lost 3+ but still won the tournament' },
           ];
 
-          const badgeProgress = {}; // id -> { current, target }
-          const badgeTierLevel = {}; // id -> 'bronze'|'silver'|'gold'
+          const badgeProgress = {};
+          const badgeTierLevel = {};
 
-          // Helper: compute tier for a badge
           function computeTier(id, value, tiers) {
             if (!tiers) return;
             if (value >= tiers[2])      badgeTierLevel[id] = 'gold';
@@ -1646,39 +1793,30 @@
             else if (value >= tiers[0]) badgeTierLevel[id] = 'bronze';
           }
 
-          // Count tournament wins
           const tourneyWins = tournamentDetails.filter(td => td.placement === 'Champion').length;
           if (tourneyWins >= 1) earned.add('champion');
           if (tourneyWins >= 2) earned.add('dynasty');
           computeTier('champion', tourneyWins, [1, 3, 5]);
           badgeProgress['champion'] = { current: tourneyWins, target: 1 };
 
-          // Veteran / Socialite
           if (tournamentIds.length >= 3) earned.add('veteran');
           if (tournamentIds.length >= 5) earned.add('socialite');
           computeTier('veteran', tournamentIds.length, [3, 7, 15]);
           badgeProgress['veteran'] = { current: tournamentIds.length, target: 3 };
           badgeProgress['socialite'] = { current: tournamentIds.length, target: 5 };
 
-          // Sharpshooter
           if (totalMatches >= 4 && winRate >= 75) earned.add('sharpshooter');
-
-          // First Blood
           if (wins >= 1) earned.add('first_blood');
 
-          // Iron Wall + Perfect Season + Tenacious
           for (const tid of tournamentIds) {
             const playerSignup = signups.find(s => s.tournament_id === tid);
             if (!playerSignup) continue;
-            const tMatches = matches.filter(m =>
-              m.player1_id === playerSignup.id || m.player2_id === playerSignup.id
-            );
+            const tMatches = matches.filter(m => m.player1_id === playerSignup.id || m.player2_id === playerSignup.id);
             const completedInT = tMatches.filter(m => m.winner_id);
             if (completedInT.length >= 2) {
               const lostAny = completedInT.some(m => m.winner_id !== playerSignup.id);
               const lossesInT = completedInT.filter(m => m.winner_id !== playerSignup.id).length;
               if (!lostAny) earned.add('iron_wall');
-              // Perfect Season: won tournament + no losses
               const td = tournamentDetails.find(t => t.id === tid);
               if (td && td.placement === 'Champion') {
                 if (!lostAny) earned.add('perfect_season');
@@ -1687,10 +1825,8 @@
             }
           }
 
-          // On Fire / Streak Master: consecutive wins
           const sortedMatches = [...matches].filter(m => m.winner_id).sort((a, b) => a.id - b.id);
-          let streak = 0;
-          let maxStreak = 0;
+          let streak = 0, maxStreak = 0;
           for (const m of sortedMatches) {
             if (signupIds.includes(m.winner_id)) {
               streak++;
@@ -1705,7 +1841,6 @@
           badgeProgress['on_fire'] = { current: maxStreak, target: 3 };
           badgeProgress['streak_master'] = { current: maxStreak, target: 5 };
 
-          // Underdog
           try {
             const playerElo = await db.getPlayerElo(playerName);
             if (playerElo) {
@@ -1716,45 +1851,36 @@
                 if (opponent) {
                   try {
                     const oppElo = await db.getPlayerElo(opponent.discord_username);
-                    if (oppElo && oppElo.elo > playerElo.elo) {
-                      earned.add('underdog');
-                      break;
-                    }
+                    if (oppElo && oppElo.elo > playerElo.elo) { earned.add('underdog'); break; }
                   } catch (_) {}
                 }
               }
             }
           } catch (_) {}
 
-          // ELO-based badges
           const peakForBadges = Math.max(playerCurrentElo, playerPeakElo);
           if (peakForBadges >= 1100) earned.add('rising_star');
           if (peakForBadges >= 1300) earned.add('elite');
           badgeProgress['rising_star'] = { current: peakForBadges, target: 1100 };
           badgeProgress['elite'] = { current: peakForBadges, target: 1300 };
 
-          // Bounty badges
           if (bountyWinCount >= 5) earned.add('bounty_hunter');
           if (bountyWinCount >= 15) earned.add('bounty_king');
           computeTier('bounty_hunter', bountyWinCount, [5, 15, 30]);
           badgeProgress['bounty_hunter'] = { current: bountyWinCount, target: 5 };
           badgeProgress['bounty_king'] = { current: bountyWinCount, target: 15 };
 
-          // Economy badges
           if (totalSpent >= 1000) earned.add('big_spender');
           badgeProgress['big_spender'] = { current: totalSpent, target: 1000 };
           if (inventoryCount >= 5) earned.add('collector');
           badgeProgress['collector'] = { current: inventoryCount, target: 5 };
 
-          // -- Detect newly unlocked badges --
           const storageKey = `dbl_badges_${playerName}`;
           const previousBadges = JSON.parse(localStorage.getItem(storageKey) || '[]');
           const previousSet = new Set(previousBadges);
           const newlyUnlocked = [...earned].filter(id => !previousSet.has(id));
-          // Save current earned set
           localStorage.setItem(storageKey, JSON.stringify([...earned]));
 
-          // Render badges
           const badgesHtml = badgeDefs.map(b => {
             const isEarned = earned.has(b.id);
             const isNew = newlyUnlocked.includes(b.id);
@@ -1763,21 +1889,15 @@
               ? `badge-card earned${b.gold ? ' tier-gold-badge' : ''}${isNew ? ' newly-unlocked' : ''}`
               : 'badge-card locked';
 
-            // Tier dot
             let tierDot = '';
-            if (isEarned && tier) {
-              tierDot = `<div class="badge-tier-dot tier-${tier}" title="${tier}"></div>`;
-            }
+            if (isEarned && tier) tierDot = `<div class="badge-tier-dot tier-${tier}" title="${tier}"></div>`;
 
-            // Progress bar (only on locked progressive badges)
             let progressHtml = '';
             if (!isEarned && badgeProgress[b.id]) {
               const p = badgeProgress[b.id];
               const pct = Math.min(100, Math.round((p.current / p.target) * 100));
               if (p.current > 0) {
-                progressHtml = `
-                  <div class="badge-progress"><div class="badge-progress-fill" style="width:${pct}%"></div></div>
-                  <div class="badge-progress-label">${p.current}/${p.target}</div>`;
+                progressHtml = `<div class="badge-progress"><div class="badge-progress-fill" style="width:${pct}%"></div></div><div class="badge-progress-label">${p.current}/${p.target}</div>`;
               }
             }
 
@@ -1790,14 +1910,17 @@
             </div>`;
           }).join('');
 
-          document.getElementById('achievements-section').innerHTML = `
-            <div class="achievements-section">
-              <div class="achievements-title">Achievements <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:8px;">${earned.size}/${badgeDefs.length}</span></div>
-              <div class="badges-grid">${badgesHtml}</div>
-            </div>
-          `;
+          document.getElementById('badge-count').textContent = `${earned.size}/${badgeDefs.length}`;
+          document.getElementById('badges-content').innerHTML = `<div class="badges-grid">${badgesHtml}</div>`;
 
-          // -- Show unlock celebration for new badges --
+          // Hero badge icons
+          const earnedBadgeIcons = badgeDefs.filter(b => earned.has(b.id)).map(b => b.icon);
+          if (earnedBadgeIcons.length) {
+            const slot = document.getElementById('hero-badges-slot');
+            if (slot) slot.innerHTML = `<div class="hero-badges">${earnedBadgeIcons.map(icon => `<div class="hero-badge-mini" title="${icon}">${icon}</div>`).join('')}</div>`;
+          }
+
+          // Unlock celebration
           if (newlyUnlocked.length > 0) {
             let unlockIndex = 0;
             function showNextUnlock() {
@@ -1808,32 +1931,25 @@
 
               const overlay = document.createElement('div');
               overlay.className = 'badge-unlock-overlay';
-              overlay.innerHTML = `
-                <div class="badge-unlock-modal">
-                  <div class="unlock-label">Achievement Unlocked!</div>
-                  <div class="unlock-icon">${bDef.icon}</div>
-                  <div class="unlock-name">${bDef.name}</div>
-                  <div class="unlock-desc">${bDef.desc}</div>
-                </div>
-              `;
+              overlay.innerHTML = `<div class="badge-unlock-modal">
+                <div class="unlock-label">Achievement Unlocked!</div>
+                <div class="unlock-icon">${bDef.icon}</div>
+                <div class="unlock-name">${bDef.name}</div>
+                <div class="unlock-desc">${bDef.desc}</div>
+              </div>`;
               document.body.appendChild(overlay);
               try { playSound('claim'); } catch (_) {}
 
               overlay.addEventListener('click', () => {
                 overlay.remove();
                 unlockIndex++;
-                if (unlockIndex < newlyUnlocked.length) {
-                  setTimeout(showNextUnlock, 300);
-                }
+                if (unlockIndex < newlyUnlocked.length) setTimeout(showNextUnlock, 300);
               });
-              // Auto-dismiss after 3s
               setTimeout(() => {
                 if (overlay.parentNode) {
                   overlay.remove();
                   unlockIndex++;
-                  if (unlockIndex < newlyUnlocked.length) {
-                    setTimeout(showNextUnlock, 300);
-                  }
+                  if (unlockIndex < newlyUnlocked.length) setTimeout(showNextUnlock, 300);
                 }
               }, 3000);
             }
@@ -1843,332 +1959,115 @@
           console.error('Badges error:', e);
         }
 
-        // ── Player Card ──
+        // ── Titles ──
         try {
-          const eloData = await db.getPlayerElo(playerName);
-          const elo = eloData ? eloData.elo : null;
-          const tier = elo
-            ? (elo >= 1400 ? { name: 'Diamond', icon: '💎', cls: 'tier-diamond' }
-              : elo >= 1200 ? { name: 'Platinum', icon: '⚡', cls: 'tier-platinum' }
-              : elo >= 1100 ? { name: 'Gold', icon: '🥇', cls: 'tier-gold' }
-              : elo >= 1000 ? { name: 'Silver', icon: '🥈', cls: 'tier-silver' }
-              : { name: 'Bronze', icon: '🥉', cls: 'tier-bronze' })
-            : null;
-
-          // Equipped flair items
-          let flairBorderClass = '';
-          let flairTitle = '';
-          let profileBg = '';
-          let ultimateAura = null;
-          try {
-            const { data: equipped } = await supabaseClient
-              .from('player_inventory')
-              .select('*, item:shop_items(*)')
-              .ilike('discord_username', playerName)
-              .eq('equipped', true);
-            if (equipped) {
-              for (const inv of equipped) {
-                const t = inv.item?.type || inv.item?.item_type;
-                const meta = inv.item?.metadata || {};
-                if (t === 'flair_border' && (meta.effect || inv.item?.effect)) {
-                  flairBorderClass = meta.effect || inv.item.effect;
-                }
-                if (t === 'flair_title' && (meta.title || inv.item?.effect)) {
-                  flairTitle = meta.title || inv.item.effect;
-                }
-                if (t === 'profile_bg' && meta.bg) {
-                  profileBg = meta.bg;
-                }
-                if (meta.ultimate && meta.aura) {
-                  ultimateAura = meta.aura;
-                }
-              }
+          if (typeof TitleManager !== 'undefined') {
+            const equippedTitle = await TitleManager.getEquippedTitle(playerName);
+            const titleDisplay = document.getElementById('hero-title-display');
+            if (titleDisplay && equippedTitle) {
+              titleDisplay.innerHTML = `<div class="hero-equipped-title" style="color:${equippedTitle.color}">${esc(equippedTitle.name)}</div>`;
             }
-          } catch (_) {}
 
-          if (ultimateAura) {
-            const auraColors = {
-              divine_silver: { glow: 'rgba(192,192,255,0.4)', gradient: 'radial-gradient(circle, rgba(192,192,255,0.15) 0%, transparent 70%)' },
-              hakai_purple: { glow: 'rgba(168,85,247,0.4)', gradient: 'radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 70%)' },
-              dragon_flame: { glow: 'rgba(255,215,0,0.4)', gradient: 'radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,45,120,0.08) 40%, transparent 70%)' }
-            };
-            const ac = auraColors[ultimateAura] || auraColors.dragon_flame;
-            const profileCard = document.querySelector('.profile-card') || document.querySelector('.card');
-            if (profileCard) {
-              profileCard.style.boxShadow = `0 0 30px ${ac.glow}, 0 0 60px ${ac.glow}`;
-              profileCard.style.animation = 'ultimate-profile-pulse 3s ease-in-out infinite';
-              const auraDiv = document.createElement('div');
-              auraDiv.style.cssText = `position:absolute;inset:-20px;background:${ac.gradient};pointer-events:none;z-index:0;border-radius:inherit;animation:aura-pulse 3s ease-in-out infinite;`;
-              profileCard.style.position = 'relative';
-              profileCard.style.overflow = 'visible';
-              profileCard.prepend(auraDiv);
-            }
-            const nameEl = document.querySelector('.profile-name');
-            if (nameEl && ultimateAura === 'dragon_flame') {
-              nameEl.style.background = 'linear-gradient(90deg,#ffd700,#fff4b0,#ff8c00)';
-              nameEl.style.webkitBackgroundClip = 'text';
-              nameEl.style.webkitTextFillColor = 'transparent';
-              nameEl.style.fontWeight = '900';
-            }
-          }
+            const allTitleDefs = Object.values(TitleManager.TITLES);
+            const ownedTitles = await TitleManager.getPlayerTitles(playerName);
+            const ownedIds = new Set(ownedTitles.map(t => t.title_id));
+            const equippedId = ownedTitles.find(t => t.equipped)?.title_id || (ownedIds.has('rookie') ? 'rookie' : null);
+            const isOwnProfile = typeof AUTH !== 'undefined' && AUTH.isLoggedIn() && AUTH.getDiscordUsername() === playerName;
 
-          // Points
-          let pointsVal = null;
-          try {
-            const { data: points } = await supabaseClient
-              .from('player_points')
-              .select('*')
-              .ilike('discord_username', playerName)
-              .single();
-            if (points) pointsVal = points.balance || 0;
-          } catch (_) {}
+            document.getElementById('titles-count').textContent = `${ownedIds.size}/${allTitleDefs.length}`;
 
-          // Top 3 characters for the card
-          const cardChars = topChars.slice(0, 3);
+            let titlesHtml = '<div class="titles-grid">';
+            for (const t of allTitleDefs) {
+              const owned = ownedIds.has(t.id);
+              const isEquipped = equippedId === t.id;
+              let cls = 'title-card';
+              if (owned) cls += ' owned';
+              if (isEquipped) cls += ' equipped-card';
+              if (!owned) cls += ' locked';
 
-          // Earned badges (reuse the earned Set from above)
-          const badgeDefs = [
-            { id: 'first_blood',    icon: '🌟' },
-            { id: 'champion',       icon: '🏆' },
-            { id: 'dynasty',        icon: '👑' },
-            { id: 'on_fire',        icon: '🔥' },
-            { id: 'streak_master',  icon: '⚡' },
-            { id: 'veteran',        icon: '⚔️' },
-            { id: 'socialite',      icon: '🤝' },
-            { id: 'sharpshooter',   icon: '🎯' },
-            { id: 'iron_wall',      icon: '🛡️' },
-            { id: 'underdog',       icon: '💀' },
-            { id: 'rising_star',    icon: '⭐' },
-            { id: 'elite',          icon: '💎' },
-            { id: 'bounty_hunter',  icon: '💰' },
-            { id: 'bounty_king',    icon: '🤑' },
-            { id: 'big_spender',    icon: '🛒' },
-            { id: 'collector',      icon: '📦' },
-            { id: 'perfect_season', icon: '✨' },
-            { id: 'tenacious',      icon: '🔄' },
-          ];
-          const earnedBadgeIcons = badgeDefs.filter(b => earned.has(b.id)).map(b => b.icon);
+              titlesHtml += `<div class="${cls}">`;
+              titlesHtml += `<div class="title-card-name" style="color:${owned ? t.color : 'var(--muted)'}">${esc(t.name)}</div>`;
+              titlesHtml += `<div class="title-card-desc">${esc(t.description)}</div>`;
+              titlesHtml += `<div class="title-card-source ${t.source}">${t.source === 'shop' ? 'Shop - ' + t.price + ' pts' : 'Earned'}</div>`;
 
-          if (profileBg) document.body.classList.add('profile-bg-' + profileBg);
-
-          const cardHtml = `
-            <div class="player-card-wrap ${window._isVillain ? 'villain-card' : ''}">
-              <div class="player-card ${flairBorderClass}">
-                <div class="player-card-inner">
-                  <div class="card-top">
-                    <div class="card-player-name">${playerName}</div>
-                    ${flairTitle ? `<div class="card-flair-title">${flairTitle}</div>` : ''}
-                    ${tier ? `
-                      <div class="card-elo-value">${elo}</div>
-                      <span class="card-tier-badge ${tier.cls}">${tier.icon} ${tier.name}</span>
-                    ` : ''}
-                    ${pointsVal !== null ? `<div class="card-points-badge"><img src="https://dbgsbuilds.com/wp-content/themes/dbgsquad-lite/asset/badge/36195_00000000E3116FFB.png" alt="" style="width:16px;height:16px;vertical-align:middle;filter:drop-shadow(0 0 3px rgba(255,215,0,0.4));"> ${pointsVal.toLocaleString()} Points</div>` : ''}
-                  </div>
-
-                  ${cardChars.length ? `
-                    <div class="card-chars">
-                      ${cardChars.map(c => `
-                        <a href="character.html?id=${c.id}" style="text-align:center;text-decoration:none;color:inherit;">
-                          <div class="card-char">
-                            <img src="${c.image}" alt="${c.name}" onerror="this.parentElement.style.display='none'" />
-                          </div>
-                          <div class="card-char-label">${c.name.split(' ').slice(0, 2).join(' ')}</div>
-                        </a>
-                      `).join('')}
-                    </div>
-                  ` : ''}
-
-                  <div class="card-stats">
-                    <div class="card-stat">
-                      <div class="card-stat-val" style="color:var(--green)">${wins}</div>
-                      <div class="card-stat-lbl">Wins</div>
-                    </div>
-                    <div class="card-stat">
-                      <div class="card-stat-val" style="color:var(--red,#ff4757)">${losses}</div>
-                      <div class="card-stat-lbl">Losses</div>
-                    </div>
-                    <div class="card-stat">
-                      <div class="card-stat-val" style="color:var(--gold)">${winRate}%</div>
-                      <div class="card-stat-lbl">Win Rate</div>
-                    </div>
-                    <div class="card-stat">
-                      <div class="card-stat-val" style="color:var(--cyan)">${tournamentIds.length}</div>
-                      <div class="card-stat-lbl">Tourneys</div>
-                    </div>
-                  </div>
-
-                  ${earnedBadgeIcons.length ? `
-                    <div class="card-badges">
-                      ${earnedBadgeIcons.map(icon => `<div class="card-badge-mini" title="${icon}">${icon}</div>`).join('')}
-                    </div>
-                  ` : ''}
-                </div>
-              </div>
-              <button class="card-share-btn" onclick="copyProfileLink()">📋 Copy Profile Link</button>
-            </div>
-          `;
-
-          // Insert card at the very top of profile content
-          content.insertAdjacentHTML('afterbegin', cardHtml);
-          playSound('powerup');
-
-          // Check if this player has any accolades
-          try {
-            const accolades = [];
-            // Champion check
-            const { data: ct } = await supabaseClient.from('tournaments')
-              .select('id').eq('status', 'completed').order('created_at', { ascending: false }).limit(1);
-            if (ct?.length) {
-              const { data: fm } = await supabaseClient.from('matches')
-                .select('winner_id, player1_id, player2_id, player1:signups!matches_player1_id_fkey(discord_username), player2:signups!matches_player2_id_fkey(discord_username)')
-                .eq('tournament_id', ct[0].id).not('winner_id', 'is', null)
-                .order('round', { ascending: false }).limit(1);
-              if (fm?.length) {
-                const w = fm[0];
-                const champName = w.winner_id === w.player1_id ? w.player1?.discord_username : w.player2?.discord_username;
-                if (champName === playerName) accolades.push({ icon: '🏆', label: 'Current Champion' });
-              }
-            }
-            // Best streak
-            const { data: pts } = await supabaseClient.from('player_points')
-              .select('best_streak, current_streak').ilike('discord_username', playerName).single();
-            if (pts?.best_streak >= 3) accolades.push({ icon: '🔥', label: `Best Streak: ${pts.best_streak}` });
-            if (pts?.current_streak >= 2) accolades.push({ icon: '⚡', label: `On ${pts.current_streak} Win Streak` });
-
-            if (accolades.length > 0) {
-              const wrap = document.querySelector('.player-card-inner .card-top');
-              if (wrap) {
-                const div = document.createElement('div');
-                div.className = 'card-accolades';
-                div.innerHTML = accolades.map(a => `<span class="card-accolade" title="${a.label}">${a.icon}</span>`).join('');
-                wrap.appendChild(div);
-              }
-            }
-          } catch (_) {}
-
-          // -- Player Titles --
-          try {
-            if (typeof TitleManager !== 'undefined') {
-              const equippedTitle = await TitleManager.getEquippedTitle(playerName);
-              const titleDisplay = document.getElementById('player-title-display');
-              if (titleDisplay && equippedTitle) {
-                titleDisplay.innerHTML = `<div class="profile-equipped-title" style="color:${equippedTitle.color}">${equippedTitle.name}</div>`;
-              }
-
-              // Also show on the player card
-              const cardFlairEl = document.querySelector('.card-flair-title');
-              if (!cardFlairEl) {
-                const cardTop = document.querySelector('.card-top .card-player-name');
-                if (cardTop && equippedTitle.id !== 'rookie') {
-                  cardTop.insertAdjacentHTML('afterend', `<div class="card-flair-title" style="color:${equippedTitle.color};text-shadow:0 0 8px ${equippedTitle.color};">${equippedTitle.name}</div>`);
+              if (owned && isOwnProfile) {
+                if (isEquipped) {
+                  titlesHtml += `<button class="title-equip-btn is-equipped" disabled>Equipped</button>`;
+                } else {
+                  titlesHtml += `<button class="title-equip-btn" onclick="equipPlayerTitle('${t.id}')">Equip</button>`;
                 }
-              }
-
-              // Titles section
-              const allTitleDefs = Object.values(TitleManager.TITLES);
-              const ownedTitles = await TitleManager.getPlayerTitles(playerName);
-              const ownedIds = new Set(ownedTitles.map(t => t.title_id));
-              const equippedId = ownedTitles.find(t => t.equipped)?.title_id || (ownedIds.has('rookie') ? 'rookie' : null);
-
-              const isOwnProfile = typeof AUTH !== 'undefined' && AUTH.isLoggedIn() && AUTH.getDiscordUsername() === playerName;
-
-              let titlesHtml = `<div class="achievements-title">Titles <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:8px;">${ownedIds.size}/${allTitleDefs.length}</span></div>`;
-              titlesHtml += '<div class="titles-grid">';
-              for (const t of allTitleDefs) {
-                const owned = ownedIds.has(t.id);
-                const isEquipped = equippedId === t.id;
-                let cls = 'title-card';
-                if (owned) cls += ' owned';
-                if (isEquipped) cls += ' equipped-card';
-                if (!owned) cls += ' locked';
-
-                titlesHtml += `<div class="${cls}">`;
-                titlesHtml += `<div class="title-card-name" style="color:${owned ? t.color : 'var(--muted)'}">${t.name}</div>`;
-                titlesHtml += `<div class="title-card-desc">${t.description}</div>`;
-                titlesHtml += `<div class="title-card-source ${t.source}">${t.source === 'shop' ? 'Shop - ' + t.price + ' pts' : 'Earned'}</div>`;
-
-                if (owned && isOwnProfile) {
-                  if (isEquipped) {
-                    titlesHtml += `<button class="title-equip-btn is-equipped" disabled>Equipped</button>`;
-                  } else {
-                    titlesHtml += `<button class="title-equip-btn" onclick="equipPlayerTitle('${t.id}')">Equip</button>`;
-                  }
-                } else if (!owned) {
-                  titlesHtml += `<div class="title-lock-hint">${t.source === 'shop' ? 'Available in Shop' : t.description}</div>`;
-                }
-                titlesHtml += '</div>';
+              } else if (!owned) {
+                titlesHtml += `<div class="title-lock-hint">${t.source === 'shop' ? 'Available in Shop' : esc(t.description)}</div>`;
               }
               titlesHtml += '</div>';
-
-              const titlesSection = document.getElementById('titles-section');
-              if (titlesSection) {
-                titlesSection.innerHTML = titlesHtml;
-                titlesSection.style.display = '';
-              }
             }
-          } catch (e) {
-            console.error('Titles error:', e);
+            titlesHtml += '</div>';
+
+            document.getElementById('titles-content').innerHTML = titlesHtml;
           }
-
-          // Cosmetic Collection
-          try {
-            const { data: inventory } = await supabaseClient
-              .from('player_inventory')
-              .select('*, item:shop_items(*)')
-              .ilike('discord_username', playerName);
-            if (inventory?.length) {
-              const cosmetics = inventory.filter(inv => {
-                const t = inv.item?.type || inv.item?.item_type || '';
-                return ['flair_border', 'flair_title', 'profile_bg'].includes(t);
-              });
-              if (cosmetics.length) {
-                let html = '<div class="cosmetic-collection"><h3>Cosmetic Collection</h3><div class="cosmetic-grid">';
-                for (const inv of cosmetics) {
-                  const t = inv.item?.type || inv.item?.item_type;
-                  const meta = inv.item?.metadata || {};
-                  const name = inv.item?.name || 'Unknown';
-                  const isEquipped = inv.equipped;
-                  let previewHtml = '';
-                  if (t === 'flair_border') {
-                    const effect = meta.effect || inv.item?.effect || '';
-                    previewHtml = `<div class="cosmetic-preview border-preview ${effect}"></div>`;
-                  } else if (t === 'profile_bg') {
-                    const bg = meta.bg || '';
-                    previewHtml = `<div class="cosmetic-preview bg-preview ${bg}"></div>`;
-                  } else if (t === 'flair_title') {
-                    const title = meta.title || inv.item?.effect || '';
-                    previewHtml = `<div class="cosmetic-title-preview">"${title}"</div>`;
-                  }
-                  const typeLabel = t === 'flair_border' ? 'Border' : t === 'flair_title' ? 'Title' : 'Background';
-                  html += `<div class="cosmetic-item ${isEquipped ? 'equipped' : ''}">
-                    ${isEquipped ? '<span class="cosmetic-equipped-badge">Equipped</span>' : ''}
-                    ${previewHtml}
-                    <div class="cosmetic-name">${name}</div>
-                    <div class="cosmetic-type">${typeLabel}</div>
-                  </div>`;
-                }
-                html += '</div></div>';
-                content.insertAdjacentHTML('beforeend', html);
-              }
-            }
-          } catch (_) {}
         } catch (e) {
-          console.error('Player card error:', e);
+          console.error('Titles error:', e);
+        }
+
+        // ── Cosmetic Collection ──
+        try {
+          const { data: inventory } = await supabaseClient
+            .from('player_inventory')
+            .select('*, item:shop_items(*)')
+            .ilike('discord_username', playerName);
+
+          const cosmeticsEl = document.getElementById('cosmetics-content');
+          if (inventory?.length) {
+            const cosmetics = inventory.filter(inv => {
+              const t = inv.item?.type || inv.item?.item_type || '';
+              return ['flair_border', 'flair_title', 'profile_bg'].includes(t);
+            });
+            if (cosmetics.length) {
+              let html = '<div class="cosmetic-grid">';
+              for (const inv of cosmetics) {
+                const t = inv.item?.type || inv.item?.item_type;
+                const meta = inv.item?.metadata || {};
+                const name = inv.item?.name || 'Unknown';
+                const isEquipped = inv.equipped;
+                let previewHtml = '';
+                if (t === 'flair_border') {
+                  const effect = meta.effect || inv.item?.effect || '';
+                  previewHtml = `<div class="cosmetic-preview border-preview ${effect}"></div>`;
+                } else if (t === 'profile_bg') {
+                  const bg = meta.bg || '';
+                  previewHtml = `<div class="cosmetic-preview bg-preview ${bg}"></div>`;
+                } else if (t === 'flair_title') {
+                  const title = meta.title || inv.item?.effect || '';
+                  previewHtml = `<div class="cosmetic-title-preview">"${esc(title)}"</div>`;
+                }
+                const typeLabel = t === 'flair_border' ? 'Border' : t === 'flair_title' ? 'Title' : 'Background';
+                html += `<div class="cosmetic-item ${isEquipped ? 'equipped' : ''}">
+                  ${isEquipped ? '<span class="cosmetic-equipped-badge">Equipped</span>' : ''}
+                  ${previewHtml}
+                  <div class="cosmetic-name">${esc(name)}</div>
+                  <div class="cosmetic-type">${typeLabel}</div>
+                </div>`;
+              }
+              html += '</div>';
+              cosmeticsEl.innerHTML = html;
+            } else {
+              cosmeticsEl.innerHTML = '<div class="empty-msg">No cosmetics owned.</div>';
+            }
+          } else {
+            cosmeticsEl.innerHTML = '<div class="empty-msg">No cosmetics owned.</div>';
+          }
+        } catch (_) {
+          document.getElementById('cosmetics-content').innerHTML = '<div class="empty-msg">No cosmetics owned.</div>';
         }
 
       } catch (e) {
         console.error('Profile load error:', e);
-        content.innerHTML = '<div class="empty-state"><p>Error loading player profile.</p></div>';
+        content.innerHTML = '<div class="profile-landing"><div class="landing-box"><h3 style="color:var(--red);">Error</h3><p>Error loading player profile.</p></div></div>';
       }
     });
   </script>
   <script src="js/themes.js"></script>
-  <script src="js/notification-inbox.js"></script>`n  <script src="js/toolbar.js"></script>
+  <script src="js/notification-inbox.js"></script>
+  <script src="js/toolbar.js"></script>
 </body>
 </html>
-
-
-
-
-
-
