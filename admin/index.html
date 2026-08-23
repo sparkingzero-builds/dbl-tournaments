@@ -608,6 +608,83 @@
       .player-detail-grid { grid-template-columns: repeat(2, 1fr); }
       .player-search-bar { flex-direction: column; }
     }
+
+    /* Activity Feed */
+    .activity-feed-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--bg-2, rgba(0,0,0,0.2));
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      transition: border-color 0.15s;
+    }
+    .activity-feed-item:hover { border-color: rgba(0, 229, 255, 0.3); }
+    .activity-feed-item .af-icon {
+      font-size: 22px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,229,255,0.08);
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    .activity-feed-item .af-icon.signup { background: rgba(0,229,255,0.1); }
+    .activity-feed-item .af-icon.match { background: rgba(46,213,115,0.1); }
+    .activity-feed-item .af-icon.bounty { background: rgba(255,215,64,0.1); }
+    .activity-feed-item .af-icon.purchase { background: rgba(255,45,120,0.1); }
+    .activity-feed-item .af-icon.points { background: rgba(165,94,234,0.1); }
+    .activity-feed-item .af-icon.elo { background: rgba(0,229,255,0.1); }
+    .activity-feed-item .af-body { flex: 1; min-width: 0; }
+    .activity-feed-item .af-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .activity-feed-item .af-detail {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .activity-feed-item .af-time {
+      font-size: 10px;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .activity-feed-item .af-player {
+      color: var(--cyan);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .activity-feed-item .af-player:hover { text-decoration: underline; }
+    .stat-box {
+      background: var(--panel, #1a1535);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 12px;
+      text-align: center;
+    }
+    .stat-box .stat-val {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--cyan);
+      line-height: 1;
+    }
+    .stat-box .stat-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body class="scanlines">
@@ -662,6 +739,7 @@
           <div class="sidebar-label">Data</div>
           <div class="sidebar-item" data-tab="stats"><span class="icon">📈</span> Stats</div>
           <div class="sidebar-item" data-tab="audit"><span class="icon">📝</span> Audit Log</div>
+          <div class="sidebar-item" data-tab="notifications"><span class="icon">🔔</span> Activity Feed</div>
         </div>
 
         <div class="sidebar-section">
@@ -1661,6 +1739,42 @@
         <div id="manage-auction-list"><p class="text-muted">Loading listings...</p></div>
       </div>
     </div>
+
+    <!-- Activity Feed / Notifications Tab -->
+    <div class="tab-content" id="tab-notifications">
+      <div class="card mb-3">
+        <div class="flex justify-between items-center mb-2">
+          <h3>Player Activity Feed</h3>
+          <div class="flex gap-1">
+            <select id="activity-filter" onchange="loadActivityFeed()" style="max-width:180px;">
+              <option value="all">All Activity</option>
+              <option value="signups">Tournament Signups</option>
+              <option value="matches">Match Results</option>
+              <option value="bounties">Bounty Challenges</option>
+              <option value="purchases">Shop Purchases</option>
+              <option value="points">Points Changes</option>
+              <option value="elo">ELO Changes</option>
+            </select>
+            <button class="btn btn-sm btn-secondary" onclick="loadActivityFeed()">Refresh</button>
+          </div>
+        </div>
+        <div id="activity-feed-list"><p class="text-muted">Loading activity...</p></div>
+        <div style="margin-top:12px;text-align:center;">
+          <button class="btn btn-sm btn-secondary" id="activity-load-more" style="display:none;" onclick="loadMoreActivity()">Load More</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="mb-2">Live Stats</h3>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;" id="activity-stats">
+          <div class="stat-box"><div class="stat-val" id="stat-signups-today">-</div><div class="stat-label">Signups Today</div></div>
+          <div class="stat-box"><div class="stat-val" id="stat-matches-today">-</div><div class="stat-label">Matches Today</div></div>
+          <div class="stat-box"><div class="stat-val" id="stat-bounties-today">-</div><div class="stat-label">Bounties Today</div></div>
+          <div class="stat-box"><div class="stat-val" id="stat-purchases-today">-</div><div class="stat-label">Purchases Today</div></div>
+        </div>
+      </div>
+    </div>
+
       </div><!-- /.admin-main -->
     </div><!-- /.admin-layout -->
   </main>
@@ -1726,13 +1840,13 @@
     // Sidebar tab labels
     const sidebarTabTitles = {
       tournament: 'Tournament', players: 'Players', bracket: 'Bracket',
-      stats: 'Stats', audit: 'Audit Log', economy: 'Economy',
+      stats: 'Stats', audit: 'Audit Log', notifications: 'Activity Feed', economy: 'Economy',
       bounty: 'Bounty', rewards: 'Rewards', seasons: 'Seasons',
       manage: 'Manage', settings: 'Settings'
     };
     const sidebarTabSections = {
       tournament: 'Tournament', players: 'Tournament', bracket: 'Tournament',
-      stats: 'Data', audit: 'Data', economy: 'Economy',
+      stats: 'Data', audit: 'Data', notifications: 'Data', economy: 'Economy',
       bounty: 'Economy', rewards: 'Management', seasons: 'Management',
       manage: 'Management', settings: 'System'
     };
@@ -1768,6 +1882,7 @@
         if (tab.dataset.tab === 'rewards') loadRewardsTab();
         if (tab.dataset.tab === 'seasons') loadSeasonsTab();
         if (tab.dataset.tab === 'manage') loadManageTab();
+        if (tab.dataset.tab === 'notifications') loadActivityFeed();
       });
     });
 
@@ -5202,6 +5317,227 @@ loadSettings = function() {
   _origLoadSettings4();
   loadAwardsSettings();
 };
+
+// ══════════════════════════════════════════
+// Activity Feed / Notifications
+// ══════════════════════════════════════════
+let _activityOffset = 0;
+const ACTIVITY_PAGE_SIZE = 30;
+
+function activityTimeAgo(d) {
+  const diff = Date.now() - new Date(d).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return days + 'd ago';
+  return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+async function loadActivityFeed(append) {
+  if (!append) _activityOffset = 0;
+  const filter = document.getElementById('activity-filter')?.value || 'all';
+  const container = document.getElementById('activity-feed-list');
+  if (!append) container.innerHTML = '<p class="text-muted">Loading activity...</p>';
+
+  try {
+    const events = [];
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+
+    // Fetch data based on filter
+    const fetches = [];
+
+    if (filter === 'all' || filter === 'signups') {
+      fetches.push(
+        supabaseClient.from('signups').select('id, discord_username, tournament_id, created_at, tournament:tournaments(name)')
+          .order('created_at', { ascending: false }).range(_activityOffset, _activityOffset + ACTIVITY_PAGE_SIZE - 1)
+          .then(({ data }) => {
+            (data || []).forEach(s => events.push({
+              type: 'signup', icon: '📝', iconCls: 'signup',
+              title: `${esc(s.discord_username)} signed up for a tournament`,
+              detail: s.tournament?.name ? esc(s.tournament.name) : '',
+              player: s.discord_username,
+              time: s.created_at
+            }));
+          })
+      );
+    }
+
+    if (filter === 'all' || filter === 'matches') {
+      fetches.push(
+        supabaseClient.from('matches')
+          .select('id, round, score, winner_id, created_at, player1:signups!matches_player1_id_fkey(discord_username), player2:signups!matches_player2_id_fkey(discord_username)')
+          .not('winner_id', 'is', null)
+          .order('created_at', { ascending: false }).range(_activityOffset, _activityOffset + ACTIVITY_PAGE_SIZE - 1)
+          .then(({ data }) => {
+            (data || []).forEach(m => {
+              const winner = m.winner_id === m.player1?.id ? m.player1?.discord_username : m.player2?.discord_username;
+              const p1 = m.player1?.discord_username || '?';
+              const p2 = m.player2?.discord_username || '?';
+              events.push({
+                type: 'match', icon: '⚔️', iconCls: 'match',
+                title: `${esc(p1)} vs ${esc(p2)}`,
+                detail: `${m.score ? esc(m.score) + ' · ' : ''}Round ${m.round || '?'}${winner ? ' · Winner: ' + esc(winner) : ''}`,
+                player: winner || p1,
+                time: m.created_at
+              });
+            });
+          })
+      );
+    }
+
+    if (filter === 'all' || filter === 'bounties') {
+      fetches.push(
+        supabaseClient.from('bounty_challenges')
+          .select('id, challenger, target, winner, bounty_at_stake, currency_reward, status, resolved_at, created_at')
+          .order('created_at', { ascending: false }).range(_activityOffset, _activityOffset + ACTIVITY_PAGE_SIZE - 1)
+          .then(({ data }) => {
+            (data || []).forEach(b => {
+              const isPending = b.status === 'pending';
+              const isComplete = b.status === 'completed';
+              events.push({
+                type: 'bounty', icon: isPending ? '🎯' : (isComplete ? '💰' : '❌'), iconCls: 'bounty',
+                title: isPending
+                  ? `${esc(b.challenger)} challenged ${esc(b.target)}`
+                  : isComplete
+                    ? `${esc(b.winner || '?')} won bounty vs ${esc(b.winner === b.challenger ? b.target : b.challenger)}`
+                    : `Bounty ${b.status}: ${esc(b.challenger)} vs ${esc(b.target)}`,
+                detail: `Z ${(b.bounty_at_stake || 0).toLocaleString()} at stake${b.currency_reward ? ' · +' + b.currency_reward + ' pts' : ''}`,
+                player: b.challenger,
+                time: b.resolved_at || b.created_at
+              });
+            });
+          })
+      );
+    }
+
+    if (filter === 'all' || filter === 'purchases') {
+      fetches.push(
+        supabaseClient.from('point_transactions')
+          .select('discord_username, amount, reason, created_at')
+          .eq('reason', 'purchase')
+          .order('created_at', { ascending: false }).range(_activityOffset, _activityOffset + ACTIVITY_PAGE_SIZE - 1)
+          .then(({ data }) => {
+            (data || []).forEach(tx => events.push({
+              type: 'purchase', icon: '🛒', iconCls: 'purchase',
+              title: `${esc(tx.discord_username)} made a purchase`,
+              detail: `${tx.amount} points spent`,
+              player: tx.discord_username,
+              time: tx.created_at
+            }));
+          })
+      );
+    }
+
+    if (filter === 'all' || filter === 'points') {
+      fetches.push(
+        supabaseClient.from('point_transactions')
+          .select('discord_username, amount, reason, created_at')
+          .neq('reason', 'purchase')
+          .order('created_at', { ascending: false }).range(_activityOffset, _activityOffset + ACTIVITY_PAGE_SIZE - 1)
+          .then(({ data }) => {
+            const reasonLabels = {
+              match_win: 'Match Win', participation: 'Participation', ban_vote: 'Ban Vote',
+              placement_1st: 'Champion Reward', placement_2nd: 'Runner-up Reward',
+              placement_3rd: '3rd Place Reward', admin_grant: 'Admin Grant',
+              streak_bonus: 'Streak Bonus', tournament_complete: 'Tournament Complete'
+            };
+            (data || []).forEach(tx => {
+              const label = reasonLabels[tx.reason] || (tx.reason?.startsWith('streak') ? 'Streak Bonus' : esc(tx.reason || 'Other'));
+              const sign = tx.amount >= 0 ? '+' : '';
+              events.push({
+                type: 'points', icon: tx.amount >= 0 ? '💫' : '💸', iconCls: 'points',
+                title: `${esc(tx.discord_username)} · ${label}`,
+                detail: `${sign}${tx.amount} points`,
+                player: tx.discord_username,
+                time: tx.created_at
+              });
+            });
+          })
+      );
+    }
+
+    if (filter === 'all' || filter === 'elo') {
+      fetches.push(
+        supabaseClient.from('elo_ratings')
+          .select('discord_username, elo, peak_elo, updated_at')
+          .order('updated_at', { ascending: false }).range(_activityOffset, _activityOffset + ACTIVITY_PAGE_SIZE - 1)
+          .then(({ data }) => {
+            (data || []).forEach(e => events.push({
+              type: 'elo', icon: '📊', iconCls: 'elo',
+              title: `${esc(e.discord_username)} ELO updated`,
+              detail: `Current: ${e.elo}${e.peak_elo > e.elo ? ' · Peak: ' + e.peak_elo : ''}`,
+              player: e.discord_username,
+              time: e.updated_at
+            }));
+          })
+      );
+    }
+
+    await Promise.all(fetches);
+
+    // Sort all events by time, newest first
+    events.sort((a, b) => new Date(b.time) - new Date(a.time));
+    const pageEvents = events.slice(0, ACTIVITY_PAGE_SIZE);
+
+    if (!append && pageEvents.length === 0) {
+      container.innerHTML = '<p class="text-muted">No activity found.</p>';
+      document.getElementById('activity-load-more').style.display = 'none';
+      return;
+    }
+
+    const html = pageEvents.map(ev => `
+      <div class="activity-feed-item">
+        <div class="af-icon ${ev.iconCls}">${ev.icon}</div>
+        <div class="af-body">
+          <div class="af-title">${ev.title}</div>
+          ${ev.detail ? `<div class="af-detail">${ev.detail}</div>` : ''}
+        </div>
+        <div class="af-time">${activityTimeAgo(ev.time)}</div>
+      </div>
+    `).join('');
+
+    if (append) {
+      container.insertAdjacentHTML('beforeend', html);
+    } else {
+      container.innerHTML = html;
+    }
+
+    document.getElementById('activity-load-more').style.display = pageEvents.length >= ACTIVITY_PAGE_SIZE ? '' : 'none';
+
+    // Load today's stats (only on fresh load)
+    if (!append) loadActivityStats(todayStart);
+
+  } catch (e) {
+    console.error('Activity feed error:', e);
+    if (!append) container.innerHTML = '<p class="text-muted" style="color:var(--red);">Error loading activity feed.</p>';
+  }
+}
+
+function loadMoreActivity() {
+  _activityOffset += ACTIVITY_PAGE_SIZE;
+  loadActivityFeed(true);
+}
+
+async function loadActivityStats(todayStart) {
+  try {
+    const [signups, matches, bounties, purchases] = await Promise.all([
+      supabaseClient.from('signups').select('id', { count: 'exact', head: true }).gte('created_at', todayStart),
+      supabaseClient.from('matches').select('id', { count: 'exact', head: true }).not('winner_id', 'is', null).gte('created_at', todayStart),
+      supabaseClient.from('bounty_challenges').select('id', { count: 'exact', head: true }).gte('created_at', todayStart),
+      supabaseClient.from('point_transactions').select('id', { count: 'exact', head: true }).eq('reason', 'purchase').gte('created_at', todayStart)
+    ]);
+    document.getElementById('stat-signups-today').textContent = signups.count || 0;
+    document.getElementById('stat-matches-today').textContent = matches.count || 0;
+    document.getElementById('stat-bounties-today').textContent = bounties.count || 0;
+    document.getElementById('stat-purchases-today').textContent = purchases.count || 0;
+  } catch (e) {
+    console.error('Activity stats error:', e);
+  }
+}
 </script>
 </body>
 </html>
