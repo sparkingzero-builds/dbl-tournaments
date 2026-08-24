@@ -443,6 +443,15 @@
           const tourneyBannedIds = (tournament.tournament_bans || []).map(String);
           const allBannedIds = [...voteBannedIds, ...tourneyBannedIds];
           if (allBannedIds.length > 0) {
+            // Fill gaps in charMap from characters.json
+            const missing = allBannedIds.filter(id => !charMap[id]);
+            if (missing.length) {
+              try {
+                const res = await fetch('data/characters.json');
+                const allChars = await res.json();
+                allChars.forEach(c => { if (missing.includes(String(c.id))) charMap[String(c.id)] = c; });
+              } catch(_){}
+            }
             const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
             const info = document.createElement('div');
             info.id = 'ban-phase-banner';
