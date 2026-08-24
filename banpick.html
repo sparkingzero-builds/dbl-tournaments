@@ -281,6 +281,8 @@
   <script>
     initParticles(document.getElementById('particles'));
 
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
     let tournament = null;
     let signups = [];
     let mySignup = null;
@@ -395,7 +397,7 @@
       content.innerHTML = `
         <div class="ban-header">
           <h1 class="ban-title">⚔ Ban Vote</h1>
-          <p class="ban-subtitle">${tournament.name} — Vote for the character you want banned. The top ${banCount} most-voted character${banCount !== 1 ? 's get' : ' gets'} banned from the tournament.</p>
+          <p class="ban-subtitle">${esc(tournament.name)} — Vote for the character you want banned. The top ${banCount} most-voted character${banCount !== 1 ? 's get' : ' gets'} banned from the tournament.</p>
         </div>
         <div class="ban-login">
           <div class="card card-glow">
@@ -408,7 +410,7 @@
             <h4 class="mb-1 text-muted">Votes: ${votedCount} / ${signups.length}</h4>
             ${signups.map(s => `
               <div class="ban-player-row">
-                <span class="player-name">${s.discord_username}</span>
+                <span class="player-name">${esc(s.discord_username)}</span>
                 ${s.bans && s.bans.length > 0
                   ? '<span class="ban-done">✓ Voted</span>'
                   : '<span class="ban-pending">Pending</span>'}
@@ -482,8 +484,8 @@
         const c = allChars.find(ch => ch.id === selectedVote);
         container.innerHTML = `
           <div class="ban-slot filled">
-            <img class="ban-slot__img" src="${c?.image || ''}" alt="${c?.name || ''}" onerror="this.style.display='none'" />
-            <span class="ban-slot__name">${c?.name || 'Unknown'}</span>
+            <img class="ban-slot__img" src="${esc(c?.image || '')}" alt="${esc(c?.name || '')}" onerror="this.style.display='none'" />
+            <span class="ban-slot__name">${esc(c?.name || 'Unknown')}</span>
             <button class="ban-slot__remove" onclick="clearVote()">&times;</button>
           </div>`;
       } else {
@@ -557,13 +559,13 @@
         const rarityClass = (c.rarity || '').toLowerCase();
         card.innerHTML = `
           <div class="char-card__art">
-            <img src="${c.image}" alt="${c.name}" loading="lazy" onerror="this.src='${fallbackImg}'" />
+            <img src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy" onerror="this.src='${fallbackImg}'" />
             <div class="char-card__element" style="background:${elementColors[c.element] || '#666'}"></div>
-            <span class="char-card__rarity badge-${rarityClass}">${c.rarity}</span>
+            <span class="char-card__rarity badge-${esc(rarityClass)}">${esc(c.rarity)}</span>
           </div>
           <div class="char-card__body">
-            <div class="char-card__name">${c.name}</div>
-            <a href="character.html?id=${c.id}" class="char-card__info" onclick="event.stopPropagation()" title="View kit">ℹ</a>
+            <div class="char-card__name">${esc(c.name)}</div>
+            <a href="character.html?id=${encodeURIComponent(c.id)}" class="char-card__info" onclick="event.stopPropagation()" title="View kit">ℹ</a>
           </div>
         `;
 
@@ -637,8 +639,8 @@
             <h4 class="mb-2 text-pink">You Voted to Ban</h4>
             ${votedChar ? `
               <div class="ban-slot filled">
-                <img class="ban-slot__img" src="${votedChar.image}" alt="${votedChar.name}" onerror="this.style.display='none'" />
-                <span class="ban-slot__name">${votedChar.name}</span>
+                <img class="ban-slot__img" src="${esc(votedChar.image)}" alt="${esc(votedChar.name)}" onerror="this.style.display='none'" />
+                <span class="ban-slot__name">${esc(votedChar.name)}</span>
               </div>` : ''}
           </div>`;
 
@@ -649,7 +651,7 @@
             <div class="ban-status-list mt-2">
               ${signups.map(s => `
                 <div class="ban-player-row">
-                  <span class="player-name">${s.discord_username}</span>
+                  <span class="player-name">${esc(s.discord_username)}</span>
                   ${s.bans && s.bans.length > 0
                     ? '<span class="ban-done">✓ Voted</span>'
                     : '<span class="ban-pending">Pending</span>'}
@@ -666,8 +668,8 @@
               const isBanned = bannedIds.has(String(r.id));
               return c ? `
                 <div class="ban-slot ${isBanned ? 'filled' : ''}" style="${isBanned ? '' : 'opacity:0.5;'}">
-                  <img class="ban-slot__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
-                  <span class="ban-slot__name" style="${isBanned ? 'color:var(--pink);' : ''}">${c.name}</span>
+                  <img class="ban-slot__img" src="${esc(c.image)}" alt="${esc(c.name)}" onerror="this.style.display='none'" />
+                  <span class="ban-slot__name" style="${isBanned ? 'color:var(--pink);' : ''}">${esc(c.name)}</span>
                   <span style="font-family:'Exo 2',sans-serif;font-weight:800;font-size:13px;color:${isBanned ? 'var(--pink)' : 'var(--muted)'};">${r.count} vote${r.count !== 1 ? 's' : ''}${isBanned ? ' — BANNED' : ''}</span>
                 </div>` : '';
             }).join('')}
@@ -682,8 +684,8 @@
               <p class="text-muted mb-2" style="font-size:13px;">A character on your team was banned! You need to replace them.</p>
               ${conflicting.map(c => `
                 <div class="ban-slot filled">
-                  <img class="ban-slot__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
-                  <span class="ban-slot__name" style="text-decoration:line-through;color:var(--pink);">${c.name}</span>
+                  <img class="ban-slot__img" src="${esc(c.image)}" alt="${esc(c.name)}" onerror="this.style.display='none'" />
+                  <span class="ban-slot__name" style="text-decoration:line-through;color:var(--pink);">${esc(c.name)}</span>
                 </div>
               `).join('')}
               <button class="btn btn-primary btn-lg mt-2" onclick="startRepick()" style="width:100%;">Re-Pick Team</button>
@@ -715,8 +717,8 @@
               const c = allChars.find(ch => String(ch.id) === String(r.id));
               return c ? `
                 <div class="ban-slot filled">
-                  <img class="ban-slot__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
-                  <span class="ban-slot__name" style="color:var(--pink);">${c.name}</span>
+                  <img class="ban-slot__img" src="${esc(c.image)}" alt="${esc(c.name)}" onerror="this.style.display='none'" />
+                  <span class="ban-slot__name" style="color:var(--pink);">${esc(c.name)}</span>
                 </div>` : '';
             }).join('')}
           </div>`;
@@ -762,8 +764,8 @@
               <h4 class="text-pink mb-2">Banned from your team:</h4>
               ${conflicting.map(c => `
                 <div class="ban-slot filled">
-                  <img class="ban-slot__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
-                  <span class="ban-slot__name" style="text-decoration:line-through;color:var(--pink);">${c.name}</span>
+                  <img class="ban-slot__img" src="${esc(c.image)}" alt="${esc(c.name)}" onerror="this.style.display='none'" />
+                  <span class="ban-slot__name" style="text-decoration:line-through;color:var(--pink);">${esc(c.name)}</span>
                 </div>
               `).join('')}` : `
               <h4 class="text-pink mb-2">You need ${missingCount} more character${missingCount !== 1 ? 's' : ''}</h4>`}
@@ -827,8 +829,8 @@
           const c = repickTeam[i];
           html += `
             <div class="ban-slot filled" style="border-color:var(--cyan);">
-              <img class="ban-slot__img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
-              <span class="ban-slot__name">${c.name}</span>
+              <img class="ban-slot__img" src="${esc(c.image)}" alt="${esc(c.name)}" onerror="this.style.display='none'" />
+              <span class="ban-slot__name">${esc(c.name)}</span>
               <button class="ban-slot__remove" style="color:var(--cyan);" onclick="removeRepick(${i})">&times;</button>
             </div>`;
         } else {
@@ -881,7 +883,6 @@
       const search = document.getElementById('repick-search')?.value || '';
       const element = document.querySelector('#repick-filters .element-btn.active')?.dataset.element || '';
       const rarity = document.getElementById('repick-rarity-filter')?.value || '';
-      const bannedIds = getBannedCharIds();
 
       let chars = allChars;
       if (search) chars = chars.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
@@ -909,13 +910,13 @@
         const rarityClass = (c.rarity || '').toLowerCase();
         card.innerHTML = `
           <div class="char-card__art">
-            <img src="${c.image}" alt="${c.name}" loading="lazy" onerror="this.src='${fallbackImg}'" />
+            <img src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy" onerror="this.src='${fallbackImg}'" />
             <div class="char-card__element" style="background:${elementColors[c.element] || '#666'}"></div>
-            <span class="char-card__rarity badge-${rarityClass}">${c.rarity}</span>
+            <span class="char-card__rarity badge-${esc(rarityClass)}">${esc(c.rarity)}</span>
           </div>
           <div class="char-card__body">
-            <div class="char-card__name">${c.name}</div>
-            <a href="character.html?id=${c.id}" class="char-card__info" onclick="event.stopPropagation()" title="View kit">ℹ</a>
+            <div class="char-card__name">${esc(c.name)}</div>
+            <a href="character.html?id=${encodeURIComponent(c.id)}" class="char-card__info" onclick="event.stopPropagation()" title="View kit">ℹ</a>
           </div>
         `;
 

@@ -1,4 +1,6 @@
 const BracketManager = (() => {
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
   function nextPowerOf2(n) {
     let p = 1;
     while (p < n) p *= 2;
@@ -163,16 +165,16 @@ const BracketManager = (() => {
               teamHtml = `<div class="match-team-icons">
                 ${player.team.map(c => {
                   const isBanned = bannedSet.has(String(c.id));
-                  return `<img src="${c.image}" alt="${c.name}" title="${c.name}${isBanned ? ' (BANNED)' : ''}" style="${isBanned ? 'opacity:0.2;filter:grayscale(1);border-color:var(--pink);' : ''}" onerror="this.style.display='none'" />`;
+                  return `<img src="${esc(c.image)}" alt="${esc(c.name)}" title="${esc(c.name)}${isBanned ? ' (BANNED)' : ''}" style="${isBanned ? 'opacity:0.2;filter:grayscale(1);border-color:var(--pink);' : ''}" onerror="this.style.display='none'" />`;
                 }).join('')}
               </div>`;
             }
 
-            const nameHtml = player ? `<a href="${getProfileBase()}profile.html?player=${encodeURIComponent(name)}" class="player-match-name" onclick="event.stopPropagation()">${name}</a>` : `<span class="player-match-name">${name}</span>`;
+            const nameHtml = player ? `<a href="${getProfileBase()}profile.html?player=${encodeURIComponent(name)}" class="player-match-name" onclick="event.stopPropagation()">${esc(name)}</a>` : `<span class="player-match-name">${esc(name)}</span>`;
             div.innerHTML = `
               ${nameHtml}
               ${teamHtml}
-              ${match.score && isWinner ? `<span class="match-score">${match.score}</span>` : ''}
+              ${match.score && isWinner ? `<span class="match-score">${esc(match.score)}</span>` : ''}
             `;
 
             if (options.admin && card.classList.contains('clickable')) {
@@ -211,7 +213,7 @@ const BracketManager = (() => {
       champEl.className = 'champion-card float-in';
       champEl.innerHTML = `
         <div class="champion-label">Champion</div>
-        <div class="champion-name">${champ ? `<a href="${getProfileBase()}profile.html?player=${encodeURIComponent(champ.discord_username)}">${champ.discord_username}</a>` : 'Unknown'}</div>
+        <div class="champion-name">${champ ? `<a href="${getProfileBase()}profile.html?player=${encodeURIComponent(champ.discord_username)}">${esc(champ.discord_username)}</a>` : 'Unknown'}</div>
       `;
       bracket.appendChild(champEl);
     }
