@@ -179,10 +179,12 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof initParticles === 'function') initParticles();
-      ShopModal.init();
-      ShopSearch.init();
-      ShopSearch.onFilterChange(() => ShopRenderer.render());
-      ShopCore.init();
+      if (typeof ShopModal !== 'undefined') ShopModal.init();
+      if (typeof ShopSearch !== 'undefined') {
+        ShopSearch.init();
+        ShopSearch.onFilterChange(() => ShopRenderer.render());
+      }
+      if (typeof ShopCore !== 'undefined') ShopCore.init();
     });
   </script>
   <script src="js/notification-inbox.js"></script>
