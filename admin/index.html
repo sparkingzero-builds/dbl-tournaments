@@ -3079,9 +3079,7 @@
 
       const permBans = currentTournament.tournament_bans || [];
 
-      const rebanActive = getRebanFlag();
-      console.log('[REBAN DEBUG] hasVotes:', hasVotes, 'rebanActive:', rebanActive, 'tournamentId:', currentTournament?.id, 'localStorage:', localStorage.getItem('reban_active_' + currentTournament?.id));
-      if (rebanActive || hasVotes) {
+      if (getRebanFlag() || hasVotes) {
         const status = allVoted ? 'All votes in!' : `${votedCount}/${signups.length} voted`;
         desc.textContent = `Re-ban round in progress — ${status}. End the round to apply bans.`;
         container.innerHTML = `
