@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -9,370 +9,7 @@
   <link rel="stylesheet" href="css/bracket.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/themes.css" />
-  <style>
-    .shop-hero { text-align: center; padding: 30px 0 10px; }
-    .shop-hero h1 {
-      font-size: clamp(28px, 5vw, 48px);
-      background: linear-gradient(135deg, var(--cyan), var(--pink), var(--gold));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; margin-bottom: 4px; letter-spacing: 2px;
-    }
-    .shop-hero .shop-subtitle {
-      color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.15em;
-    }
-
-    .wallet-bar {
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
-      margin: 20px 0 24px; padding: 14px 20px;
-      background: linear-gradient(135deg, rgba(255,215,64,0.08), rgba(0,229,255,0.05));
-      border: 1px solid rgba(255,215,64,0.2); border-radius: var(--radius);
-    }
-    .wallet-left { display: flex; align-items: center; gap: 12px; }
-    .wallet-icon {
-      width: 36px; height: 36px; background: linear-gradient(135deg, var(--gold), #ff8c00);
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 18px; box-shadow: 0 0 16px rgba(255,215,0,0.3);
-    }
-    .wallet-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
-    .wallet-amount {
-      font-family: 'Exo 2', sans-serif; font-size: 28px; font-weight: 900;
-      color: var(--gold); text-shadow: 0 0 12px rgba(255,215,0,0.2);
-    }
-    .wallet-right { display: flex; gap: 8px; align-items: center; }
-    .wallet-username {
-      font-size: 13px; color: var(--muted); padding: 6px 14px;
-      background: var(--bg); border-radius: var(--radius-sm); border: 1px solid var(--line);
-    }
-    .btn-logout {
-      background: none; border: 1px solid var(--line); color: var(--muted);
-      padding: 6px 14px; border-radius: var(--radius-sm); cursor: pointer; font-size: 12px; transition: all 0.2s;
-    }
-    .btn-logout:hover { border-color: var(--pink); color: var(--pink); }
-
-    .shop-tabs {
-      display: flex; gap: 6px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px;
-    }
-    .shop-tab {
-      background: var(--panel); border: 1px solid var(--line); color: var(--muted);
-      font-family: 'Exo 2', sans-serif; font-weight: 700; font-size: 12px;
-      padding: 10px 18px; border-radius: var(--radius); cursor: pointer;
-      text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; transition: all 0.2s;
-    }
-    .shop-tab:hover { border-color: var(--cyan); color: var(--text); }
-    .shop-tab.active {
-      background: linear-gradient(135deg, rgba(0,229,255,0.15), rgba(0,229,255,0.05));
-      border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 12px rgba(0,229,255,0.15);
-    }
-    .shop-tab .tab-count {
-      display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px;
-      font-size: 10px; font-weight: 800; background: var(--cyan); color: var(--bg);
-      border-radius: 999px; margin-left: 6px; padding: 0 5px;
-    }
-
-    .shop-section-header { display: flex; align-items: center; gap: 12px; margin: 28px 0 16px; }
-    .shop-section-header:first-child { margin-top: 0; }
-    .shop-section-header h2 { font-size: 16px; color: var(--text); letter-spacing: 0.1em; white-space: nowrap; }
-    .shop-section-header::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--line), transparent); }
-
-    .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-bottom: 24px; }
-    .item-grid.featured { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
-
-    .item-card {
-      position: relative; border-radius: 12px; overflow: hidden; cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s; aspect-ratio: 3 / 4;
-      display: flex; flex-direction: column;
-    }
-    .item-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
-    .item-card.featured-card { aspect-ratio: 4 / 5; }
-
-    .item-card::before {
-      content: ''; position: absolute; inset: 0; border-radius: 12px; padding: 2px;
-      background: var(--rarity-gradient);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor; mask-composite: exclude; z-index: 2; pointer-events: none;
-    }
-
-    .item-card[data-rarity="common"] { --rarity-gradient: linear-gradient(135deg, #6b7280, #9ca3af); --rarity-bg: linear-gradient(160deg, #2a2d35 0%, #1f2228 50%, #2a2d35 100%); --rarity-color: #9ca3af; }
-    .item-card[data-rarity="uncommon"] { --rarity-gradient: linear-gradient(135deg, #22c55e, #16a34a); --rarity-bg: linear-gradient(160deg, #0f2a1a 0%, #0a1f12 50%, #1a3d26 100%); --rarity-color: #22c55e; }
-    .item-card[data-rarity="rare"] { --rarity-gradient: linear-gradient(135deg, #3b82f6, #2563eb); --rarity-bg: linear-gradient(160deg, #0f1a3a 0%, #0a1228 50%, #1a2d55 100%); --rarity-color: #3b82f6; }
-    .item-card[data-rarity="epic"] { --rarity-gradient: linear-gradient(135deg, #a855f7, #7c3aed); --rarity-bg: linear-gradient(160deg, #1f0a3a 0%, #150828 50%, #2d1455 100%); --rarity-color: #a855f7; }
-    .item-card[data-rarity="legendary"] { --rarity-gradient: linear-gradient(135deg, #f59e0b, #d97706, #fbbf24); --rarity-bg: linear-gradient(160deg, #2a1a05 0%, #1f1200 50%, #3d2a0a 100%); --rarity-color: #f59e0b; }
-    .item-card[data-rarity="mythic"] { --rarity-gradient: linear-gradient(135deg, #ff2d78, #ff6b00, #ffd700); --rarity-bg: linear-gradient(160deg, #2a0515 0%, #1f0008 50%, #3d0a20 100%); --rarity-color: #ff2d78; }
-    .item-card[data-rarity="ultimate"] {
-      --rarity-gradient: conic-gradient(from var(--ultimate-angle, 0deg), #00ffcc, #00e5ff, #a855f7, #ff2d78, #ffd700, #00ffcc);
-      --rarity-bg: linear-gradient(160deg, #001a1a 0%, #0a0020 50%, #001a10 100%);
-      --rarity-color: #00ffcc;
-      box-shadow: 0 0 20px rgba(0,255,204,0.3), 0 0 40px rgba(168,85,247,0.2), 0 0 60px rgba(255,45,120,0.15);
-      animation: ultimate-card-glow 3s ease-in-out infinite;
-    }
-    .item-card[data-rarity="ultimate"]::before { animation: ultimate-border-spin 3s linear infinite; }
-    .item-card[data-rarity="ultimate"]::after {
-      content: ''; position: absolute; inset: -2px; border-radius: 14px; z-index: -1;
-      background: conic-gradient(from 0deg, #00ffcc, #00e5ff, #a855f7, #ff2d78, #ffd700, #00ffcc);
-      animation: ultimate-border-spin 3s linear infinite;
-      filter: blur(12px); opacity: 0.6;
-    }
-    .item-card[data-rarity="ultimate"] .card-bg-effect {
-      background:
-        radial-gradient(circle at 50% 40%, rgba(0,255,204,0.25) 0%, transparent 45%),
-        radial-gradient(circle at 25% 70%, rgba(168,85,247,0.2) 0%, transparent 40%),
-        radial-gradient(circle at 75% 65%, rgba(255,45,120,0.2) 0%, transparent 40%),
-        radial-gradient(circle at 50% 90%, rgba(255,215,64,0.15) 0%, transparent 35%);
-      animation: ultimate-aura 4s ease-in-out infinite;
-      opacity: 0.7;
-    }
-    .item-card[data-rarity="ultimate"] .card-icon {
-      filter: drop-shadow(0 0 16px rgba(0,255,204,0.5)) drop-shadow(0 0 32px rgba(168,85,247,0.3));
-      animation: ultimate-icon-float 3s ease-in-out infinite;
-    }
-    .item-card[data-rarity="ultimate"] .card-name {
-      background: linear-gradient(90deg, #00ffcc, #a855f7, #ff2d78);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; font-weight: 900;
-    }
-    .item-card[data-rarity="ultimate"] .card-price .price-value {
-      background: linear-gradient(90deg, #ffd700, #ff8c00);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; font-weight: 900; font-size: 18px;
-    }
-    @keyframes ultimate-border-spin {
-      from { filter: blur(12px) hue-rotate(0deg); }
-      to { filter: blur(12px) hue-rotate(360deg); }
-    }
-    @keyframes ultimate-card-glow {
-      0%, 100% { box-shadow: 0 0 20px rgba(0,255,204,0.3), 0 0 40px rgba(168,85,247,0.2), 0 0 60px rgba(255,45,120,0.1); }
-      33% { box-shadow: 0 0 25px rgba(168,85,247,0.4), 0 0 50px rgba(255,45,120,0.25), 0 0 70px rgba(0,255,204,0.1); }
-      66% { box-shadow: 0 0 25px rgba(255,45,120,0.35), 0 0 50px rgba(255,215,64,0.2), 0 0 70px rgba(168,85,247,0.1); }
-    }
-    @keyframes ultimate-aura {
-      0%, 100% { opacity: 0.5; transform: scale(1); }
-      50% { opacity: 0.8; transform: scale(1.05); }
-    }
-    @keyframes ultimate-icon-float {
-      0%, 100% { transform: scale(1) translateY(0); }
-      50% { transform: scale(1.08) translateY(-6px); }
-    }
-
-    .card-visual {
-      flex: 1; background: var(--rarity-bg); display: flex; align-items: center; justify-content: center;
-      position: relative; overflow: hidden;
-    }
-    .card-visual::after {
-      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
-      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); pointer-events: none;
-    }
-    .card-icon { z-index: 1; transition: transform 0.3s; overflow: hidden; border-radius: 8px; }
-    .card-icon img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
-    .item-card:hover .card-icon { transform: scale(1.1); }
-
-    .card-bg-effect { position: absolute; inset: 0; opacity: 0.3; z-index: 0; }
-    .card-bg-effect.aura-effect { background: radial-gradient(circle at 50% 60%, var(--rarity-color) 0%, transparent 60%); animation: aura-pulse 3s ease-in-out infinite; }
-    .card-bg-effect.shimmer-effect { background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%); background-size: 200% 200%; animation: shimmer 3s ease-in-out infinite; }
-    @keyframes aura-pulse { 0%, 100% { opacity: 0.2; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.1); } }
-    @keyframes shimmer { 0% { background-position: -200% -200%; } 100% { background-position: 200% 200%; } }
-
-    .card-badge {
-      position: absolute; top: 10px; left: 10px; z-index: 3;
-      font-family: 'Exo 2', sans-serif; font-size: 9px; font-weight: 800;
-      text-transform: uppercase; letter-spacing: 0.15em; padding: 4px 10px; border-radius: 4px; color: #000;
-    }
-    .card-badge.hot { background: linear-gradient(135deg, #ff4500, #ff8c00); box-shadow: 0 0 10px rgba(255,69,0,0.4); }
-    .card-badge.new { background: linear-gradient(135deg, #00e5ff, #00b8d4); box-shadow: 0 0 10px rgba(0,229,255,0.4); }
-    .card-badge.exclusive { background: linear-gradient(135deg, #ffd700, #ff6b00); box-shadow: 0 0 10px rgba(255,215,0,0.4); animation: badge-glow 2s ease-in-out infinite; }
-    @keyframes badge-glow { 0%, 100% { box-shadow: 0 0 6px rgba(255,215,0,0.4); } 50% { box-shadow: 0 0 16px rgba(255,215,0,0.8); } }
-
-    .card-info { background: rgba(10,8,20,0.95); padding: 10px 12px; position: relative; z-index: 1; }
-    .card-name {
-      font-family: 'Exo 2', sans-serif; font-weight: 800; font-size: 13px; color: var(--text);
-      text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;
-    }
-    .card-type { font-size: 10px; color: var(--rarity-color); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
-
-    .card-price-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      background: rgba(10,8,20,0.98); padding: 8px 12px; border-top: 1px solid rgba(255,255,255,0.05);
-    }
-    .card-price { display: flex; align-items: center; gap: 6px; }
-    .price-coin {
-      width: 18px; height: 18px; border-radius: 50%;
-      background: url('https://dbgsbuilds.com/wp-content/themes/dbgsquad-lite/asset/badge/36195_00000000E3116FFB.png') center/contain no-repeat;
-      filter: drop-shadow(0 0 4px rgba(255,215,0,0.4));
-    }
-    .price-value { font-family: 'Exo 2', sans-serif; font-weight: 800; font-size: 15px; color: var(--gold); }
-    .price-value.free { color: var(--green); }
-    .btn-get {
-      background: var(--cyan); color: #000; border: none; padding: 5px 14px; border-radius: 6px;
-      font-family: 'Exo 2', sans-serif; font-weight: 800; font-size: 11px;
-      text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s;
-    }
-    .btn-get:hover:not(:disabled) { background: #fff; box-shadow: 0 0 12px rgba(0,229,255,0.4); }
-    .btn-get:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; }
-    .btn-get.owned { background: var(--green); color: #000; cursor: default; opacity: 0.8; }
-    .item-card.owned-card { opacity: 0.45; filter: grayscale(0.5); pointer-events: auto; }
-    .item-card.owned-card:hover { transform: none; box-shadow: none; }
-    .item-card.owned-card .card-price-bar { background: rgba(10,8,20,0.98); }
-    .item-card.owned-card .card-bg-effect { animation: none; }
-
-    /* ===== DETAIL MODAL ===== */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0; z-index: 1000;
-      background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
-      align-items: center; justify-content: center; padding: 20px;
-    }
-    .modal-overlay.open { display: flex; animation: modalFadeIn 0.25s ease-out; }
-    @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-    .modal-card {
-      background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
-      max-width: 480px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative;
-      animation: modalSlideUp 0.3s ease-out;
-    }
-    @keyframes modalSlideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-    .modal-close {
-      position: absolute; top: 12px; right: 12px; z-index: 5;
-      width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line);
-      background: var(--bg); color: var(--muted); font-size: 16px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; transition: all 0.2s;
-    }
-    .modal-close:hover { border-color: var(--pink); color: var(--pink); }
-
-    .modal-visual {
-      height: 220px; display: flex; align-items: center; justify-content: center;
-      position: relative; overflow: hidden; border-radius: 16px 16px 0 0;
-    }
-    .modal-visual .card-bg-effect { position: absolute; inset: 0; opacity: 0.4; }
-    .modal-visual::after {
-      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 60%;
-      background: linear-gradient(to top, var(--panel), transparent); pointer-events: none;
-    }
-    .modal-icon { z-index: 1; filter: drop-shadow(0 4px 24px rgba(0,0,0,0.5)); }
-
-    .modal-body { padding: 0 24px 24px; }
-
-    .modal-rarity-tag {
-      display: inline-block; font-family: 'Exo 2', sans-serif; font-size: 10px; font-weight: 800;
-      text-transform: uppercase; letter-spacing: 0.15em; padding: 4px 12px; border-radius: 4px;
-      margin-bottom: 8px;
-    }
-
-    .modal-name {
-      font-family: 'Exo 2', sans-serif; font-size: 22px; font-weight: 900;
-      text-transform: uppercase; color: var(--text); margin-bottom: 4px; line-height: 1.2;
-    }
-    .modal-type-label {
-      font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 16px;
-    }
-
-    .modal-desc {
-      color: var(--text); font-size: 14px; line-height: 1.6; margin-bottom: 16px;
-      padding: 14px 16px; background: var(--bg-2); border-radius: var(--radius-sm);
-      border-left: 3px solid var(--cyan);
-    }
-
-    .modal-preview-section {
-      margin-bottom: 16px; padding: 16px; background: var(--bg-2); border-radius: var(--radius);
-    }
-    .modal-preview-label {
-      font-family: 'Exo 2', sans-serif; font-size: 10px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 10px;
-    }
-    .modal-preview-demo { display: flex; align-items: center; justify-content: center; min-height: 50px; }
-
-    .modal-price-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 0; border-top: 1px solid var(--line); margin-top: 8px;
-    }
-    .modal-price { display: flex; align-items: center; gap: 8px; }
-    .modal-price .price-coin { width: 24px; height: 24px; font-size: 12px; }
-    .modal-price .price-value { font-size: 22px; }
-    .modal-buy-btn {
-      background: var(--cyan); color: #000; border: none; padding: 12px 32px; border-radius: 8px;
-      font-family: 'Exo 2', sans-serif; font-weight: 800; font-size: 14px;
-      text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: all 0.2s;
-    }
-    .modal-buy-btn:hover:not(:disabled) { background: #fff; box-shadow: 0 0 20px rgba(0,229,255,0.4); transform: scale(1.03); }
-    .modal-buy-btn:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; }
-
-    /* Login */
-    .login-overlay { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; }
-    .login-card {
-      background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
-      padding: 48px 40px; max-width: 400px; width: 100%; text-align: center;
-    }
-    .login-card h2 { color: var(--cyan); margin-bottom: 8px; font-size: 22px; }
-    .login-card p { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
-    .login-card input {
-      width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--text);
-      padding: 12px 16px; border-radius: var(--radius-sm); font-size: 15px; margin-bottom: 12px;
-      text-align: center; font-family: 'Chakra Petch', sans-serif;
-    }
-    .login-card input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 12px rgba(0,229,255,0.15); }
-    .login-card .btn { width: 100%; padding: 12px; font-size: 14px; }
-
-    .tab-section { display: none; }
-    .tab-section.active { display: block; }
-
-    .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
-    .inv-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; transition: border-color 0.2s; }
-    .inv-card:hover { border-color: var(--cyan); }
-    .inv-card-visual { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: var(--bg-2); }
-    .inv-card-info { padding: 10px 12px; }
-    .inv-card-name { font-family: 'Exo 2', sans-serif; font-weight: 700; font-size: 12px; color: var(--text); text-transform: uppercase; margin-bottom: 2px; }
-    .inv-card-type { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
-    .inv-equip-btn {
-      width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--muted);
-      padding: 6px; border-radius: 6px; font-family: 'Exo 2', sans-serif; font-weight: 700;
-      font-size: 10px; text-transform: uppercase; cursor: pointer; transition: all 0.2s;
-    }
-    .inv-equip-btn:hover { border-color: var(--cyan); color: var(--cyan); }
-    .inv-equip-btn.equipped { border-color: var(--green); color: var(--green); background: rgba(46,213,115,0.08); }
-
-    .tx-list { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-    .tx-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 13px; }
-    .tx-row:last-child { border-bottom: none; }
-    .tx-reason { color: var(--text); text-transform: capitalize; }
-    .tx-date { color: var(--muted); font-size: 11px; }
-    .tx-amount { font-family: 'Exo 2', sans-serif; font-weight: 800; font-size: 14px; }
-    .tx-amount.positive { color: var(--green); }
-    .tx-amount.negative { color: var(--pink); }
-
-    .empty-state { text-align: center; color: var(--muted); padding: 60px 20px; font-size: 14px; }
-
-    @media (max-width: 768px) {
-      .wallet-bar { flex-direction: column; text-align: center; }
-      .wallet-left { justify-content: center; }
-      .wallet-right { justify-content: center; flex-wrap: wrap; }
-      .wallet-amount { font-size: 24px; }
-      .shop-tabs { gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      .shop-tab { padding: 10px 14px; font-size: 11px; min-height: 44px; white-space: nowrap; }
-      .modal-card { max-width: 100%; margin: 10px; }
-      .modal-visual { height: 180px; }
-      .modal-body { padding: 0 16px 16px; }
-      .modal-name { font-size: 18px; }
-      .modal-buy-btn { padding: 12px 24px; min-height: 44px; width: 100%; }
-      .modal-price-row { flex-direction: column; gap: 12px; align-items: stretch; }
-      .btn-get { min-height: 36px; padding: 6px 14px; }
-      .inv-grid { grid-template-columns: repeat(2, 1fr); }
-      .tx-row { flex-direction: column; gap: 4px; align-items: flex-start; padding: 10px 14px; }
-      .login-card { padding: 32px 24px; }
-    }
-    @media (max-width: 480px) {
-      .item-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
-      .item-grid.featured { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-      .modal-visual { height: 140px; }
-      .modal-name { font-size: 16px; }
-      .card-name { font-size: 11px; }
-      .card-info { padding: 8px 10px; }
-      .card-price-bar { padding: 6px 10px; }
-      .inv-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
-      .shop-section-header h2 { font-size: 14px; }
-    }
-    @media (min-width: 900px) {
-      .item-grid { grid-template-columns: repeat(5, 1fr); }
-      .item-grid.featured { grid-template-columns: repeat(4, 1fr); }
-    }
-  </style>
+  <link rel="stylesheet" href="css/shop.css" />
 </head>
 <body class="scanlines">
   <nav class="navbar">
@@ -408,6 +45,7 @@
             <div class="dropdown-label">More</div>
             <a href="auction.html">Auction</a>
             <a href="season.html">Season</a>
+            <a href="recap.html">Recap</a>
             <a href="matches.html">Matches</a>
             <a href="history.html">History</a>
             <a href="world-tournament.html">World Tournament</a>
@@ -421,45 +59,26 @@
 
   <div class="particles-bg" id="particles"></div>
 
-  <!-- Detail Modal -->
-  <div class="modal-overlay" id="item-modal" onclick="if(event.target===this)closeModal()">
-    <div class="modal-card">
-      <button class="modal-close" onclick="closeModal()">✕</button>
-      <div class="modal-visual" id="modal-visual"></div>
-      <div class="modal-body">
-        <div class="modal-rarity-tag" id="modal-rarity"></div>
-        <div class="modal-name" id="modal-name"></div>
-        <div class="modal-type-label" id="modal-type"></div>
-        <div class="modal-desc" id="modal-desc"></div>
-        <div class="modal-preview-section" id="modal-preview-section">
-          <div class="modal-preview-label">Preview</div>
-          <div class="modal-preview-demo" id="modal-preview"></div>
-        </div>
-        <div class="modal-price-row">
-          <div class="modal-price" id="modal-price"></div>
-          <button class="modal-buy-btn" id="modal-buy-btn">GET</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <main class="page page-enter">
     <div class="container">
+      <!-- Login -->
       <div id="login-section" class="login-overlay">
         <div class="login-card">
           <h2>Item Shop</h2>
           <p>Enter your Discord username to browse and purchase items</p>
-          <input type="text" id="username-input" placeholder="Discord Username" onkeydown="if(event.key==='Enter')loginShop()" />
-          <button class="btn btn-primary" onclick="loginShop()">Enter Shop</button>
+          <input type="text" id="username-input" placeholder="Discord Username" onkeydown="if(event.key==='Enter')ShopCore.login()" />
+          <button class="btn btn-primary" onclick="ShopCore.login()">Enter Shop</button>
         </div>
       </div>
 
+      <!-- Shop Content -->
       <div id="shop-content" style="display:none;">
         <div class="shop-hero">
           <h1>Item Shop</h1>
           <div class="shop-subtitle">Today's Selection</div>
         </div>
 
+        <!-- Wallet Bar -->
         <div class="wallet-bar">
           <div class="wallet-left">
             <div class="wallet-icon"><img src="https://dbgsbuilds.com/wp-content/themes/dbgsquad-lite/asset/badge/36195_00000000E3116FFB.png" alt="coins" style="width:28px;height:28px;filter:drop-shadow(0 0 6px rgba(255,215,0,0.5));"></div>
@@ -470,35 +89,64 @@
           </div>
           <div class="wallet-right">
             <div class="wallet-username" id="display-username"></div>
-            <button class="btn-logout" onclick="logoutShop()">Log Out</button>
+            <button class="btn-logout" onclick="ShopCore.logout()">Log Out</button>
           </div>
         </div>
 
+        <!-- Main Tabs -->
         <div class="shop-tabs" id="main-tabs">
-          <button class="shop-tab active" onclick="switchMainTab('shop')">Shop</button>
-          <button class="shop-tab" onclick="switchMainTab('titles')">Titles</button>
-          <button class="shop-tab" onclick="switchMainTab('inventory')">Inventory</button>
-          <button class="shop-tab" onclick="switchMainTab('history')">History</button>
+          <button class="shop-tab active" onclick="ShopCore.switchTab('shop')">Shop</button>
+          <button class="shop-tab" onclick="ShopCore.switchTab('titles')">Titles</button>
+          <button class="shop-tab" onclick="ShopCore.switchTab('inventory')">Inventory</button>
+          <button class="shop-tab" onclick="ShopCore.switchTab('history')">History</button>
         </div>
 
-        <div id="tab-titles" class="tab-section">
-          <div class="shop-section-header"><h2>Purchasable Titles</h2></div>
-          <div id="titles-shop-grid" class="item-grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));"></div>
-        </div>
-
+        <!-- Shop Tab -->
         <div id="tab-shop" class="tab-section active">
-          <div class="shop-tabs" id="category-tabs"></div>
+          <!-- Toolbar: Search + Sort -->
+          <div class="shop-toolbar">
+            <div class="search-wrapper">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="shop-search-input" placeholder="Search items..." />
+            </div>
+            <select id="shop-sort-select">
+              <option value="rarity-desc">Rarity: Best First</option>
+              <option value="rarity-asc">Rarity: Common First</option>
+              <option value="price-desc">Price: High → Low</option>
+              <option value="price-asc">Price: Low → High</option>
+              <option value="name-asc">Name: A → Z</option>
+              <option value="newest">Newest First</option>
+            </select>
+          </div>
+
+          <!-- Category Sub-Tabs -->
+          <div class="shop-categories" id="category-tabs">
+            <button class="shop-category-tab active" data-category="all">All Items <span class="cat-count"></span></button>
+            <button class="shop-category-tab" data-category="cosmetics">Cosmetics <span class="cat-count"></span></button>
+            <button class="shop-category-tab" data-category="effects">Effects <span class="cat-count"></span></button>
+            <button class="shop-category-tab" data-category="social">Social <span class="cat-count"></span></button>
+          </div>
+
+          <!-- Items Container -->
           <div id="shop-items-container">
             <div class="loader"><div class="loader-spinner"></div></div>
           </div>
         </div>
 
+        <!-- Titles Tab -->
+        <div id="tab-titles" class="tab-section">
+          <div class="section-header">Purchasable Titles</div>
+          <div id="titles-shop-grid" class="item-grid"></div>
+        </div>
+
+        <!-- Inventory Tab -->
         <div id="tab-inventory" class="tab-section">
           <div id="inventory-container">
             <div class="empty-state">No items yet — go grab something from the shop!</div>
           </div>
         </div>
 
+        <!-- History Tab -->
         <div id="tab-history" class="tab-section">
           <div id="tx-container">
             <div class="empty-state">No transactions yet.</div>
@@ -508,562 +156,36 @@
     </div>
   </main>
 
+  <!-- Supabase + Core Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-client.js"></script>
   <script src="js/maintenance.js"></script>
   <script src="js/auth.js"></script>
-    <script src="js/titles.js"></script>
-    <script src="js/activity-alerts.js"></script>
-    <script src="js/daily-rewards.js"></script>
+  <script src="js/titles.js"></script>
+  <script src="js/activity-alerts.js"></script>
+  <script src="js/daily-rewards.js"></script>
   <script src="js/notifications.js"></script>
   <script src="js/sounds.js"></script>
   <script src="js/themes.js"></script>
   <script src="js/particles.js"></script>
+
+  <!-- Shop Modules (order matters) -->
+  <script src="js/shop-assets.js"></script>
+  <script src="js/shop-core.js"></script>
+  <script src="js/shop-search.js"></script>
+  <script src="js/shop-renderer.js"></script>
+  <script src="js/shop-modal.js"></script>
+
   <script>
-    let shopUsername = sessionStorage.getItem('shop_username') || '';
-    let currentBalance = 0;
-    let allItems = [];
-    let ownedItemIds = new Set();
-    let activeCategory = 'all';
-
-    const TYPE_LABELS = {
-      flair_border: 'Flair Border', flair_title: 'Title', aura: 'Aura Effect',
-      victory_quote: 'Victory Quote', kings_commentary: 'Social Perk',
-      golden_name: 'Social Perk', hype_bomb: 'Social Perk',
-      profile_bg: 'Profile Background', badge: 'Badge', alt_art: 'Alt Art',
-      double_down: 'Power-Up', vegetas_pride: 'Power-Up',
-      ban_immunity: 'Power-Up', scouter: 'Power-Up'
-    };
-
-    const CATEGORY_MAP = {
-      flair_title: 'cosmetics', flair_border: 'cosmetics', aura: 'effects',
-      profile_bg: 'cosmetics', victory_quote: 'social', kings_commentary: 'social',
-      golden_name: 'social', hype_bomb: 'effects', badge: 'cosmetics', alt_art: 'cosmetics',
-      double_down: 'effects', vegetas_pride: 'effects', ban_immunity: 'effects', scouter: 'effects'
-    };
-
-    const CATEGORY_LABELS = {
-      all: '🔥 All Items', cosmetics: '🎨 Cosmetics', effects: '⚡ Effects', social: '💬 Social'
-    };
-
-    const ITEM_DESCRIPTIONS = {
-      flair_border: 'Adds a custom animated border around your profile card on the Rankings and Profile pages. Other players will see this border whenever they view your stats.',
-      flair_title: 'A special title displayed below your username on your profile page and in tournament brackets. Show off your rank and style.',
-      aura: 'An animated glow effect that surrounds your name in the rankings table and profile card. Different colours for different vibes.',
-      victory_quote: 'A custom quote that appears on your profile and shows up in the Live Feed when you win a match. Talk your trash.',
-      kings_commentary: "Post a pinned commentary message in the Live Feed that appears with a gold crown icon. Your words, broadcast to the whole tournament.",
-      golden_name: 'Your username gets rendered in gold with a glowing effect across the entire site — rankings, brackets, profiles, feed. Everyone will know.',
-      hype_bomb: 'Drop an animated hype explosion in the Live Feed that everyone sees. A burst of energy particles and screen shake when you trigger it.',
-      profile_bg: 'Changes the background theme of your profile page. Each background has unique colours and atmospheric effects.',
-      badge: "A collectible badge displayed on your profile's badge wall. Some are earned, some are bought — all are bragging rights.",
-      double_down: 'Doubles the points you earn from your next tournament. Win points become 200, loss points become 50, champion bonus becomes 1000. One-time use.',
-      vegetas_pride: "When you lose a match, you earn warrior's bonus points (75 instead of 25). Lasts for one full tournament. Pride in defeat.",
-      ban_immunity: 'Protect one character on your team from being banned in the next tournament. Your opponent cannot ban your shielded pick. One-time use.',
-      scouter: "View your next opponent's recent match history and team picks before your match starts. Knowledge is power. One-time use."
-    };
-
-    function getItemDescription(item) {
-      if (item.description) return item.description;
-      return ITEM_DESCRIPTIONS[item.type] || 'A unique item from the DBL Tournament shop.';
-    }
-
-    function getRarity(item) {
-      const cost = item.cost || 0;
-      if (item.metadata?.ultimate) return 'ultimate';
-      if (item.metadata?.exclusive) return 'mythic';
-      if (cost >= 500) return 'legendary';
-      if (cost >= 300) return 'epic';
-      if (cost >= 150) return 'rare';
-      if (cost >= 50) return 'uncommon';
-      return 'common';
-    }
-
-    const RARITY_LABELS = {
-      common: 'Common', uncommon: 'Uncommon', rare: 'Rare',
-      epic: 'Epic', legendary: 'Legendary', mythic: 'Mythic', ultimate: 'Ultimate'
-    };
-
-    const RARITY_COLORS = {
-      common: '#9ca3af', uncommon: '#22c55e', rare: '#3b82f6',
-      epic: '#a855f7', legendary: '#f59e0b', mythic: '#ff2d78', ultimate: '#00ffcc'
-    };
-
-    const DBGS = 'https://dbgsbuilds.com/wp-content/themes/dbgsquad-lite/asset';
-    const ITEM_IMAGE_MAP = {
-      "It's Over 9000": `${DBGS}/sticker/36083_0000000066154205.png`,
-      "You're Nothing": `${DBGS}/profile-icon/2990_0001BA30437017BA.png`,
-      "This Isn't Even My Final Form": `${DBGS}/profile-icon/2641_0001BA30FB81F542.png`,
-      "Owari Da": `${DBGS}/profile-icon/2994_0001BA304E226081.png`,
-      "Fusion Above All": `${DBGS}/profile-icon/2980_0001BA30757A1501.png`,
-      "Final Flash!": `${DBGS}/profile-icon/35606_00000000ADCA5E55.png`,
-      "Lucky Mascot": `${DBGS}/profile-icon/2646_0001BA3075AAE877.png`,
-      "Super Saiyan 3": `${DBGS}/profile-icon/35593_00000000D0710DF5.png`,
-      "God of Destruction": `${DBGS}/sticker/44581_00000000B4FA1339.png`,
-      "Frieza Force Commander": `${DBGS}/profile-icon/2643_0001BA308C86C5D4.png`,
-      "Elite Saiyan": `${DBGS}/profile-icon/2992_0001BA30F5F387C4.png`,
-      "Super Saiyan": `${DBGS}/sticker/2735_0001BA3019FCD3D7.png`,
-      "Z Fighter": `${DBGS}/profile-icon/2996_0001BA306E23FB5C.png`,
-      "Namekian Elder": `${DBGS}/sticker/44626_00000000094EE5E1.png`,
-      "Saiyan Warrior": `${DBGS}/profile-icon/2642_0001BA300242223F.png`,
-      "Earthling": `${DBGS}/profile-icon/35597_0000000053203DD4.png`,
-      "Saiyan Pride Aura": `${DBGS}/sticker/44617_00000000DC3402D3.png`,
-      "Golden SSJ Aura": `${DBGS}/sticker/44599_000000007BCB5D18.png`,
-      "Legendary Aura": `${DBGS}/profile-icon/2985_0001BA30D9760283.png`,
-      "Blue Ki Aura": `${DBGS}/profile-icon/2984_0001BA3000526D71.png`,
-      "Dragon Fist Border": `${DBGS}/sticker/35954_000000008C257CA7.png`,
-      "Ranger Border": `${DBGS}/sticker/36111_00000000DFDBBCA4.png`,
-      "Android 18 Border": `${DBGS}/sticker/44566_000000002BCE1AB5.png`,
-      "Perfect Border": `${DBGS}/profile-icon/35632_000000009261B84E.png`,
-      "Training Grounds": `${DBGS}/sticker/44584_00000000CA2DD0A3.png`,
-      "Shadow Realm": `${DBGS}/profile-icon/35608_000000001EF6F819.png`,
-      "Tournament Arena": `${DBGS}/sticker/36103_000000002C97FF8E.png`,
-      "Scouter": `${DBGS}/helper-icon/17319_000000001E4B6C74.png`,
-      "Ban Immunity": `${DBGS}/helper-icon/17450_00000000FF1582B1.png`,
-      "Hype Bomb": `${DBGS}/helper-icon/12235_00000000FDB12817.png`,
-      "Double Down": `${DBGS}/helper-icon/17527_00000000D0B69B37.png`,
-      "Vegeta's Pride": `${DBGS}/sticker/36083_0000000066154205.png`,
-      "Golden Name": `${DBGS}/badge/2745_0001BA3038396091.png`,
-      "Elder's Wisdom": `${DBGS}/profile-icon/35640_00000000361FD067.png`,
-      "Dragon Ball Collector": `${DBGS}/sticker/2712_0001BA30D7AD84D0.png`,
-      "First Blood Badge": `${DBGS}/badge/2748_0001BA3067C1A908.png`,
-      "Tournament of Power Survivor": `${DBGS}/badge/2747_0001BA30D63701BD.png`,
-      "The Ultimate Fusion": `${DBGS}/badge/36369_00000000C9D9D8EA.png`,
-      "Warrior through Time": `${DBGS}/badge/36372_000000004D83D0AD.png`,
-      "Unrelenting Evil": `${DBGS}/badge/36439_000000009B5AE8D6.png`
-    };
-
-    const ITEM_IMAGE_MAP_LOWER = {};
-    Object.keys(ITEM_IMAGE_MAP).forEach(k => { ITEM_IMAGE_MAP_LOWER[k.toLowerCase()] = ITEM_IMAGE_MAP[k]; });
-
-    function getItemImage(item) {
-      return ITEM_IMAGE_MAP[item.name] || ITEM_IMAGE_MAP_LOWER[(item.name || '').toLowerCase()] || `${DBGS}/profile-icon/2980_0001BA30757A1501.png`;
-    }
-
-    function makeCardVisual(item, size) {
-      const src = getItemImage(item);
-      const s = size || 80;
-      return `<img src="${src}" alt="${escapeHtml(item.name)}" style="width:${s}px;height:${s}px;object-fit:cover;border-radius:8px;filter:drop-shadow(0 4px 16px rgba(0,0,0,0.6));" onerror="this.style.display='none'" />`;
-    }
-
-    function getPreviewDemo(item) {
-      const meta = item.metadata || {};
-      switch(item.type) {
-        case 'flair_border': {
-          const gradients = {
-            'flair-fire': 'conic-gradient(from 0deg, #ff4500, #ff8c00, #ffd700, #ff4500)',
-            'flair-ice': 'conic-gradient(from 0deg, #00bfff, #e0f7ff, #00bfff, #4dd0e1)',
-            'flair-royal': 'conic-gradient(from 0deg, #9b59b6, #ffd700, #9b59b6, #e74c3c)',
-            'flair-shadow': 'conic-gradient(from 0deg, #1a1a2e, #6c3483, #1a1a2e, #2c3e50)',
-            'flair-champion': 'conic-gradient(from 0deg, #ffd700, #ff6b00, #ff0080, #8b00ff, #00d4ff, #ffd700)'
-          };
-          const bg = gradients[meta.effect] || 'var(--line)';
-          return `<div style="width:80px;height:80px;border-radius:14px;background:${bg};padding:3px;">
-            <div style="width:100%;height:100%;background:var(--bg-2);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);">Your<br>Profile</div></div>`;
-        }
-        case 'aura':
-          return `<div style="padding:8px 20px;font-weight:700;color:var(--text);position:relative;font-family:'Exo 2',sans-serif;">YourName<div style="position:absolute;inset:-8px;border-radius:8px;background:radial-gradient(ellipse,${RARITY_COLORS[getRarity(item)]} 0%,transparent 70%);opacity:0.4;z-index:-1;"></div></div>`;
-        case 'flair_title':
-          return `<div style="padding:6px 16px;background:linear-gradient(135deg,var(--cyan),var(--pink));border-radius:999px;font-size:12px;font-weight:700;color:#000;font-family:'Exo 2',sans-serif;">${meta.title || item.name}</div>`;
-        case 'victory_quote':
-          return `<div style="font-style:italic;color:var(--gold);font-size:13px;text-shadow:0 0 6px rgba(255,215,0,0.3);padding:0 10px;text-align:center;">"${meta.quote || item.name}"</div>`;
-        case 'golden_name':
-          return `<div style="font-weight:900;font-size:18px;background:linear-gradient(90deg,#ffd700,#fff4b0,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none;font-family:'Exo 2',sans-serif;">YourName</div>`;
-        case 'hype_bomb':
-          return `<div style="font-size:11px;color:var(--text);text-align:center;line-height:1.6;"><span style="font-size:24px;">💥</span><br>Everyone sees an animated<br>explosion in the feed!</div>`;
-        case 'profile_bg':
-          return `<div style="width:120px;height:60px;border-radius:8px;background:${item.name.includes('Void') ? 'radial-gradient(ellipse,rgba(30,0,50,0.95),#000)' : item.name.includes('Chamber') ? 'linear-gradient(180deg,rgba(255,255,255,0.15),rgba(20,20,40,0.95))' : 'linear-gradient(135deg,rgba(20,20,40,0.95),rgba(40,20,60,0.95))'};border:1px solid var(--line);"></div>`;
-        case 'kings_commentary':
-          return `<div style="padding:8px 12px;background:rgba(255,215,0,0.08);border-left:3px solid var(--gold);border-radius:4px;font-size:11px;color:var(--text);max-width:200px;"><span style="color:var(--gold);font-weight:700;">👑 You:</span> Your message here</div>`;
-        case 'double_down':
-          return `<div style="text-align:center;font-size:12px;color:var(--text);line-height:1.6;"><span style="font-size:18px;color:var(--cyan);font-weight:900;font-family:'Exo 2',sans-serif;">100→200</span> pts<br><span style="font-size:10px;color:var(--muted);">Win points doubled next tournament</span></div>`;
-        case 'ban_immunity':
-          return `<div style="text-align:center;font-size:12px;color:var(--text);line-height:1.6;"><div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:6px;"><span style="color:#22c55e;font-weight:700;">PROTECTED</span></div><br><span style="font-size:10px;color:var(--muted);">One character can't be banned</span></div>`;
-        case 'scouter':
-          return `<div style="text-align:center;font-size:12px;color:var(--text);line-height:1.6;font-family:monospace;"><div style="padding:4px 10px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:4px;font-size:10px;color:#22c55e;">SCANNING OPPONENT...<br>Team: ??? | W/L: ???</div></div>`;
-        case 'vegetas_pride':
-          return `<div style="text-align:center;font-size:12px;color:var(--text);line-height:1.6;"><span style="font-size:18px;color:var(--pink);font-weight:900;font-family:'Exo 2',sans-serif;">25→75</span> pts<br><span style="font-size:10px;color:var(--muted);">Loss points tripled for one tournament</span></div>`;
-        case 'badge':
-          return `<div style="text-align:center;"><div style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:8px;">${makeCardVisual(item, 32)}<span style="color:var(--gold);font-weight:700;font-family:'Exo 2',sans-serif;font-size:12px;">${escapeHtml(item.name)}</span></div><div style="font-size:10px;color:var(--muted);margin-top:6px;">Displayed on your profile badge wall</div></div>`;
-        default:
-          return `<div style="color:var(--muted);font-size:12px;">Preview not available</div>`;
-      }
-    }
-
-    function getBadge(item) {
-      if (item.metadata?.exclusive) return '<div class="card-badge exclusive">EXCLUSIVE</div>';
-      if (item.cost >= 2000) return '<div class="card-badge hot">HOT</div>';
-      if (item.cost === 0) return '<div class="card-badge new">FREE</div>';
-      return '';
-    }
-
-    function renderItemCard(item, featured) {
-      const rarity = getRarity(item);
-      const owned = ownedItemIds.has(item.id);
-      const canBuy = !owned && currentBalance >= item.cost;
-      const badge = getBadge(item);
-      const typeLabel = TYPE_LABELS[item.type] || item.type;
-      const idx = allItems.indexOf(item);
-
-      let btnClass = 'btn-get';
-      let btnText = 'LOCKED';
-      let btnDisabled = true;
-      if (owned) { btnClass += ' owned'; btnText = 'OWNED'; }
-      else if (canBuy) { btnDisabled = false; btnText = 'GET'; }
-
-      return `
-        <div class="item-card ${featured ? 'featured-card' : ''} ${owned ? 'owned-card' : ''}" data-rarity="${rarity}" onclick="openModal(${idx})">
-          ${owned ? '<div class="card-badge" style="background:var(--green);box-shadow:0 0 10px rgba(46,213,115,0.4);">OWNED</div>' : badge}
-          <div class="card-visual">
-            <div class="card-bg-effect ${rarity === 'legendary' || rarity === 'mythic' ? 'aura-effect' : 'shimmer-effect'}"></div>
-            <div class="card-icon">${makeCardVisual(item, featured ? 100 : 80)}</div>
-          </div>
-          <div class="card-info">
-            <div class="card-name">${escapeHtml(item.name)}</div>
-            <div class="card-type">${escapeHtml(typeLabel)}</div>
-          </div>
-          <div class="card-price-bar">
-            <div class="card-price">
-              ${item.cost > 0
-                ? `<div class="price-coin"></div><span class="price-value">${item.cost.toLocaleString()}</span>`
-                : '<span class="price-value free">FREE</span>'}
-            </div>
-            <button class="${btnClass}" ${btnDisabled ? 'disabled' : ''} onclick="event.stopPropagation();buyItem('${item.id}', ${item.cost}, '${escapeHtml(item.name).replace(/'/g, "\\'")}')">
-              ${btnText}
-            </button>
-          </div>
-        </div>`;
-    }
-
-    function openModal(idx) {
-      const item = allItems[idx];
-      if (!item) return;
-      const rarity = getRarity(item);
-      const color = RARITY_COLORS[rarity];
-      const canBuy = currentBalance >= item.cost;
-      const typeLabel = TYPE_LABELS[item.type] || item.type;
-
-      const visualEl = document.getElementById('modal-visual');
-      visualEl.style.background = `linear-gradient(160deg, ${color}22, ${color}08)`;
-      visualEl.innerHTML = `<div class="card-bg-effect aura-effect" style="--rarity-color:${color}"></div><div class="modal-icon">${makeCardVisual(item, 120)}</div>`;
-
-      const rarityTag = document.getElementById('modal-rarity');
-      rarityTag.textContent = RARITY_LABELS[rarity];
-      rarityTag.style.background = color;
-      rarityTag.style.color = '#000';
-
-      document.getElementById('modal-name').textContent = item.name;
-      const typeEl = document.getElementById('modal-type');
-      typeEl.textContent = typeLabel;
-      typeEl.style.color = color;
-
-      document.getElementById('modal-desc').textContent = getItemDescription(item);
-      document.getElementById('modal-preview').innerHTML = getPreviewDemo(item);
-
-      const priceEl = document.getElementById('modal-price');
-      priceEl.innerHTML = item.cost > 0
-        ? `<div class="price-coin"></div><span class="price-value">${item.cost.toLocaleString()}</span>`
-        : '<span class="price-value free">FREE</span>';
-
-      const owned = ownedItemIds.has(item.id);
-      const buyBtn = document.getElementById('modal-buy-btn');
-      if (owned) {
-        buyBtn.disabled = true;
-        buyBtn.textContent = 'OWNED';
-        buyBtn.style.background = 'var(--green)';
-        buyBtn.style.color = '#000';
-        buyBtn.onclick = null;
-      } else {
-        buyBtn.disabled = !canBuy;
-        buyBtn.textContent = canBuy ? 'GET' : `NEED ${(item.cost - currentBalance).toLocaleString()} MORE`;
-        buyBtn.style.background = '';
-        buyBtn.style.color = '';
-        buyBtn.onclick = () => {
-          buyItem(item.id, item.cost, item.name);
-          closeModal();
-        };
-      }
-
-      document.getElementById('item-modal').classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal() {
-      document.getElementById('item-modal').classList.remove('open');
-      document.body.style.overflow = '';
-    }
-
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
     document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(() => {
-        if (typeof AUTH !== 'undefined' && AUTH.isLoggedIn()) {
-          const discordName = AUTH.getDiscordUsername();
-          if (discordName) {
-            document.getElementById('username-input').value = discordName;
-            loginShop();
-            return;
-          }
-        }
-        if (shopUsername) {
-          document.getElementById('username-input').value = shopUsername;
-          loginShop();
-        }
-      }, 200);
+      if (typeof initParticles === 'function') initParticles();
+      ShopModal.init();
+      ShopSearch.init();
+      ShopSearch.onFilterChange(() => ShopRenderer.render());
+      ShopCore.init();
     });
-
-    function loginShop() {
-      if (typeof AUTH !== 'undefined' && !AUTH.isLoggedIn()) {
-        return AUTH.requireLogin('access the shop');
-      }
-      const input = document.getElementById('username-input');
-      const name = (typeof AUTH !== 'undefined' && AUTH.isLoggedIn()) ? AUTH.getDiscordUsername() : input.value.trim();
-      if (!name) { NotificationSystem.show('Login with Discord to access the shop', 'error'); return; }
-      shopUsername = name;
-      sessionStorage.setItem('shop_username', shopUsername);
-      document.getElementById('login-section').style.display = 'none';
-      document.getElementById('shop-content').style.display = 'block';
-      document.getElementById('display-username').textContent = shopUsername;
-      loadShop();
-    }
-
-    function logoutShop() {
-      sessionStorage.removeItem('shop_username');
-      shopUsername = '';
-      document.getElementById('login-section').style.display = '';
-      document.getElementById('shop-content').style.display = 'none';
-      if (typeof AUTH !== 'undefined') AUTH.logout();
-    }
-
-    async function loadShop() { await refreshBalance(); await loadShopItems(); }
-
-    async function refreshBalance() {
-      try {
-        const pts = await db.getPoints(shopUsername);
-        currentBalance = pts.balance || 0;
-        document.getElementById('balance-value').textContent = currentBalance.toLocaleString();
-      } catch (e) { console.error('Failed to load balance', e); }
-    }
-
-    async function loadShopItems() {
-      const container = document.getElementById('shop-items-container');
-      try {
-        const [items, inventory] = await Promise.all([
-          db.getShopItems(),
-          db.getInventory(shopUsername)
-        ]);
-        allItems = items;
-        ownedItemIds = new Set(inventory.map(inv => inv.item?.id).filter(Boolean));
-        if (!allItems.length) {
-          container.innerHTML = '<div class="empty-state">No items available right now. Check back soon!</div>';
-          document.getElementById('category-tabs').innerHTML = '';
-          return;
-        }
-        buildCategoryTabs();
-        renderShopGrid();
-      } catch (e) {
-        container.innerHTML = '<div class="empty-state">Failed to load shop items.</div>';
-        console.error(e);
-      }
-    }
-
-    function buildCategoryTabs() {
-      const cats = { all: allItems.length };
-      allItems.forEach(item => { const cat = CATEGORY_MAP[item.type] || 'other'; cats[cat] = (cats[cat] || 0) + 1; });
-      const tabsEl = document.getElementById('category-tabs');
-      let html = '';
-      Object.entries(CATEGORY_LABELS).forEach(([key, label]) => {
-        if (cats[key]) html += `<button class="shop-tab ${activeCategory === key ? 'active' : ''}" onclick="filterCategory('${key}')">${label}<span class="tab-count">${cats[key]}</span></button>`;
-      });
-      tabsEl.innerHTML = html;
-    }
-
-    function filterCategory(cat) { activeCategory = cat; buildCategoryTabs(); renderShopGrid(); }
-
-    function renderShopGrid() {
-      const container = document.getElementById('shop-items-container');
-      let items = allItems;
-      if (activeCategory !== 'all') items = allItems.filter(i => (CATEGORY_MAP[i.type] || 'other') === activeCategory);
-
-      const ultimate = items.filter(i => getRarity(i) === 'ultimate');
-      const featured = items.filter(i => getRarity(i) === 'legendary' || getRarity(i) === 'mythic');
-      const regular = items.filter(i => !['legendary', 'mythic', 'ultimate'].includes(getRarity(i)));
-
-      let html = '';
-      if (ultimate.length) {
-        html += '<div class="shop-section-header"><h2 style="background:linear-gradient(90deg,#00ffcc,#a855f7,#ff2d78);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:22px;">ULTIMATE</h2></div>';
-        html += '<div class="item-grid featured" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));">';
-        ultimate.forEach(item => { html += renderItemCard(item, true); });
-        html += '</div>';
-      }
-      if (featured.length) {
-        html += '<div class="shop-section-header"><h2>⭐ Featured</h2></div>';
-        html += '<div class="item-grid featured">';
-        featured.forEach(item => { html += renderItemCard(item, true); });
-        html += '</div>';
-      }
-      if (regular.length) {
-        if (featured.length) html += '<div class="shop-section-header"><h2>🛒 Daily Items</h2></div>';
-        html += '<div class="item-grid">';
-        regular.sort((a, b) => b.cost - a.cost);
-        regular.forEach(item => { html += renderItemCard(item, false); });
-        html += '</div>';
-      }
-      container.innerHTML = html;
-    }
-
-    async function buyItem(itemId, cost, name) {
-      try {
-        await db.purchaseItem(shopUsername, itemId, cost);
-        playSound('purchase');
-        NotificationSystem.show('Purchased ' + name + '!', 'success');
-        await refreshBalance();
-        await loadShopItems();
-      } catch (e) {
-        playSound('error');
-        NotificationSystem.show(e.message || 'Purchase failed', 'error');
-      }
-    }
-
-    function switchMainTab(tab) {
-      document.querySelectorAll('#main-tabs .shop-tab').forEach((btn, i) => {
-        btn.classList.toggle('active', ['shop', 'titles', 'inventory', 'history'][i] === tab);
-      });
-      document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
-      document.getElementById('tab-' + tab).classList.add('active');
-      if (tab === 'inventory') loadInventory();
-      if (tab === 'history') loadTransactions();
-      if (tab === 'shop') loadShopItems();
-      if (tab === 'titles') loadTitlesShop();
-    }
-
-    async function loadInventory() {
-      const container = document.getElementById('inventory-container');
-      try {
-        const items = await db.getInventory(shopUsername);
-        if (!items.length) { container.innerHTML = '<div class="empty-state">No items yet — go grab something from the shop!</div>'; return; }
-        let html = '<div class="inv-grid">';
-        items.forEach(inv => {
-          const item = inv.item || {};
-          const typeLabel = TYPE_LABELS[item.type] || item.type || '';
-          html += `
-            <div class="inv-card">
-              <div class="inv-card-visual">${makeCardVisual(item, 60)}</div>
-              <div class="inv-card-info">
-                <div class="inv-card-name">${escapeHtml(item.name || 'Unknown')}</div>
-                <div class="inv-card-type">${escapeHtml(typeLabel)}</div>
-                <button class="inv-equip-btn ${inv.equipped ? 'equipped' : ''}"
-                  onclick="toggleEquip('${inv.id}', ${inv.equipped})">
-                  ${inv.equipped ? '✓ Equipped' : 'Equip'}
-                </button>
-              </div>
-            </div>`;
-        });
-        html += '</div>';
-        container.innerHTML = html;
-      } catch (e) { container.innerHTML = '<div class="empty-state">Failed to load inventory.</div>'; console.error(e); }
-    }
-
-    async function toggleEquip(inventoryId, isEquipped) {
-      try {
-        if (isEquipped) { await db.unequipItem(shopUsername, inventoryId); playSound('equip'); }
-        else { await db.equipItem(shopUsername, inventoryId); playSound('equip'); }
-        await loadInventory();
-      } catch (e) { NotificationSystem.show('Failed to update item', 'error'); }
-    }
-
-    async function loadTransactions() {
-      const container = document.getElementById('tx-container');
-      try {
-        const txs = await db.getPointTransactions(shopUsername);
-        if (!txs.length) { container.innerHTML = '<div class="empty-state">No transactions yet.</div>'; return; }
-        let html = '<div class="tx-list">';
-        txs.forEach(tx => {
-          const isPositive = tx.amount >= 0;
-          const date = new Date(tx.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-          html += `<div class="tx-row"><div><div class="tx-reason">${escapeHtml(tx.reason || 'Unknown')}</div><div class="tx-date">${date}</div></div><div class="tx-amount ${isPositive ? 'positive' : 'negative'}">${isPositive ? '+' : ''}${tx.amount.toLocaleString()} pts</div></div>`;
-        });
-        html += '</div>';
-        container.innerHTML = html;
-      } catch (e) { container.innerHTML = '<div class="empty-state">Failed to load transactions.</div>'; console.error(e); }
-    }
-
-    async function loadTitlesShop() {
-      const grid = document.getElementById('titles-shop-grid');
-      if (!grid || typeof TitleManager === 'undefined') {
-        if (grid) grid.innerHTML = '<div class="empty-state">Titles system loading...</div>';
-        return;
-      }
-      try {
-        const shopTitles = Object.values(TitleManager.TITLES).filter(t => t.source === 'shop');
-        const ownedTitles = await TitleManager.getPlayerTitles(shopUsername);
-        const ownedIds = new Set(ownedTitles.map(t => t.title_id));
-
-        if (!shopTitles.length) {
-          grid.innerHTML = '<div class="empty-state">No titles available.</div>';
-          return;
-        }
-
-        let html = '';
-        for (const t of shopTitles) {
-          const owned = ownedIds.has(t.id);
-          const canBuy = !owned && currentBalance >= t.price;
-          const rarity = t.price >= 1500 ? 'mythic' : t.price >= 1000 ? 'legendary' : t.price >= 750 ? 'epic' : 'rare';
-
-          html += `
-            <div class="item-card ${owned ? 'owned-card' : ''}" data-rarity="${rarity}" style="aspect-ratio:4/3;">
-              ${owned ? '<div class="card-badge" style="background:var(--green);box-shadow:0 0 10px rgba(46,213,115,0.4);">OWNED</div>' : ''}
-              <div class="card-visual">
-                <div class="card-bg-effect aura-effect"></div>
-                <div style="z-index:1;text-align:center;padding:16px;">
-                  <div style="font-family:'Exo 2',sans-serif;font-size:18px;font-weight:900;color:${t.color};text-shadow:0 0 12px ${t.color};text-transform:uppercase;letter-spacing:0.08em;">${escapeHtml(t.name)}</div>
-                  <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4;">${escapeHtml(t.description)}</div>
-                </div>
-              </div>
-              <div class="card-info">
-                <div class="card-name">${escapeHtml(t.name)}</div>
-                <div class="card-type" style="color:${t.color};">Player Title</div>
-              </div>
-              <div class="card-price-bar">
-                <div class="card-price">
-                  <div class="price-coin"></div>
-                  <span class="price-value">${t.price.toLocaleString()}</span>
-                </div>
-                <button class="btn-get ${owned ? 'owned' : ''}" ${owned || !canBuy ? 'disabled' : ''}
-                  onclick="event.stopPropagation();buyTitle('${t.id}')">
-                  ${owned ? 'OWNED' : canBuy ? 'GET' : 'LOCKED'}
-                </button>
-              </div>
-            </div>`;
-        }
-        grid.innerHTML = html;
-      } catch (e) {
-        grid.innerHTML = '<div class="empty-state">Failed to load titles.</div>';
-        console.error(e);
-      }
-    }
-
-    async function buyTitle(titleId) {
-      if (typeof TitleManager === 'undefined') return;
-      try {
-        const title = await TitleManager.purchaseTitle(shopUsername, titleId);
-        playSound('purchase');
-        NotificationSystem.show('Purchased title: ' + title.name + '!', 'success');
-        await refreshBalance();
-        await loadTitlesShop();
-      } catch (e) {
-        playSound('error');
-        NotificationSystem.show(e.message || 'Purchase failed', 'error');
-      }
-    }
-
-    function escapeHtml(str) { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
   </script>
-  <script src="js/notification-inbox.js"></script>`n  <script src="js/toolbar.js"></script>
+  <script src="js/notification-inbox.js"></script>
+  <script src="js/toolbar.js"></script>
 </body>
 </html>
-
-
-
-
-
-
