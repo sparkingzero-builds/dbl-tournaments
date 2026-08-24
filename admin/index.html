@@ -3059,7 +3059,15 @@
       }
     };
 
-    let rebanInProgress = false;
+    function getRebanFlag() {
+      if (!currentTournament) return false;
+      return localStorage.getItem('reban_active_' + currentTournament.id) === '1';
+    }
+    function setRebanFlag(v) {
+      if (!currentTournament) return;
+      if (v) localStorage.setItem('reban_active_' + currentTournament.id, '1');
+      else localStorage.removeItem('reban_active_' + currentTournament.id);
+    }
 
     async function updateRebanButtons() {
       const container = document.getElementById('reban-buttons');
@@ -3071,7 +3079,7 @@
 
       const permBans = currentTournament.tournament_bans || [];
 
-      if (rebanInProgress || hasVotes) {
+      if (getRebanFlag() || hasVotes) {
         const status = allVoted ? 'All votes in!' : `${votedCount}/${signups.length} voted`;
         desc.textContent = `Re-ban round in progress — ${status}. End the round to apply bans.`;
         container.innerHTML = `
@@ -3170,7 +3178,7 @@
           NotificationSystem.show(`${stillHaveVotes.length} player(s) still have votes after clearing. Ban round NOT started — please retry.`, 'error');
           return;
         }
-        rebanInProgress = true;
+        setRebanFlag(true);
         NotificationSystem.show(`Cleared ${cleared} ban votes. New ban round is open.`, 'success');
         loadBanResults();
         updateRebanButtons();
@@ -3230,7 +3238,7 @@
         await db.updateTournament(currentTournament.id, { ban_history: banHistory });
         currentTournament.ban_history = banHistory;
 
-        rebanInProgress = false;
+        setRebanFlag(false);
         signups = await db.getSignups(currentTournament.id);
         const modeLabel = mode === 'tournament' ? 'Tournament-wide ban applied.' : 'Round ban applied.';
         NotificationSystem.show(`${modeLabel} Removed banned characters from ${stripped} team${stripped !== 1 ? 's' : ''}.`, 'success');
@@ -3243,7 +3251,7 @@
 
     function cancelReban() {
       if (!confirm('Cancel the re-ban round? No bans will be applied.')) return;
-      rebanInProgress = false;
+      setRebanFlag(false);
       NotificationSystem.show('Re-ban round cancelled.', 'info');
       updateRebanButtons();
     }
