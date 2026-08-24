@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tournament Recap — DBL Tournaments</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <style>
+    .recap-container { max-width: 1100px; margin: 0 auto; padding: 100px 20px 60px; }
+
+    /* ── Tournament Selector ── */
+    .tournament-selector {
+      display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+    .tournament-selector label {
+      font-family: 'Exo 2', sans-serif; font-weight: 700; font-size: 13px;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    }
+    .tournament-selector select {
+      background: var(--panel); border: 1px solid var(--line); color: var(--text);
+      font-family: 'Chakra Petch', sans-serif; padding: 10px 16px; border-radius: 8px;
+      font-size: 14px; min-width: 260px; cursor: pointer;
+    }
+    .tournament-selector select:focus { outline: none; border-color: var(--cyan); }
+
+    /* ── Recap Header ── */
+    .recap-header {
+      text-align: center; margin-bottom: 40px; padding: 40px 20px;
+      background: linear-gradient(135deg, rgba(255,215,64,0.06), rgba(0,229,255,0.04));
+      border: 1px solid var(--line); border-radius: 16px;
+      position: relative; overflow: hidden;
+    }
+    .recap-header::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--cyan), var(--pink));
+    }
+    .recap-title {
+      font-family: 'Exo 2', sans-serif; font-size: clamp(28px, 5vw, 48px);
+      font-weight: 900; text-transform: uppercase;
+      background: linear-gradient(180deg, #ffd740, #ff8c00);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 8px;
+    }
+    .recap-meta {
+      display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;
+      font-family: 'Chakra Petch', sans-serif; font-size: 14px; color: var(--muted);
+    }
+    .recap-meta span { display: flex; align-items: center; gap: 6px; }
+
+    /* ── Champion Spotlight ── */
+    .champion-spotlight {
+      background: var(--panel); border: 2px solid var(--gold);
+      border-radius: 16px; padding: 32px; margin-bottom: 32px;
+      box-shadow: 0 0 30px rgba(255,215,64,0.15), inset 0 0 30px rgba(255,215,64,0.03);
+      position: relative; overflow: hidden;
+    }
+    .champion-spotlight::before {
+      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: conic-gradient(from 0deg, transparent, rgba(255,215,64,0.05), transparent, rgba(255,215,64,0.05), transparent);
+      animation: championGlow 8s linear infinite;
+    }
+    @keyframes championGlow { to { transform: rotate(360deg); } }
+    .champion-content { position: relative; z-index: 1; }
+    .champion-label {
+      font-family: 'Exo 2', sans-serif; font-size: 11px; font-weight: 800;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px;
+    }
+    .champion-name-big {
+      font-family: 'Exo 2', sans-serif; font-size: clamp(32px, 5vw, 56px); font-weight: 900;
+      color: var(--gold); margin-bottom: 16px; display: flex; align-items: center; gap: 12px;
+    }
+    .champion-stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px; margin-bottom: 20px;
+    }
+    .champ-stat {
+      background: rgba(255,215,64,0.06); border: 1px solid rgba(255,215,64,0.15);
+      border-radius: 10px; padding: 14px; text-align: center;
+    }
+    .champ-stat-value {
+      font-family: 'Exo 2', sans-serif; font-size: 24px; font-weight: 800; color: var(--gold);
+    }
+    .champ-stat-label {
+      font-family: 'Chakra Petch', sans-serif; font-size: 11px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .victory-path {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px;
+    }
+    .victory-path-label {
+      font-family: 'Exo 2', sans-serif; font-size: 12px; font-weight: 700;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .path-opponent {
+      background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.2);
+      border-radius: 6px; padding: 4px 10px; font-family: 'Chakra Petch', sans-serif;
+      font-size: 13px; color: var(--cyan);
+    }
+    .path-arrow { color: var(--muted); font-size: 14px; }
+
+    /* ── Highlight Cards ── */
+    .highlights-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px; margin-bottom: 32px;
+    }
+    .highlight-card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+      padding: 20px; display: flex; gap: 16px; align-items: flex-start;
+    }
+    .highlight-icon {
+      width: 48px; height: 48px; border-radius: 10px; display: flex;
+      align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
+    }
+    .highlight-icon.upset { background: rgba(255,45,120,0.12); }
+    .highlight-icon.closest { background: rgba(0,229,255,0.12); }
+    .highlight-icon.dominant { background: rgba(46,213,115,0.12); }
+    .highlight-title {
+      font-family: 'Exo 2', sans-serif; font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px;
+    }
+    .highlight-value {
+      font-family: 'Exo 2', sans-serif; font-size: 18px; font-weight: 800; color: var(--text);
+      margin-bottom: 4px;
+    }
+    .highlight-detail {
+      font-family: 'Chakra Petch', sans-serif; font-size: 13px; color: var(--muted);
+    }
+
+    /* ── Quick Stats ── */
+    .quick-stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px; margin-bottom: 32px;
+    }
+    .quick-stat {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+      padding: 18px; text-align: center;
+    }
+    .quick-stat-value {
+      font-family: 'Exo 2', sans-serif; font-size: 28px; font-weight: 800; color: var(--cyan);
+    }
+    .quick-stat-label {
+      font-family: 'Chakra Petch', sans-serif; font-size: 11px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px;
+    }
+
+    /* ── Results Table ── */
+    .results-section { margin-bottom: 40px; }
+    .round-group { margin-bottom: 24px; }
+    .round-label {
+      font-family: 'Exo 2', sans-serif; font-size: 13px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.15em; color: var(--cyan);
+      margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line);
+    }
+    .results-table {
+      width: 100%; border-collapse: collapse; font-family: 'Chakra Petch', sans-serif;
+      font-size: 14px;
+    }
+    .results-table th {
+      text-align: left; padding: 10px 12px; font-family: 'Exo 2', sans-serif;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--muted); border-bottom: 1px solid var(--line);
+    }
+    .results-table td {
+      padding: 10px 12px; border-bottom: 1px solid rgba(46,39,85,0.4); color: var(--text);
+    }
+    .results-table tr:hover td { background: rgba(0,229,255,0.03); }
+    .winner-cell { color: var(--green); font-weight: 700; }
+    .loser-cell { color: var(--muted); }
+
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center; padding: 80px 20px; color: var(--muted);
+      font-family: 'Chakra Petch', sans-serif;
+    }
+    .empty-state h2 {
+      font-family: 'Exo 2', sans-serif; font-size: 24px; color: var(--text); margin-bottom: 8px;
+    }
+
+    /* ── Section Heading ── */
+    .section-title {
+      font-family: 'Exo 2', sans-serif; font-size: 16px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.15em; color: var(--text);
+      margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+    }
+    .section-title::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--line), transparent);
+    }
+
+    .overflow-x { overflow-x: auto; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">&#9776;</button>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="characters.html">Characters</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="bracket.html">Bracket</a></li>
+        <li><a href="bounty.html">Bounty</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="profile.html">Profile</a></li>
+        <li class="nav-dropdown">
+          <a href="#">More &#9662;</a>
+          <div class="nav-dropdown-menu">
+            <div class="dropdown-label">Stats</div>
+            <a href="tierlist.html">Tier List</a>
+            <a href="meta.html">Character Meta</a>
+            <a href="analytics.html">Ban Analytics</a>
+            <a href="power-rankings.html">Power Rankings</a>
+            <a href="hall-of-fame.html">Hall of Fame</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Social</div>
+            <a href="clans.html">Clans</a>
+            <a href="feed.html">Live Feed</a>
+            <a href="rivalries.html">Rivalries</a>
+            <a href="betting.html">Betting</a>
+            <a href="casino.html">Casino</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">More</div>
+            <a href="auction.html">Auction</a>
+            <a href="season.html">Season</a>
+            <a href="matches.html">Matches</a>
+            <a href="history.html">History</a>
+            <a href="world-tournament.html">World Tournament</a>
+            <a href="compare.html">Compare</a>
+            <a href="mvp-vote.html">MVP Vote</a>
+            <a href="recap.html" class="active">Recap</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="particles-bg" id="particles"></div>
+
+  <div class="recap-container">
+
+    <!-- Tournament Selector -->
+    <div class="tournament-selector">
+      <label>Tournament Recap</label>
+      <select id="tournament-select">
+        <option value="">-- Select a completed tournament --</option>
+      </select>
+    </div>
+
+    <!-- Content Area -->
+    <div id="recap-content">
+      <div class="empty-state">
+        <h2>Tournament Recaps</h2>
+        <p>Select a completed tournament above to view the full recap.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/maintenance.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/titles.js"></script>
+  <script src="js/activity-alerts.js"></script>
+  <script src="js/daily-rewards.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/confetti.js"></script>
+  <script src="js/clan-tag.js"></script>
+  <script src="js/notification-inbox.js"></script>
+  <script src="js/toolbar.js"></script>
+  <script>
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+    const contentEl = document.getElementById('recap-content');
+    const selectEl = document.getElementById('tournament-select');
+
+    async function init() {
+      // Load completed tournaments
+      const { data: tournaments } = await supabaseClient
+        .from('tournaments')
+        .select('id, name, created_at, start_date, status')
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false });
+
+      if (!tournaments?.length) {
+        contentEl.innerHTML = '<div class="empty-state"><h2>No Completed Tournaments</h2><p>Check back after a tournament finishes.</p></div>';
+        return;
+      }
+
+      tournaments.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = t.name;
+        selectEl.appendChild(opt);
+      });
+
+      selectEl.addEventListener('change', () => {
+        const id = selectEl.value;
+        if (id) {
+          history.replaceState(null, '', '?id=' + id);
+          loadRecap(id, tournaments.find(t => t.id === id));
+        }
+      });
+
+      // Check URL param
+      const urlId = new URLSearchParams(location.search).get('id');
+      if (urlId) {
+        const found = tournaments.find(t => t.id === urlId);
+        if (found) {
+          selectEl.value = urlId;
+          loadRecap(urlId, found);
+        }
+      }
+    }
+
+    async function loadRecap(tournamentId, tournament) {
+      contentEl.innerHTML = '<div class="empty-state"><p>Loading recap...</p></div>';
+
+      try {
+        // Fetch all matches for this tournament
+        const { data: matches } = await supabaseClient
+          .from('matches')
+          .select('id, player1_id, player2_id, winner_id, round, score, created_at, player1:signups!matches_player1_id_fkey(id, discord_username), player2:signups!matches_player2_id_fkey(id, discord_username)')
+          .eq('tournament_id', tournamentId)
+          .order('round', { ascending: true });
+
+        if (!matches?.length) {
+          contentEl.innerHTML = '<div class="empty-state"><h2>No Match Data</h2><p>This tournament has no recorded matches.</p></div>';
+          return;
+        }
+
+        // Fetch signups to get participant count
+        const { data: signups } = await supabaseClient
+          .from('signups')
+          .select('id, discord_username')
+          .eq('tournament_id', tournamentId);
+
+        const participantCount = signups?.length || 0;
+
+        // Fetch ELO ratings for all participants for upset detection
+        const playerNames = new Set();
+        matches.forEach(m => {
+          if (m.player1?.discord_username) playerNames.add(m.player1.discord_username);
+          if (m.player2?.discord_username) playerNames.add(m.player2.discord_username);
+        });
+
+        const eloMap = {};
+        if (playerNames.size > 0) {
+          const { data: elos } = await supabaseClient
+            .from('elo_ratings')
+            .select('discord_username, elo');
+          if (elos) elos.forEach(e => { eloMap[e.discord_username] = e.elo; });
+        }
+
+        // Find champion (winner of highest round)
+        const completedMatches = matches.filter(m => m.winner_id);
+        const maxRound = Math.max(...completedMatches.map(m => m.round || 0));
+        const finalMatch = completedMatches.find(m => m.round === maxRound);
+
+        let champion = null;
+        if (finalMatch) {
+          const isP1 = finalMatch.winner_id === finalMatch.player1_id;
+          champion = isP1 ? finalMatch.player1 : finalMatch.player2;
+        }
+
+        // Champion match record + victory path
+        let champWins = 0, champLosses = 0;
+        const victoryPath = [];
+        if (champion) {
+          completedMatches
+            .filter(m => m.player1_id === champion.id || m.player2_id === champion.id)
+            .sort((a, b) => (a.round || 0) - (b.round || 0))
+            .forEach(m => {
+              const isP1 = m.player1_id === champion.id;
+              const opponent = isP1 ? m.player2 : m.player1;
+              if (m.winner_id === champion.id) {
+                champWins++;
+                if (opponent?.discord_username) victoryPath.push(opponent.discord_username);
+              } else {
+                champLosses++;
+              }
+            });
+        }
+
+        // Biggest Upset: completed match where lower-ELO player beat higher-ELO player, biggest gap
+        let biggestUpset = null;
+        let biggestUpsetGap = 0;
+        completedMatches.forEach(m => {
+          const p1Name = m.player1?.discord_username;
+          const p2Name = m.player2?.discord_username;
+          if (!p1Name || !p2Name) return;
+          const p1Elo = eloMap[p1Name] || 1000;
+          const p2Elo = eloMap[p2Name] || 1000;
+          const winnerIsP1 = m.winner_id === m.player1_id;
+          const winnerElo = winnerIsP1 ? p1Elo : p2Elo;
+          const loserElo = winnerIsP1 ? p2Elo : p1Elo;
+          const gap = loserElo - winnerElo;
+          if (gap > biggestUpsetGap) {
+            biggestUpsetGap = gap;
+            const winnerName = winnerIsP1 ? p1Name : p2Name;
+            const loserName = winnerIsP1 ? p2Name : p1Name;
+            biggestUpset = { winner: winnerName, loser: loserName, winnerElo, loserElo, gap, score: m.score, round: m.round };
+          }
+        });
+
+        // Closest Match: parse score "X-Y" and find smallest absolute diff
+        let closestMatch = null;
+        let closestDiff = Infinity;
+        completedMatches.forEach(m => {
+          if (!m.score) return;
+          const parts = m.score.split('-').map(Number);
+          if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+            const diff = Math.abs(parts[0] - parts[1]);
+            if (diff < closestDiff) {
+              closestDiff = diff;
+              closestMatch = {
+                p1: m.player1?.discord_username || '?',
+                p2: m.player2?.discord_username || '?',
+                score: m.score, round: m.round
+              };
+            }
+          }
+        });
+
+        // Dominant Performance: player with best average score margin
+        const playerMargins = {};
+        completedMatches.forEach(m => {
+          if (!m.score || !m.winner_id) return;
+          const parts = m.score.split('-').map(Number);
+          if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) return;
+          const margin = Math.abs(parts[0] - parts[1]);
+          const winnerIsP1 = m.winner_id === m.player1_id;
+          const winnerName = winnerIsP1 ? m.player1?.discord_username : m.player2?.discord_username;
+          if (!winnerName) return;
+          if (!playerMargins[winnerName]) playerMargins[winnerName] = { total: 0, count: 0 };
+          playerMargins[winnerName].total += margin;
+          playerMargins[winnerName].count++;
+        });
+
+        let dominant = null;
+        let bestAvgMargin = 0;
+        Object.entries(playerMargins).forEach(([name, d]) => {
+          // Require at least 2 wins with scores
+          if (d.count >= 2) {
+            const avg = d.total / d.count;
+            if (avg > bestAvgMargin) { bestAvgMargin = avg; dominant = { name, avg: avg.toFixed(1), wins: d.count }; }
+          }
+        });
+        // Fallback: if nobody has 2+ scored wins, pick highest single margin
+        if (!dominant) {
+          Object.entries(playerMargins).forEach(([name, d]) => {
+            const avg = d.total / d.count;
+            if (avg > bestAvgMargin) { bestAvgMargin = avg; dominant = { name, avg: avg.toFixed(1), wins: d.count }; }
+          });
+        }
+
+        // Quick Stats
+        const totalMatches = completedMatches.length;
+        const scoredMatches = completedMatches.filter(m => m.score);
+        let avgScore = '--';
+        if (scoredMatches.length) {
+          const totals = scoredMatches.reduce((acc, m) => {
+            const parts = m.score.split('-').map(Number);
+            if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+              acc.sum += parts[0] + parts[1];
+              acc.count++;
+            }
+            return acc;
+          }, { sum: 0, count: 0 });
+          if (totals.count) avgScore = (totals.sum / totals.count).toFixed(1);
+        }
+
+        const totalRounds = maxRound || '--';
+
+        // Format date
+        const dateRaw = tournament.start_date || tournament.created_at;
+        const dateStr = dateRaw ? new Date(dateRaw).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+
+        // Build HTML
+        let html = '';
+
+        // ── Recap Header
+        html += `<div class="recap-header">
+          <div class="recap-title">${esc(tournament.name)}</div>
+          <div class="recap-meta">
+            <span>&#128197; ${dateStr}</span>
+            <span>&#128101; ${participantCount} Participants</span>
+            <span>&#127942; ${champion ? esc(champion.discord_username) : 'TBD'}</span>
+          </div>
+        </div>`;
+
+        // ── Champion Spotlight
+        if (champion) {
+          const champElo = eloMap[champion.discord_username] || 1000;
+          html += `<div class="champion-spotlight">
+            <div class="champion-content">
+              <div class="champion-label">&#128081; Tournament Champion</div>
+              <div class="champion-name-big">${esc(champion.discord_username)}</div>
+              <div class="champion-stats">
+                <div class="champ-stat">
+                  <div class="champ-stat-value">${champWins}-${champLosses}</div>
+                  <div class="champ-stat-label">Match Record</div>
+                </div>
+                <div class="champ-stat">
+                  <div class="champ-stat-value">${champElo}</div>
+                  <div class="champ-stat-label">ELO Rating</div>
+                </div>
+                <div class="champ-stat">
+                  <div class="champ-stat-value">${totalRounds}</div>
+                  <div class="champ-stat-label">Rounds Played</div>
+                </div>
+              </div>
+              ${victoryPath.length ? `
+                <div class="victory-path">
+                  <span class="victory-path-label">Path to Victory:</span>
+                  ${victoryPath.map((opp, i) =>
+                    `${i > 0 ? '<span class="path-arrow">&#9654;</span>' : ''}<span class="path-opponent">${esc(opp)}</span>`
+                  ).join('')}
+                </div>` : ''}
+            </div>
+          </div>`;
+        }
+
+        // ── Bracket Highlights
+        html += '<div class="section-title">Bracket Highlights</div>';
+        html += '<div class="highlights-grid">';
+
+        if (biggestUpset) {
+          html += `<div class="highlight-card">
+            <div class="highlight-icon upset">&#128165;</div>
+            <div>
+              <div class="highlight-title">Biggest Upset</div>
+              <div class="highlight-value">${esc(biggestUpset.winner)} def. ${esc(biggestUpset.loser)}</div>
+              <div class="highlight-detail">ELO gap: ${biggestUpset.gap} (${biggestUpset.winnerElo} vs ${biggestUpset.loserElo})${biggestUpset.score ? ' &middot; ' + esc(biggestUpset.score) : ''} &middot; Round ${biggestUpset.round || '?'}</div>
+            </div>
+          </div>`;
+        } else {
+          html += `<div class="highlight-card">
+            <div class="highlight-icon upset">&#128165;</div>
+            <div>
+              <div class="highlight-title">Biggest Upset</div>
+              <div class="highlight-value">No upsets detected</div>
+              <div class="highlight-detail">All favorites held seed</div>
+            </div>
+          </div>`;
+        }
+
+        if (closestMatch) {
+          html += `<div class="highlight-card">
+            <div class="highlight-icon closest">&#9878;</div>
+            <div>
+              <div class="highlight-title">Closest Match</div>
+              <div class="highlight-value">${esc(closestMatch.p1)} vs ${esc(closestMatch.p2)}</div>
+              <div class="highlight-detail">Score: ${esc(closestMatch.score)} &middot; Round ${closestMatch.round || '?'}</div>
+            </div>
+          </div>`;
+        } else {
+          html += `<div class="highlight-card">
+            <div class="highlight-icon closest">&#9878;</div>
+            <div>
+              <div class="highlight-title">Closest Match</div>
+              <div class="highlight-value">No scored matches</div>
+              <div class="highlight-detail">Score data not available</div>
+            </div>
+          </div>`;
+        }
+
+        if (dominant) {
+          html += `<div class="highlight-card">
+            <div class="highlight-icon dominant">&#9889;</div>
+            <div>
+              <div class="highlight-title">Dominant Performance</div>
+              <div class="highlight-value">${esc(dominant.name)}</div>
+              <div class="highlight-detail">Avg. margin: ${dominant.avg} across ${dominant.wins} win${dominant.wins > 1 ? 's' : ''}</div>
+            </div>
+          </div>`;
+        } else {
+          html += `<div class="highlight-card">
+            <div class="highlight-icon dominant">&#9889;</div>
+            <div>
+              <div class="highlight-title">Dominant Performance</div>
+              <div class="highlight-value">No data</div>
+              <div class="highlight-detail">Score data not available</div>
+            </div>
+          </div>`;
+        }
+
+        html += '</div>';
+
+        // ── Quick Stats
+        html += '<div class="section-title">Quick Stats</div>';
+        html += `<div class="quick-stats">
+          <div class="quick-stat">
+            <div class="quick-stat-value">${totalMatches}</div>
+            <div class="quick-stat-label">Total Matches</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-value">${avgScore}</div>
+            <div class="quick-stat-label">Avg. Total Score</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-value">${totalRounds}</div>
+            <div class="quick-stat-label">Rounds</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-value">${participantCount}</div>
+            <div class="quick-stat-label">Participants</div>
+          </div>
+        </div>`;
+
+        // ── Full Results Table grouped by round
+        html += '<div class="section-title">Full Results</div>';
+        html += '<div class="results-section">';
+
+        const rounds = {};
+        matches.forEach(m => {
+          const r = m.round || 0;
+          if (!rounds[r]) rounds[r] = [];
+          rounds[r].push(m);
+        });
+
+        Object.keys(rounds).sort((a, b) => Number(a) - Number(b)).forEach(r => {
+          const rNum = Number(r);
+          const label = rNum === maxRound ? 'Finals' : rNum === maxRound - 1 ? 'Semi-Finals' : rNum === maxRound - 2 ? 'Quarter-Finals' : `Round ${r}`;
+          html += `<div class="round-group">
+            <div class="round-label">${esc(label)}</div>
+            <div class="overflow-x">
+              <table class="results-table">
+                <thead><tr>
+                  <th>Player 1</th>
+                  <th>Score</th>
+                  <th>Player 2</th>
+                  <th>Winner</th>
+                </tr></thead>
+                <tbody>`;
+
+          rounds[r].forEach(m => {
+            const p1 = m.player1?.discord_username || '?';
+            const p2 = m.player2?.discord_username || '?';
+            const winner = m.winner_id ? (m.winner_id === m.player1_id ? p1 : p2) : 'Pending';
+            const p1Class = m.winner_id === m.player1_id ? 'winner-cell' : (m.winner_id ? 'loser-cell' : '');
+            const p2Class = m.winner_id === m.player2_id ? 'winner-cell' : (m.winner_id ? 'loser-cell' : '');
+
+            html += `<tr>
+              <td class="${p1Class}">${esc(p1)}</td>
+              <td>${m.score ? esc(m.score) : '--'}</td>
+              <td class="${p2Class}">${esc(p2)}</td>
+              <td class="winner-cell">${m.winner_id ? esc(winner) : '<span style="color:var(--muted)">Pending</span>'}</td>
+            </tr>`;
+          });
+
+          html += '</tbody></table></div></div>';
+        });
+
+        html += '</div>';
+
+        contentEl.innerHTML = html;
+
+      } catch (e) {
+        console.error('Recap load error:', e);
+        contentEl.innerHTML = '<div class="empty-state"><h2>Error</h2><p>Could not load recap data.</p></div>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+  <script>
+    if (typeof initParticles === 'function') initParticles(document.getElementById('particles'));
+  </script>
+</body>
+</html>

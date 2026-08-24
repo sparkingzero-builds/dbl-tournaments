@@ -208,31 +208,51 @@ const NotifInbox = (() => {
         .limit(3);
       if (error) console.warn('NotifInbox: tournaments query failed', error.message);
 
-      if (tournaments) tournaments.forEach(t => {
-        if (t.status === 'open') {
-          items.push({
-            id: 'tourney_open_' + t.id,
-            type: 'tournament_open',
-            icon: '&#x1F3AF;',
-            title: 'Tournament Open!',
-            body: `<strong>${esc(t.name)}</strong> is now accepting sign-ups!`,
-            time: t.created_at,
-            action: pathPrefix + 'tournament.html',
-            priority: 3
-          });
-        } else if (t.status === 'active') {
-          items.push({
-            id: 'tourney_active_' + t.id,
-            type: 'tournament_active',
-            icon: '&#x26A1;',
-            title: 'Tournament Live!',
-            body: `<strong>${esc(t.name)}</strong> is underway!`,
-            time: t.created_at,
-            action: pathPrefix + 'bracket.html',
-            priority: 2
-          });
-        }
-      });
+      if (tournaments) {
+        const now = Date.now();
+        const in24h = now + 86400000;
+        tournaments.forEach(t => {
+          if (t.status === 'open') {
+            items.push({
+              id: 'tourney_open_' + t.id,
+              type: 'tournament_open',
+              icon: '&#x1F3AF;',
+              title: 'Tournament Open!',
+              body: `<strong>${esc(t.name)}</strong> is now accepting sign-ups!`,
+              time: t.created_at,
+              action: pathPrefix + 'tournament.html',
+              priority: 3
+            });
+            // Check if starting within 24 hours
+            if (t.date) {
+              const startTime = new Date(t.date).getTime();
+              if (startTime > now && startTime <= in24h) {
+                items.push({
+                  id: 'tourney_soon_' + t.id,
+                  type: 'tournament_soon',
+                  icon: '&#x23F0;',
+                  title: 'Tournament Starting Soon!',
+                  body: `<strong>${esc(t.name)}</strong> starts in less than 24 hours!`,
+                  time: t.created_at,
+                  action: pathPrefix + 'tournament.html',
+                  priority: 3
+                });
+              }
+            }
+          } else if (t.status === 'active') {
+            items.push({
+              id: 'tourney_active_' + t.id,
+              type: 'tournament_active',
+              icon: '&#x26A1;',
+              title: 'Tournament Live!',
+              body: `<strong>${esc(t.name)}</strong> is underway!`,
+              time: t.created_at,
+              action: pathPrefix + 'bracket.html',
+              priority: 2
+            });
+          }
+        });
+      }
     } catch (e) { console.warn('NotifInbox: tournaments error', e); }
 
     try {
@@ -295,6 +315,73 @@ const NotifInbox = (() => {
         });
       }
     } catch (e) { console.warn('NotifInbox: matches error', e); }
+
+    // New titles unlocked
+    try {
+      const { data: playerTitles } = await supabaseClient
+        .from('player_titles')
+        .select('id, title_id, created_at')
+        .ilike('discord_username', username)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (playerTitles) {
+        const seenKey = 'dbl_notif_seen_titles_' + username;
+        let seenTitles = [];
+        try { seenTitles = JSON.parse(localStorage.getItem(seenKey) || '[]'); } catch {}
+
+        playerTitles.forEach(t => {
+          if (!seenTitles.includes(t.title_id)) {
+            const titleName = (typeof TitleSystem !== 'undefined' && TitleSystem.TITLES?.[t.title_id]?.name) || t.title_id;
+            items.push({
+              id: 'title_new_' + t.title_id,
+              type: 'title_unlock',
+              icon: '&#x1F451;',
+              title: 'New Title Unlocked!',
+              body: `You earned the <strong>${esc(titleName)}</strong> title!`,
+              time: t.created_at,
+              action: pathPrefix + 'profile.html',
+              priority: 2
+            });
+          }
+        });
+
+        // Mark all current titles as seen once the user opens the panel
+        if (playerTitles.length) {
+          const allTitleIds = playerTitles.map(t => t.title_id);
+          const handler = () => {
+            try { localStorage.setItem(seenKey, JSON.stringify(allTitleIds)); } catch {}
+          };
+          if (bellEl) bellEl.querySelector('.notif-bell-btn')?.addEventListener('click', handler, { once: true });
+        }
+      }
+    } catch (e) { console.warn('NotifInbox: titles error', e); }
+
+    // Recent point transactions (last 24 hours)
+    try {
+      const oneDayAgoISO = new Date(Date.now() - 86400000).toISOString();
+      const { data: ptxns } = await supabaseClient
+        .from('point_transactions')
+        .select('id, amount, reason, created_at')
+        .ilike('discord_username', username)
+        .gt('created_at', oneDayAgoISO)
+        .gt('amount', 0)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (ptxns) ptxns.forEach(tx => {
+        items.push({
+          id: 'pts_' + tx.id,
+          type: 'points_earned',
+          icon: '&#x1F4B0;',
+          title: 'Points Earned!',
+          body: `You earned <span style="color:var(--gold);">${(tx.amount || 0).toLocaleString()}</span> points${tx.reason ? ' (' + esc(tx.reason) + ')' : ''}!`,
+          time: tx.created_at,
+          action: pathPrefix + 'profile.html',
+          priority: 1
+        });
+      });
+    } catch (e) { console.warn('NotifInbox: points error', e); }
 
     try {
       const { data: shopItems, error } = await supabaseClient
@@ -607,3 +694,6 @@ const NotifInbox = (() => {
 
   return { init, markAllRead, refresh: fetchAll };
 })();
+
+// Alias for backward compatibility — NotificationCenter.init() delegates to NotifInbox
+const NotificationCenter = NotifInbox;

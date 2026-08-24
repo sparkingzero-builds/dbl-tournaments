@@ -760,6 +760,52 @@
 
     .badge-progress-label { font-size: 8px; color: var(--muted); margin-top: 2px; }
 
+    @keyframes progressGlow {
+      0%, 100% { box-shadow: 0 0 4px rgba(0,229,255,0.3); }
+      50% { box-shadow: 0 0 10px rgba(0,229,255,0.7), 0 0 20px rgba(0,229,255,0.3); }
+    }
+
+    .badge-progress.near-complete .badge-progress-fill {
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+      animation: progressGlow 1.8s ease-in-out infinite;
+    }
+
+    /* ── Form Indicator Badge ── */
+    .form-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    .form-badge.hot {
+      color: #ff6b35;
+      background: rgba(255,107,53,0.12);
+      box-shadow: 0 0 12px rgba(255,69,0,0.3);
+      animation: hotGlow 2s ease-in-out infinite;
+    }
+
+    .form-badge.cold {
+      color: #64b5f6;
+      background: rgba(100,181,246,0.12);
+    }
+
+    .form-badge.consistent {
+      color: var(--cyan);
+      background: rgba(0,229,255,0.1);
+    }
+
+    @keyframes hotGlow {
+      0%, 100% { box-shadow: 0 0 12px rgba(255,69,0,0.3); }
+      50% { box-shadow: 0 0 22px rgba(255,69,0,0.5), 0 0 40px rgba(255,140,0,0.2); }
+    }
+
     @keyframes badgeUnlock {
       0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
       60%  { transform: scale(1.2) rotate(3deg); opacity: 1; }
@@ -1081,6 +1127,7 @@
           <div class="nav-dropdown-menu">
             <div class="dropdown-label">Stats</div>
             <a href="tierlist.html">Tier List</a>
+            <a href="meta.html">Character Meta</a>
             <a href="analytics.html">Ban Analytics</a>
             <a href="power-rankings.html">Power Rankings</a>
             <a href="hall-of-fame.html">Hall of Fame</a>
@@ -1124,7 +1171,7 @@
   <script src="js/notifications.js"></script>
   <script src="js/sounds.js"></script>
   <script>
-    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
     async function equipPlayerTitle(titleId) {
       try {
@@ -1196,7 +1243,7 @@
         return;
       }
 
-      document.title = `${esc(playerName)} — DBL Tournaments`;
+      document.title = `${playerName} — DBL Tournaments`;
 
       try {
         const signups = await db.getPlayerStats(playerName);
@@ -1476,7 +1523,7 @@
           </div>
         `;
 
-        playSound('powerup');
+        if (typeof playSound === 'function') playSound('powerup');
 
         // ── Load Recent Activity ──
         try {
@@ -1500,7 +1547,7 @@
               admin_grant: { label: 'Admin Grant', icon: '⭐', color: 'var(--cyan)' },
             };
             actEl.innerHTML = txData.map(tx => {
-              const r = reasonLabels[tx.reason] || (tx.reason?.startsWith('streak_bonus') ? { label: 'Streak Bonus', icon: '🔥', color: 'var(--gold)' } : { label: tx.reason || 'Other', icon: '💫', color: 'var(--muted)' });
+              const r = reasonLabels[tx.reason] || (tx.reason?.startsWith('streak_bonus') ? { label: 'Streak Bonus', icon: '🔥', color: 'var(--gold)' } : { label: esc(tx.reason || 'Other'), icon: '💫', color: 'var(--muted)' });
               const sign = tx.amount >= 0 ? '+' : '';
               const amtColor = tx.amount >= 0 ? 'var(--green)' : 'var(--red)';
               const ago = timeAgo(tx.created_at);
@@ -1656,6 +1703,47 @@
           console.error('ELO load error:', e);
         }
 
+        // ── Form Indicator Badge ──
+        try {
+          // Get last 10 completed matches for this player using their signup IDs
+          if (signupIds.length > 0) {
+            // Query matches where player is player1 or player2 separately, then merge
+            const formQueries = await Promise.all([
+              supabaseClient.from('matches')
+                .select('winner_id, created_at')
+                .in('player1_id', signupIds)
+                .not('winner_id', 'is', null)
+                .order('created_at', { ascending: false })
+                .limit(10),
+              supabaseClient.from('matches')
+                .select('winner_id, created_at')
+                .in('player2_id', signupIds)
+                .not('winner_id', 'is', null)
+                .order('created_at', { ascending: false })
+                .limit(10)
+            ]);
+            const allFormMatches = [...(formQueries[0].data || []), ...(formQueries[1].data || [])]
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              .slice(0, 10);
+
+            if (allFormMatches.length > 0) {
+              const recentWins = allFormMatches.filter(m => signupIds.includes(m.winner_id)).length;
+              let formHtml = '';
+              if (recentWins >= 7) {
+                formHtml = '<span class="form-badge hot">🔥 Hot Streak</span>';
+              } else if (recentWins <= 3) {
+                formHtml = '<span class="form-badge cold">🧊 Cold Streak</span>';
+              } else {
+                formHtml = '<span class="form-badge consistent">⚡ Consistent</span>';
+              }
+              const tierRow = document.getElementById('hero-tier-row');
+              if (tierRow) tierRow.insertAdjacentHTML('beforeend', formHtml);
+            }
+          }
+        } catch (e) {
+          console.error('Form badge error:', e);
+        }
+
         // Points
         try {
           const { data: points } = await supabaseClient
@@ -1729,7 +1817,7 @@
             if (fm?.length) {
               const w = fm[0];
               const champName = w.winner_id === w.player1_id ? w.player1?.discord_username : w.player2?.discord_username;
-              if (champName === playerName) accolades.push({ icon: '🏆', label: 'Current Champion' });
+              if (champName && champName.toLowerCase() === playerName.toLowerCase()) accolades.push({ icon: '🏆', label: 'Current Champion' });
             }
           }
           const { data: pts } = await supabaseClient.from('player_points').select('best_streak, current_streak').ilike('discord_username', playerName).single();
@@ -1797,16 +1885,19 @@
           if (tourneyWins >= 1) earned.add('champion');
           if (tourneyWins >= 2) earned.add('dynasty');
           computeTier('champion', tourneyWins, [1, 3, 5]);
-          badgeProgress['champion'] = { current: tourneyWins, target: 1 };
+          badgeProgress['champion'] = { current: tourneyWins, target: 1, unit: 'tournament wins' };
+          badgeProgress['dynasty'] = { current: tourneyWins, target: 2, unit: 'tournament wins' };
 
           if (tournamentIds.length >= 3) earned.add('veteran');
           if (tournamentIds.length >= 5) earned.add('socialite');
           computeTier('veteran', tournamentIds.length, [3, 7, 15]);
-          badgeProgress['veteran'] = { current: tournamentIds.length, target: 3 };
-          badgeProgress['socialite'] = { current: tournamentIds.length, target: 5 };
+          badgeProgress['veteran'] = { current: tournamentIds.length, target: 3, unit: 'tournaments' };
+          badgeProgress['socialite'] = { current: tournamentIds.length, target: 5, unit: 'tournaments' };
 
           if (totalMatches >= 4 && winRate >= 75) earned.add('sharpshooter');
+          badgeProgress['sharpshooter'] = { current: totalMatches >= 4 ? winRate : 0, target: 75, unit: '% win rate' };
           if (wins >= 1) earned.add('first_blood');
+          badgeProgress['first_blood'] = { current: wins, target: 1, unit: 'wins' };
 
           for (const tid of tournamentIds) {
             const playerSignup = signups.find(s => s.tournament_id === tid);
@@ -1838,8 +1929,8 @@
           if (maxStreak >= 3) earned.add('on_fire');
           if (maxStreak >= 5) earned.add('streak_master');
           computeTier('on_fire', maxStreak, [3, 5, 10]);
-          badgeProgress['on_fire'] = { current: maxStreak, target: 3 };
-          badgeProgress['streak_master'] = { current: maxStreak, target: 5 };
+          badgeProgress['on_fire'] = { current: maxStreak, target: 3, unit: 'win streak' };
+          badgeProgress['streak_master'] = { current: maxStreak, target: 5, unit: 'win streak' };
 
           try {
             const playerElo = await db.getPlayerElo(playerName);
@@ -1861,19 +1952,19 @@
           const peakForBadges = Math.max(playerCurrentElo, playerPeakElo);
           if (peakForBadges >= 1100) earned.add('rising_star');
           if (peakForBadges >= 1300) earned.add('elite');
-          badgeProgress['rising_star'] = { current: peakForBadges, target: 1100 };
-          badgeProgress['elite'] = { current: peakForBadges, target: 1300 };
+          badgeProgress['rising_star'] = { current: peakForBadges, target: 1100, unit: 'ELO' };
+          badgeProgress['elite'] = { current: peakForBadges, target: 1300, unit: 'ELO' };
 
           if (bountyWinCount >= 5) earned.add('bounty_hunter');
           if (bountyWinCount >= 15) earned.add('bounty_king');
           computeTier('bounty_hunter', bountyWinCount, [5, 15, 30]);
-          badgeProgress['bounty_hunter'] = { current: bountyWinCount, target: 5 };
-          badgeProgress['bounty_king'] = { current: bountyWinCount, target: 15 };
+          badgeProgress['bounty_hunter'] = { current: bountyWinCount, target: 5, unit: 'bounty wins' };
+          badgeProgress['bounty_king'] = { current: bountyWinCount, target: 15, unit: 'bounty wins' };
 
           if (totalSpent >= 1000) earned.add('big_spender');
-          badgeProgress['big_spender'] = { current: totalSpent, target: 1000 };
+          badgeProgress['big_spender'] = { current: totalSpent, target: 1000, unit: 'pts spent' };
           if (inventoryCount >= 5) earned.add('collector');
-          badgeProgress['collector'] = { current: inventoryCount, target: 5 };
+          badgeProgress['collector'] = { current: inventoryCount, target: 5, unit: 'items' };
 
           const storageKey = `dbl_badges_${playerName}`;
           const previousBadges = JSON.parse(localStorage.getItem(storageKey) || '[]');
@@ -1896,9 +1987,9 @@
             if (!isEarned && badgeProgress[b.id]) {
               const p = badgeProgress[b.id];
               const pct = Math.min(100, Math.round((p.current / p.target) * 100));
-              if (p.current > 0) {
-                progressHtml = `<div class="badge-progress"><div class="badge-progress-fill" style="width:${pct}%"></div></div><div class="badge-progress-label">${p.current}/${p.target}</div>`;
-              }
+              const nearComplete = pct > 75 ? ' near-complete' : '';
+              const unitLabel = p.unit ? ' ' + p.unit : '';
+              progressHtml = `<div class="badge-progress${nearComplete}"><div class="badge-progress-fill" style="width:${pct}%"></div></div><div class="badge-progress-label">${p.current} / ${p.target}${unitLabel}</div>`;
             }
 
             return `<div class="${cls}" title="${b.desc}" data-badge-id="${b.id}">
@@ -1972,7 +2063,7 @@
             const ownedTitles = await TitleManager.getPlayerTitles(playerName);
             const ownedIds = new Set(ownedTitles.map(t => t.title_id));
             const equippedId = ownedTitles.find(t => t.equipped)?.title_id || (ownedIds.has('rookie') ? 'rookie' : null);
-            const isOwnProfile = typeof AUTH !== 'undefined' && AUTH.isLoggedIn() && AUTH.getDiscordUsername() === playerName;
+            const isOwnProfile = typeof AUTH !== 'undefined' && AUTH.isLoggedIn() && AUTH.getDiscordUsername()?.toLowerCase() === playerName.toLowerCase();
 
             document.getElementById('titles-count').textContent = `${ownedIds.size}/${allTitleDefs.length}`;
 

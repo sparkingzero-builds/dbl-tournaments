@@ -666,6 +666,59 @@
       text-decoration: none;
     }
     .activity-feed-item .af-player:hover { text-decoration: underline; }
+
+    /* Realtime glow animation */
+    @keyframes af-realtime-glow {
+      0% { box-shadow: 0 0 12px rgba(0,229,255,0.5), inset 0 0 8px rgba(0,229,255,0.15); border-color: var(--cyan); }
+      100% { box-shadow: none; border-color: var(--line); }
+    }
+    .activity-feed-item.af-realtime { animation: af-realtime-glow 2s ease-out forwards, af-enter .25s ease-out; }
+
+    /* Quick action buttons */
+    .activity-feed-item { position: relative; }
+    .af-actions {
+      display: flex; gap: 4px; align-items: center;
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      opacity: 0; transition: opacity .15s;
+    }
+    .activity-feed-item:hover .af-actions { opacity: 1; }
+    .af-actions button {
+      font-size: 10px; padding: 3px 8px; border-radius: 4px;
+      border: 1px solid var(--line); background: var(--panel); color: var(--muted);
+      cursor: pointer; white-space: nowrap; font-family: 'Exo 2', sans-serif;
+      transition: border-color .15s, color .15s;
+    }
+    .af-actions button:hover { border-color: var(--cyan); color: var(--cyan); }
+
+    /* Date separators */
+    .af-date-separator {
+      display: flex; align-items: center; gap: 12px;
+      margin: 10px 0 6px; font-size: 11px; color: var(--muted);
+      font-family: 'Chakra Petch', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .af-date-separator::before, .af-date-separator::after {
+      content: ''; flex: 1; height: 1px; background: var(--line);
+    }
+
+    /* Anomaly alerts */
+    .af-anomaly {
+      border: 1px solid var(--red); border-radius: 8px;
+      padding: 10px 14px; margin-bottom: 8px;
+      background: rgba(255,71,87,0.08);
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12px; color: var(--text);
+    }
+    .af-anomaly .af-anomaly-icon { font-size: 18px; flex-shrink: 0; }
+    .af-anomaly .af-anomaly-text { flex: 1; }
+
+    /* Auto-refresh toggle */
+    .af-auto-toggle {
+      font-size: 11px; padding: 4px 10px; border-radius: 4px;
+      border: 1px solid var(--line); background: var(--panel); color: var(--muted);
+      cursor: pointer; font-family: 'Exo 2', sans-serif; transition: all .15s;
+    }
+    .af-auto-toggle.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0,229,255,0.1); }
+
     .stat-box {
       background: var(--panel, #1a1535);
       border: 1px solid var(--line);
@@ -709,6 +762,7 @@
             <a href="../compare.html">Compare</a>
             <a href="../shop.html">Shop</a>
             <a href="../tierlist.html">Tier List</a>
+            <a href="../meta.html">Character Meta</a>
             <a href="../characters.html">Characters</a>
             <a href="../season.html">Season</a>
             <a href="../betting.html">Betting</a>
@@ -1759,6 +1813,7 @@
               <option value="elo">ELO Changes</option>
             </select>
             <button class="btn btn-sm btn-secondary" onclick="loadActivityFeed()">Refresh</button>
+            <button class="af-auto-toggle" id="af-auto-toggle" onclick="toggleAutoRefresh()" title="Auto-refresh via realtime">Auto ⚡</button>
           </div>
         </div>
         <div id="activity-feed-list"><p class="text-muted">Loading activity...</p></div>
@@ -4682,7 +4737,7 @@
       await loadSeasonHistory();
     }
 
-    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
     // -- Rewards CRUD --
     let _editRewardId = null;
@@ -5514,21 +5569,15 @@ async function loadActivityFeed(append) {
       return;
     }
 
-    const html = pageEvents.map(ev => `
-      <div class="activity-feed-item" style="animation:af-enter .25s ease-out">
-        <div class="af-icon ${ev.iconCls}">${ev.icon}</div>
-        <div class="af-body">
-          <div class="af-title">${ev.title}</div>
-          ${ev.detail ? `<div class="af-detail">${ev.detail}</div>` : ''}
-        </div>
-        <div class="af-time" data-time="${ev.time}">${activityTimeAgo(ev.time)}</div>
-      </div>
-    `).join('');
+    // Build HTML with date separators
+    const html = buildFeedHtmlWithSeparators(pageEvents);
 
     if (append) {
       container.insertAdjacentHTML('beforeend', html);
     } else {
-      container.innerHTML = html;
+      // Anomaly alerts + feed
+      const anomalyHtml = detectAnomalies(events);
+      container.innerHTML = anomalyHtml + html;
     }
 
     document.getElementById('activity-load-more').style.display = _activityHasMore ? '' : 'none';
@@ -5541,12 +5590,227 @@ async function loadActivityFeed(append) {
   }
 }
 
+// --- Feature 3: Date Separators ---
+function getDateLabel(dateStr) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const eventDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diffDays = Math.floor((todayStart - eventDay) / 86400000);
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays >= 2 && diffDays <= 3) return diffDays + ' days ago';
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function renderFeedItem(ev, extraClass) {
+  const cls = extraClass ? ` ${extraClass}` : '';
+  const actions = buildQuickActions(ev);
+  return `<div class="activity-feed-item${cls}" style="animation:af-enter .25s ease-out" data-event-type="${ev.type}" data-player="${esc(ev.player || '')}">
+    <div class="af-icon ${ev.iconCls}">${ev.icon}</div>
+    <div class="af-body">
+      <div class="af-title">${ev.title}</div>
+      ${ev.detail ? `<div class="af-detail">${ev.detail}</div>` : ''}
+    </div>
+    <div class="af-time" data-time="${ev.time}">${activityTimeAgo(ev.time)}</div>
+    <div class="af-actions">${actions}</div>
+  </div>`;
+}
+
+function buildFeedHtmlWithSeparators(events) {
+  let html = '';
+  let lastLabel = null;
+  for (const ev of events) {
+    const label = getDateLabel(ev.time);
+    if (label !== lastLabel) {
+      html += `<div class="af-date-separator">${esc(label)}</div>`;
+      lastLabel = label;
+    }
+    html += renderFeedItem(ev);
+  }
+  return html;
+}
+
+// --- Feature 2: Quick Actions ---
+function buildQuickActions(ev) {
+  let btns = '';
+  const playerEsc = esc(ev.player || '');
+  const viewPlayer = `<button onclick="event.stopPropagation();switchToPlayer('${playerEsc}')">View Player</button>`;
+
+  switch (ev.type) {
+    case 'signup':
+      btns = viewPlayer;
+      break;
+    case 'match':
+      btns = `<button onclick="event.stopPropagation();switchToMatchesTab()">View Match</button>${viewPlayer}`;
+      break;
+    case 'bounty':
+      btns = `${viewPlayer}<button onclick="event.stopPropagation();alert('Coming soon')">Resolve Bounty</button>`;
+      break;
+    case 'purchase':
+      btns = `${viewPlayer}<button onclick="event.stopPropagation();alert('Coming soon')">Refund</button>`;
+      break;
+    case 'points':
+    case 'elo':
+      btns = viewPlayer;
+      break;
+  }
+  return btns;
+}
+
+function switchToMatchesTab() {
+  const tab = document.querySelector('.sidebar-item[data-tab="bracket"]');
+  if (tab) tab.click();
+}
+
+// --- Feature 4: Anomaly Detection ---
+function detectAnomalies(events) {
+  const alerts = [];
+  const now = Date.now();
+  const oneHourAgo = now - 3600000;
+  const thirtyMinAgo = now - 1800000;
+
+  // ELO spike: any ELO updated_at event where elo jumped 200+
+  // We check elo_ratings events for high values (heuristic: elo > 1200+200 baseline check not possible without previous, so check detail)
+  const eloEvents = events.filter(e => e.type === 'elo');
+  for (const e of eloEvents) {
+    const match = e.detail?.match(/Current:\s*(\d+)/);
+    const peakMatch = e.detail?.match(/Peak:\s*(\d+)/);
+    if (match && peakMatch) {
+      const current = parseInt(match[1]);
+      const peak = parseInt(peakMatch[1]);
+      if (peak - current >= 200 || current >= 1400) {
+        // Can't detect exact jump without previous value, flag high ELO as potential spike
+      }
+    }
+  }
+  // Simpler: check for very high ELO values as a proxy
+  for (const e of eloEvents) {
+    const match = e.detail?.match(/Current:\s*(\d+)/);
+    if (match && parseInt(match[1]) >= 1600) {
+      alerts.push(`⚠️ High ELO alert: <strong>${esc(e.player)}</strong> has ELO ${match[1]}`);
+    }
+  }
+
+  // Rapid purchases: same player 5+ purchases in the last hour
+  const recentPurchases = events.filter(e => e.type === 'purchase' && new Date(e.time).getTime() > oneHourAgo);
+  const purchaseCounts = {};
+  for (const p of recentPurchases) {
+    purchaseCounts[p.player] = (purchaseCounts[p.player] || 0) + 1;
+  }
+  for (const [player, count] of Object.entries(purchaseCounts)) {
+    if (count >= 5) {
+      alerts.push(`⚠️ Rapid purchases: <strong>${esc(player)}</strong> made ${count} purchases in the last hour`);
+    }
+  }
+
+  // Mass signups: 10+ in last 30 minutes
+  const recentSignups = events.filter(e => e.type === 'signup' && new Date(e.time).getTime() > thirtyMinAgo);
+  if (recentSignups.length >= 10) {
+    alerts.push(`⚠️ Mass signups: ${recentSignups.length} signups in the last 30 minutes`);
+  }
+
+  if (alerts.length === 0) return '';
+  return alerts.map(a => `<div class="af-anomaly"><div class="af-anomaly-icon">🚨</div><div class="af-anomaly-text">${a}</div></div>`).join('');
+}
+
+// --- Feature 1: Realtime Feed ---
+let _afRealtimeChannel = null;
+let _afAutoRefresh = false;
+
+function toggleAutoRefresh() {
+  _afAutoRefresh = !_afAutoRefresh;
+  const btn = document.getElementById('af-auto-toggle');
+  btn.classList.toggle('active', _afAutoRefresh);
+  if (_afAutoRefresh) {
+    startRealtimeFeed();
+  } else {
+    stopRealtimeFeed();
+  }
+}
+
+function startRealtimeFeed() {
+  if (_afRealtimeChannel) return;
+  _afRealtimeChannel = supabaseClient.channel('activity-feed')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'signups' }, payload => handleRealtimeEvent('signup', payload.new))
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'matches' }, payload => handleRealtimeEvent('match', payload.new))
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bounty_challenges' }, payload => handleRealtimeEvent('bounty', payload.new))
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'point_transactions' }, payload => handleRealtimeEvent('points', payload.new))
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'elo_ratings' }, payload => handleRealtimeEvent('elo', payload.new))
+    .subscribe();
+}
+
+function stopRealtimeFeed() {
+  if (_afRealtimeChannel) {
+    supabaseClient.removeChannel(_afRealtimeChannel);
+    _afRealtimeChannel = null;
+  }
+}
+
+function handleRealtimeEvent(type, row) {
+  if (!_afAutoRefresh) return;
+  let ev = null;
+  switch (type) {
+    case 'signup':
+      ev = { type: 'signup', icon: '📝', iconCls: 'signup',
+        title: `<span class="af-player" onclick="switchToPlayer('${esc(row.discord_username || '?')}')">${esc(row.discord_username || '?')}</span> signed up for a tournament`,
+        detail: '', player: row.discord_username || '?', time: row.created_at };
+      break;
+    case 'match':
+      if (!row.winner_id) return;
+      ev = { type: 'match', icon: '⚔️', iconCls: 'match',
+        title: `Match completed (Round ${row.round || '?'})`,
+        detail: row.score ? esc(row.score) : '', player: '', time: row.created_at };
+      break;
+    case 'bounty':
+      ev = { type: 'bounty', icon: row.status === 'pending' ? '🎯' : '💰', iconCls: 'bounty',
+        title: `<span class="af-player" onclick="switchToPlayer('${esc(row.challenger || '?')}')">${esc(row.challenger || '?')}</span> bounty ${esc(row.status || 'created')}`,
+        detail: `Z ${(row.bounty_at_stake || 0).toLocaleString()} at stake`,
+        player: row.challenger || '?', time: row.created_at };
+      break;
+    case 'points':
+      const isPurchase = row.reason === 'purchase';
+      ev = { type: isPurchase ? 'purchase' : 'points', icon: isPurchase ? '🛒' : (row.amount >= 0 ? '💫' : '💸'),
+        iconCls: isPurchase ? 'purchase' : 'points',
+        title: `<span class="af-player" onclick="switchToPlayer('${esc(row.discord_username || '?')}')">${esc(row.discord_username || '?')}</span> · ${isPurchase ? 'Purchase' : esc(row.reason || 'Points')}`,
+        detail: `${row.amount >= 0 ? '+' : ''}${row.amount} points`,
+        player: row.discord_username || '?', time: row.created_at };
+      break;
+    case 'elo':
+      ev = { type: 'elo', icon: '📊', iconCls: 'elo',
+        title: `<span class="af-player" onclick="switchToPlayer('${esc(row.discord_username || '?')}')">${esc(row.discord_username || '?')}</span> ELO updated`,
+        detail: `Current: ${row.elo}${row.peak_elo > row.elo ? ' · Peak: ' + row.peak_elo : ''}`,
+        player: row.discord_username || '?', time: row.updated_at || row.created_at };
+      break;
+  }
+  if (!ev) return;
+  const container = document.getElementById('activity-feed-list');
+  const itemHtml = renderFeedItem(ev, 'af-realtime');
+  // Insert after any anomaly alerts but before feed items
+  const firstItem = container.querySelector('.activity-feed-item');
+  const firstSep = container.querySelector('.af-date-separator');
+  const insertBefore = firstSep || firstItem;
+  if (insertBefore) {
+    // Add Today separator if not already present at the top
+    const firstSepEl = container.querySelector('.af-date-separator');
+    if (!firstSepEl || firstSepEl.textContent.trim() !== 'Today') {
+      const ref = firstSepEl || insertBefore;
+      ref.insertAdjacentHTML('beforebegin', `<div class="af-date-separator">Today</div>`);
+    }
+    // Insert the new item right after the Today separator
+    const todaySep = container.querySelector('.af-date-separator');
+    todaySep.insertAdjacentHTML('afterend', itemHtml);
+  } else {
+    container.insertAdjacentHTML('afterbegin', `<div class="af-date-separator">Today</div>` + itemHtml);
+  }
+}
+
 function switchToPlayer(name) {
   const playersTab = document.querySelector('.sidebar-item[data-tab="players"]');
   if (playersTab) {
     playersTab.click();
     setTimeout(() => {
-      const search = document.getElementById('player-search');
+      const search = document.getElementById('player-search-input');
       if (search) { search.value = name; search.dispatchEvent(new Event('input')); }
     }, 200);
   }
