@@ -62,18 +62,18 @@ const Announcements = (() => {
       '</div>';
     }).join('');
 
+    document.body.appendChild(bar);
     const main = document.querySelector('main');
     if (main) {
-      main.insertBefore(bar, main.firstChild);
-    } else {
-      document.body.appendChild(bar);
+      const barHeight = anns.length * 48 + 16;
+      main.style.paddingTop = (parseInt(getComputedStyle(main).paddingTop) + barHeight) + 'px';
     }
 
     if (!document.getElementById('ann-public-styles')) {
       const style = document.createElement('style');
       style.id = 'ann-public-styles';
       style.textContent =
-        '#announcements-bar{position:relative;z-index:50;width:100%;max-width:1200px;margin:0 auto;padding:8px 16px;margin-top:8px;}' +
+        '#announcements-bar{position:fixed;top:58px;left:0;right:0;z-index:999;width:100%;max-width:1200px;margin:0 auto;padding:8px 16px;}' +
         '.ann-public-item{display:flex;align-items:center;justify-content:space-between;background:var(--panel,#1a1535);border-radius:6px;padding:10px 14px;margin-bottom:6px;gap:12px;animation:annSlide .4s ease-out;}' +
         '.ann-public-content{display:flex;align-items:center;gap:8px;flex:1;min-width:0;font-size:14px;color:var(--text,#e8e4f8);}' +
         '.ann-public-icon{font-size:16px;flex-shrink:0;}' +
