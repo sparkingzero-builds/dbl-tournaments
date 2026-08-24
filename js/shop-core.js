@@ -131,6 +131,8 @@ const ShopCore = (function () {
     try {
       const pts = await db.getPoints(state.username);
       state.balance = pts.balance || 0;
+      const el = document.getElementById('balance-value');
+      if (el) el.textContent = state.balance.toLocaleString();
     } catch (e) {
       console.error('Failed to load balance', e);
     }
@@ -242,13 +244,31 @@ const ShopCore = (function () {
 
   function switchTab(tabName) {
     state.activeTab = tabName;
+    document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById('tab-' + tabName);
+    if (target) target.classList.add('active');
+    document.querySelectorAll('#main-tabs .shop-tab').forEach((btn, i) => {
+      const tabs = ['shop', 'titles', 'inventory', 'history'];
+      btn.classList.toggle('active', tabs[i] === tabName);
+    });
+    if (tabName === 'shop' && typeof ShopRenderer !== 'undefined') ShopRenderer.render();
+    if (tabName === 'titles' && typeof ShopRenderer !== 'undefined') ShopRenderer.renderTitles();
+    if (tabName === 'inventory' && typeof ShopRenderer !== 'undefined') ShopRenderer.renderInventory();
+    if (tabName === 'history' && typeof ShopRenderer !== 'undefined') ShopRenderer.renderTransactions();
   }
 
   // ── Login / Init ───────────────────────────────────────────────
 
-  function login(username) {
-    state.username = username;
-    sessionStorage.setItem('shop_username', username);
+  async function login(username) {
+    const name = username || (document.getElementById('username-input')?.value || '').trim();
+    if (!name) return;
+    state.username = name;
+    sessionStorage.setItem('shop_username', name);
+    document.getElementById('login-section').style.display = 'none';
+    document.getElementById('shop-content').style.display = '';
+    document.getElementById('display-username').textContent = name;
+    await Promise.all([refreshBalance(), loadItems(), loadInventory()]);
+    if (typeof ShopRenderer !== 'undefined') ShopRenderer.render();
   }
 
   function logout() {
@@ -263,7 +283,8 @@ const ShopCore = (function () {
     invalidateItemCache();
     invalidateInventoryCache();
     sessionStorage.removeItem('shop_username');
-    if (typeof AUTH !== 'undefined') AUTH.logout();
+    document.getElementById('login-section').style.display = '';
+    document.getElementById('shop-content').style.display = 'none';
   }
 
   async function init() {
@@ -280,13 +301,12 @@ const ShopCore = (function () {
       const stored = sessionStorage.getItem('shop_username');
       if (stored) state.username = stored;
     }
-    // If logged in, load initial data
     if (state.username) {
-      await Promise.all([
-        refreshBalance(),
-        loadItems(),
-        loadInventory()
-      ]);
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('shop-content').style.display = '';
+      document.getElementById('display-username').textContent = state.username;
+      await Promise.all([refreshBalance(), loadItems(), loadInventory()]);
+      if (typeof ShopRenderer !== 'undefined') ShopRenderer.render();
     }
   }
 
