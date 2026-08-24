@@ -172,6 +172,90 @@
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
+      animation: pendingPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pendingPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .ban-confirm-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(13, 10, 26, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .ban-confirm-modal {
+      background: var(--panel);
+      border: 2px solid var(--pink);
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      max-width: 360px;
+      width: 90%;
+      box-shadow: 0 0 40px rgba(255, 45, 120, 0.3), 0 0 80px rgba(255, 45, 120, 0.1);
+    }
+
+    .ban-confirm-modal img {
+      width: 100px;
+      height: 100px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 2px solid var(--pink);
+      margin-bottom: 16px;
+    }
+
+    .ban-confirm-modal h3 {
+      color: var(--pink);
+      font-family: 'Exo 2', sans-serif;
+      font-size: 20px;
+      text-shadow: 0 0 12px rgba(255, 45, 120, 0.5);
+      margin-bottom: 8px;
+    }
+
+    .ban-confirm-modal .char-name {
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .ban-confirm-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .ban-confirm-btns .btn {
+      min-width: 120px;
+    }
+
+    .extra-ban-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 45, 120, 0.12);
+      border: 1px solid var(--pink);
+      border-radius: 8px;
+      padding: 6px 12px;
+      color: var(--pink);
+      font-family: 'Exo 2', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-top: 8px;
+      text-shadow: 0 0 8px rgba(255, 45, 120, 0.4);
     }
 
     .ban-success {
@@ -289,6 +373,7 @@
     let selectedVote = null;
     let banCount = 1;
     let allChars = [];
+    let votePollingInterval = null;
 
     // Season XP helper
     let _activeSeason = null;
@@ -364,6 +449,7 @@
     }
 
     function showLoginOrVote() {
+      clearVotePolling();
       const content = document.getElementById('ban-content');
       const saved = sessionStorage.getItem('ban_username');
 
@@ -449,13 +535,14 @@
     }
 
     function showVotePage() {
+      clearVotePolling();
       const content = document.getElementById('ban-content');
       selectedVote = null;
 
       content.innerHTML = `
         <div class="ban-header">
           <h1 class="ban-title">⚔ Ban Vote</h1>
-          <p class="ban-subtitle">Pick 1 character you want banned from the tournament. The character with the most votes gets removed.</p>
+          <p class="ban-subtitle">Pick ${banCount === 1 ? '1 character' : banCount + ' characters'} you want banned from the tournament. The ${banCount === 1 ? 'character' : 'characters'} with the most votes get${banCount === 1 ? 's' : ''} removed.</p>
         </div>
         <div class="ban-phase-content">
           <div class="ban-sidebar">
@@ -463,9 +550,10 @@
             <div id="vote-slot">
               <div class="ban-slot"><span class="ban-slot__empty">Pick a character</span></div>
             </div>
-            <button class="btn btn-primary btn-lg mt-2" id="submit-vote-btn" onclick="submitVote()" disabled style="width:100%;">
+            <button class="btn btn-primary btn-lg mt-2" id="submit-vote-btn" onclick="confirmBanVote()" disabled style="width:100%;">
               Submit Vote
             </button>
+            <div id="extra-ban-notice"></div>
           </div>
           <div>
             <div class="filter-bar" id="ban-filters"></div>
@@ -474,6 +562,17 @@
         </div>`;
 
       renderVoteGrid();
+
+      // Check for extra ban perk and show badge
+      (async () => {
+        try {
+          const perks = await db.getPlayerPerks(mySignup.discord_username);
+          if (perks.extraBans > 0) {
+            const notice = document.getElementById('extra-ban-notice');
+            if (notice) notice.innerHTML = '<div class="extra-ban-badge">⚡ Double Vote Power — Your vote counts twice!</div>';
+          }
+        } catch (_) {}
+      })();
     }
 
     function renderVoteSlot() {
@@ -543,6 +642,7 @@
       if (rarity) chars = chars.filter(c => c.rarity === rarity);
 
       const grid = document.getElementById('ban-char-grid');
+      const savedScroll = grid.scrollTop;
       grid.innerHTML = '';
 
       const fallbackImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23161d2e' width='100' height='100'/%3E%3Ctext x='50' y='55' text-anchor='middle' fill='%238fa0c4' font-size='12'%3E%3F%3C/text%3E%3C/svg%3E";
@@ -576,6 +676,37 @@
           applyVoteFilters();
         });
         grid.appendChild(card);
+      });
+
+      grid.scrollTop = savedScroll;
+    }
+
+    function confirmBanVote() {
+      if (!selectedVote) return;
+      const c = allChars.find(ch => ch.id === selectedVote);
+      if (!c) return;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'ban-confirm-overlay';
+      overlay.innerHTML = `
+        <div class="ban-confirm-modal">
+          <img src="${esc(c.image)}" alt="${esc(c.name)}" onerror="this.style.display='none'" />
+          <h3>BAN THIS CHARACTER?</h3>
+          <div class="char-name">${esc(c.name)}</div>
+          <div class="ban-confirm-btns">
+            <button class="btn btn-secondary" id="ban-cancel-btn">Cancel</button>
+            <button class="btn btn-primary" id="ban-confirm-btn" style="background:var(--pink);border-color:var(--pink);">Confirm Ban</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+
+      overlay.querySelector('#ban-cancel-btn').addEventListener('click', () => overlay.remove());
+      overlay.querySelector('#ban-confirm-btn').addEventListener('click', () => {
+        overlay.remove();
+        submitVote();
+      });
+      overlay.addEventListener('click', e => {
+        if (e.target === overlay) overlay.remove();
       });
     }
 
@@ -623,7 +754,26 @@
       }
     }
 
+    function clearVotePolling() {
+      if (votePollingInterval) {
+        clearInterval(votePollingInterval);
+        votePollingInterval = null;
+      }
+    }
+
+    function startVotePolling() {
+      clearVotePolling();
+      votePollingInterval = setInterval(async () => {
+        try {
+          signups = await db.getSignups(tournament.id);
+          if (mySignup) mySignup = signups.find(s => s.id === mySignup.id);
+          showVoteSubmitted();
+        } catch (_) {}
+      }, 10000);
+    }
+
     function showVoteSubmitted() {
+      clearVotePolling();
       const content = document.getElementById('ban-content');
       const allDone = signups.every(s => s.bans && s.bans.length > 0);
       const votedCount = signups.filter(s => s.bans && s.bans.length > 0).length;
@@ -659,7 +809,9 @@
               `).join('')}
             </div>
           </div>`;
+        startVotePolling();
       } else {
+        playSound('reveal');
         html += `
           <div class="card mt-3" style="max-width:500px;margin:0 auto;border-color:var(--pink);">
             <h4 class="text-pink mb-2">Vote Results</h4>
@@ -774,6 +926,7 @@
             <a href="bracket.html" class="btn btn-secondary mt-3" style="display:block;text-align:center;">Back to Bracket</a>
           </div>`;
       } else {
+        const bannedList = [...allBanned].map(id => allChars.find(ch => String(ch.id) === String(id))).filter(Boolean);
         content.innerHTML = `
           <div class="ban-header">
             <h1 class="ban-title" style="color:var(--cyan);">✓ Team Clear</h1>
@@ -784,6 +937,16 @@
               <h4 style="color:var(--green);">✓ All Good</h4>
               <p class="text-muted mt-1">None of your characters were banned.</p>
             </div>
+            ${bannedList.length > 0 ? `
+            <div class="card mt-3" style="border-color:var(--pink);">
+              <h4 class="text-pink mb-2">Banned Characters</h4>
+              ${bannedList.map(c => `
+                <div class="ban-slot filled">
+                  <img class="ban-slot__img" src="${esc(c.image)}" alt="${esc(c.name)}" onerror="this.style.display='none'" />
+                  <span class="ban-slot__name" style="color:var(--pink);">${esc(c.name)}</span>
+                </div>
+              `).join('')}
+            </div>` : ''}
             <a href="bracket.html" class="btn btn-primary mt-3" style="display:block;text-align:center;">Go to Bracket</a>
           </div>`;
       }
@@ -792,6 +955,7 @@
     let repickTeam = [];
 
     function startRepick() {
+      clearVotePolling();
       const content = document.getElementById('ban-content');
       const allBanned = getAllBannedIds();
       const myTeam = mySignup.team || [];

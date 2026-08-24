@@ -105,6 +105,10 @@ const BracketManager = (() => {
   function renderBracket(container, matches, signups, options = {}) {
     container.innerHTML = '';
 
+    // Remove any previous ban banner/legend
+    document.getElementById('ban-phase-banner')?.remove();
+    document.getElementById('ban-legend')?.remove();
+
     if (!matches.length) {
       container.innerHTML = '<div class="empty-state"><h3>No bracket yet</h3><p>Bracket will appear once the tournament starts</p></div>';
       return;
@@ -165,7 +169,10 @@ const BracketManager = (() => {
               teamHtml = `<div class="match-team-icons">
                 ${player.team.map(c => {
                   const isBanned = bannedSet.has(String(c.id));
-                  return `<img src="${esc(c.image)}" alt="${esc(c.name)}" title="${esc(c.name)}${isBanned ? ' (BANNED)' : ''}" style="${isBanned ? 'opacity:0.2;filter:grayscale(1);border-color:var(--pink);' : ''}" onerror="this.style.display='none'" />`;
+                  if (isBanned) {
+                    return `<span class="banned-char-wrap"><img src="${esc(c.image)}" alt="${esc(c.name)}" title="${esc(c.name)} (BANNED)" class="banned-char-img" onerror="this.style.display='none'" /><svg class="banned-x-svg" viewBox="0 0 24 24"><line x1="3" y1="3" x2="21" y2="21" class="banned-x-line"/><line x1="21" y1="3" x2="3" y2="21" class="banned-x-line banned-x-line-2"/></svg></span>`;
+                  }
+                  return `<img src="${esc(c.image)}" alt="${esc(c.name)}" title="${esc(c.name)}" onerror="this.style.display='none'" />`;
                 }).join('')}
               </div>`;
             }
@@ -219,6 +226,15 @@ const BracketManager = (() => {
     }
 
     container.appendChild(bracket);
+
+    // ── Ban Legend (only if bans exist) ──
+    const bannedSet = options.bannedCharIds || new Set();
+    if (bannedSet.size > 0) {
+      const legend = document.createElement('div');
+      legend.id = 'ban-legend';
+      legend.innerHTML = `<span class="ban-legend-icon">🚫</span> <span class="ban-legend-x"></span> = Banned character`;
+      container.parentNode.insertBefore(legend, container);
+    }
 
     // Dramatic reveal animation
     const rounds = bracket.querySelectorAll('.bracket-round');

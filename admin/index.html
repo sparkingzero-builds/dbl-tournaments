@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin � DBL Tournaments</title>
+  <title>Admin — DBL Tournaments</title>
   <link rel="stylesheet" href="../css/main.css" />
   <link rel="stylesheet" href="../css/components.css" />
   <link rel="stylesheet" href="../css/roster.css" />
@@ -1366,7 +1366,7 @@
         <div class="form-group mt-3">
           <label>Characters Banned (by vote)</label>
           <input type="number" id="ban-count" min="1" max="10" value="1" style="max-width:120px;" onchange="updateBanCount()" />
-          <p class="text-muted mt-1" style="font-size:12px;">How many top-voted characters get banned. Each player votes for 1 character � the most-voted get removed.</p>
+          <p class="text-muted mt-1" style="font-size:12px;">How many top-voted characters get banned. Each player votes for 1 character — the most-voted get removed.</p>
         </div>
         <div class="form-group mt-3">
           <label>Signup Deadline</label>
@@ -1438,7 +1438,7 @@
             <button class="btn btn-sm btn-secondary" id="awards-btn-open" onclick="setAwardsVotingState('open')" style="border-color:var(--green);color:var(--green);">Open Voting</button>
             <button class="btn btn-sm btn-secondary" id="awards-btn-results" onclick="setAwardsVotingState('results')" style="border-color:var(--gold);color:var(--gold);">Reveal Results</button>
           </div>
-          <p class="text-muted mt-1" style="font-size:12px;">Current state: <strong id="awards-current-state">�</strong></p>
+          <p class="text-muted mt-1" style="font-size:12px;">Current state: <strong id="awards-current-state">—</strong></p>
         </div>
         <div class="form-group mt-2">
           <div class="toggle-switch" onclick="toggleAwardsLiveResults()">
@@ -2188,7 +2188,7 @@
         tbody.innerHTML = signups.map((s, i) => {
           const teamHtml = s.team ? s.team.map(c =>
             `<img src="${c.image}" alt="${c.name}" title="${c.name}" style="width:30px;height:30px;border-radius:4px;border:1px solid var(--border-color);" onerror="this.style.display='none'" />`
-          ).join('') : '<span class="text-muted">�</span>';
+          ).join('') : '<span class="text-muted">—</span>';
 
           const date = new Date(s.created_at).toLocaleDateString();
 
@@ -3070,11 +3070,11 @@
       const permBans = currentTournament.tournament_bans || [];
 
       if (hasVotes) {
-        desc.textContent = `Re-ban round in progress � ${votedCount}/${signups.length} voted.`;
+        desc.textContent = `Re-ban round in progress — ${votedCount}/${signups.length} voted.`;
         container.innerHTML = `
           <div class="flex gap-1 mt-1" style="flex-wrap:wrap;">
-            <button class="btn btn-sm btn-danger" onclick="endReban('round')">End Ban � This Round Only</button>
-            <button class="btn btn-sm btn-pink" onclick="endReban('tournament')" style="background:var(--pink);color:#fff;">End Ban � Whole Tournament</button>
+            <button class="btn btn-sm btn-danger" onclick="endReban('round')">End Ban — This Round Only</button>
+            <button class="btn btn-sm btn-pink" onclick="endReban('tournament')" style="background:var(--pink);color:#fff;">End Ban — Whole Tournament</button>
             <button class="btn btn-sm btn-secondary" onclick="startReban()">Reset Votes</button>
           </div>`;
       } else {
@@ -3102,6 +3102,37 @@
           </div>`;
       }
       container.innerHTML += permHtml;
+
+      // Ban history section
+      const history = currentTournament.ban_history || [];
+      if (history.length > 0) {
+        if (!allCharacters.length) { await CharacterManager.load(); allCharacters = CharacterManager.getAll(); }
+        const historyHtml = history.map(entry => {
+          const tallyRows = entry.vote_tallies.map(t => {
+            const ch = allCharacters.find(c => String(c.id) === String(t.character_id));
+            const wasBanned = entry.banned_ids.includes(String(t.character_id));
+            return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;${wasBanned ? 'color:var(--red);font-weight:700;' : ''}">
+              <span style="font-size:12px;">${ch ? esc(ch.name) : t.character_id}</span>
+              <span style="margin-left:auto;font-size:11px;">${t.votes} vote${t.votes !== 1 ? 's' : ''}${wasBanned ? ' — BANNED' : ''}</span>
+            </div>`;
+          }).join('');
+          const ts = new Date(entry.timestamp).toLocaleString();
+          const modeLabel = entry.mode === 'tournament' ? 'Tournament-wide' : 'Round only';
+          return `<div style="background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-sm);padding:8px 10px;margin-top:6px;">
+            <div style="font-size:11px;color:var(--muted);">Round ${entry.round} — ${ts} — ${modeLabel} — ${entry.total_voters}/${entry.total_players} voted</div>
+            ${tallyRows}
+          </div>`;
+        }).join('');
+
+        container.innerHTML += `
+          <div class="mt-2" style="border-top:1px solid var(--line);padding-top:10px;">
+            <div style="cursor:pointer;display:flex;align-items:center;gap:6px;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none';this.querySelector('span').textContent=this.nextElementSibling.style.display==='none'?'\\u25B6':'\\u25BC';">
+              <span style="font-size:10px;">&#x25B6;</span>
+              <label style="font-size:12px;color:var(--gold);cursor:pointer;">Ban History (${history.length} round${history.length !== 1 ? 's' : ''})</label>
+            </div>
+            <div style="display:none;">${historyHtml}</div>
+          </div>`;
+      }
     }
 
     async function startReban() {
@@ -3113,14 +3144,28 @@
 
       try {
         const tSignups = await db.getSignups(currentTournament.id);
+        const needClearing = tSignups.filter(s => s.bans && s.bans.length > 0);
         let cleared = 0;
-        for (const s of tSignups) {
-          if (s.bans && s.bans.length > 0) {
+        const failed = [];
+        for (const s of needClearing) {
+          try {
             await db.updateSignupBans(s.id, [], s.team);
             cleared++;
+          } catch (err) {
+            failed.push(s.player_name || s.id);
           }
         }
+        if (failed.length > 0) {
+          NotificationSystem.show(`Failed to clear votes for ${failed.length} player(s): ${failed.join(', ')}. Ban round NOT started — fix and retry.`, 'error');
+          return;
+        }
         signups = await db.getSignups(currentTournament.id);
+        // Verify all votes actually cleared
+        const stillHaveVotes = signups.filter(s => s.bans && s.bans.length > 0);
+        if (stillHaveVotes.length > 0) {
+          NotificationSystem.show(`${stillHaveVotes.length} player(s) still have votes after clearing. Ban round NOT started — please retry.`, 'error');
+          return;
+        }
         NotificationSystem.show(`Cleared ${cleared} ban votes. New ban round is open.`, 'success');
         loadBanResults();
         updateRebanButtons();
@@ -3164,6 +3209,21 @@
             }
           }
         }
+
+        // Save ban round history
+        const banHistory = currentTournament.ban_history || [];
+        const historyEntry = {
+          round: banHistory.length + 1,
+          timestamp: new Date().toISOString(),
+          mode: mode,
+          vote_tallies: sorted.map(([id, count]) => ({ character_id: id, votes: count })),
+          banned_ids: [...bannedIds],
+          total_voters: tSignups.filter(s => s.bans && s.bans.length > 0).length,
+          total_players: tSignups.length
+        };
+        banHistory.push(historyEntry);
+        await db.updateTournament(currentTournament.id, { ban_history: banHistory });
+        currentTournament.ban_history = banHistory;
 
         signups = await db.getSignups(currentTournament.id);
         const modeLabel = mode === 'tournament' ? 'Tournament-wide ban applied.' : 'Round ban applied.';
@@ -3216,7 +3276,7 @@
              onclick="addManualBan('${esc(c.id)}')">
           <img src="${esc(c.image)}" style="width:28px;height:28px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />
           <span style="font-size:13px;font-weight:600;">${esc(c.name)}</span>
-          <span style="font-size:10px;color:var(--muted);margin-left:auto;">${esc(c.element)} � ${esc(c.rarity)}</span>
+          <span style="font-size:10px;color:var(--muted);margin-left:auto;">${esc(c.element)} — ${esc(c.rarity)}</span>
         </div>
       `).join('');
     }
@@ -3459,32 +3519,32 @@
         { type: 'flair_border', name: 'Royal Border', description: 'A regal golden border effect', cost: 750, metadata: { effect: 'flair-royal' }, active: true },
         { type: 'flair_border', name: 'Shadow Border', description: 'A dark shadowy border effect', cost: 600, metadata: { effect: 'flair-shadow' }, active: true },
         // -- DB Titles --
-        { type: 'flair_title', name: 'Earthling', description: '"Earthling" � everyone starts somewhere', cost: 100, metadata: { title: 'Earthling' }, active: true },
-        { type: 'flair_title', name: 'Saiyan Warrior', description: '"Saiyan Warrior" � born to fight', cost: 300, metadata: { title: 'Saiyan Warrior' }, active: true },
-        { type: 'flair_title', name: 'Super Saiyan', description: '"Super Saiyan" � the legend awakens', cost: 500, metadata: { title: 'Super Saiyan' }, active: true },
-        { type: 'flair_title', name: 'Z Fighter', description: '"Z Fighter" � protector of Earth', cost: 400, metadata: { title: 'Z Fighter' }, active: true },
-        { type: 'flair_title', name: 'Namekian Elder', description: '"Namekian Elder" � wisdom of the ages', cost: 350, metadata: { title: 'Namekian Elder' }, active: true },
-        { type: 'flair_title', name: 'Elite Saiyan', description: '"Elite Saiyan" � Vegeta would approve', cost: 700, metadata: { title: 'Elite Saiyan' }, active: true },
-        { type: 'flair_title', name: 'Frieza Force Commander', description: '"Frieza Force Commander" � fear and respect', cost: 800, metadata: { title: 'Frieza Force Commander' }, active: true },
-        { type: 'flair_title', name: 'God of Destruction', description: '"God of Destruction" � hakai!', cost: 2000, metadata: { title: 'God of Destruction' }, active: true },
-        { type: 'flair_title', name: 'Ultra Instinct', description: '"Ultra Instinct" � beyond the gods', cost: 3000, metadata: { title: 'Ultra Instinct' }, active: true },
-        { type: 'flair_title', name: 'Grand Zeno', description: '"Grand Zeno" � ruler of all', cost: 5000, metadata: { title: 'Grand Zeno' }, active: true },
+        { type: 'flair_title', name: 'Earthling', description: '"Earthling" — everyone starts somewhere', cost: 100, metadata: { title: 'Earthling' }, active: true },
+        { type: 'flair_title', name: 'Saiyan Warrior', description: '"Saiyan Warrior" — born to fight', cost: 300, metadata: { title: 'Saiyan Warrior' }, active: true },
+        { type: 'flair_title', name: 'Super Saiyan', description: '"Super Saiyan" — the legend awakens', cost: 500, metadata: { title: 'Super Saiyan' }, active: true },
+        { type: 'flair_title', name: 'Z Fighter', description: '"Z Fighter" — protector of Earth', cost: 400, metadata: { title: 'Z Fighter' }, active: true },
+        { type: 'flair_title', name: 'Namekian Elder', description: '"Namekian Elder" — wisdom of the ages', cost: 350, metadata: { title: 'Namekian Elder' }, active: true },
+        { type: 'flair_title', name: 'Elite Saiyan', description: '"Elite Saiyan" — Vegeta would approve', cost: 700, metadata: { title: 'Elite Saiyan' }, active: true },
+        { type: 'flair_title', name: 'Frieza Force Commander', description: '"Frieza Force Commander" — fear and respect', cost: 800, metadata: { title: 'Frieza Force Commander' }, active: true },
+        { type: 'flair_title', name: 'God of Destruction', description: '"God of Destruction" — hakai!', cost: 2000, metadata: { title: 'God of Destruction' }, active: true },
+        { type: 'flair_title', name: 'Ultra Instinct', description: '"Ultra Instinct" — beyond the gods', cost: 3000, metadata: { title: 'Ultra Instinct' }, active: true },
+        { type: 'flair_title', name: 'Grand Zeno', description: '"Grand Zeno" — ruler of all', cost: 5000, metadata: { title: 'Grand Zeno' }, active: true },
         // -- Aura Effects --
         { type: 'aura', name: 'Blue Ki Aura', description: 'A pulsing blue ki glow around your name on the bracket', cost: 600, metadata: { effect: 'aura-blue' }, active: true },
-        { type: 'aura', name: 'Red Ki Aura', description: 'A fiery red ki glow � Kaio-Ken style', cost: 600, metadata: { effect: 'aura-red' }, active: true },
+        { type: 'aura', name: 'Red Ki Aura', description: 'A fiery red ki glow — Kaio-Ken style', cost: 600, metadata: { effect: 'aura-red' }, active: true },
         { type: 'aura', name: 'Golden SSJ Aura', description: 'Super Saiyan golden glow on the bracket', cost: 1000, metadata: { effect: 'aura-gold' }, active: true },
-        { type: 'aura', name: 'Ultra Instinct Aura', description: 'Silver shimmer � mastered UI energy', cost: 2500, metadata: { effect: 'aura-ui' }, active: true },
+        { type: 'aura', name: 'Ultra Instinct Aura', description: 'Silver shimmer — mastered UI energy', cost: 2500, metadata: { effect: 'aura-ui' }, active: true },
         // -- Victory Quotes --
         { type: 'victory_quote', name: 'Fusion Above All', description: 'Show "Fusion Above All" after winning on the bracket', cost: 400, metadata: { quote: 'Fusion Above All' }, active: true },
         { type: 'victory_quote', name: 'Final Flash!', description: 'Show "Final Flash!" after winning on the bracket', cost: 400, metadata: { quote: 'Final Flash!' }, active: true },
-        { type: 'victory_quote', name: 'You\'re Nothing', description: 'Show "You\'re nothing but a weakling" � Vegeta energy', cost: 500, metadata: { quote: "You're nothing but a weakling." }, active: true },
+        { type: 'victory_quote', name: 'You\'re Nothing', description: 'Show "You\'re nothing but a weakling" — Vegeta energy', cost: 500, metadata: { quote: "You're nothing but a weakling." }, active: true },
         { type: 'victory_quote', name: 'It\'s Over 9000', description: 'Show "It\'s over 9000!!!" after a win', cost: 500, metadata: { quote: "It's over 9000!!!" }, active: true },
         { type: 'victory_quote', name: 'This Isn\'t Even My Final Form', description: 'The classic Frieza taunt', cost: 750, metadata: { quote: "This isn't even my final form." }, active: true },
-        { type: 'victory_quote', name: 'Owari Da', description: 'Show "Owari Da." � Beerus finisher', cost: 800, metadata: { quote: 'Owari Da.' }, active: true },
+        { type: 'victory_quote', name: 'Owari Da', description: 'Show "Owari Da." — Beerus finisher', cost: 800, metadata: { quote: 'Owari Da.' }, active: true },
         // -- Social Rewards --
         { type: 'kings_commentary', name: 'King Kai\'s Commentary', description: 'Your trash talk messages get a golden crown highlight', cost: 1200, metadata: {}, active: true },
         { type: 'golden_name', name: 'Golden Name', description: 'Your name appears in gold on the shoutbox', cost: 800, metadata: {}, active: true },
-        { type: 'hype_bomb', name: 'Hype Bomb', description: 'Your hype clicks count as 10x � Spirit Bomb energy!', cost: 1500, metadata: { multiplier: 10 }, active: true },
+        { type: 'hype_bomb', name: 'Hype Bomb', description: 'Your hype clicks count as 10x — Spirit Bomb energy!', cost: 1500, metadata: { multiplier: 10 }, active: true },
         // -- Profile Backgrounds --
         { type: 'profile_bg', name: 'Tournament Arena', description: 'World Tournament stage background on your profile', cost: 900, metadata: { bg: 'tournament-arena' }, active: true },
         { type: 'profile_bg', name: 'World of Void', description: 'The empty void from Tournament of Power', cost: 1200, metadata: { bg: 'world-of-void' }, active: true },
@@ -3493,7 +3553,7 @@
         // -- Badges --
         { type: 'badge', name: 'First Blood Badge', description: 'Badge for winning your first match ever', cost: 200, metadata: { badge: 'first-blood', icon: '\u{1F31F}' }, active: true },
         { type: 'badge', name: 'Dragon Ball Collector', description: 'Collect all 7 Dragon Balls badge', cost: 3500, metadata: { badge: 'dragonball-collector', icon: '\u{1F31F}' }, active: true },
-        { type: 'badge', name: 'Tournament of Power Survivor', description: 'Season 1 exclusive � you were there', cost: 0, metadata: { badge: 'top-survivor', icon: '?', exclusive: true }, active: true },
+        { type: 'badge', name: 'Tournament of Power Survivor', description: 'Season 1 exclusive — you were there', cost: 0, metadata: { badge: 'top-survivor', icon: '?', exclusive: true }, active: true },
       ];
 
       try {
@@ -3672,8 +3732,8 @@
         { tier: 16, name: 'First Blood Badge',      type: 'badge',            track: 'free',    premium_cost: 0,    description: 'First blood!',                        metadata: { badge: 'first-blood', icon: '\u{1F31F}' } },
         { tier: 17, name: 'Shadow Border',          type: 'flair_border',     track: 'premium', premium_cost: 500,  description: 'Dark shadow profile border',          metadata: { effect: 'flair-shadow' } },
         { tier: 18, name: 'God of Destruction',     type: 'flair_title',      track: 'premium', premium_cost: 700,  description: 'Hakai!',                              metadata: { title: 'God of Destruction' } },
-        { tier: 19, name: 'Ultra Instinct Aura',    type: 'aura',             track: 'premium', premium_cost: 800,  description: 'Silver shimmer � mastered UI',        metadata: { effect: 'aura-ui' } },
-        { tier: 20, name: 'ToP Survivor Badge',     type: 'badge',            track: 'free',    premium_cost: 0,    description: 'Season 1 exclusive � you survived',   metadata: { badge: 'top-survivor', icon: '?', exclusive: true } },
+        { tier: 19, name: 'Ultra Instinct Aura',    type: 'aura',             track: 'premium', premium_cost: 800,  description: 'Silver shimmer — mastered UI',        metadata: { effect: 'aura-ui' } },
+        { tier: 20, name: 'ToP Survivor Badge',     type: 'badge',            track: 'free',    premium_cost: 0,    description: 'Season 1 exclusive — you survived',   metadata: { badge: 'top-survivor', icon: '?', exclusive: true } },
       ];
 
       try {
@@ -4036,7 +4096,7 @@
         tbody.innerHTML = signups.map((s, i) => {
           const teamHtml = s.team ? s.team.map(c =>
             `<img src="${c.image}" alt="${c.name}" title="${c.name}" style="width:30px;height:30px;border-radius:4px;border:1px solid var(--border-color);" onerror="this.style.display='none'" />`
-          ).join('') : '<span class="text-muted">�</span>';
+          ).join('') : '<span class="text-muted">—</span>';
           const date = new Date(s.created_at).toLocaleDateString();
           const safeUser = s.discord_username.replace(/'/g,"\\'");
           return `
@@ -4154,9 +4214,9 @@
                 <td><strong>${c.challenger}</strong></td>
                 <td><strong>${c.target}</strong></td>
                 <td><span style="color:${statusColor[c.status] || 'var(--muted)'};font-weight:700;text-transform:uppercase;font-size:11px;">${c.status}</span></td>
-                <td>${c.winner || '�'}</td>
+                <td>${c.winner || '—'}</td>
                 <td style="color:var(--gold);font-family:'Exo 2',sans-serif;font-weight:700;">${c.currency_reward || 0}</td>
-                <td style="font-family:'Exo 2',sans-serif;font-weight:700;">${c.elo_change ? (c.elo_change > 0 ? '+' : '') + c.elo_change : '�'}</td>
+                <td style="font-family:'Exo 2',sans-serif;font-weight:700;">${c.elo_change ? (c.elo_change > 0 ? '+' : '') + c.elo_change : '—'}</td>
                 <td>${c.status === 'pending' || c.status === 'accepted' ? `<button class="action-btn" style="border-color:var(--red);color:var(--red);" onclick="cancelChallenge('${c.id}')">Cancel</button>` : ''}</td>
               </tr>`;
           }).join('');
@@ -4203,7 +4263,7 @@
           .update({ status: 'completed', winner: winner })
           .eq('id', id);
         if (error) throw error;
-        AdminLog.log('bounty', `Resolved dispute #${id.slice(0,8)} � winner: ${winner}`);
+        AdminLog.log('bounty', `Resolved dispute #${id.slice(0,8)} — winner: ${winner}`);
         NotificationSystem.show(`Dispute resolved. Winner: ${winner}`, 'success');
         loadBountyTab();
       } catch (e) {
@@ -4359,7 +4419,7 @@
       // Build bar chart from playerCounts (already computed in loadStats)
       const container = document.getElementById('stat-activity-chart');
       // Re-derive from signups count in stats overview
-      // Use the same data from loadStats � recollect
+      // Use the same data from loadStats — recollect
       // We'll grab from the "Most Active" section data
       const rows = document.querySelectorAll('#stat-most-active .player-row');
       if (!rows.length) {
@@ -5310,7 +5370,7 @@ async function loadWorldTournamentStatus() {
     const { data: wt } = await supabaseClient.from('tournaments')
       .select('*').eq('type', 'world_tournament').neq('status', 'completed').maybeSingle();
     if (wt) {
-      statusEl.innerHTML = 'Active: <strong style="color:var(--gold)">' + wt.name + '</strong> � Status: ' + wt.status;
+      statusEl.innerHTML = 'Active: <strong style="color:var(--gold)">' + wt.name + '</strong> — Status: ' + wt.status;
       startBtn.style.display = 'none';
       endBtn.style.display = '';
     } else {
