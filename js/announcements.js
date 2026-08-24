@@ -62,14 +62,18 @@ const Announcements = (() => {
       '</div>';
     }).join('');
 
-    const main = document.querySelector('main') || document.body;
-    main.parentNode.insertBefore(bar, main);
+    const main = document.querySelector('main');
+    if (main) {
+      main.insertBefore(bar, main.firstChild);
+    } else {
+      document.body.appendChild(bar);
+    }
 
     if (!document.getElementById('ann-public-styles')) {
       const style = document.createElement('style');
       style.id = 'ann-public-styles';
       style.textContent =
-        '#announcements-bar{position:relative;z-index:50;width:100%;max-width:1200px;margin:0 auto;padding:8px 16px;}' +
+        '#announcements-bar{position:relative;z-index:50;width:100%;max-width:1200px;margin:0 auto;padding:8px 16px;margin-top:8px;}' +
         '.ann-public-item{display:flex;align-items:center;justify-content:space-between;background:var(--panel,#1a1535);border-radius:6px;padding:10px 14px;margin-bottom:6px;gap:12px;animation:annSlide .4s ease-out;}' +
         '.ann-public-content{display:flex;align-items:center;gap:8px;flex:1;min-width:0;font-size:14px;color:var(--text,#e8e4f8);}' +
         '.ann-public-icon{font-size:16px;flex-shrink:0;}' +
