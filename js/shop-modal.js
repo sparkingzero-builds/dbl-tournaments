@@ -48,7 +48,6 @@ const ShopModal = (function () {
         '</div>' +
       '</div>';
 
-    if (!document.body) { _el = null; return; }
     document.body.appendChild(_el);
 
     // inject styles
