@@ -178,12 +178,14 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      if (typeof initParticles === 'function') initParticles();
-      if (typeof ShopSearch !== 'undefined') {
-        ShopSearch.init();
-        ShopSearch.onFilterChange(() => ShopRenderer.render());
-      }
-      if (typeof ShopCore !== 'undefined') ShopCore.init();
+      try { if (typeof initParticles === 'function') initParticles(); } catch(_){}
+      try {
+        if (typeof ShopSearch !== 'undefined') {
+          ShopSearch.init();
+          ShopSearch.onFilterChange(() => ShopRenderer.render());
+        }
+      } catch(_){}
+      try { if (typeof ShopCore !== 'undefined') ShopCore.init(); } catch(_){}
     });
   </script>
   <script src="js/notification-inbox.js"></script>
