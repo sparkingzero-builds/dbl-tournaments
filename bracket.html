@@ -16,6 +16,21 @@
     .ban-phase-banner.active-phase a{color:var(--cyan);text-decoration:underline;}
     .ban-phase-banner.info-phase{background:rgba(0,229,255,.06);border:1px solid var(--line);color:var(--muted);font-size:.82rem;font-weight:600;}
     .ban-phase-banner.info-phase a{color:var(--cyan);}
+    .ban-phase-banner.banned-showcase{max-width:700px;padding:16px 24px;background:linear-gradient(135deg,rgba(255,71,87,.08),rgba(255,45,120,.05));border:1px solid rgba(255,71,87,.3);animation:none;}
+    .ban-showcase-label{font-family:'Chakra Petch',sans-serif;font-size:13px;font-weight:700;letter-spacing:4px;color:var(--red);margin-bottom:12px;text-shadow:0 0 10px rgba(255,71,87,.4);}
+    .ban-showcase-chars{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;}
+    .ban-showcase-card{display:flex;flex-direction:column;align-items:center;gap:6px;animation:banCardSlam .5s cubic-bezier(.17,.67,.35,1.4) both;}
+    .ban-showcase-card:nth-child(2){animation-delay:.15s;}
+    .ban-showcase-card:nth-child(3){animation-delay:.3s;}
+    .ban-showcase-img-wrap{position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;border:2px solid var(--red);box-shadow:0 0 12px rgba(255,71,87,.3);}
+    .ban-showcase-img-wrap img{width:100%;height:100%;object-fit:cover;filter:grayscale(.6) brightness(.7);}
+    .ban-showcase-x{position:absolute;inset:0;width:100%;height:100%;}
+    .ban-showcase-x line{stroke:var(--red);stroke-width:3;stroke-linecap:round;stroke-dasharray:28;stroke-dashoffset:28;animation:drawBanX .4s ease-out .3s forwards;}
+    .ban-showcase-x line:nth-child(2){animation-delay:.5s;}
+    .ban-showcase-name{font-family:'Exo 2',sans-serif;font-size:11px;font-weight:600;color:var(--red);max-width:80px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .ban-showcase-unknown{width:64px;height:64px;border-radius:8px;background:var(--panel);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--muted);}
+    @keyframes banCardSlam{0%{opacity:0;transform:scale(1.8) translateY(-20px);}100%{opacity:1;transform:scale(1) translateY(0);}}
+    @keyframes drawBanX{to{stroke-dashoffset:0;}}
     @keyframes ban-banner-pulse{0%,100%{box-shadow:0 0 8px rgba(255,45,120,.15);}50%{box-shadow:0 0 20px rgba(255,45,120,.35);}}
 
     /* ── Ban Legend ── */
@@ -414,15 +429,38 @@
         } else if (tournament.status === 'active') {
           const signupsForBans = await db.getSignups(tournament.id);
           const banVotes = {};
-          signupsForBans.forEach(s => { if (s.bans && s.bans.length) s.bans.forEach(id => { banVotes[id] = (banVotes[id] || 0) + 1; }); });
+          const charMap = {};
+          signupsForBans.forEach(s => {
+            if (s.bans && s.bans.length) s.bans.forEach(id => { banVotes[id] = (banVotes[id] || 0) + 1; });
+            if (s.team) s.team.forEach(c => {
+              const cObj = typeof c === 'object' ? c : { id: c, name: c };
+              if (cObj.id) charMap[String(cObj.id)] = cObj;
+            });
+          });
           const banCount = tournament.ban_count || 1;
           const sortedBans = Object.entries(banVotes).sort((a, b) => b[1] - a[1]);
-          const totalBanned = Math.min(sortedBans.length, banCount) + (tournament.tournament_bans || []).length;
-          if (totalBanned > 0) {
+          const voteBannedIds = sortedBans.slice(0, banCount).map(([id]) => String(id));
+          const tourneyBannedIds = (tournament.tournament_bans || []).map(String);
+          const allBannedIds = [...voteBannedIds, ...tourneyBannedIds];
+          if (allBannedIds.length > 0) {
+            const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
             const info = document.createElement('div');
             info.id = 'ban-phase-banner';
-            info.className = 'ban-phase-banner info-phase';
-            info.innerHTML = `${totalBanned} character${totalBanned > 1 ? 's' : ''} banned this round &mdash; <a href="banpick.html">see details</a>`;
+            info.className = 'ban-phase-banner banned-showcase';
+            info.innerHTML = '<div class="ban-showcase-label">BANNED</div>' +
+              '<div class="ban-showcase-chars">' +
+              allBannedIds.map(id => {
+                const ch = charMap[id];
+                if (!ch) return `<div class="ban-showcase-card"><div class="ban-showcase-unknown">?</div><div class="ban-showcase-name">Unknown</div></div>`;
+                return `<div class="ban-showcase-card">` +
+                  `<div class="ban-showcase-img-wrap">` +
+                    `<img src="${esc(ch.image)}" alt="${esc(ch.name)}" onerror="this.style.display='none'" />` +
+                    `<svg class="ban-showcase-x" viewBox="0 0 24 24"><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/></svg>` +
+                  `</div>` +
+                  `<div class="ban-showcase-name">${esc(ch.name)}</div>` +
+                `</div>`;
+              }).join('') +
+              '</div>';
             container.parentNode.insertBefore(info, container);
           }
         }
