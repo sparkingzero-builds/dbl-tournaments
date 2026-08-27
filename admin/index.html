@@ -1351,6 +1351,13 @@
             <span>Show player teams publicly</span>
           </div>
         </div>
+        <div class="form-group mt-2">
+          <div class="toggle-switch" onclick="toggleRepick()">
+            <div class="toggle-track" id="repick-toggle"></div>
+            <span>Allow team re-picks</span>
+          </div>
+          <p class="text-muted mt-1" style="font-size:12px;">Let players change their team before the tournament starts (e.g. when new characters drop).</p>
+        </div>
         <div class="form-group mt-3">
           <label>Tournament Theme</label>
           <div class="flex gap-1 mt-1" id="theme-selector"></div>
@@ -2492,6 +2499,28 @@
         toggle.classList.add('active');
       } else {
         toggle.classList.remove('active');
+      }
+      const repickToggle = document.getElementById('repick-toggle');
+      if (repickToggle) {
+        if (currentTournament.allow_repick) {
+          repickToggle.classList.add('active');
+        } else {
+          repickToggle.classList.remove('active');
+        }
+      }
+    }
+
+    async function toggleRepick() {
+      if (!currentTournament) { NotificationSystem.show('No active tournament', 'error'); return; }
+      const toggle = document.getElementById('repick-toggle');
+      const newVal = !toggle.classList.contains('active');
+      try {
+        await db.updateTournament(currentTournament.id, { allow_repick: newVal });
+        currentTournament.allow_repick = newVal;
+        toggle.classList.toggle('active');
+        NotificationSystem.show(newVal ? 'Team re-picks enabled' : 'Team re-picks disabled', 'info');
+      } catch (e) {
+        NotificationSystem.show('Error updating re-pick setting', 'error');
       }
     }
 

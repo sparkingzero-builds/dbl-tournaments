@@ -401,6 +401,22 @@
                 </button>
               </div>
             </div>
+            ${currentTournament.allow_repick ? `
+            <div class="card card-glow mt-3" style="border:1px solid var(--gold);">
+              <h3 class="mb-2" style="color:var(--gold);">Change Team</h3>
+              <p class="text-muted" style="font-size:12px;margin-bottom:10px;">Already signed up? Pick a new team below.</p>
+              <div class="flex flex-col gap-2">
+                <label style="font-weight:600;font-size:0.9rem;">Your Discord Username</label>
+                <input type="text" id="repick-username" placeholder="e.g. Player#1234" />
+                <label style="font-weight:600;font-size:0.9rem;margin-top:8px;">New Team</label>
+                <div class="team-display" id="repick-team-slots"></div>
+                <button class="btn btn-secondary" onclick="openRepickModal()">Pick Characters</button>
+                <button class="btn btn-primary mt-2" id="repick-btn" onclick="submitRepick()" disabled>
+                  Update Team
+                </button>
+              </div>
+            </div>
+            ` : ''}
           </div>
         </div>
         ` : `
@@ -411,6 +427,22 @@
             <a href="bracket.html" class="btn btn-primary btn-lg">View Bracket</a>
           </div>
         </div>
+        ${currentTournament.allow_repick ? `
+        <div class="card card-glow mt-3" style="border:1px solid var(--gold);max-width:500px;margin-left:auto;margin-right:auto;">
+          <h3 class="mb-2" style="color:var(--gold);">Change Team</h3>
+          <p class="text-muted" style="font-size:12px;margin-bottom:10px;">Team re-picks are open. Pick a new team below.</p>
+          <div class="flex flex-col gap-2">
+            <label style="font-weight:600;font-size:0.9rem;">Your Discord Username</label>
+            <input type="text" id="repick-username" placeholder="e.g. Player#1234" />
+            <label style="font-weight:600;font-size:0.9rem;margin-top:8px;">New Team</label>
+            <div class="team-display" id="repick-team-slots"></div>
+            <button class="btn btn-secondary" onclick="openRepickModal()">Pick Characters</button>
+            <button class="btn btn-primary mt-2" id="repick-btn" onclick="submitRepick()" disabled>
+              Update Team
+            </button>
+          </div>
+        </div>
+        ` : ''}
         <div class="power-rankings" id="power-rankings-section">
           <div class="card card-glow">
             <h3><span class="icon-fire">&#128293;</span> Power Rankings â€” Who Will Win?</h3>
@@ -427,6 +459,9 @@
 
       if (!isSignup) {
         initPowerRankings();
+        if (currentTournament.allow_repick) {
+          initRepickSlots();
+        }
       }
 
       if (isSignup) {
@@ -437,6 +472,10 @@
           CharacterManager.renderTeamSlots(document.getElementById('signup-team-slots'));
           updateSignupBtn();
         });
+
+        if (currentTournament.allow_repick) {
+          initRepickSlots();
+        }
 
         // Countdown timer
         if (currentTournament.signup_deadline) {
@@ -562,9 +601,107 @@
       }
     }
 
+    // --- Re-pick flow ---
+    let repickTeam = [];
+
+    function initRepickSlots() {
+      const el = document.getElementById('repick-team-slots');
+      if (!el) return;
+      el.innerHTML = [0,1,2].map(i => {
+        const c = repickTeam[i];
+        return c
+          ? `<div class="team-slot filled" onclick="removeRepickChar(${i})"><img src="${c.image}" alt="${c.name}" /><span class="slot-remove">×</span></div>`
+          : `<div class="team-slot empty"><span>?</span></div>`;
+      }).join('');
+    }
+
+    function removeRepickChar(i) {
+      repickTeam.splice(i, 1);
+      initRepickSlots();
+      updateRepickBtn();
+    }
+
+    function updateRepickBtn() {
+      const btn = document.getElementById('repick-btn');
+      if (!btn) return;
+      const name = document.getElementById('repick-username')?.value.trim();
+      btn.disabled = !name || repickTeam.length !== 3;
+    }
+
+    function openRepickModal() {
+      const modal = document.getElementById('char-modal');
+      modal.classList.add('open');
+      modal.dataset.mode = 'repick';
+      CharacterManager.clearTeam();
+      repickTeam.forEach(c => CharacterManager.toggleSelect(c));
+      CharacterManager.renderFilterBar(
+        document.getElementById('modal-filters'),
+        document.getElementById('modal-char-grid'),
+        { selectable: true, onSelect: onRepickSelect }
+      );
+      CharacterManager.renderTeamSlots(document.getElementById('modal-team-slots'));
+      updateConfirmBtn();
+    }
+
+    function onRepickSelect(char, team) {
+      CharacterManager.renderTeamSlots(document.getElementById('modal-team-slots'));
+      updateConfirmBtn();
+    }
+
+    const origConfirmTeam = confirmTeam;
+    confirmTeam = function() {
+      const modal = document.getElementById('char-modal');
+      if (modal.dataset.mode === 'repick') {
+        repickTeam = CharacterManager.getTeam().map(c => ({ id: c.id, name: c.name, element: c.element, rarity: c.rarity, image: c.image }));
+        modal.dataset.mode = '';
+        closeCharModal();
+        initRepickSlots();
+        updateRepickBtn();
+      } else {
+        origConfirmTeam();
+      }
+    };
+
+    async function submitRepick() {
+      const name = document.getElementById('repick-username').value.trim();
+      if (!name || repickTeam.length !== 3) return;
+
+      const btn = document.getElementById('repick-btn');
+      btn.disabled = true;
+      btn.textContent = 'Updating...';
+
+      try {
+        const existing = signups.find(s => s.discord_username.toLowerCase() === name.toLowerCase());
+        if (!existing) {
+          NotificationSystem.show('Username not found. Are you signed up?', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Update Team';
+          return;
+        }
+
+        const { error } = await supabaseClient
+          .from('signups')
+          .update({ team: repickTeam })
+          .eq('id', existing.id);
+
+        if (error) throw error;
+
+        NotificationSystem.show('Team updated!', 'success');
+        repickTeam = [];
+        document.getElementById('repick-username').value = '';
+        signups = await db.getSignups(currentTournament.id);
+        renderTournamentPage();
+      } catch (e) {
+        NotificationSystem.show('Error updating team: ' + (e.message || 'Try again'), 'error');
+        btn.disabled = false;
+        btn.textContent = 'Update Team';
+      }
+    }
+
     // Listen for input changes
     document.addEventListener('input', (e) => {
       if (e.target.id === 'discord-input') updateSignupBtn();
+      if (e.target.id === 'repick-username') updateRepickBtn();
     });
 
     // Power Rankings
