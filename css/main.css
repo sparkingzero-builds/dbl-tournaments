@@ -702,8 +702,13 @@ textarea:focus {
     border-bottom: 1px solid var(--line);
     max-height: calc(100vh - 58px);
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     z-index: 1001;
   }
+  .navbar-links::-webkit-scrollbar { width: 6px; }
+  .navbar-links::-webkit-scrollbar-track { background: transparent; }
+  .navbar-links::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
 
   .navbar-links a {
     padding: 14px 16px;
