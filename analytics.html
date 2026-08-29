@@ -306,9 +306,11 @@
           (signups || []).forEach(s => {
             if (!s.bans || !Array.isArray(s.bans) || s.bans.length === 0) return;
             s.bans.forEach(b => {
-              if (!b || !b.id) return;
-              const key = String(b.id);
-              if (!banCounts[key]) banCounts[key] = { id: b.id, name: b.name, image: b.image, count: 0 };
+              if (!b) return;
+              const key = typeof b === 'object' ? String(b.id) : String(b);
+              if (!key) return;
+              const char = charMap[key];
+              if (!banCounts[key]) banCounts[key] = { id: key, name: char?.name || 'Unknown', image: char?.image || '', count: 0 };
               banCounts[key].count++;
               totalBanEvents++;
               hadBans = true;
