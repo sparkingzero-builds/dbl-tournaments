@@ -1,16 +1,16 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Season Pass — DBL Tournaments</title>
+  <title>Season Pass â€” DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/bracket.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/themes.css" />
   <style>
-    /* ── Hero ── */
+    /* â”€â”€ Hero â”€â”€ */
     .season-hero {
       text-align: center; padding: 40px 0 10px; position: relative;
     }
@@ -43,7 +43,7 @@
       color: var(--cyan); letter-spacing: 1px;
     }
 
-    /* ── Login ── */
+    /* â”€â”€ Login â”€â”€ */
     .season-login-gate {
       max-width: 420px; margin: 30px auto; text-align: center;
       padding: 40px 30px; background: var(--panel); border: 1px solid var(--line);
@@ -57,7 +57,7 @@
     }
     .login-row input:focus { border-color: var(--cyan); }
 
-    /* ── Countdown ── */
+    /* â”€â”€ Countdown â”€â”€ */
     .countdown-bar {
       display: flex; align-items: center; justify-content: center; gap: 20px;
       margin: 20px auto; padding: 16px 28px; max-width: 500px;
@@ -79,7 +79,7 @@
     .countdown-bar.urgent { border-color: var(--red); }
     .countdown-bar.urgent .cd-val { color: var(--red); }
 
-    /* ── Premium bar ── */
+    /* â”€â”€ Premium bar â”€â”€ */
     .premium-bar {
       max-width: 900px; margin: 0 auto 20px;
       padding: 16px 24px; border-radius: 12px;
@@ -106,7 +106,7 @@
       color: var(--gold); cursor: pointer;
     }
 
-    /* ── XP Section ── */
+    /* â”€â”€ XP Section â”€â”€ */
     .xp-section {
       max-width: 900px; margin: 0 auto 28px;
       padding: 24px 28px; background: var(--panel);
@@ -147,7 +147,7 @@
     .xp-markers .tier-current { color: var(--cyan); font-weight: 700; }
     .xp-markers .tier-next { color: var(--gold); }
 
-    /* ── Reward Track ── */
+    /* â”€â”€ Reward Track â”€â”€ */
     .track-section { margin: 0 auto 30px; max-width: 100%; }
     .track-section h2 {
       font-family: 'Chakra Petch', sans-serif; font-size: 20px; font-weight: 700;
@@ -205,7 +205,7 @@
       border-color: var(--green); background: rgba(46,213,115,0.1);
     }
     .track-node.claimed .node-circle::after {
-      content: '✓'; position: absolute; top: -6px; right: -6px;
+      content: 'âœ“'; position: absolute; top: -6px; right: -6px;
       width: 18px; height: 18px; border-radius: 50%;
       background: var(--green); color: #0d0a1a;
       font-size: 11px; font-weight: 900;
@@ -252,7 +252,7 @@
     .node-btn:hover { transform: scale(1.08); filter: brightness(1.15); }
     .node-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
 
-    /* ── Stats Grid ── */
+    /* â”€â”€ Stats Grid â”€â”€ */
     .stats-grid {
       max-width: 900px; margin: 0 auto 28px;
       display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;
@@ -273,7 +273,7 @@
       font-size: 10px; color: var(--muted); font-style: italic; margin-top: 4px;
     }
 
-    /* ── Challenges ── */
+    /* â”€â”€ Challenges â”€â”€ */
     .challenges-card {
       max-width: 900px; margin: 0 auto 30px;
       padding: 24px; background: var(--panel);
@@ -317,7 +317,7 @@
     .ch-item.done .ch-bar-fill { background: var(--green); }
     .ch-prog { font-size: 10px; color: var(--muted); text-align: right; margin-top: 4px; }
 
-    /* ── Leaderboard ── */
+    /* â”€â”€ Leaderboard â”€â”€ */
     .lb-card {
       max-width: 700px; margin: 0 auto 30px;
       padding: 24px; background: var(--panel);
@@ -349,7 +349,7 @@
       padding: 1px 6px; border-radius: 999px; margin-left: 6px;
     }
 
-    /* ── Archive ── */
+    /* â”€â”€ Archive â”€â”€ */
     .archive-section {
       max-width: 900px; margin: 30px auto;
     }
@@ -383,7 +383,7 @@
     .pod-name a:hover { color: var(--cyan); }
     .pod-xp { color: var(--muted); font-size: 11px; }
 
-    /* ── No season ── */
+    /* â”€â”€ No season â”€â”€ */
     .no-season-state {
       text-align: center; padding: 80px 20px; color: var(--muted);
     }
@@ -406,37 +406,45 @@
       <ul class="navbar-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="tournament.html">Tournament</a></li>
-        <li><a href="characters.html">Characters</a></li>
-        <li><a href="rankings.html">Rankings</a></li>
         <li><a href="bracket.html">Bracket</a></li>
-        <li><a href="bounty.html">Bounty</a></li>
         <li><a href="shop.html">Shop</a></li>
         <li><a href="profile.html">Profile</a></li>
         <li class="nav-dropdown">
-          <a href="#" class="active">More &#9662;</a>
+          <a href="#">More ▾</a>
           <div class="nav-dropdown-menu">
+            <div class="dropdown-label">Tournament</div>
+            <a href="banpick.html">Ban Phase</a>
+            <a href="draft.html">Draft</a>
+            <a href="fight-night.html">Fight Night</a>
+            <a href="matches.html">Matches</a>
+            <a href="history.html">History</a>
+            <div class="dropdown-divider"></div>
             <div class="dropdown-label">Stats</div>
+            <a href="rankings.html">Rankings</a>
             <a href="tierlist.html">Tier List</a>
-            <a href="meta.html">Character Meta</a>
-            <a href="analytics.html">Ban Analytics</a>
             <a href="power-rankings.html">Power Rankings</a>
+            <a href="analytics.html">Ban Analytics</a>
+            <a href="meta.html">Character Meta</a>
+            <a href="compare.html">Compare</a>
             <a href="hall-of-fame.html">Hall of Fame</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Characters</div>
+            <a href="characters.html">Characters</a>
+            <a href="recap.html">Recap</a>
+            <a href="mvp-vote.html">MVP Vote</a>
             <div class="dropdown-divider"></div>
             <div class="dropdown-label">Social</div>
             <a href="clans.html">Clans</a>
-            <a href="feed.html">Live Feed</a>
             <a href="rivalries.html">Rivalries</a>
-            <a href="betting.html">Betting</a>
-            <a href="casino.html">Casino</a>
+            <a href="feed.html">Live Feed</a>
+            <a href="bounty.html">Bounty</a>
             <div class="dropdown-divider"></div>
-            <div class="dropdown-label">More</div>
+            <div class="dropdown-label">Economy</div>
+            <a href="casino.html">Casino</a>
+            <a href="betting.html">Betting</a>
             <a href="auction.html">Auction</a>
             <a href="season.html">Season</a>
-            <a href="matches.html">Matches</a>
-            <a href="history.html">History</a>
             <a href="world-tournament.html">World Tournament</a>
-            <a href="compare.html">Compare</a>
-            <a href="mvp-vote.html">MVP Vote</a>
           </div>
         </li>
       </ul>
@@ -553,9 +561,9 @@
     function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
     const REWARD_ICONS = {
-      points: '🪙', flair_border: '🖼️', flair_title: '✨', badge: '🏅',
-      profile_bg: '🎨', aura: '🔥', victory_quote: '💬',
-      kings_commentary: '👑', golden_name: '⭐', hype_bomb: '💥'
+      points: 'ðŸª™', flair_border: 'ðŸ–¼ï¸', flair_title: 'âœ¨', badge: 'ðŸ…',
+      profile_bg: 'ðŸŽ¨', aura: 'ðŸ”¥', victory_quote: 'ðŸ’¬',
+      kings_commentary: 'ðŸ‘‘', golden_name: 'â­', hype_bomb: 'ðŸ’¥'
     };
 
     function getRewardTooltip(reward) {
@@ -569,7 +577,7 @@
         case 'points': return `${meta.amount || 0} points`;
         case 'profile_bg': return 'Profile background';
         case 'kings_commentary': return 'Gold trash talk';
-        case 'badge': return `${meta.icon || '🏅'} Badge`;
+        case 'badge': return `${meta.icon || 'ðŸ…'} Badge`;
         default: return reward.description || '';
       }
     }
@@ -630,7 +638,7 @@
       bar.style.display = 'flex';
       const wrap = document.getElementById('premium-btn-wrap');
       if (isPremium()) {
-        wrap.innerHTML = '<span class="premium-active" onclick="togglePremium()">👑 PREMIUM ACTIVE <span style="font-size:10px;color:var(--muted);font-weight:400;">(click to deactivate)</span></span>';
+        wrap.innerHTML = '<span class="premium-active" onclick="togglePremium()">ðŸ‘‘ PREMIUM ACTIVE <span style="font-size:10px;color:var(--muted);font-weight:400;">(click to deactivate)</span></span>';
       } else {
         wrap.innerHTML = '<button class="btn-premium" onclick="togglePremium()">Upgrade to Premium</button>';
       }
@@ -691,7 +699,7 @@
         const isCurrent = t === tier + 1;
         const isClaimed = claimed.includes(t);
         const reward = seasonRewards.find(r => r.tier === t);
-        const icon = reward ? (REWARD_ICONS[reward.type] || '🏆') : '🔒';
+        const icon = reward ? (REWARD_ICONS[reward.type] || 'ðŸ†') : 'ðŸ”’';
         const name = reward ? esc(reward.name) : 'Locked';
         const tooltip = reward ? esc(getRewardTooltip(reward)) : '';
         const trackType = reward?.track || 'free';
@@ -843,7 +851,7 @@
         return `
           <div class="ch-item${completed ? ' done' : ''}">
             <div class="ch-top">
-              <span class="ch-name">${completed ? '✅ ' : ''}${esc(ch.name)}</span>
+              <span class="ch-name">${completed ? 'âœ… ' : ''}${esc(ch.name)}</span>
               <span class="ch-xp">+${ch.xp_reward} XP</span>
             </div>
             <div class="ch-desc">${esc(ch.description)}</div>
@@ -863,7 +871,7 @@
           tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);text-align:center;padding:20px;">No players yet</td></tr>';
           return;
         }
-        const medals = ['👑', '🥈', '🥉'];
+        const medals = ['ðŸ‘‘', 'ðŸ¥ˆ', 'ðŸ¥‰'];
         tbody.innerHTML = data.map((p, i) => {
           const t = getCurrentTier(p.xp);
           const badge = p.is_premium ? '<span class="lb-premium-badge">PRO</span>' : '';
@@ -885,7 +893,7 @@
           .eq('status', 'completed').order('ended_at', { ascending: false }).limit(10);
         if (!data?.length) return;
         section.style.display = 'block';
-        const medals = ['🥇', '🥈', '🥉'];
+        const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
         let html = '';
         for (const s of data) {
           const start = new Date(s.started_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
@@ -901,7 +909,7 @@
             <div class="arc-card">
               <div class="arc-header">
                 <span class="arc-name">${esc(s.name || 'Season')}</span>
-                <span class="arc-dates">${start} — ${end}</span>
+                <span class="arc-dates">${start} â€” ${end}</span>
               </div>
               <div class="arc-stats">
                 <div class="arc-stat"><div class="arc-stat-val">${total}</div><div class="arc-stat-label">Players</div></div>
@@ -936,7 +944,7 @@
       const tag = document.getElementById('season-tag');
       tag.style.display = 'inline-block';
       const days = Math.floor((Date.now() - new Date(activeSeason.started_at).getTime()) / (1000*60*60*24));
-      tag.textContent = `${activeSeason.name} • Day ${days + 1} • ${activeSeason.total_tiers || 20} Tiers`;
+      tag.textContent = `${activeSeason.name} â€¢ Day ${days + 1} â€¢ ${activeSeason.total_tiers || 20} Tiers`;
 
       try { seasonRewards = await db.getSeasonRewards(activeSeason.id); } catch (e) { console.error('Failed to load rewards:', e); seasonRewards = []; }
 
@@ -970,7 +978,7 @@
       try { myProgress = await db.getSeasonProgress(activeSeason.id, u); } catch (e) { console.error(e); }
 
       if (!myProgress) {
-        NotificationSystem.show('No season progress found — starting fresh!', 'info');
+        NotificationSystem.show('No season progress found â€” starting fresh!', 'info');
       }
 
       document.getElementById('season-login').style.display = 'none';

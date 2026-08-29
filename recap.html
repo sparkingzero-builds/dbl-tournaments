@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tournament Recap — DBL Tournaments</title>
+  <title>Tournament Recap â€” DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
@@ -11,7 +11,7 @@
   <style>
     .recap-container { max-width: 1100px; margin: 0 auto; padding: 100px 20px 60px; }
 
-    /* ── Tournament Selector ── */
+    /* â”€â”€ Tournament Selector â”€â”€ */
     .tournament-selector {
       display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
       margin-bottom: 32px;
@@ -27,7 +27,7 @@
     }
     .tournament-selector select:focus { outline: none; border-color: var(--cyan); }
 
-    /* ── Recap Header ── */
+    /* â”€â”€ Recap Header â”€â”€ */
     .recap-header {
       text-align: center; margin-bottom: 40px; padding: 40px 20px;
       background: linear-gradient(135deg, rgba(255,215,64,0.06), rgba(0,229,255,0.04));
@@ -51,7 +51,7 @@
     }
     .recap-meta span { display: flex; align-items: center; gap: 6px; }
 
-    /* ── Champion Spotlight ── */
+    /* â”€â”€ Champion Spotlight â”€â”€ */
     .champion-spotlight {
       background: var(--panel); border: 2px solid var(--gold);
       border-radius: 16px; padding: 32px; margin-bottom: 32px;
@@ -102,7 +102,7 @@
     }
     .path-arrow { color: var(--muted); font-size: 14px; }
 
-    /* ── Highlight Cards ── */
+    /* â”€â”€ Highlight Cards â”€â”€ */
     .highlights-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 16px; margin-bottom: 32px;
@@ -130,7 +130,7 @@
       font-family: 'Chakra Petch', sans-serif; font-size: 13px; color: var(--muted);
     }
 
-    /* ── Quick Stats ── */
+    /* â”€â”€ Quick Stats â”€â”€ */
     .quick-stats {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       gap: 12px; margin-bottom: 32px;
@@ -147,7 +147,7 @@
       text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px;
     }
 
-    /* ── Results Table ── */
+    /* â”€â”€ Results Table â”€â”€ */
     .results-section { margin-bottom: 40px; }
     .round-group { margin-bottom: 24px; }
     .round-label {
@@ -171,7 +171,7 @@
     .winner-cell { color: var(--green); font-weight: 700; }
     .loser-cell { color: var(--muted); }
 
-    /* ── Empty State ── */
+    /* â”€â”€ Empty State â”€â”€ */
     .empty-state {
       text-align: center; padding: 80px 20px; color: var(--muted);
       font-family: 'Chakra Petch', sans-serif;
@@ -180,7 +180,7 @@
       font-family: 'Exo 2', sans-serif; font-size: 24px; color: var(--text); margin-bottom: 8px;
     }
 
-    /* ── Section Heading ── */
+    /* â”€â”€ Section Heading â”€â”€ */
     .section-title {
       font-family: 'Exo 2', sans-serif; font-size: 16px; font-weight: 800;
       text-transform: uppercase; letter-spacing: 0.15em; color: var(--text);
@@ -203,38 +203,45 @@
       <ul class="navbar-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="tournament.html">Tournament</a></li>
-        <li><a href="characters.html">Characters</a></li>
-        <li><a href="rankings.html">Rankings</a></li>
         <li><a href="bracket.html">Bracket</a></li>
-        <li><a href="bounty.html">Bounty</a></li>
         <li><a href="shop.html">Shop</a></li>
         <li><a href="profile.html">Profile</a></li>
         <li class="nav-dropdown">
-          <a href="#">More &#9662;</a>
+          <a href="#">More ▾</a>
           <div class="nav-dropdown-menu">
+            <div class="dropdown-label">Tournament</div>
+            <a href="banpick.html">Ban Phase</a>
+            <a href="draft.html">Draft</a>
+            <a href="fight-night.html">Fight Night</a>
+            <a href="matches.html">Matches</a>
+            <a href="history.html">History</a>
+            <div class="dropdown-divider"></div>
             <div class="dropdown-label">Stats</div>
+            <a href="rankings.html">Rankings</a>
             <a href="tierlist.html">Tier List</a>
-            <a href="meta.html">Character Meta</a>
-            <a href="analytics.html">Ban Analytics</a>
             <a href="power-rankings.html">Power Rankings</a>
+            <a href="analytics.html">Ban Analytics</a>
+            <a href="meta.html">Character Meta</a>
+            <a href="compare.html">Compare</a>
             <a href="hall-of-fame.html">Hall of Fame</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Characters</div>
+            <a href="characters.html">Characters</a>
+            <a href="recap.html">Recap</a>
+            <a href="mvp-vote.html">MVP Vote</a>
             <div class="dropdown-divider"></div>
             <div class="dropdown-label">Social</div>
             <a href="clans.html">Clans</a>
-            <a href="feed.html">Live Feed</a>
             <a href="rivalries.html">Rivalries</a>
-            <a href="betting.html">Betting</a>
-            <a href="casino.html">Casino</a>
+            <a href="feed.html">Live Feed</a>
+            <a href="bounty.html">Bounty</a>
             <div class="dropdown-divider"></div>
-            <div class="dropdown-label">More</div>
+            <div class="dropdown-label">Economy</div>
+            <a href="casino.html">Casino</a>
+            <a href="betting.html">Betting</a>
             <a href="auction.html">Auction</a>
             <a href="season.html">Season</a>
-            <a href="matches.html">Matches</a>
-            <a href="history.html">History</a>
             <a href="world-tournament.html">World Tournament</a>
-            <a href="compare.html">Compare</a>
-            <a href="mvp-vote.html">MVP Vote</a>
-            <a href="recap.html" class="active">Recap</a>
           </div>
         </li>
       </ul>
@@ -490,7 +497,7 @@
         // Build HTML
         let html = '';
 
-        // ── Recap Header
+        // â”€â”€ Recap Header
         html += `<div class="recap-header">
           <div class="recap-title">${esc(tournament.name)}</div>
           <div class="recap-meta">
@@ -500,7 +507,7 @@
           </div>
         </div>`;
 
-        // ── Champion Spotlight
+        // â”€â”€ Champion Spotlight
         if (champion) {
           const champElo = eloMap[champion.discord_username] || 1000;
           html += `<div class="champion-spotlight">
@@ -532,7 +539,7 @@
           </div>`;
         }
 
-        // ── Bracket Highlights
+        // â”€â”€ Bracket Highlights
         html += '<div class="section-title">Bracket Highlights</div>';
         html += '<div class="highlights-grid">';
 
@@ -598,7 +605,7 @@
 
         html += '</div>';
 
-        // ── Quick Stats
+        // â”€â”€ Quick Stats
         html += '<div class="section-title">Quick Stats</div>';
         html += `<div class="quick-stats">
           <div class="quick-stat">
@@ -619,7 +626,7 @@
           </div>
         </div>`;
 
-        // ── Full Results Table grouped by round
+        // â”€â”€ Full Results Table grouped by round
         html += '<div class="section-title">Full Results</div>';
         html += '<div class="results-section">';
 

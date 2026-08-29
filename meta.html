@@ -1,16 +1,16 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Character Meta — DBL Tournaments</title>
+  <title>Character Meta â€” DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/bracket.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/themes.css" />
   <style>
-    /* ── Page hero ── */
+    /* â”€â”€ Page hero â”€â”€ */
     .meta-hero {
       text-align: center;
       padding: 100px 0 40px;
@@ -34,7 +34,7 @@
       text-transform: uppercase;
     }
 
-    /* ── Section titles ── */
+    /* â”€â”€ Section titles â”€â”€ */
     .section-title {
       font-family: 'Exo 2', sans-serif;
       font-size: 24px;
@@ -54,7 +54,7 @@
       background: linear-gradient(90deg, var(--cyan), transparent);
     }
 
-    /* ── Top 10 grid ── */
+    /* â”€â”€ Top 10 grid â”€â”€ */
     .top-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -120,7 +120,7 @@
     .top-card .trend-down { color: var(--red); }
     .top-card .trend-stable { color: var(--muted); }
 
-    /* ── Full table ── */
+    /* â”€â”€ Full table â”€â”€ */
     .meta-table-wrap {
       overflow-x: auto;
       margin-bottom: 40px;
@@ -183,7 +183,7 @@
       color: #fff;
     }
 
-    /* ── Tier breakdown ── */
+    /* â”€â”€ Tier breakdown â”€â”€ */
     .tier-section { margin-bottom: 40px; }
     .tier-group {
       margin-bottom: 24px;
@@ -249,7 +249,7 @@
       font-weight: 700;
     }
 
-    /* ── Loading ── */
+    /* â”€â”€ Loading â”€â”€ */
     .meta-loading {
       text-align: center;
       padding: 60px 0;
@@ -267,7 +267,7 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Empty state ── */
+    /* â”€â”€ Empty state â”€â”€ */
     .meta-empty {
       text-align: center;
       padding: 60px 20px;
@@ -276,7 +276,7 @@
       font-size: 14px;
     }
 
-    /* ── Stats bar ── */
+    /* â”€â”€ Stats bar â”€â”€ */
     .stats-bar {
       display: flex;
       gap: 16px;
@@ -316,37 +316,45 @@
       <ul class="navbar-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="tournament.html">Tournament</a></li>
-        <li><a href="characters.html">Characters</a></li>
-        <li><a href="rankings.html">Rankings</a></li>
         <li><a href="bracket.html">Bracket</a></li>
-        <li><a href="bounty.html">Bounty</a></li>
         <li><a href="shop.html">Shop</a></li>
         <li><a href="profile.html">Profile</a></li>
         <li class="nav-dropdown">
-          <a href="#">More &#9662;</a>
+          <a href="#">More ▾</a>
           <div class="nav-dropdown-menu">
+            <div class="dropdown-label">Tournament</div>
+            <a href="banpick.html">Ban Phase</a>
+            <a href="draft.html">Draft</a>
+            <a href="fight-night.html">Fight Night</a>
+            <a href="matches.html">Matches</a>
+            <a href="history.html">History</a>
+            <div class="dropdown-divider"></div>
             <div class="dropdown-label">Stats</div>
+            <a href="rankings.html">Rankings</a>
             <a href="tierlist.html">Tier List</a>
-            <a href="meta.html" class="active">Character Meta</a>
-            <a href="analytics.html">Ban Analytics</a>
             <a href="power-rankings.html">Power Rankings</a>
+            <a href="analytics.html">Ban Analytics</a>
+            <a href="meta.html">Character Meta</a>
+            <a href="compare.html">Compare</a>
             <a href="hall-of-fame.html">Hall of Fame</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Characters</div>
+            <a href="characters.html">Characters</a>
+            <a href="recap.html">Recap</a>
+            <a href="mvp-vote.html">MVP Vote</a>
             <div class="dropdown-divider"></div>
             <div class="dropdown-label">Social</div>
             <a href="clans.html">Clans</a>
-            <a href="feed.html">Live Feed</a>
             <a href="rivalries.html">Rivalries</a>
-            <a href="betting.html">Betting</a>
-            <a href="casino.html">Casino</a>
+            <a href="feed.html">Live Feed</a>
+            <a href="bounty.html">Bounty</a>
             <div class="dropdown-divider"></div>
-            <div class="dropdown-label">More</div>
+            <div class="dropdown-label">Economy</div>
+            <a href="casino.html">Casino</a>
+            <a href="betting.html">Betting</a>
             <a href="auction.html">Auction</a>
             <a href="season.html">Season</a>
-            <a href="matches.html">Matches</a>
-            <a href="history.html">History</a>
             <a href="world-tournament.html">World Tournament</a>
-            <a href="compare.html">Compare</a>
-            <a href="mvp-vote.html">MVP Vote</a>
           </div>
         </li>
       </ul>
@@ -429,7 +437,7 @@
     let metaData = [];        // processed array of { id, name, image, element, picks, wins, losses, winRate, avgElo, trend }
     let currentSort = { col: 'picks', dir: 'desc' };
 
-    // ── Load character data from JSON ──
+    // â”€â”€ Load character data from JSON â”€â”€
     async function loadCharacterLookup() {
       try {
         const res = await fetch('data/characters.json');
@@ -440,7 +448,7 @@
       }
     }
 
-    // ── Query Supabase for pick/win data ──
+    // â”€â”€ Query Supabase for pick/win data â”€â”€
     async function loadMetaFromDB() {
       // Get all signups with team data
       const { data: signups, error: sErr } = await supabaseClient
@@ -537,7 +545,7 @@
       };
     }
 
-    // ── Generate mock data if no real data ──
+    // â”€â”€ Generate mock data if no real data â”€â”€
     function generateMockData() {
       const mockNames = [
         { id: 738, name: 'SSGSS Kaioken Goku' },
@@ -586,7 +594,7 @@
       });
     }
 
-    // ── Render top 10 grid ──
+    // â”€â”€ Render top 10 grid â”€â”€
     function renderTopGrid(data) {
       const grid = document.getElementById('top-grid');
       const top10 = data.slice(0, 10);
@@ -608,7 +616,7 @@
       grid.style.display = '';
     }
 
-    // ── Render full table ──
+    // â”€â”€ Render full table â”€â”€
     function renderTable(data) {
       const tbody = document.getElementById('meta-tbody');
       tbody.innerHTML = data.map((c, i) => `
@@ -633,7 +641,7 @@
       document.getElementById('table-wrap').style.display = '';
     }
 
-    // ── Sorting ──
+    // â”€â”€ Sorting â”€â”€
     function sortData(col) {
       if (currentSort.col === col) {
         currentSort.dir = currentSort.dir === 'desc' ? 'asc' : 'desc';
@@ -668,7 +676,7 @@
       renderTable(metaData);
     }
 
-    // ── Render tiers ──
+    // â”€â”€ Render tiers â”€â”€
     function renderTiers(data) {
       const tiers = [
         { key: 'S', label: 'S Tier', desc: '60%+ Win Rate', cls: 'tier-s', min: 60 },
@@ -714,7 +722,7 @@
       section.style.display = '';
     }
 
-    // ── Update summary stats ──
+    // â”€â”€ Update summary stats â”€â”€
     function updateStats(info) {
       document.getElementById('stat-total-picks').textContent = info.totalPicks;
       document.getElementById('stat-unique-chars').textContent = info.uniqueChars;
@@ -723,7 +731,7 @@
       document.getElementById('stat-top-char').style.fontSize = info.topChar.length > 15 ? '16px' : '';
     }
 
-    // ── Init ──
+    // â”€â”€ Init â”€â”€
     document.addEventListener('DOMContentLoaded', async () => {
       // Table sort click handlers
       document.querySelectorAll('.meta-table th[data-sort]').forEach(th => {
@@ -744,7 +752,7 @@
         metaData = dbResult.chars;
         updateStats(dbResult);
       } else {
-        // Use mock data — mark it clearly
+        // Use mock data â€” mark it clearly
         useMock = true;
         metaData = generateMockData();
         const totalPicks = metaData.reduce((s, c) => s + c.picks, 0);
@@ -765,7 +773,7 @@
         const hero = document.querySelector('.meta-hero');
         const notice = document.createElement('div');
         notice.style.cssText = 'margin-top:12px;padding:10px 20px;background:rgba(255,215,64,0.1);border:1px solid var(--gold);border-radius:6px;font-size:12px;color:var(--gold);font-family:"Chakra Petch",sans-serif;display:inline-block;';
-        notice.textContent = 'Showing sample data — real stats will appear once tournaments have team picks recorded.';
+        notice.textContent = 'Showing sample data â€” real stats will appear once tournaments have team picks recorded.';
         hero.appendChild(notice);
       }
     });
