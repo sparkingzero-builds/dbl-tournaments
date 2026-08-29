@@ -458,10 +458,20 @@
       .top-players-grid { grid-template-columns: 1fr; max-width: 320px; margin: 0 auto; }
       .quick-links-grid { grid-template-columns: repeat(2, 1fr); }
       .hero-sub { letter-spacing: 0.1em; }
+      .stat-label { font-size: 11px; }
+      .stat-number { font-size: clamp(20px, 5vw, 28px); }
+      .section-heading { font-size: 12px; }
+      .home-section { padding: 0 12px 28px; }
+      .tournament-card { padding: 16px; }
+      .activity-item { padding: 10px; min-height: 44px; }
+      .top-player-card { padding: 12px; }
+      .top-player-card a { min-height: 44px; display: flex; align-items: center; }
+      .quick-link { padding: 16px 12px; min-height: 60px; }
     }
 
     @media (max-width: 380px) {
       .quick-links-grid { grid-template-columns: 1fr; }
+      .stats-bar { gap: 8px; }
     }
   </style>
 </head>
