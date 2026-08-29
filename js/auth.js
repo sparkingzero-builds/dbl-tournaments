@@ -101,8 +101,15 @@ const AUTH = {
   },
 
   updateUI() {
-    const container = document.getElementById('auth-nav');
-    if (!container) return;
+    let container = document.getElementById('auth-nav');
+    if (!container) {
+      const nav = document.querySelector('.navbar .container');
+      if (!nav) return;
+      container = document.createElement('div');
+      container.id = 'auth-nav';
+      container.style.cssText = 'margin-left:auto;display:flex;align-items:center;';
+      nav.appendChild(container);
+    }
 
     if (this.isLoggedIn()) {
       const name = this.getDiscordUsername() || 'User';
