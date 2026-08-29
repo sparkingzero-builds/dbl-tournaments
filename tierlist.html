@@ -353,11 +353,18 @@
     </div>
 
     <div class="tier-tabs">
-      <button class="tier-tab active" data-tab="vote" onclick="switchTab('vote')">Vote</button>
-      <button class="tier-tab" data-tab="results" onclick="switchTab('results')">Results</button>
+      <button class="tier-tab active" data-tab="winrates" onclick="switchTab('winrates')">Win Rates</button>
+      <button class="tier-tab" data-tab="vote" onclick="switchTab('vote')">Community Vote</button>
+      <button class="tier-tab" data-tab="results" onclick="switchTab('results')">Vote Results</button>
     </div>
 
-    <div id="vote-view">
+    <div id="winrates-view">
+      <div id="winrates-content">
+        <div class="loader"><div class="loader-spinner"></div></div>
+      </div>
+    </div>
+
+    <div id="vote-view" style="display:none;">
       <div class="tier-board" id="tier-board"></div>
       <div class="submit-row">
         <button class="btn btn-primary btn-charge" id="submit-votes-btn" onclick="submitVotes()">Submit Votes</button>
@@ -439,6 +446,7 @@
       buildTierBoard();
       renderAllTiers();
       renderUnranked();
+      loadWinRates();
     }
 
     function buildTierBoard() {
@@ -593,12 +601,120 @@
     // Tabs
     function switchTab(tab) {
       document.querySelectorAll('.tier-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+      document.getElementById('winrates-view').style.display = tab === 'winrates' ? '' : 'none';
       document.getElementById('vote-view').style.display = tab === 'vote' ? '' : 'none';
       document.getElementById('results-view').style.display = tab === 'results' ? '' : 'none';
       if (tab === 'results') loadResults();
+      if (tab === 'winrates') loadWinRates();
     }
 
-    // Results
+    // Win Rates (match-based)
+    let winRatesLoaded = false;
+
+    async function loadWinRates() {
+      if (winRatesLoaded) return;
+      const container = document.getElementById('winrates-content');
+      container.innerHTML = '<div class="loader"><div class="loader-spinner"></div></div>';
+
+      try {
+        // Get all tournaments
+        const { data: tournaments } = await supabaseClient.from('tournaments').select('id');
+        if (!tournaments?.length) { container.innerHTML = '<p class="text-muted" style="text-align:center;padding:40px;">No tournaments found.</p>'; return; }
+
+        // Get all completed matches with signups
+        const allMatches = [];
+        for (const t of tournaments) {
+          const { data } = await supabaseClient
+            .from('matches')
+            .select('winner_id, player1_id, player2_id, player1:signups!matches_player1_id_fkey(team), player2:signups!matches_player2_id_fkey(team)')
+            .eq('tournament_id', t.id)
+            .not('winner_id', 'is', null);
+          if (data) allMatches.push(...data);
+        }
+
+        if (!allMatches.length) { container.innerHTML = '<p class="text-muted" style="text-align:center;padding:40px;">No completed matches yet.</p>'; return; }
+
+        // Calculate character win/loss
+        const stats = {};
+        allMatches.forEach(m => {
+          const winnerTeam = m.winner_id === m.player1_id ? m.player1?.team : m.player2?.team;
+          const loserTeam = m.winner_id === m.player1_id ? m.player2?.team : m.player1?.team;
+
+          if (winnerTeam) winnerTeam.forEach(c => {
+            const id = String(c.id);
+            if (!stats[id]) stats[id] = { wins: 0, losses: 0 };
+            stats[id].wins++;
+          });
+          if (loserTeam) loserTeam.forEach(c => {
+            const id = String(c.id);
+            if (!stats[id]) stats[id] = { wins: 0, losses: 0 };
+            stats[id].losses++;
+          });
+        });
+
+        // Build ranked list
+        const ranked = Object.entries(stats).map(([id, s]) => {
+          const total = s.wins + s.losses;
+          const winRate = total > 0 ? (s.wins / total * 100) : 0;
+          const char = allChars.find(c => String(c.id) === id);
+          return { id, char, wins: s.wins, losses: s.losses, total, winRate };
+        }).filter(r => r.char).sort((a, b) => b.winRate - a.winRate || b.total - a.total);
+
+        // Assign tiers
+        const tierDefs = [
+          { key: 'S', label: 'S TIER', color: '#ff4d6a', desc: '65%+ WIN RATE', min: 65 },
+          { key: 'A', label: 'A TIER', color: '#ff8c42', desc: '55-64% WIN RATE', min: 55 },
+          { key: 'B', label: 'B TIER', color: '#ffd740', desc: '45-54% WIN RATE', min: 45 },
+          { key: 'C', label: 'C TIER', color: '#4caf50', desc: '35-44% WIN RATE', min: 35 },
+          { key: 'D', label: 'D TIER', color: '#00e5ff', desc: 'BELOW 35% WIN RATE', min: 0 }
+        ];
+
+        let html = `<p class="text-muted" style="text-align:center;margin-bottom:20px;font-size:13px;">Based on ${allMatches.length} completed matches across ${tournaments.length} tournament${tournaments.length !== 1 ? 's' : ''}. Characters are tiered by the win rate of players who use them.</p>`;
+
+        tierDefs.forEach(tier => {
+          const chars = ranked.filter(r => {
+            if (tier.key === 'S') return r.winRate >= 65;
+            if (tier.key === 'A') return r.winRate >= 55 && r.winRate < 65;
+            if (tier.key === 'B') return r.winRate >= 45 && r.winRate < 55;
+            if (tier.key === 'C') return r.winRate >= 35 && r.winRate < 45;
+            return r.winRate < 35;
+          });
+
+          if (!chars.length) return;
+
+          html += `
+            <div style="margin-bottom:24px;">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                <div style="width:40px;height:40px;border-radius:8px;background:${tier.color};display:flex;align-items:center;justify-content:center;font-weight:900;font-family:'Chakra Petch',sans-serif;font-size:20px;color:#000;">${tier.key}</div>
+                <div>
+                  <div style="font-weight:700;font-family:'Chakra Petch',sans-serif;font-size:18px;color:${tier.color};">${tier.label}</div>
+                  <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">${tier.desc} · ${chars.length} CHARACTER${chars.length !== 1 ? 'S' : ''}</div>
+                </div>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                ${chars.map(r => `
+                  <a href="character.html?id=${r.char.id}" style="display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 12px 6px 6px;text-decoration:none;color:var(--text);transition:border-color .2s;" onmouseover="this.style.borderColor='${tier.color}'" onmouseout="this.style.borderColor='var(--line)'">
+                    <img src="${r.char.image}" alt="${r.char.name}" style="width:36px;height:36px;border-radius:6px;" onerror="this.style.display='none'" />
+                    <div>
+                      <div style="font-size:13px;font-weight:600;">${r.char.name}</div>
+                      <div style="font-size:11px;color:var(--muted);">${r.wins}W ${r.losses}L</div>
+                    </div>
+                    <div style="font-weight:700;font-size:14px;color:${tier.color};margin-left:4px;">${r.winRate.toFixed(1)}%</div>
+                  </a>
+                `).join('')}
+              </div>
+            </div>`;
+        });
+
+        container.innerHTML = html;
+        winRatesLoaded = true;
+      } catch (e) {
+        console.error(e);
+        container.innerHTML = '<p class="text-muted" style="text-align:center;padding:40px;">Failed to load win rate data.</p>';
+      }
+    }
+
+    // Results (community votes)
     let resultsData = [];
     let currentSort = 'tier';
 
