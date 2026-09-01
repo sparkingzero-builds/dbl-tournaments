@@ -659,10 +659,12 @@
         YEL: 'var(--el-yel)', PUR: 'var(--el-pur)', LGT: 'var(--el-lgt)'
       };
 
+      const alreadyBanned = new Set((tournament?.tournament_bans || []).map(String));
       chars.forEach(c => {
+        const isBanned = alreadyBanned.has(String(c.id));
         const card = document.createElement('div');
         const isSelected = selectedVote === c.id;
-        card.className = 'char-card' + (isSelected ? ' ban-selected' : '');
+        card.className = 'char-card' + (isSelected ? ' ban-selected' : '') + (isBanned ? ' banned' : '');
 
         const rarityClass = (c.rarity || '').toLowerCase();
         card.innerHTML = `
@@ -677,12 +679,16 @@
           </div>
         `;
 
-        card.addEventListener('click', () => {
-          selectedVote = isSelected ? null : c.id;
-          if (!isSelected) playSound('click');
-          renderVoteSlot();
-          applyVoteFilters();
-        });
+        if (isBanned) {
+          card.title = 'Already banned';
+        } else {
+          card.addEventListener('click', () => {
+            selectedVote = isSelected ? null : c.id;
+            if (!isSelected) playSound('click');
+            renderVoteSlot();
+            applyVoteFilters();
+          });
+        }
         grid.appendChild(card);
       });
 
