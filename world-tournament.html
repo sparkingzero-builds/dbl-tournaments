@@ -646,22 +646,22 @@
           }
         } catch { /* table may not exist */ }
 
-        /* Fetch tournament wins */
+        /* Fetch match wins */
         let winsMap = {};
+        let lossesMap = {};
         try {
-          const { data: signups } = await supabaseClient
-            .from('signups')
-            .select('discord_username, tournament_id');
-          const { data: tournaments } = await supabaseClient
-            .from('tournaments')
-            .select('id, winner')
-            .eq('status', 'completed');
-
-          if (tournaments) {
-            for (const t of tournaments) {
-              if (t.winner && playerNames.includes(t.winner)) {
-                winsMap[t.winner] = (winsMap[t.winner] || 0) + 1;
-              }
+          const { data: matches } = await supabaseClient
+            .from('matches')
+            .select('player1:signups!matches_player1_id_fkey(discord_username), player2:signups!matches_player2_id_fkey(discord_username), winner_id, player1_id, player2_id')
+            .not('winner_id', 'is', null);
+          if (matches) {
+            for (const m of matches) {
+              const p1 = m.player1?.discord_username;
+              const p2 = m.player2?.discord_username;
+              const winner = m.winner_id === m.player1_id ? p1 : p2;
+              const loser = m.winner_id === m.player1_id ? p2 : p1;
+              if (winner) winsMap[winner] = (winsMap[winner] || 0) + 1;
+              if (loser) lossesMap[loser] = (lossesMap[loser] || 0) + 1;
             }
           }
         } catch { /* graceful */ }
@@ -690,7 +690,7 @@
           const winsNorm = (winsMap[p.discord_username] || 0) / maxWins;
           const xpNorm = (xpMap[p.discord_username] || 0) / maxXp;
           const composite = (eloNorm * 0.4) + (bountyNorm * 0.3) + (winsNorm * 0.2) + (xpNorm * 0.1);
-          return { ...p, bounties: bountyMap[p.discord_username] || 0, wins: winsMap[p.discord_username] || 0, composite };
+          return { ...p, bounties: bountyMap[p.discord_username] || 0, wins: winsMap[p.discord_username] || 0, losses: lossesMap[p.discord_username] || 0, composite };
         });
 
         scored.sort((a, b) => b.composite - a.composite);
@@ -708,8 +708,8 @@
               </div>
               <div class="qualifier-stats">
                 <span>ELO ${p.elo}</span>
-                <span>🎯 ${p.bounties}</span>
-                <span>🏆 ${p.wins}</span>
+                <span style="color:var(--green)">${p.wins}W</span>
+                <span style="color:var(--red)">${p.losses}L</span>
               </div>
               <div class="qualifier-composite">${(p.composite * 100).toFixed(1)} PTS</div>
             </div>`;
