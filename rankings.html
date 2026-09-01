@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Player rankings, ELO ratings, and win records." />
+  <meta property="og:title" content="Leaderboard — DBL Tournaments" />
+  <meta property="og:description" content="Player rankings, ELO ratings, and win records." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#00e5ff" />
   <title>Rankings — DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
@@ -238,7 +243,13 @@
     </div>
 
     <div class="leaderboard" id="leaderboard">
-      <div class="loader"><div class="loader-spinner"></div></div>
+      <div id="rankings-skeleton">
+        <div class="skeleton-row"><div class="skeleton-bar w-20"></div><div class="skeleton-lines"><div class="skeleton-bar w-40"></div></div><div class="skeleton-bar w-20"></div></div>
+        <div class="skeleton-row"><div class="skeleton-bar w-20"></div><div class="skeleton-lines"><div class="skeleton-bar w-60"></div></div><div class="skeleton-bar w-20"></div></div>
+        <div class="skeleton-row"><div class="skeleton-bar w-20"></div><div class="skeleton-lines"><div class="skeleton-bar w-40"></div></div><div class="skeleton-bar w-20"></div></div>
+        <div class="skeleton-row"><div class="skeleton-bar w-20"></div><div class="skeleton-lines"><div class="skeleton-bar w-60"></div></div><div class="skeleton-bar w-20"></div></div>
+        <div class="skeleton-row"><div class="skeleton-bar w-20"></div><div class="skeleton-lines"><div class="skeleton-bar w-40"></div></div><div class="skeleton-bar w-20"></div></div>
+      </div>
     </div>
   </main>
 
@@ -301,7 +312,7 @@
         supabaseClient.from('elo_ratings').select('discord_username, elo, peak_elo'),
         supabaseClient.from('bounties').select('discord_username, bounty, wins, losses, streak'),
         supabaseClient.from('player_points').select('discord_username, balance, lifetime_earned'),
-        supabaseClient.from('matches').select('player1_id, player2_id, winner_id'),
+        supabaseClient.from('matches').select('player1:signups!matches_player1_id_fkey(discord_username), player2:signups!matches_player2_id_fkey(discord_username), winner_id, player1_id, player2_id').not('winner_id', 'is', null),
       ]);
 
       data.elo = (eloRes.data || []).sort((a, b) => b.elo - a.elo);
@@ -309,24 +320,17 @@
       data.currency = (currencyRes.data || []).sort((a, b) => b.balance - a.balance);
       data.matches = matchRes.data || [];
 
-      // Build win/loss map from matches
-      const wl = {};
-      data.matches.forEach(m => {
-        if (!m.winner_id) return;
-        [m.player1_id, m.player2_id].forEach(pid => {
-          if (!pid) return;
-          if (!wl[pid]) wl[pid] = { w: 0, l: 0 };
-        });
-        if (wl[m.winner_id]) wl[m.winner_id].w++;
-        const loser = m.winner_id === m.player1_id ? m.player2_id : m.player1_id;
-        if (loser && wl[loser]) wl[loser].l++;
-      });
-      data.winLossById = wl;
-
-      // Also build win/loss by username from bounties table (has wins/losses columns)
+      // Build win/loss by username from match results
       data.wlByName = {};
-      data.bounty.forEach(b => {
-        data.wlByName[b.discord_username] = { w: b.wins || 0, l: b.losses || 0 };
+      data.matches.forEach(m => {
+        const p1 = m.player1?.discord_username;
+        const p2 = m.player2?.discord_username;
+        if (p1) { if (!data.wlByName[p1]) data.wlByName[p1] = { w: 0, l: 0 }; }
+        if (p2) { if (!data.wlByName[p2]) data.wlByName[p2] = { w: 0, l: 0 }; }
+        const winnerName = m.winner_id === m.player1_id ? p1 : p2;
+        const loserName = m.winner_id === m.player1_id ? p2 : p1;
+        if (winnerName && data.wlByName[winnerName]) data.wlByName[winnerName].w++;
+        if (loserName && data.wlByName[loserName]) data.wlByName[loserName].l++;
       });
 
       // Unique player count
@@ -348,8 +352,11 @@
       data.bounty.forEach(p => {
         if (!map[p.discord_username]) map[p.discord_username] = {};
         map[p.discord_username].bounty = p.bounty || 0;
-        map[p.discord_username].wins = p.wins || 0;
-        map[p.discord_username].losses = p.losses || 0;
+      });
+      Object.entries(data.wlByName).forEach(([name, wl]) => {
+        if (!map[name]) map[name] = {};
+        map[name].wins = wl.w;
+        map[name].losses = wl.l;
       });
       data.currency.forEach(p => {
         if (!map[p.discord_username]) map[p.discord_username] = {};
@@ -429,7 +436,7 @@
             <div class="lb-rank">${rank}</div>
             <div class="lb-player">${playerLink(p.discord_username)}</div>
             <div class="lb-stat gold">${(p.bounty || 0).toLocaleString()}</div>
-            <div class="lb-secondary hide-mobile"><span class="w">${p.wins || 0}</span>W / <span class="l">${p.losses || 0}</span>L</div>
+            <div class="lb-secondary hide-mobile"><span class="w">${(data.wlByName[p.discord_username]?.w) || 0}</span>W / <span class="l">${(data.wlByName[p.discord_username]?.l) || 0}</span>L</div>
             <div class="lb-secondary hide-mobile">${p.streak || 0}</div>
           </div>`;
         });

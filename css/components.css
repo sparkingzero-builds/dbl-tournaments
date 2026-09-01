@@ -399,6 +399,40 @@
   to { transform: rotate(360deg); }
 }
 
+/* Skeleton loading */
+@keyframes skeleton-pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+  100% { opacity: 0.6; }
+}
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 6px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+.skeleton-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--line);
+  flex-shrink: 0;
+}
+.skeleton-bar {
+  height: 14px;
+  background: var(--line);
+  border-radius: 4px;
+}
+.skeleton-bar.w-40 { width: 40%; }
+.skeleton-bar.w-60 { width: 60%; }
+.skeleton-bar.w-20 { width: 20%; }
+.skeleton-lines { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+
 /* Empty State */
 .empty-state {
   text-align: center;

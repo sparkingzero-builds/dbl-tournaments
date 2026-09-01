@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Tournament champions and all-time records." />
+  <meta property="og:title" content="Hall of Fame — DBL Tournaments" />
+  <meta property="og:description" content="Tournament champions and all-time records." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#00e5ff" />
   <title>Hall of Fame - DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
@@ -553,7 +558,10 @@
     <!-- All-Time Records -->
     <div class="hof-section-heading"><span class="icon">&#127941;</span> All-Time Records</div>
     <div class="records-grid" id="records-grid">
-      <div class="hof-loading">Loading records...</div>
+      <div class="skeleton-row"><div class="skeleton-bar w-20"></div><div class="skeleton-lines"><div class="skeleton-bar w-60"></div><div class="skeleton-bar w-40"></div></div></div>
+      <div class="skeleton-row"><div class="skeleton-bar w-20"></div><div class="skeleton-lines"><div class="skeleton-bar w-60"></div><div class="skeleton-bar w-40"></div></div></div>
+      <div class="skeleton-row"><div class="skeleton-bar w-20"></div><div class="skeleton-lines"><div class="skeleton-bar w-60"></div><div class="skeleton-bar w-40"></div></div></div>
+      <div class="skeleton-row"><div class="skeleton-bar w-20"></div><div class="skeleton-lines"><div class="skeleton-bar w-60"></div><div class="skeleton-bar w-40"></div></div></div>
     </div>
 
     <!-- Season Champions -->
@@ -609,8 +617,8 @@
       try {
         const { data: tournaments } = await supabaseClient
           .from('tournaments')
-          .select('id, name, created_at, start_date')
-          .eq('status', 'completed')
+          .select('id, name, created_at, start_date, status')
+          .in('status', ['completed', 'active'])
           .order('created_at', { ascending: false });
 
         if (!tournaments?.length) {
@@ -621,6 +629,7 @@
         let html = '';
         for (const t of tournaments) {
           const champ = await getChampionForTournament(t.id);
+          if (!champ?.name) continue;
           let teamHtml = '';
           if (champ?.team && Array.isArray(champ.team)) {
             teamHtml = '<div class="champion-team">' +
