@@ -1404,14 +1404,19 @@
           <div id="reban-buttons"></div>
         </div>
         <div class="divider"></div>
+        <div class="form-group">
+          <label style="color:var(--pink);">Currently Banned Characters</label>
+          <p class="text-muted" style="font-size:12px;">All characters banned from this tournament (from community votes or manual bans). Click × to unban.</p>
+          <div id="manual-ban-list" class="mt-2" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div>
+        <div class="divider"></div>
         <div class="form-group" id="manual-ban-section">
-          <label>Manual Character Bans</label>
-          <p class="text-muted" style="font-size:12px;">Ban any character from the tournament instantly. Banned characters are removed from all player teams.</p>
+          <label>Add Manual Ban</label>
+          <p class="text-muted" style="font-size:12px;">Search and ban a character instantly. They'll be removed from all player teams.</p>
           <div style="display:flex;gap:8px;margin-top:8px;">
             <input type="text" id="manual-ban-search" placeholder="Search character..." style="flex:1;" oninput="filterManualBanList()" />
           </div>
           <div id="manual-ban-dropdown" style="display:none;max-height:200px;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-sm);margin-top:4px;"></div>
-          <div id="manual-ban-list" class="mt-2" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
         </div>
       </div>
 
@@ -3370,17 +3375,29 @@
       if (!container || !currentTournament) return;
       const bans = (currentTournament.tournament_bans || []).map(String);
       if (!bans.length) {
-        container.innerHTML = '<span class="text-muted" style="font-size:12px;">No characters banned.</span>';
+        container.innerHTML = '<span class="text-muted" style="font-size:12px;">No characters currently banned.</span>';
         return;
       }
       if (!allCharacters.length) return;
+
+      const votes = {};
+      signups.forEach(s => {
+        if (s.bans && s.bans.length > 0) {
+          s.bans.forEach(id => { votes[id] = (votes[id] || 0) + 1; });
+        }
+      });
+
       container.innerHTML = bans.map(id => {
         const c = allCharacters.find(ch => String(ch.id) === String(id));
+        const voteCount = votes[id] || 0;
         return c ? `
-          <div style="display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--pink);border-radius:var(--radius-sm);padding:4px 8px;">
-            <img src="${esc(c.image)}" style="width:24px;height:24px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />
-            <span style="font-size:12px;color:var(--pink);font-weight:700;">${esc(c.name)}</span>
-            <button onclick="removeTournamentBan('${esc(id)}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">&times;</button>
+          <div style="display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--pink);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:4px;">
+            <img src="${esc(c.image)}" style="width:32px;height:32px;border-radius:6px;object-fit:cover;" onerror="this.style.display='none'" />
+            <div style="flex:1;">
+              <span style="font-size:13px;color:var(--pink);font-weight:700;">${esc(c.name)}</span>
+              ${voteCount ? `<span style="font-size:11px;color:var(--muted);margin-left:8px;">${voteCount} vote${voteCount !== 1 ? 's' : ''}</span>` : '<span style="font-size:11px;color:var(--muted);margin-left:8px;">Manual ban</span>'}
+            </div>
+            <button class="btn btn-sm" style="border-color:var(--green);color:var(--green);font-size:11px;padding:2px 10px;" onclick="removeTournamentBan('${esc(id)}')">Unban</button>
           </div>` : '';
       }).join('');
     }
