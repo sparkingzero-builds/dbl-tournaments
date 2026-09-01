@@ -528,7 +528,8 @@
 
       mySignup = signups.find(s => s.discord_username.toLowerCase() === username.toLowerCase());
       if (!mySignup) {
-        NotificationSystem.show('Username not found in this tournament', 'error');
+        const suggestion = signups.map(s => s.discord_username).join(', ');
+        NotificationSystem.show('Username not found. Use the name you signed up with.', 'error');
         return;
       }
 
@@ -1145,17 +1146,16 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      init();
-      setTimeout(() => {
-        if (typeof AUTH !== 'undefined' && AUTH.isLoggedIn()) {
-          const input = document.getElementById('ban-username');
-          if (input && !input.value) {
-            input.value = AUTH.getDiscordUsername() || '';
-            loginForBan();
-          }
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (typeof AUTH !== 'undefined') await AUTH.init();
+      await init();
+      if (typeof AUTH !== 'undefined' && AUTH.isLoggedIn()) {
+        const input = document.getElementById('ban-username');
+        if (input && !input.value) {
+          input.value = AUTH.getDiscordUsername() || '';
+          loginForBan();
         }
-      }, 500);
+      }
     });
   </script>
   <script src="js/notification-inbox.js"></script>
