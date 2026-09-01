@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tournament Recap â€” DBL Tournaments</title>
+  <title>Tournament Recap — DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
@@ -11,7 +11,7 @@
   <style>
     .recap-container { max-width: 1100px; margin: 0 auto; padding: 100px 20px 60px; }
 
-    /* â”€â”€ Tournament Selector â”€â”€ */
+    /* ── Tournament Selector ── */
     .tournament-selector {
       display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
       margin-bottom: 32px;
@@ -27,7 +27,7 @@
     }
     .tournament-selector select:focus { outline: none; border-color: var(--cyan); }
 
-    /* â”€â”€ Recap Header â”€â”€ */
+    /* ── Recap Header ── */
     .recap-header {
       text-align: center; margin-bottom: 40px; padding: 40px 20px;
       background: linear-gradient(135deg, rgba(255,215,64,0.06), rgba(0,229,255,0.04));
@@ -51,7 +51,7 @@
     }
     .recap-meta span { display: flex; align-items: center; gap: 6px; }
 
-    /* â”€â”€ Champion Spotlight â”€â”€ */
+    /* ── Champion Spotlight ── */
     .champion-spotlight {
       background: var(--panel); border: 2px solid var(--gold);
       border-radius: 16px; padding: 32px; margin-bottom: 32px;
@@ -102,7 +102,7 @@
     }
     .path-arrow { color: var(--muted); font-size: 14px; }
 
-    /* â”€â”€ Highlight Cards â”€â”€ */
+    /* ── Highlight Cards ── */
     .highlights-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 16px; margin-bottom: 32px;
@@ -130,7 +130,7 @@
       font-family: 'Chakra Petch', sans-serif; font-size: 13px; color: var(--muted);
     }
 
-    /* â”€â”€ Quick Stats â”€â”€ */
+    /* ── Quick Stats ── */
     .quick-stats {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       gap: 12px; margin-bottom: 32px;
@@ -147,7 +147,7 @@
       text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px;
     }
 
-    /* â”€â”€ Results Table â”€â”€ */
+    /* ── Results Table ── */
     .results-section { margin-bottom: 40px; }
     .round-group { margin-bottom: 24px; }
     .round-label {
@@ -171,7 +171,7 @@
     .winner-cell { color: var(--green); font-weight: 700; }
     .loser-cell { color: var(--muted); }
 
-    /* â”€â”€ Empty State â”€â”€ */
+    /* ── Empty State ── */
     .empty-state {
       text-align: center; padding: 80px 20px; color: var(--muted);
       font-family: 'Chakra Petch', sans-serif;
@@ -180,7 +180,7 @@
       font-family: 'Exo 2', sans-serif; font-size: 24px; color: var(--text); margin-bottom: 8px;
     }
 
-    /* â”€â”€ Section Heading â”€â”€ */
+    /* ── Section Heading ── */
     .section-title {
       font-family: 'Exo 2', sans-serif; font-size: 16px; font-weight: 800;
       text-transform: uppercase; letter-spacing: 0.15em; color: var(--text);
@@ -497,7 +497,7 @@
         // Build HTML
         let html = '';
 
-        // â”€â”€ Recap Header
+        // ── Recap Header
         html += `<div class="recap-header">
           <div class="recap-title">${esc(tournament.name)}</div>
           <div class="recap-meta">
@@ -507,7 +507,7 @@
           </div>
         </div>`;
 
-        // â”€â”€ Champion Spotlight
+        // ── Champion Spotlight
         if (champion) {
           const champElo = eloMap[champion.discord_username] || 1000;
           html += `<div class="champion-spotlight">
@@ -539,7 +539,7 @@
           </div>`;
         }
 
-        // â”€â”€ Bracket Highlights
+        // ── Bracket Highlights
         html += '<div class="section-title">Bracket Highlights</div>';
         html += '<div class="highlights-grid">';
 
@@ -605,7 +605,7 @@
 
         html += '</div>';
 
-        // â”€â”€ Quick Stats
+        // ── Quick Stats
         html += '<div class="section-title">Quick Stats</div>';
         html += `<div class="quick-stats">
           <div class="quick-stat">
@@ -626,7 +626,7 @@
           </div>
         </div>`;
 
-        // â”€â”€ Full Results Table grouped by round
+        // ── Full Results Table grouped by round
         html += '<div class="section-title">Full Results</div>';
         html += '<div class="results-section">';
 

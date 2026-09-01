@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tier List â€” DBL Tournaments</title>
+  <title>Tier List — DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/bracket.css" />
@@ -303,7 +303,7 @@
   <nav class="navbar">
     <div class="container">
       <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
-      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">â˜°</button>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
       <ul class="navbar-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="tournament.html">Tournament</a></li>
@@ -499,7 +499,7 @@
                    onclick="cycleChar(${c.id})"
                    title="${c.name}">
         <img src="${c.image}" alt="${c.name}" onerror="this.style.display='none'" />
-        <a href="character.html?id=${c.id}" class="tier-char-info" onclick="event.stopPropagation()" title="View kit">â„¹</a>
+        <a href="character.html?id=${c.id}" class="tier-char-info" onclick="event.stopPropagation()" title="View kit">ℹ</a>
         <div class="char-name-tip">${c.name.length > 18 ? c.name.slice(0, 16) + '..' : c.name}</div>
       </div>`;
     }

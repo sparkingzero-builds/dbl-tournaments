@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rankings â€” DBL Tournaments</title>
+  <title>Rankings — DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
@@ -256,11 +256,11 @@
   <script>
     initParticles(document.getElementById('particles'));
 
-    /* â”€â”€ State â”€â”€ */
+    /* ── State ── */
     let currentTab = 'overall';
     let data = { elo: [], bounty: [], currency: [], matches: [] };
 
-    /* â”€â”€ Helpers â”€â”€ */
+    /* ── Helpers ── */
     function getTier(elo) {
       if (elo >= 1400) return { name: 'Diamond', cls: 'tier-diamond' };
       if (elo >= 1200) return { name: 'Platinum', cls: 'tier-platinum' };
@@ -295,7 +295,7 @@
       return `<a class=”lb-name” href=”profile.html?player=${encodeURIComponent(name)}”${style}>${name}</a>${skull}`;
     }
 
-    /* â”€â”€ Data Loading â”€â”€ */
+    /* ── Data Loading ── */
     async function loadAllData() {
       const [eloRes, bountyRes, currencyRes, matchRes] = await Promise.all([
         supabaseClient.from('elo_ratings').select('discord_username, elo, peak_elo'),
@@ -337,7 +337,7 @@
       document.getElementById('player-count').innerHTML = `<strong>${allNames.size}</strong> Players Tracked`;
     }
 
-    /* â”€â”€ Build datasets per tab â”€â”€ */
+    /* ── Build datasets per tab ── */
     function getOverallData() {
       // Merge all players, compute composite score
       const map = {};
@@ -360,7 +360,7 @@
         const w = d.wins || 0, l = d.losses || 0;
         const wr = (w + l) >= 4 ? w / (w + l) : 0;
         // Composite: weighted ELO (40%) + win rate (25%) + bounty (20%) + currency (15%)
-        const eloNorm = ((d.elo || 1000) - 800) / 600; // 800-1400 â†’ 0-1
+        const eloNorm = ((d.elo || 1000) - 800) / 600; // 800-1400 → 0-1
         const bountyNorm = Math.min((d.bounty || 0) / 5000, 1);
         const currNorm = Math.min((d.balance || 0) / 10000, 1);
         const score = eloNorm * 0.4 + wr * 0.25 + bountyNorm * 0.2 + currNorm * 0.15;
@@ -378,7 +378,7 @@
       return players.sort((a, b) => b.rate - a.rate);
     }
 
-    /* â”€â”€ Render â”€â”€ */
+    /* ── Render ── */
     function render(searchQuery) {
       const container = document.getElementById('leaderboard');
       const q = (searchQuery || '').toLowerCase().trim();
@@ -472,7 +472,7 @@
       container.innerHTML = html;
     }
 
-    /* â”€â”€ Tab switching â”€â”€ */
+    /* ── Tab switching ── */
     document.querySelectorAll('.view-tab').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
@@ -482,12 +482,12 @@
       });
     });
 
-    /* â”€â”€ Search â”€â”€ */
+    /* ── Search ── */
     document.getElementById('player-search').addEventListener('input', (e) => {
       render(e.target.value);
     });
 
-    /* â”€â”€ Init â”€â”€ */
+    /* ── Init ── */
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         await Promise.all([loadAllData(), loadGoldenNames()]);

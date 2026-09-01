@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Draft Lobby â€” DBL Tournaments</title>
+  <title>Draft Lobby — DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/roster.css" />
@@ -517,7 +517,7 @@
     let timerInterval = null;
     let pickDeadline = null;
 
-    // â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Init ──────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', async () => {
       await AUTH.init();
       AUTH.renderNav();
@@ -573,7 +573,7 @@
       document.getElementById('draft-loading').innerHTML = `<h2 style="color:var(--red);">Error</h2><p class="text-muted">${msg}</p>`;
     }
 
-    // â”€â”€ Snake Order Generation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Snake Order Generation ────────────────────────────
     function generateSnakeOrder(playerNames, picksPerPlayer) {
       const order = [];
       let pickNum = 0;
@@ -587,7 +587,7 @@
       return order;
     }
 
-    // â”€â”€ Start Draft UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Start Draft UI ────────────────────────────────────
     async function startDraftUI() {
       document.getElementById('draft-loading').style.display = 'none';
       document.getElementById('draft-not-started').style.display = 'none';
@@ -645,7 +645,7 @@
       draftPicks = data || [];
     }
 
-    // â”€â”€ Rendering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Rendering ─────────────────────────────────────────
     function renderAll() {
       renderStatus();
       renderDraftOrder();
@@ -777,7 +777,7 @@
       container.scrollTop = container.scrollHeight;
     }
 
-    // â”€â”€ Character Selection & Confirm â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Character Selection & Confirm ─────────────────────
     function selectChar(charId, charName) {
       if (!isMyTurn()) return;
       selectedCharId = charId;
@@ -833,7 +833,7 @@
       }
     }
 
-    // â”€â”€ Polling â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Polling ───────────────────────────────────────────
     function startPolling() {
       if (pollInterval) clearInterval(pollInterval);
       pollInterval = setInterval(async () => {
@@ -845,7 +845,7 @@
       }, 3000);
     }
 
-    // â”€â”€ Timer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Timer ─────────────────────────────────────────────
     function startTimer() {
       // Timer is informational - no auto-skip
       const timerEl = document.getElementById('ds-timer');

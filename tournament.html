@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tournament â€” DBL Tournaments</title>
+  <title>Tournament — DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/roster.css" />
@@ -222,7 +222,7 @@
   <nav class="navbar">
     <div class="container">
       <a href="index.html" class="navbar-brand">DBL <span>Tournaments</span></a>
-      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">â˜°</button>
+      <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
       <ul class="navbar-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="tournament.html">Tournament</a></li>
@@ -378,7 +378,7 @@
           <span class="status ${isSignup ? 'status-signup' : 'status-active'}">${isSignup ? 'Signups Open' : 'In Progress'}</span>
           <h1 class="tournament-name mt-2">${currentTournament.name}</h1>
           ${currentTournament.description ? `<p class="tournament-desc">${currentTournament.description}</p>` : ''}
-          <div class="player-count mt-2">${signups.length} <span>/ ${currentTournament.max_players || 'âˆž'} players</span></div>
+          <div class="player-count mt-2">${signups.length} <span>/ ${currentTournament.max_players || '∞'} players</span></div>
           <div style="display:flex;gap:8px;margin-top:14px;justify-content:center;flex-wrap:wrap;">
             <a href="bracket.html" class="btn btn-sm btn-secondary">Bracket</a>
             <a href="banpick.html" class="btn btn-sm btn-secondary">Ban Phase</a>
@@ -453,7 +453,7 @@
         ` : ''}
         <div class="power-rankings" id="power-rankings-section">
           <div class="card card-glow">
-            <h3><span class="icon-fire">&#128293;</span> Power Rankings â€” Who Will Win?</h3>
+            <h3><span class="icon-fire">&#128293;</span> Power Rankings — Who Will Win?</h3>
             <div id="pr-round-selector" class="pr-round-selector"></div>
             <div id="pr-content">
               <div class="loader"><div class="loader-spinner"></div></div>

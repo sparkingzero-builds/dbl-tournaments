@@ -1,16 +1,16 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Character Meta â€” DBL Tournaments</title>
+  <title>Character Meta — DBL Tournaments</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/bracket.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/themes.css" />
   <style>
-    /* â”€â”€ Page hero â”€â”€ */
+    /* ── Page hero ── */
     .meta-hero {
       text-align: center;
       padding: 100px 0 40px;
@@ -34,7 +34,7 @@
       text-transform: uppercase;
     }
 
-    /* â”€â”€ Section titles â”€â”€ */
+    /* ── Section titles ── */
     .section-title {
       font-family: 'Exo 2', sans-serif;
       font-size: 24px;
@@ -54,7 +54,7 @@
       background: linear-gradient(90deg, var(--cyan), transparent);
     }
 
-    /* â”€â”€ Top 10 grid â”€â”€ */
+    /* ── Top 10 grid ── */
     .top-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -120,7 +120,7 @@
     .top-card .trend-down { color: var(--red); }
     .top-card .trend-stable { color: var(--muted); }
 
-    /* â”€â”€ Full table â”€â”€ */
+    /* ── Full table ── */
     .meta-table-wrap {
       overflow-x: auto;
       margin-bottom: 40px;
@@ -183,7 +183,7 @@
       color: #fff;
     }
 
-    /* â”€â”€ Tier breakdown â”€â”€ */
+    /* ── Tier breakdown ── */
     .tier-section { margin-bottom: 40px; }
     .tier-group {
       margin-bottom: 24px;
@@ -249,7 +249,7 @@
       font-weight: 700;
     }
 
-    /* â”€â”€ Loading â”€â”€ */
+    /* ── Loading ── */
     .meta-loading {
       text-align: center;
       padding: 60px 0;
@@ -267,7 +267,7 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* â”€â”€ Empty state â”€â”€ */
+    /* ── Empty state ── */
     .meta-empty {
       text-align: center;
       padding: 60px 20px;
@@ -276,7 +276,7 @@
       font-size: 14px;
     }
 
-    /* â”€â”€ Stats bar â”€â”€ */
+    /* ── Stats bar ── */
     .stats-bar {
       display: flex;
       gap: 16px;
@@ -437,7 +437,7 @@
     let metaData = [];        // processed array of { id, name, image, element, picks, wins, losses, winRate, avgElo, trend }
     let currentSort = { col: 'picks', dir: 'desc' };
 
-    // â”€â”€ Load character data from JSON â”€â”€
+    // ── Load character data from JSON ──
     async function loadCharacterLookup() {
       try {
         const res = await fetch('data/characters.json');
@@ -448,7 +448,7 @@
       }
     }
 
-    // â”€â”€ Query Supabase for pick/win data â”€â”€
+    // ── Query Supabase for pick/win data ──
     async function loadMetaFromDB() {
       // Get all signups with team data
       const { data: signups, error: sErr } = await supabaseClient
@@ -545,7 +545,7 @@
       };
     }
 
-    // â”€â”€ Generate mock data if no real data â”€â”€
+    // ── Generate mock data if no real data ──
     function generateMockData() {
       const mockNames = [
         { id: 738, name: 'SSGSS Kaioken Goku' },
@@ -594,7 +594,7 @@
       });
     }
 
-    // â”€â”€ Render top 10 grid â”€â”€
+    // ── Render top 10 grid ──
     function renderTopGrid(data) {
       const grid = document.getElementById('top-grid');
       const top10 = data.slice(0, 10);
@@ -616,7 +616,7 @@
       grid.style.display = '';
     }
 
-    // â”€â”€ Render full table â”€â”€
+    // ── Render full table ──
     function renderTable(data) {
       const tbody = document.getElementById('meta-tbody');
       tbody.innerHTML = data.map((c, i) => `
@@ -641,7 +641,7 @@
       document.getElementById('table-wrap').style.display = '';
     }
 
-    // â”€â”€ Sorting â”€â”€
+    // ── Sorting ──
     function sortData(col) {
       if (currentSort.col === col) {
         currentSort.dir = currentSort.dir === 'desc' ? 'asc' : 'desc';
@@ -676,7 +676,7 @@
       renderTable(metaData);
     }
 
-    // â”€â”€ Render tiers â”€â”€
+    // ── Render tiers ──
     function renderTiers(data) {
       const tiers = [
         { key: 'S', label: 'S Tier', desc: '60%+ Win Rate', cls: 'tier-s', min: 60 },
@@ -722,7 +722,7 @@
       section.style.display = '';
     }
 
-    // â”€â”€ Update summary stats â”€â”€
+    // ── Update summary stats ──
     function updateStats(info) {
       document.getElementById('stat-total-picks').textContent = info.totalPicks;
       document.getElementById('stat-unique-chars').textContent = info.uniqueChars;
@@ -731,7 +731,7 @@
       document.getElementById('stat-top-char').style.fontSize = info.topChar.length > 15 ? '16px' : '';
     }
 
-    // â”€â”€ Init â”€â”€
+    // ── Init ──
     document.addEventListener('DOMContentLoaded', async () => {
       // Table sort click handlers
       document.querySelectorAll('.meta-table th[data-sort]').forEach(th => {
@@ -752,7 +752,7 @@
         metaData = dbResult.chars;
         updateStats(dbResult);
       } else {
-        // Use mock data â€” mark it clearly
+        // Use mock data — mark it clearly
         useMock = true;
         metaData = generateMockData();
         const totalPicks = metaData.reduce((s, c) => s + c.picks, 0);
@@ -773,7 +773,7 @@
         const hero = document.querySelector('.meta-hero');
         const notice = document.createElement('div');
         notice.style.cssText = 'margin-top:12px;padding:10px 20px;background:rgba(255,215,64,0.1);border:1px solid var(--gold);border-radius:6px;font-size:12px;color:var(--gold);font-family:"Chakra Petch",sans-serif;display:inline-block;';
-        notice.textContent = 'Showing sample data â€” real stats will appear once tournaments have team picks recorded.';
+        notice.textContent = 'Showing sample data — real stats will appear once tournaments have team picks recorded.';
         hero.appendChild(notice);
       }
     });
