@@ -3370,7 +3370,7 @@
       }
     }
 
-    function renderManualBanList() {
+    async function renderManualBanList() {
       const container = document.getElementById('manual-ban-list');
       if (!container || !currentTournament) return;
       const bans = (currentTournament.tournament_bans || []).map(String);
@@ -3378,7 +3378,10 @@
         container.innerHTML = '<span class="text-muted" style="font-size:12px;">No characters currently banned.</span>';
         return;
       }
-      if (!allCharacters.length) return;
+      if (!allCharacters.length) {
+        await CharacterManager.load();
+        allCharacters = CharacterManager.getAll();
+      }
 
       const votes = {};
       signups.forEach(s => {
