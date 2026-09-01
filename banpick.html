@@ -496,7 +496,7 @@
         <div class="ban-login">
           <div class="card card-glow">
             <h3 class="mb-2">Enter Your Username</h3>
-            <p class="text-muted mb-2" style="font-size:13px;">Enter the Discord username you signed up with to cast your vote.</p>
+            <p class="text-muted mb-2" style="font-size:13px;">Enter the username you signed up with (may differ from your Discord name).</p>
             <input type="text" id="ban-username" placeholder="e.g. Player#1234" />
             <button class="btn btn-primary btn-lg mt-2" onclick="loginForBan()" style="width:100%;">Cast Your Vote</button>
           </div>
@@ -528,8 +528,11 @@
 
       mySignup = signups.find(s => s.discord_username.toLowerCase() === username.toLowerCase());
       if (!mySignup) {
-        const suggestion = signups.map(s => s.discord_username).join(', ');
-        NotificationSystem.show('Username not found. Use the name you signed up with.', 'error');
+        const names = signups.map(s => esc(s.discord_username));
+        const listHtml = names.length <= 20
+          ? '<br><br><strong>Signed-up players:</strong><br>' + names.join(', ')
+          : '';
+        NotificationSystem.show('Username not found — use the exact name you signed up with (might differ from your Discord name).' + listHtml, 'error', 8000);
         return;
       }
 
