@@ -65,8 +65,10 @@ const Announcements = (() => {
     document.body.appendChild(bar);
     const main = document.querySelector('main');
     if (main) {
-      const barHeight = anns.length * 48 + 16;
-      main.style.paddingTop = (parseInt(getComputedStyle(main).paddingTop) + barHeight) + 'px';
+      requestAnimationFrame(() => {
+        const barHeight = bar.offsetHeight || (anns.length * 48 + 16);
+        main.style.paddingTop = (parseInt(getComputedStyle(main).paddingTop) + barHeight) + 'px';
+      });
     }
 
     if (!document.getElementById('ann-public-styles')) {

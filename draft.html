@@ -520,7 +520,7 @@
     // ── Init ──────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', async () => {
       await AUTH.init();
-      AUTH.renderNav();
+      if (AUTH.updateUI) AUTH.updateUI();
       await CharacterManager.load();
       allCharacters = CharacterManager.getAll();
       myUsername = AUTH.getDiscordUsername();
@@ -873,8 +873,11 @@
       }
     }
   </script>
-  <script src="js/particles.js"></script>`n  <script src="js/notification-inbox.js"></script>`n  <script src="js/announcements.js"></script>
-  <script src="js/toolbar.js"></script>`n  <script>`n    if (typeof initParticles === 'function') initParticles(document.getElementById('particles'));`n  </script>
+  <script src="js/particles.js"></script>
+  <script src="js/notification-inbox.js"></script>
+  <script src="js/announcements.js"></script>
+  <script src="js/toolbar.js"></script>
+  <script>`n    if (typeof initParticles === 'function') initParticles(document.getElementById('particles'));`n  </script>
 </body>
 </html>
 
