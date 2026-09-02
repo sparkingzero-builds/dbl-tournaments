@@ -620,7 +620,6 @@
           .select('id, name, created_at, status')
           .order('created_at', { ascending: false });
 
-        console.log('[HoF] Tournaments:', tournaments?.length, 'error:', tErr?.message);
 
         if (!tournaments?.length) {
           grid.innerHTML = '<div class="champion-empty">No completed tournaments yet. Be the first champion!</div>';
