@@ -618,7 +618,6 @@
         const { data: tournaments } = await supabaseClient
           .from('tournaments')
           .select('id, name, created_at, start_date, status')
-          .in('status', ['completed', 'active'])
           .order('created_at', { ascending: false });
 
         if (!tournaments?.length) {
@@ -671,7 +670,7 @@
       // 2. Most Tournament Wins
       try {
         const { data: tournaments } = await supabaseClient.from('tournaments')
-          .select('id').eq('status', 'completed');
+          .select('id');
         if (tournaments?.length) {
           const winCounts = {};
           for (const t of tournaments) {
