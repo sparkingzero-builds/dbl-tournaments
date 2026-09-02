@@ -54,12 +54,15 @@ const AUTH = {
   getDiscordUsername() {
     if (!this.user) return null;
     const meta = this.user.user_metadata;
-    return meta?.preferred_username
-      || meta?.user_name
-      || meta?.custom_claims?.global_name
+    const username = meta?.custom_claims?.global_name
       || meta?.full_name
       || meta?.name
+      || meta?.preferred_username
+      || meta?.user_name
       || null;
+    console.log('[AUTH] Discord metadata:', JSON.stringify(meta, null, 2));
+    console.log('[AUTH] Resolved username:', username);
+    return username;
   },
 
   getDiscordId() {
