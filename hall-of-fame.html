@@ -598,20 +598,25 @@
     }
 
     async function getChampionForTournament(tournamentId) {
-      const { data: matches, error } = await supabaseClient
+      // Get all matches to determine if the final round is complete
+      const { data: allMatches } = await supabaseClient
         .from('matches')
         .select('winner_id, player1_id, player2_id, round, player1:signups!matches_player1_id_fkey(discord_username, team), player2:signups!matches_player2_id_fkey(discord_username, team)')
         .eq('tournament_id', tournamentId)
-        .not('winner_id', 'is', null)
-        .order('round', { ascending: false })
-        .limit(1);
-      console.log('[HoF] Tournament', tournamentId, '— matches:', matches, 'error:', error);
-      if (!matches?.length) return null;
-      const m = matches[0];
-      const isP1 = m.winner_id === m.player1_id;
-      const winner = isP1 ? m.player1 : m.player2;
+        .order('round', { ascending: false });
+      if (!allMatches?.length) return null;
+
+      // Find the final round (highest round number) — it should have exactly 1 match
+      const maxRound = allMatches[0].round;
+      const finalMatches = allMatches.filter(m => m.round === maxRound);
+      if (finalMatches.length !== 1) return null;
+
+      const final = finalMatches[0];
+      if (!final.winner_id) return null;
+
+      const isP1 = final.winner_id === final.player1_id;
+      const winner = isP1 ? final.player1 : final.player2;
       const w = Array.isArray(winner) ? winner[0] : winner;
-      console.log('[HoF] Winner:', w?.discord_username, 'isP1:', isP1, 'raw:', JSON.stringify(winner));
       return { name: w?.discord_username, team: w?.team };
     }
 
