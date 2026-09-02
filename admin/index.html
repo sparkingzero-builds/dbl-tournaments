@@ -3258,20 +3258,24 @@
           }
         }
 
-        // Save ban round history
-        const banHistory = currentTournament.ban_history || [];
-        const historyEntry = {
-          round: banHistory.length + 1,
-          timestamp: new Date().toISOString(),
-          mode: mode,
-          vote_tallies: sorted.map(([id, count]) => ({ character_id: id, votes: count })),
-          banned_ids: [...bannedIds],
-          total_voters: tSignups.filter(s => s.bans && s.bans.length > 0).length,
-          total_players: tSignups.length
-        };
-        banHistory.push(historyEntry);
-        await db.updateTournament(currentTournament.id, { ban_history: banHistory });
-        currentTournament.ban_history = banHistory;
+        // Save ban round history (non-blocking — column may not exist yet)
+        try {
+          const banHistory = currentTournament.ban_history || [];
+          const historyEntry = {
+            round: banHistory.length + 1,
+            timestamp: new Date().toISOString(),
+            mode: mode,
+            vote_tallies: sorted.map(([id, count]) => ({ character_id: id, votes: count })),
+            banned_ids: [...bannedIds],
+            total_voters: tSignups.filter(s => s.bans && s.bans.length > 0).length,
+            total_players: tSignups.length
+          };
+          banHistory.push(historyEntry);
+          await db.updateTournament(currentTournament.id, { ban_history: banHistory });
+          currentTournament.ban_history = banHistory;
+        } catch (histErr) {
+          console.warn('Could not save ban history:', histErr.message);
+        }
 
         setRebanFlag(false);
         signups = await db.getSignups(currentTournament.id);
