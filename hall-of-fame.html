@@ -617,10 +617,12 @@
     async function loadChampions() {
       const grid = document.getElementById('champions-grid');
       try {
-        const { data: tournaments } = await supabaseClient
+        const { data: tournaments, error: tErr } = await supabaseClient
           .from('tournaments')
           .select('id, name, created_at, start_date, status')
           .order('created_at', { ascending: false });
+
+        console.log('[HoF] Tournaments:', tournaments?.length, 'error:', tErr?.message);
 
         if (!tournaments?.length) {
           grid.innerHTML = '<div class="champion-empty">No completed tournaments yet. Be the first champion!</div>';

@@ -202,7 +202,7 @@ const NotifInbox = (() => {
     try {
       const { data: tournaments, error } = await supabaseClient
         .from('tournaments')
-        .select('id, name, status, date, created_at')
+        .select('id, name, status, start_date, created_at')
         .in('status', ['open', 'active'])
         .order('created_at', { ascending: false })
         .limit(3);
@@ -224,8 +224,8 @@ const NotifInbox = (() => {
               priority: 3
             });
             // Check if starting within 24 hours
-            if (t.date) {
-              const startTime = new Date(t.date).getTime();
+            if (t.start_date) {
+              const startTime = new Date(t.start_date).getTime();
               if (startTime > now && startTime <= in24h) {
                 items.push({
                   id: 'tourney_soon_' + t.id,
