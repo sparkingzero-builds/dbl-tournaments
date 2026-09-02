@@ -1394,6 +1394,7 @@
             <button class="btn btn-sm btn-secondary" onclick="setStatus('draft')">Draft</button>
             <button class="btn btn-sm btn-secondary" onclick="setStatus('signup')">Open Signups</button>
             <button class="btn btn-sm btn-danger" onclick="setStatus('banning')">Ban Phase</button>
+            <button class="btn btn-sm" style="border-color:var(--pink);color:var(--pink);" onclick="endBanPhase()">End Ban Phase</button>
             <button class="btn btn-sm btn-primary" onclick="setStatus('active')">Start Tournament</button>
             <button class="btn btn-sm btn-gold" onclick="setStatus('completed')">Complete</button>
           </div>
@@ -2562,13 +2563,72 @@
       }
     }
 
+    async function endBanPhase() {
+      if (!currentTournament) return;
+      if (currentTournament.status !== 'banning') {
+        NotificationSystem.show('Tournament is not in ban phase.', 'error');
+        return;
+      }
+      const tSignups = await db.getSignups(currentTournament.id);
+      const votedCount = tSignups.filter(s => s.bans && s.bans.length > 0).length;
+      if (!confirm(`End ban phase? ${votedCount}/${tSignups.length} players voted. This will finalize the bans and move back to signup phase.`)) return;
+
+      try {
+        const banCount = currentTournament.ban_count || 1;
+        const votes = {};
+        tSignups.forEach(s => {
+          if (s.bans && s.bans.length > 0) {
+            s.bans.forEach(id => { votes[id] = (votes[id] || 0) + 1; });
+          }
+        });
+        const sorted = Object.entries(votes).sort((a, b) => b[1] - a[1]);
+        const bannedIds = sorted.slice(0, banCount).map(([id]) => id);
+
+        if (bannedIds.length > 0) {
+          const existing = (currentTournament.tournament_bans || []).map(String);
+          const merged = [...new Set([...existing, ...bannedIds])];
+          await db.updateTournament(currentTournament.id, { tournament_bans: merged, status: 'signup' });
+          currentTournament.tournament_bans = merged;
+          currentTournament.status = 'signup';
+
+          let stripped = 0;
+          const allBanned = new Set(merged);
+          for (const s of tSignups) {
+            if (!s.team) continue;
+            const cleaned = s.team.filter(c => !allBanned.has(String(c.id)));
+            if (cleaned.length < s.team.length) {
+              await db.updateSignupBans(s.id, s.bans || [], cleaned);
+              stripped++;
+            }
+          }
+
+          const charNames = bannedIds.map(id => {
+            const c = allCharacters.find(ch => String(ch.id) === String(id));
+            return c ? c.name : 'Unknown';
+          }).join(', ');
+          NotificationSystem.show(`Ban phase ended. Banned: ${charNames}. Removed from ${stripped} team${stripped !== 1 ? 's' : ''}.`, 'success', 8000);
+        } else {
+          await db.updateTournament(currentTournament.id, { status: 'signup' });
+          currentTournament.status = 'signup';
+          NotificationSystem.show('Ban phase ended. No characters received votes.', 'info');
+        }
+
+        signups = await db.getSignups(currentTournament.id);
+        renderManualBanList();
+        loadBanResults();
+        renderTournamentPage();
+      } catch (e) {
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
     async function setStatus(status) {
       if (!currentTournament) {
         NotificationSystem.show('No tournament selected', 'error');
         return;
       }
       try {
-        // When moving from banning to active, strip banned chars from teams
+        // When moving from banning to active, finalize votes into tournament_bans and strip from teams
         if (status === 'active' && currentTournament.status === 'banning') {
           const tSignups = await db.getSignups(currentTournament.id);
           const banCount = currentTournament.ban_count || 1;
@@ -2582,10 +2642,17 @@
           const bannedIds = new Set(sorted.slice(0, banCount).map(([id]) => id));
 
           if (bannedIds.size > 0) {
+            // Save voted bans to tournament_bans
+            const existing = (currentTournament.tournament_bans || []).map(String);
+            const merged = [...new Set([...existing, ...bannedIds])];
+            await db.updateTournament(currentTournament.id, { tournament_bans: merged });
+            currentTournament.tournament_bans = merged;
+
             let stripped = 0;
             for (const s of tSignups) {
               if (!s.team) continue;
-              const cleaned = s.team.filter(c => !bannedIds.has(String(c.id)));
+              const allBanned = new Set(merged);
+              const cleaned = s.team.filter(c => !allBanned.has(String(c.id)));
               if (cleaned.length < s.team.length) {
                 await db.updateSignupBans(s.id, s.bans || [], cleaned);
                 stripped++;

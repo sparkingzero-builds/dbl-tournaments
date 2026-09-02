@@ -441,20 +441,14 @@
           container.parentNode.insertBefore(banner, container);
         } else if (tournament.status === 'active') {
           const signupsForBans = await db.getSignups(tournament.id);
-          const banVotes = {};
           const charMap = {};
           signupsForBans.forEach(s => {
-            if (s.bans && s.bans.length) s.bans.forEach(id => { banVotes[id] = (banVotes[id] || 0) + 1; });
             if (s.team) s.team.forEach(c => {
               const cObj = typeof c === 'object' ? c : { id: c, name: c };
               if (cObj.id) charMap[String(cObj.id)] = cObj;
             });
           });
-          const banCount = tournament.ban_count || 1;
-          const sortedBans = Object.entries(banVotes).sort((a, b) => b[1] - a[1]);
-          const voteBannedIds = sortedBans.slice(0, banCount).map(([id]) => String(id));
-          const tourneyBannedIds = (tournament.tournament_bans || []).map(String);
-          const allBannedIds = [...voteBannedIds, ...tourneyBannedIds];
+          const allBannedIds = (tournament.tournament_bans || []).map(String);
           if (allBannedIds.length > 0) {
             // Fill gaps in charMap from characters.json
             const missing = allBannedIds.filter(id => !charMap[id]);
@@ -526,17 +520,8 @@
       const signups = await db.getSignups(tournament.id);
       const matches = await db.getMatches(tournament.id);
 
-      // Compute global ban list from votes
+      // Only show officially banned characters (finalized via admin "End Ban")
       const bannedCharIds = new Set();
-      const votes = {};
-      signups.forEach(s => {
-        if (s.bans && s.bans.length > 0) {
-          s.bans.forEach(id => { votes[id] = (votes[id] || 0) + 1; });
-        }
-      });
-      const banCount = tournament.ban_count || 1;
-      const sorted = Object.entries(votes).sort((a, b) => b[1] - a[1]);
-      sorted.slice(0, banCount).forEach(([id]) => bannedCharIds.add(String(id)));
       (tournament.tournament_bans || []).forEach(id => bannedCharIds.add(String(id)));
 
       BracketManager.renderBracket(container, matches, signups, {
