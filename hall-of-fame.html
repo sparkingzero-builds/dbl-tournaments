@@ -632,29 +632,32 @@
 
         let html = '';
         for (const t of tournaments) {
-          const champ = await getChampionForTournament(t.id);
-          if (!champ?.name) continue;
-          let teamHtml = '';
-          if (champ?.team && Array.isArray(champ.team)) {
-            teamHtml = '<div class="champion-team">' +
-              champ.team.slice(0, 6).map(c =>
-                c.image ? `<img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}" title="${escapeHtml(c.name)}">` : ''
-              ).filter(Boolean).join('') + '</div>';
+          try {
+            const champ = await getChampionForTournament(t.id);
+            if (!champ?.name) continue;
+            let teamHtml = '';
+            if (champ?.team && Array.isArray(champ.team) && champ.team.length > 0) {
+              const teamImgs = champ.team.slice(0, 6).map(c => {
+                if (!c || !c.image) return '';
+                return `<img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name || '')}" title="${escapeHtml(c.name || '')}">`;
+              }).filter(Boolean).join('');
+              if (teamImgs) teamHtml = '<div class="champion-team">' + teamImgs + '</div>';
+            }
+            const dateStr = t.created_at ? new Date(t.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+            html += `<div class="champion-card">
+              <div class="champion-trophy">&#127942;</div>
+              <div class="champion-tournament">${escapeHtml(t.name)}</div>
+              <div class="champion-date">${dateStr}</div>
+              <div class="champion-name">${profileLink(champ.name)}</div>
+              ${teamHtml}
+            </div>`;
+          } catch (cardErr) {
+            console.error('[HoF] Error rendering card for tournament', t.id, cardErr);
           }
-          const date = t.created_at;
-          const dateStr = date ? new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-          html += `<div class="champion-card">
-            <div class="champion-trophy">&#127942;</div>
-            <div class="champion-tournament">${escapeHtml(t.name)}</div>
-            <div class="champion-date">${dateStr}</div>
-            <div class="champion-name">${champ?.name ? profileLink(champ.name) : '<span class="record-empty">Unknown</span>'}</div>
-            ${teamHtml}
-          </div>`;
         }
-        console.log('[HoF] Final html length:', html.length, 'tournaments checked:', tournaments.length);
         grid.innerHTML = html || '<div class="champion-empty">No champions found.</div>';
       } catch (e) {
-        console.error('Champions error:', e);
+        console.error('[HoF] Champions error:', e);
         grid.innerHTML = '<div class="champion-empty">Could not load champions.</div>';
       }
     }
