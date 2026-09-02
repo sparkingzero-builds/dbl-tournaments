@@ -177,6 +177,26 @@ const AUTH = {
           }
         }
       }
+
+      // Sync signups: link old signups to this Discord identity
+      const [byId, byName] = await Promise.all([
+        supabaseClient.from('signups').select('id, discord_username, discord_id').eq('discord_id', discordId),
+        supabaseClient.from('signups').select('id, discord_username, discord_id').ilike('discord_username', username)
+      ]);
+      const seen = new Set();
+      const allSignups = [...(byId.data || []), ...(byName.data || [])].filter(s => {
+        if (seen.has(s.id)) return false;
+        seen.add(s.id);
+        return true;
+      });
+      for (const s of allSignups) {
+        if (s.discord_id !== discordId || s.discord_username !== username) {
+          await supabaseClient
+            .from('signups')
+            .update({ discord_username: username, discord_id: discordId })
+            .eq('id', s.id);
+        }
+      }
     } catch (e) {
       // Non-critical — don't block login
     }
