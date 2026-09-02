@@ -459,28 +459,61 @@
     function showLoginOrVote() {
       clearVotePolling();
       const content = document.getElementById('ban-content');
+
+      // Block voting if not in banning phase (allow active for re-pick only)
+      if (tournament.status !== 'banning') {
+        // If active, allow re-pick flow for players who already voted
+        if (tournament.status === 'active') {
+          const saved = sessionStorage.getItem('ban_username');
+          if (saved) {
+            mySignup = signups.find(s => s.discord_username.toLowerCase() === saved.toLowerCase());
+            if (mySignup) {
+              showRepickIfNeeded();
+              return;
+            }
+          }
+          const allVoted = signups.every(s => s.bans && s.bans.length > 0);
+          if (allVoted && signups.length > 0) {
+            showActiveRepickLogin();
+            return;
+          }
+        }
+
+        // Show closed message
+        const bannedIds = (tournament.tournament_bans || []).map(String);
+        let bannedHtml = '';
+        if (bannedIds.length > 0) {
+          bannedHtml = '<div class="mt-3"><h4 style="color:var(--pink);margin-bottom:8px;">Banned Characters</h4><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">' +
+            bannedIds.map(id => {
+              const c = allChars.find(ch => String(ch.id) === id);
+              return c ? `<div style="text-align:center;"><img src="${esc(c.image)}" style="width:48px;height:48px;border-radius:8px;border:2px solid var(--pink);opacity:0.5;filter:grayscale(1);" onerror="this.style.display='none'" /><div style="font-size:11px;color:var(--pink);margin-top:4px;">${esc(c.name)}</div></div>` : '';
+            }).join('') + '</div></div>';
+        }
+
+        content.innerHTML = `
+          <div class="ban-header">
+            <h1 class="ban-title" style="color:var(--muted);">Ban Voting Closed</h1>
+            <p class="ban-subtitle">Voting is not currently open for ${esc(tournament.name)}.</p>
+          </div>
+          <div class="ban-login">
+            <div class="card" style="border-color:var(--muted);">
+              <p class="text-muted" style="text-align:center;">The tournament organiser hasn't opened ban voting yet, or voting has already ended.</p>
+              ${bannedHtml}
+            </div>
+          </div>`;
+        return;
+      }
+
       const saved = sessionStorage.getItem('ban_username');
 
       if (saved) {
         mySignup = signups.find(s => s.discord_username.toLowerCase() === saved.toLowerCase());
         if (mySignup) {
           if (mySignup.bans && mySignup.bans.length > 0) {
-            if (tournament.status === 'active') {
-              showRepickIfNeeded();
-            } else {
-              showVoteSubmitted();
-            }
+            showVoteSubmitted();
             return;
           }
           showVotePage();
-          return;
-        }
-      }
-
-      if (tournament.status === 'active') {
-        const allVoted = signups.every(s => s.bans && s.bans.length > 0);
-        if (allVoted && signups.length > 0) {
-          showActiveRepickLogin();
           return;
         }
       }
