@@ -598,7 +598,6 @@
     }
 
     async function getChampionForTournament(tournamentId) {
-      // Get all matches to determine if the final round is complete
       const { data: allMatches } = await supabaseClient
         .from('matches')
         .select('winner_id, player1_id, player2_id, round, player1:signups!matches_player1_id_fkey(discord_username, team), player2:signups!matches_player2_id_fkey(discord_username, team)')
@@ -606,14 +605,15 @@
         .order('round', { ascending: false });
       if (!allMatches?.length) return null;
 
-      // Find the final round (highest round number) — it should have exactly 1 match
+      // Every match must have a winner (tournament fully completed)
+      if (allMatches.some(m => !m.winner_id)) return null;
+
+      // Grand final is the single match in the highest round
       const maxRound = allMatches[0].round;
       const finalMatches = allMatches.filter(m => m.round === maxRound);
       if (finalMatches.length !== 1) return null;
 
       const final = finalMatches[0];
-      if (!final.winner_id) return null;
-
       const isP1 = final.winner_id === final.player1_id;
       const winner = isP1 ? final.player1 : final.player2;
       const w = Array.isArray(winner) ? winner[0] : winner;
