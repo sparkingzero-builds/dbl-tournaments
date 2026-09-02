@@ -447,46 +447,38 @@
       <button class="nav-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">☰</button>
       <ul class="navbar-links">
         <li><a href="index.html">Home</a></li>
-        <li><a href="tournament.html">Tournament</a></li>
-        <li><a href="bracket.html">Bracket</a></li>
-        <li><a href="shop.html">Shop</a></li>
+        <li class="nav-dropdown">
+          <a href="#">Tournament ▾</a>
+          <div class="nav-dropdown-menu">
+            <a href="tournament.html">Tournament</a>
+            <a href="bracket.html">Bracket</a>
+            <a href="fight-night.html">Fight Night</a>
+            <a href="draft.html">Draft</a>
+            <a href="banpick.html">Ban Phase</a>
+            <a href="world-tournament.html">World Tournament</a>
+          </div>
+        </li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li class="nav-dropdown">
+          <a href="#">Characters ▾</a>
+          <div class="nav-dropdown-menu">
+            <a href="characters.html">Characters</a>
+            <a href="tierlist.html">Tier List</a>
+            <a href="compare.html">Compare</a>
+          </div>
+        </li>
         <li><a href="profile.html">Profile</a></li>
         <li class="nav-dropdown">
           <a href="#">More ▾</a>
           <div class="nav-dropdown-menu">
-            <div class="dropdown-label">Tournament</div>
-            <a href="banpick.html">Ban Phase</a>
-            <a href="draft.html">Draft</a>
-            <a href="fight-night.html">Fight Night</a>
-            <a href="matches.html">Matches</a>
-            <a href="history.html">History</a>
-            <div class="dropdown-divider"></div>
-            <div class="dropdown-label">Stats</div>
-            <a href="rankings.html">Rankings</a>
-            <a href="tierlist.html">Tier List</a>
-            <a href="power-rankings.html">Power Rankings</a>
-            <a href="analytics.html">Ban Analytics</a>
-            <a href="meta.html">Character Meta</a>
-            <a href="compare.html">Compare</a>
+            <a href="matches.html">Match History</a>
+            <a href="analytics.html">Analytics</a>
             <a href="hall-of-fame.html">Hall of Fame</a>
-            <div class="dropdown-divider"></div>
-            <div class="dropdown-label">Characters</div>
-            <a href="characters.html">Characters</a>
-            <a href="recap.html">Recap</a>
             <a href="mvp-vote.html">MVP Vote</a>
             <div class="dropdown-divider"></div>
-            <div class="dropdown-label">Social</div>
-            <a href="clans.html">Clans</a>
-            <a href="rivalries.html">Rivalries</a>
-            <a href="feed.html">Live Feed</a>
-            <a href="bounty.html">Bounty</a>
-            <div class="dropdown-divider"></div>
-            <div class="dropdown-label">Economy</div>
-            <a href="casino.html">Casino</a>
-            <a href="betting.html">Betting</a>
-            <a href="auction.html">Auction</a>
             <a href="season.html">Season</a>
-            <a href="world-tournament.html">World Tournament</a>
+            <a href="shop.html">Shop</a>
+            <a href="casino.html">Casino</a>
           </div>
         </li>
       </ul>
