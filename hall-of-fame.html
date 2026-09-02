@@ -610,8 +610,9 @@
       const m = matches[0];
       const isP1 = m.winner_id === m.player1_id;
       const winner = isP1 ? m.player1 : m.player2;
-      console.log('[HoF] Winner:', winner?.discord_username, 'isP1:', isP1);
-      return { name: winner?.discord_username, team: winner?.team };
+      const w = Array.isArray(winner) ? winner[0] : winner;
+      console.log('[HoF] Winner:', w?.discord_username, 'isP1:', isP1, 'raw:', JSON.stringify(winner));
+      return { name: w?.discord_username, team: w?.team };
     }
 
     async function loadChampions() {
@@ -650,6 +651,7 @@
             ${teamHtml}
           </div>`;
         }
+        console.log('[HoF] Final html length:', html.length, 'tournaments checked:', tournaments.length);
         grid.innerHTML = html || '<div class="champion-empty">No champions found.</div>';
       } catch (e) {
         console.error('Champions error:', e);
