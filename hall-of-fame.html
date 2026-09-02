@@ -620,7 +620,7 @@
       try {
         const { data: tournaments, error: tErr } = await supabaseClient
           .from('tournaments')
-          .select('id, name, created_at, start_date, status')
+          .select('id, name, created_at, status')
           .order('created_at', { ascending: false });
 
         console.log('[HoF] Tournaments:', tournaments?.length, 'error:', tErr?.message);
@@ -641,7 +641,7 @@
                 c.image ? `<img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}" title="${escapeHtml(c.name)}">` : ''
               ).filter(Boolean).join('') + '</div>';
           }
-          const date = t.start_date || t.created_at;
+          const date = t.created_at;
           const dateStr = date ? new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
           html += `<div class="champion-card">
             <div class="champion-trophy">&#127942;</div>

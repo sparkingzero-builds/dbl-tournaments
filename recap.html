@@ -296,7 +296,7 @@
       // Load completed tournaments
       const { data: tournaments } = await supabaseClient
         .from('tournaments')
-        .select('id, name, created_at, start_date, status')
+        .select('id, name, created_at, status')
         .eq('status', 'completed')
         .order('created_at', { ascending: false });
 
@@ -491,7 +491,7 @@
         const totalRounds = maxRound || '--';
 
         // Format date
-        const dateRaw = tournament.start_date || tournament.created_at;
+        const dateRaw = tournament.created_at;
         const dateStr = dateRaw ? new Date(dateRaw).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
 
         // Build HTML
