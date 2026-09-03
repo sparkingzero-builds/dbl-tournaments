@@ -551,6 +551,38 @@
   .profile-dd-links .dd-banned-btn:hover { background: rgba(255,71,87,0.1); }
   .profile-dd-tournament { font-size: 10px; color: var(--cyan); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 6px; }
   .profile-dd-nologin { font-size: 12px; color: var(--muted); padding: 8px 0; }
+
+  /* Hero profile card */
+  .hero-profile-card {
+    margin-top: 28px;
+    background: rgba(26,21,53,0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(46,39,85,0.5);
+    border-radius: 14px;
+    padding: 18px 24px;
+    max-width: 420px;
+    margin-left: auto; margin-right: auto;
+    text-align: center;
+    transition: border-color 0.3s;
+  }
+  .hero-profile-card:hover { border-color: rgba(0,229,255,0.2); }
+  .hero-profile-card .hpc-title { font-size: 10px; color: var(--cyan); text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 12px; }
+  .hero-profile-card .hpc-team { display: flex; justify-content: center; gap: 12px; margin-bottom: 14px; }
+  .hero-profile-card .hpc-char { text-align: center; }
+  .hero-profile-card .hpc-char img { width: 64px; height: 64px; border-radius: 10px; border: 2px solid var(--line); object-fit: cover; transition: border-color 0.2s, transform 0.2s; }
+  .hero-profile-card .hpc-char img:hover { transform: scale(1.08); border-color: var(--cyan); }
+  .hero-profile-card .hpc-char.banned img { border-color: var(--red); opacity: 0.4; filter: grayscale(0.8); }
+  .hero-profile-card .hpc-char .hpc-name { font-size: 10px; color: var(--muted); margin-top: 4px; max-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hero-profile-card .hpc-char .hpc-banned { font-size: 8px; color: var(--red); text-transform: uppercase; font-weight: 700; }
+  .hero-profile-card .hpc-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .hero-profile-card .hpc-actions a { font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.04em; transition: background 0.2s, transform 0.2s; }
+  .hero-profile-card .hpc-actions a:hover { transform: translateY(-1px); }
+  .hpc-profile-btn { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.3); color: var(--cyan); }
+  .hpc-profile-btn:hover { background: rgba(0,229,255,0.18); }
+  .hpc-repick-btn { background: rgba(255,71,87,0.1); border: 1px solid rgba(255,71,87,0.3); color: var(--red); }
+  .hpc-repick-btn:hover { background: rgba(255,71,87,0.18); }
+  .hpc-login-msg { color: var(--muted); font-size: 13px; }
+  .hpc-login-msg a { color: var(--cyan); font-weight: 600; }
   </style>
 </head>
 <body class="scanlines">
@@ -619,7 +651,10 @@
     <div class="hero-cta">
       <a href="tournament.html" class="btn btn-primary btn-lg">Enter Tournament</a>
       <a href="bracket.html" class="btn btn-secondary btn-lg">View Bracket</a>
+      <a href="profile.html" class="btn btn-secondary btn-lg" id="hero-profile-btn" style="display:none;">My Profile</a>
     </div>
+
+    <div class="hero-profile-card" id="hero-profile-card" style="display:none;"></div>
   </section>
 
   <!-- ── How It Works ── -->
@@ -760,6 +795,8 @@
 
     async function loadProfileDropdown() {
       const dd = document.getElementById('profile-dropdown');
+      const heroCard = document.getElementById('hero-profile-card');
+      const heroBtn = document.getElementById('hero-profile-btn');
       if (!dd) return;
       try {
         await new Promise(r => setTimeout(r, 500));
@@ -767,6 +804,7 @@
           dd.innerHTML = '<div class="profile-dd-nologin">Log in with Discord to see your team</div><div class="profile-dd-links"><a href="profile.html">View Profile</a></div>';
           return;
         }
+        if (heroBtn) { heroBtn.style.display = ''; heroBtn.href = 'profile.html?player=' + encodeURIComponent(AUTH.getDiscordUsername() || ''); }
         const username = AUTH.getDiscordUsername();
         if (!username) return;
 
@@ -786,6 +824,10 @@
 
         if (!mySignup || !mySignup.team || !mySignup.team.length) {
           dd.innerHTML = `<div class="profile-dd-tournament">${esc(tournament.name)}</div><div class="profile-dd-nologin">You haven't picked a team yet</div><div class="profile-dd-links"><a href="tournament.html">Sign Up</a><a href="profile.html?player=${encodeURIComponent(username)}">My Profile</a></div>`;
+          if (heroCard) {
+            heroCard.style.display = '';
+            heroCard.innerHTML = `<div class="hpc-title">${esc(tournament.name)}</div><div class="hpc-login-msg">You haven't picked a team yet</div><div class="hpc-actions" style="margin-top:12px"><a href="tournament.html" class="hpc-profile-btn">Sign Up Now</a></div>`;
+          }
           return;
         }
 
@@ -798,21 +840,26 @@
         const hasBanned = teamParsed.some(t => bans.includes(String(t.id)));
 
         let html = `<div class="profile-dd-tournament">${esc(tournament.name)}</div><div class="profile-dd-team">`;
+        let heroHtml = `<div class="hpc-title">Your Team — ${esc(tournament.name)}</div><div class="hpc-team">`;
         teamParsed.forEach(t => {
           const isBanned = bans.includes(String(t.id));
-          html += `<div class="profile-dd-char ${isBanned ? 'banned' : ''}">
-            <img src="${t.image || ''}" alt="${esc(t.name || '?')}" onerror="this.style.display='none'" />
-            <div class="char-name">${esc(t.name || 'Unknown')}</div>
-            ${isBanned ? '<div class="banned-tag">Banned</div>' : ''}
-          </div>`;
+          const charCard = `<img src="${t.image || ''}" alt="${esc(t.name || '?')}" onerror="this.style.display='none'" />
+            <div class="${isBanned ? 'hpc-banned' : 'hpc-name'} char-name">${isBanned ? 'Banned' : esc(t.name || 'Unknown')}</div>`;
+          html += `<div class="profile-dd-char ${isBanned ? 'banned' : ''}">${charCard}</div>`;
+          heroHtml += `<div class="hpc-char ${isBanned ? 'banned' : ''}">${charCard}</div>`;
         });
         html += '</div><div class="profile-dd-links">';
         html += `<a href="profile.html?player=${encodeURIComponent(username)}">My Profile</a>`;
+        heroHtml += '</div><div class="hpc-actions">';
+        heroHtml += `<a href="profile.html?player=${encodeURIComponent(username)}" class="hpc-profile-btn">My Profile</a>`;
         if (hasBanned) {
           html += `<a href="tournament.html#repick" class="dd-banned-btn">⚠ Banned Characters — Repick Team</a>`;
+          heroHtml += `<a href="tournament.html#repick" class="hpc-repick-btn">⚠ Repick Team</a>`;
         }
         html += '</div>';
+        heroHtml += '</div>';
         dd.innerHTML = html;
+        if (heroCard) { heroCard.style.display = ''; heroCard.innerHTML = heroHtml; }
       } catch (e) {
         console.warn('Profile dropdown error:', e);
         dd.innerHTML = '<div class="profile-dd-links"><a href="profile.html">View Profile</a></div>';
