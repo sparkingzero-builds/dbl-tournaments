@@ -292,7 +292,7 @@
       try {
         const [charResp, { data: tournaments }] = await Promise.all([
           fetch('data/characters.json'),
-          supabaseClient.from('tournaments').select('id').order('created_at', { ascending: false })
+          supabaseClient.from('tournaments').select('id, name, tournament_bans').order('created_at', { ascending: false })
         ]);
         const allChars = await charResp.json();
         const charMap = {};
@@ -303,26 +303,18 @@
         let tournamentsWithBans = 0;
 
         for (const t of (tournaments || [])) {
-          const { data: signups } = await supabaseClient
-            .from('signups')
-            .select('bans')
-            .eq('tournament_id', t.id);
-
-          let hadBans = false;
-          (signups || []).forEach(s => {
-            if (!s.bans || !Array.isArray(s.bans) || s.bans.length === 0) return;
-            s.bans.forEach(b => {
-              if (!b) return;
-              const key = typeof b === 'object' ? String(b.id) : String(b);
-              if (!key) return;
-              const char = charMap[key];
-              if (!banCounts[key]) banCounts[key] = { id: key, name: char?.name || 'Unknown', image: char?.image || '', count: 0 };
-              banCounts[key].count++;
-              totalBanEvents++;
-              hadBans = true;
-            });
+          const bans = t.tournament_bans;
+          if (!bans || !Array.isArray(bans) || bans.length === 0) continue;
+          tournamentsWithBans++;
+          bans.forEach(b => {
+            if (!b) return;
+            const key = typeof b === 'object' ? String(b.id || b) : String(b);
+            if (!key) return;
+            const char = charMap[key];
+            if (!banCounts[key]) banCounts[key] = { id: key, name: char?.name || 'Unknown', image: char?.image || '', count: 0 };
+            banCounts[key].count++;
+            totalBanEvents++;
           });
-          if (hadBans) tournamentsWithBans++;
         }
 
         const sorted = Object.values(banCounts).sort((a, b) => b.count - a.count);
@@ -359,7 +351,8 @@
         const elCounts = {};
         sorted.forEach(b => {
           const char = charMap[String(b.id)];
-          const el = elementNames[char?.element] || 'UNK';
+          const raw = char?.element || 'UNK';
+          const el = elementNames[raw] || raw;
           elCounts[el] = (elCounts[el] || 0) + b.count;
         });
 
