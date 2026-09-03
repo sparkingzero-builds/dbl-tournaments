@@ -535,6 +535,22 @@
       .quick-links-grid { grid-template-columns: 1fr; }
       .stats-bar { gap: 8px; }
     }
+  /* Profile dropdown */
+  .profile-dropdown { min-width: 260px; padding: 12px !important; }
+  .profile-dd-loading { color: var(--muted); font-size: 13px; padding: 8px; }
+  .profile-dd-team { display: flex; gap: 8px; margin-bottom: 10px; }
+  .profile-dd-char { text-align: center; flex: 1; }
+  .profile-dd-char img { width: 60px; height: 60px; border-radius: 8px; border: 2px solid var(--line); object-fit: cover; }
+  .profile-dd-char.banned img { border-color: var(--red); opacity: 0.4; filter: grayscale(0.8); }
+  .profile-dd-char .char-name { font-size: 9px; color: var(--muted); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70px; }
+  .profile-dd-char .banned-tag { font-size: 8px; color: var(--red); text-transform: uppercase; font-weight: 700; }
+  .profile-dd-links { display: flex; flex-direction: column; gap: 4px; }
+  .profile-dd-links a { display: block; padding: 6px 10px; border-radius: 6px; color: var(--text); font-size: 12px; font-weight: 600; transition: background 0.2s; }
+  .profile-dd-links a:hover { background: rgba(0,229,255,0.08); }
+  .profile-dd-links .dd-banned-btn { color: var(--red); border: 1px solid rgba(255,71,87,0.3); }
+  .profile-dd-links .dd-banned-btn:hover { background: rgba(255,71,87,0.1); }
+  .profile-dd-tournament { font-size: 10px; color: var(--cyan); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .profile-dd-nologin { font-size: 12px; color: var(--muted); padding: 8px 0; }
   </style>
 </head>
 <body class="scanlines">
@@ -564,7 +580,12 @@
             <a href="compare.html">Compare</a>
           </div>
         </li>
-        <li><a href="profile.html">Profile</a></li>
+        <li class="nav-dropdown" id="profile-nav-item">
+          <a href="profile.html">Profile ▾</a>
+          <div class="nav-dropdown-menu profile-dropdown" id="profile-dropdown">
+            <div class="profile-dd-loading">Loading...</div>
+          </div>
+        </li>
         <li class="nav-dropdown">
           <a href="#">More ▾</a>
           <div class="nav-dropdown-menu">
@@ -727,15 +748,78 @@
     initParticles(document.getElementById('particles'));
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // Load all sections in parallel
       await Promise.allSettled([
         loadTournament(),
         loadStats(),
         loadTopPlayers(),
         loadActivity(),
-        loadVillainAlert()
+        loadVillainAlert(),
+        loadProfileDropdown()
       ]);
     });
+
+    async function loadProfileDropdown() {
+      const dd = document.getElementById('profile-dropdown');
+      if (!dd) return;
+      try {
+        await new Promise(r => setTimeout(r, 500));
+        if (typeof AUTH === 'undefined' || !AUTH.isLoggedIn()) {
+          dd.innerHTML = '<div class="profile-dd-nologin">Log in with Discord to see your team</div><div class="profile-dd-links"><a href="profile.html">View Profile</a></div>';
+          return;
+        }
+        const username = AUTH.getDiscordUsername();
+        if (!username) return;
+
+        const charResp = await fetch('data/characters.json');
+        const allChars = await charResp.json();
+        const charMap = {};
+        allChars.forEach(c => { charMap[String(c.id)] = c; });
+
+        const tournament = await db.getActiveTournament();
+        if (!tournament) {
+          dd.innerHTML = `<div class="profile-dd-nologin">No active tournament</div><div class="profile-dd-links"><a href="profile.html?player=${encodeURIComponent(username)}">My Profile</a></div>`;
+          return;
+        }
+
+        const signups = await db.getSignups(tournament.id);
+        const mySignup = signups.find(s => s.discord_username?.toLowerCase() === username.toLowerCase());
+
+        if (!mySignup || !mySignup.team || !mySignup.team.length) {
+          dd.innerHTML = `<div class="profile-dd-tournament">${esc(tournament.name)}</div><div class="profile-dd-nologin">You haven't picked a team yet</div><div class="profile-dd-links"><a href="tournament.html">Sign Up</a><a href="profile.html?player=${encodeURIComponent(username)}">My Profile</a></div>`;
+          return;
+        }
+
+        const bans = (tournament.tournament_bans || []).map(b => String(typeof b === 'object' ? b.id : b));
+        const teamParsed = mySignup.team.map(t => {
+          if (typeof t === 'object' && t.id != null) return t;
+          const c = charMap[String(t)];
+          return c || { id: t, name: 'Unknown', image: '' };
+        });
+        const hasBanned = teamParsed.some(t => bans.includes(String(t.id)));
+
+        let html = `<div class="profile-dd-tournament">${esc(tournament.name)}</div><div class="profile-dd-team">`;
+        teamParsed.forEach(t => {
+          const isBanned = bans.includes(String(t.id));
+          html += `<div class="profile-dd-char ${isBanned ? 'banned' : ''}">
+            <img src="${t.image || ''}" alt="${esc(t.name || '?')}" onerror="this.style.display='none'" />
+            <div class="char-name">${esc(t.name || 'Unknown')}</div>
+            ${isBanned ? '<div class="banned-tag">Banned</div>' : ''}
+          </div>`;
+        });
+        html += '</div><div class="profile-dd-links">';
+        html += `<a href="profile.html?player=${encodeURIComponent(username)}">My Profile</a>`;
+        if (hasBanned) {
+          html += `<a href="tournament.html#repick" class="dd-banned-btn">⚠ Banned Characters — Repick Team</a>`;
+        }
+        html += '</div>';
+        dd.innerHTML = html;
+      } catch (e) {
+        console.warn('Profile dropdown error:', e);
+        dd.innerHTML = '<div class="profile-dd-links"><a href="profile.html">View Profile</a></div>';
+      }
+    }
+
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
     // ── Tournament Card ──
     async function loadTournament() {
