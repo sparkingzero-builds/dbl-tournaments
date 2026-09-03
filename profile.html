@@ -1111,6 +1111,156 @@
       .hero-chars { flex-wrap: wrap; }
       .hero-char { width: 56px; height: 56px; }
     }
+
+    /* ── My Team Tab ── */
+    .team-tournament-name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+
+    .team-roster {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .team-char-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      text-align: center;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .team-char-card:hover {
+      border-color: rgba(0, 229, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .team-char-card.banned {
+      opacity: 0.6;
+      border-color: rgba(255, 71, 87, 0.3);
+    }
+
+    .team-char-img-wrap {
+      position: relative;
+      aspect-ratio: 1;
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    .team-char-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .team-char-banned-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 71, 87, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .team-char-banned-overlay span {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 14px;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 0.12em;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      background: rgba(255, 71, 87, 0.7);
+      padding: 4px 12px;
+      border-radius: 4px;
+    }
+
+    .team-char-name {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 8px 2px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .team-char-status {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 2px 8px 8px;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    .team-char-status.active { color: var(--green); }
+    .team-char-status.banned { color: var(--red); }
+
+    .team-ban-notice {
+      background: rgba(255, 71, 87, 0.08);
+      border: 1px solid rgba(255, 71, 87, 0.2);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .team-quick-links {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    .team-quick-links h4 {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .quick-links-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
+    }
+
+    .team-qlink {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+
+    .team-qlink:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 <body class="scanlines">
@@ -1334,9 +1484,31 @@
         });
         const topChars = Object.values(charCounts).sort((a, b) => b.count - a.count).slice(0, 6);
 
+        // Check if own profile
+        const isOwnProfile = typeof AUTH !== 'undefined' && AUTH.isLoggedIn() && AUTH.getDiscordUsername()?.toLowerCase() === playerName.toLowerCase();
+
+        // Get active tournament team data
+        let activeTeamData = null;
+        try {
+          const activeTournament = await db.getActiveTournament();
+          if (activeTournament) {
+            const activeSignup = signups.find(s => s.tournament_id === activeTournament.id);
+            if (activeSignup && activeSignup.team && activeSignup.team.length) {
+              activeTeamData = {
+                tournament: activeTournament,
+                signup: activeSignup,
+                team: activeSignup.team,
+                bans: activeTournament.tournament_bans || [],
+                allowRepick: !!activeTournament.allow_repick
+              };
+            }
+          }
+        } catch (e) {}
+
         // Build sidebar nav items
         const navItems = [
           { id: 'overview', icon: '🎮', label: 'Overview' },
+          { id: 'team', icon: '🛡️', label: 'My Team' },
           { id: 'matches', icon: '⚔️', label: 'Matches', count: totalMatches },
           { id: 'bounty', icon: '💰', label: 'Bounty' },
           { id: 'achievements', icon: '🏆', label: 'Achievements' },
@@ -1465,6 +1637,51 @@
                     <div id="profile-activity" class="scroll-area">
                       <div class="empty-msg">Loading...</div>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab: My Team -->
+              <div class="tab-panel" id="tab-team">
+                <div class="panel-header">
+                  <span class="ph-icon">🛡️</span> My Team
+                </div>
+                ${activeTeamData ? `
+                  <div class="team-tournament-name">${esc(activeTeamData.tournament.name)}</div>
+                  <div class="team-roster">
+                    ${activeTeamData.team.map(c => {
+                      const isBanned = activeTeamData.bans.some(b => String(b) === String(c.id));
+                      return `<div class="team-char-card ${isBanned ? 'banned' : ''}">
+                        <div class="team-char-img-wrap">
+                          <img src="${c.image}" alt="${esc(c.name)}" onerror="this.style.display='none'" />
+                          ${isBanned ? '<div class="team-char-banned-overlay"><span>BANNED</span></div>' : ''}
+                        </div>
+                        <div class="team-char-name">${esc(c.name)}</div>
+                        ${isBanned ? '<div class="team-char-status banned">Removed from play</div>' : '<div class="team-char-status active">Active</div>'}
+                      </div>`;
+                    }).join('')}
+                  </div>
+                  ${activeTeamData.bans.some(b => activeTeamData.team.some(c => String(c.id) === String(b))) ? `
+                    <div class="team-ban-notice">
+                      <span>⚠️</span> Some of your characters were banned by community vote. ${activeTeamData.allowRepick && isOwnProfile ? 'You can repick your team below.' : ''}
+                    </div>
+                  ` : ''}
+                  ${activeTeamData.allowRepick && isOwnProfile ? `
+                    <a href="tournament.html" class="btn btn-primary mt-2" style="display:inline-block;">Repick Team</a>
+                  ` : ''}
+                ` : `
+                  <div class="empty-msg">You don't have a team in the current tournament. <a href="tournament.html" style="color:var(--cyan);">Sign up here</a>.</div>
+                `}
+
+                <div class="team-quick-links">
+                  <h4>Quick Links</h4>
+                  <div class="quick-links-row">
+                    <a href="tournament.html" class="team-qlink"><span>📝</span> Tournament</a>
+                    <a href="bracket.html" class="team-qlink"><span>📊</span> Bracket</a>
+                    <a href="banpick.html" class="team-qlink"><span>🗳️</span> Ban Phase</a>
+                    <a href="rankings.html" class="team-qlink"><span>🏅</span> Rankings</a>
+                    <a href="shop.html" class="team-qlink"><span>🛒</span> Shop</a>
+                    <a href="season.html" class="team-qlink"><span>🎖️</span> Season</a>
                   </div>
                 </div>
               </div>
