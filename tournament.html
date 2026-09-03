@@ -722,7 +722,7 @@
 
       try {
         // Determine rounds from matches
-        const { data: matches } = await supabaseClient.from('matches').select('round, winner').eq('tournament_id', currentTournament.id);
+        const { data: matches } = await supabaseClient.from('matches').select('round, winner_id').eq('tournament_id', currentTournament.id);
         if (!matches || !matches.length) {
           document.getElementById('pr-content').innerHTML = '<p class="text-muted">No matches yet.</p>';
           return;
@@ -730,7 +730,7 @@
 
         const rounds = [...new Set(matches.map(m => m.round))].sort((a, b) => a - b);
         // Current round = max round with incomplete matches
-        const roundsWithIncomplete = rounds.filter(r => matches.some(m => m.round === r && !m.winner));
+        const roundsWithIncomplete = rounds.filter(r => matches.some(m => m.round === r && !m.winner_id));
         prCurrentRound = roundsWithIncomplete.length ? Math.min(...roundsWithIncomplete) : Math.max(...rounds);
 
         // Round selector
