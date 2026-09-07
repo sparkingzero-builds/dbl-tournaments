@@ -2816,9 +2816,9 @@
       if (!confirm('This will recalculate ELO ratings from all completed tournament matches. Continue?')) return;
 
       try {
-        const tournaments = await db.getCompletedTournaments();
+        const tournaments = await db.getAllTournaments();
         if (!tournaments.length) {
-          NotificationSystem.show('No completed tournaments found', 'warning');
+          NotificationSystem.show('No tournaments found', 'warning');
           return;
         }
 
@@ -2857,6 +2857,11 @@
             playerElos[p1Name] = p1Elo + p1Change;
             playerElos[p2Name] = p2Elo + p2Change;
 
+            if (!playerStats[p1Name]) playerStats[p1Name] = { wins: 0, losses: 0, tourneys: new Set(), peak: 1000 };
+            if (!playerStats[p2Name]) playerStats[p2Name] = { wins: 0, losses: 0, tourneys: new Set(), peak: 1000 };
+            playerStats[p1Name].peak = Math.max(playerStats[p1Name].peak, playerElos[p1Name]);
+            playerStats[p2Name].peak = Math.max(playerStats[p2Name].peak, playerElos[p2Name]);
+
             if (p1Won) {
               playerStats[p1Name].wins++;
               playerStats[p2Name].losses++;
@@ -2881,7 +2886,7 @@
               wins: stats.wins,
               losses: stats.losses,
               tournaments_played: stats.tourneys.size,
-              peak_elo: elo,
+              peak_elo: stats.peak || elo,
               updated_at: new Date().toISOString()
             }, { onConflict: 'discord_username' });
           if (error) throw error;
