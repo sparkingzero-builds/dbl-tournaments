@@ -383,6 +383,36 @@ const NotifInbox = (() => {
       });
     } catch (e) { console.warn('NotifInbox: points error', e); }
 
+    // ELO changes
+    try {
+      const { data: eloData } = await supabaseClient
+        .from('elo_ratings')
+        .select('elo, wins, losses, peak_elo, updated_at')
+        .ilike('discord_username', username)
+        .limit(1)
+        .maybeSingle();
+      if (eloData && eloData.updated_at) {
+        const lastEloKey = 'dbl_last_elo_' + username;
+        let lastKnown = null;
+        try { lastKnown = JSON.parse(localStorage.getItem(lastEloKey)); } catch {}
+        if (lastKnown && lastKnown.elo !== eloData.elo) {
+          const delta = eloData.elo - lastKnown.elo;
+          const isUp = delta > 0;
+          items.push({
+            id: 'elo_change_' + eloData.updated_at,
+            type: isUp ? 'elo_up' : 'elo_down',
+            icon: isUp ? '&#x1F4C8;' : '&#x1F4C9;',
+            title: isUp ? 'ELO Increased!' : 'ELO Decreased',
+            body: `Your ELO ${isUp ? 'rose' : 'dropped'} by <strong style="color:var(--${isUp ? 'green' : 'red'});">${isUp ? '+' : ''}${delta}</strong> to <strong>${eloData.elo.toLocaleString()}</strong>${eloData.elo >= (eloData.peak_elo || 0) ? ' — New Peak!' : ''}`,
+            time: eloData.updated_at,
+            action: pathPrefix + 'rankings.html',
+            priority: 2
+          });
+        }
+        try { localStorage.setItem(lastEloKey, JSON.stringify({ elo: eloData.elo, updated_at: eloData.updated_at })); } catch {}
+      }
+    } catch (e) { console.warn('NotifInbox: elo error', e); }
+
     try {
       const { data: shopItems, error } = await supabaseClient
         .from('shop_items')

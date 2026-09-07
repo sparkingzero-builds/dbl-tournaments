@@ -966,6 +966,21 @@ function subscribeToChanges(tournamentId, handlers = {}) {
   return channel;
 }
 
+function subscribeToEloChanges(handler) {
+  if (!supabaseClient) return null;
+  const channel = supabaseClient.channel('elo-live')
+    .on('postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'elo_ratings' },
+      (payload) => handler(payload)
+    )
+    .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'elo_ratings' },
+      (payload) => handler(payload)
+    )
+    .subscribe();
+  return channel;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initSupabase();
 });

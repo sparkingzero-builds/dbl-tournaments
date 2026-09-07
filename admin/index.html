@@ -2329,6 +2329,21 @@
               } catch (streakErr) {
                 console.error('Streak update error:', streakErr);
               }
+
+              // Live ELO update
+              try {
+                const winnerEloData = await db.getPlayerElo(winnerName);
+                const loserEloData = await db.getPlayerElo(loserName);
+                const winnerElo = winnerEloData?.elo || 1000;
+                const loserElo = loserEloData?.elo || 1000;
+                const winnerDelta = calculateEloChange(winnerElo, loserElo, true);
+                const loserDelta = calculateEloChange(loserElo, winnerElo, false);
+                await db.updateElo(winnerName, winnerDelta, true);
+                await db.updateElo(loserName, loserDelta, false);
+                console.log(`ELO updated: ${winnerName} ${winnerDelta > 0 ? '+' : ''}${winnerDelta}, ${loserName} ${loserDelta > 0 ? '+' : ''}${loserDelta}`);
+              } catch (eloErr) {
+                console.error('ELO update error:', eloErr);
+              }
             }
           }
         } catch (ptErr) {
