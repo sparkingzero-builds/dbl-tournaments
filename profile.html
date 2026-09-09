@@ -2279,7 +2279,7 @@
             const equippedTitle = await TitleManager.getEquippedTitle(playerName);
             const titleDisplay = document.getElementById('hero-title-display');
             if (titleDisplay && equippedTitle) {
-              titleDisplay.innerHTML = `<div class="hero-equipped-title" style="color:${equippedTitle.color}">${equippedTitle.badge ? `<img src="${equippedTitle.badge}" alt="" style="height:24px;vertical-align:middle;margin-right:6px;">` : ''}${esc(equippedTitle.name)}</div>`;
+              titleDisplay.innerHTML = `<div class="hero-equipped-title" style="color:${equippedTitle.color}">${equippedTitle.badge ? `<img src="${equippedTitle.badge}" alt="" style="height:42px;vertical-align:middle;margin-right:8px;">` : ''}${esc(equippedTitle.name)}</div>`;
             }
 
             const allTitleDefs = Object.values(TitleManager.TITLES);
