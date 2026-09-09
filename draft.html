@@ -548,7 +548,8 @@
       const params = new URLSearchParams(window.location.search);
       const tid = params.get('id');
       if (!tid) {
-        showError('No tournament ID specified.');
+        document.getElementById('draft-loading').style.display = 'none';
+        document.getElementById('draft-not-started').style.display = '';
         return;
       }
 
