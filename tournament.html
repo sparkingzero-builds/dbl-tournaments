@@ -398,15 +398,25 @@
             <div class="card card-glow">
               <h3 class="mb-2">Sign Up</h3>
               <div class="flex flex-col gap-2">
-                <label style="font-weight:600;font-size:0.9rem;">Discord Username</label>
-                <input type="text" id="discord-input" placeholder="e.g. Player#1234" />
-                ${isDraft ? `<p class="text-muted" style="font-size:12px; margin-top:8px;">Teams will be drafted live after signups close.</p>` : `
-                <label style="font-weight:600;font-size:0.9rem;margin-top:8px;">Your Team</label>
-                <div class="team-display" id="signup-team-slots"></div>
-                <button class="btn btn-secondary" onclick="openCharModal()">Pick Characters</button>`}
-                <button class="btn btn-primary btn-charge mt-2" id="signup-btn" onclick="submitSignup()" disabled>
-                  Sign Up
-                </button>
+                <div id="signup-auth-gate">
+                  <p class="text-muted" style="font-size:13px; margin-bottom:10px;">Log in with Discord to sign up.</p>
+                  <button class="auth-login-btn" onclick="AUTH.login()" style="width:100%;padding:10px;border:1px solid var(--cyan);background:rgba(0,229,255,0.1);color:var(--cyan);border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;">Login with Discord</button>
+                </div>
+                <div id="signup-form-inner" style="display:none;">
+                  <label style="font-weight:600;font-size:0.9rem;">Signed in as</label>
+                  <div id="signup-discord-display" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;margin-bottom:8px;">
+                    <img id="signup-avatar" src="" style="width:28px;height:28px;border-radius:50%;display:none;" />
+                    <span id="signup-username-display" style="color:var(--cyan);font-weight:600;"></span>
+                  </div>
+                  <input type="hidden" id="discord-input" />
+                  ${isDraft ? `<p class="text-muted" style="font-size:12px; margin-top:8px;">Teams will be drafted live after signups close.</p>` : `
+                  <label style="font-weight:600;font-size:0.9rem;margin-top:8px;">Your Team</label>
+                  <div class="team-display" id="signup-team-slots"></div>
+                  <button class="btn btn-secondary" onclick="openCharModal()">Pick Characters</button>`}
+                  <button class="btn btn-primary btn-charge mt-2" id="signup-btn" onclick="submitSignup()" disabled>
+                    Sign Up
+                  </button>
+                </div>
               </div>
             </div>
             ${currentTournament.allow_repick && !isDraft ? `
@@ -473,11 +483,16 @@
       }
 
       if (isSignup) {
-        CharacterManager.renderTeamSlots(document.getElementById('signup-team-slots'));
+        // Show signup form if logged in, auth gate if not
+        setupSignupAuth();
+
+        if (!isDraft) {
+          CharacterManager.renderTeamSlots(document.getElementById('signup-team-slots'));
+        }
         updateSignupBtn();
 
         CharacterManager.setTeamChangeHandler((team) => {
-          CharacterManager.renderTeamSlots(document.getElementById('signup-team-slots'));
+          if (!isDraft) CharacterManager.renderTeamSlots(document.getElementById('signup-team-slots'));
           updateSignupBtn();
         });
 
@@ -520,6 +535,34 @@
             ${teamHtml}
           </div>`;
       }).join('');
+    }
+
+    // Re-check signup auth when user logs in/out
+    if (typeof supabaseClient !== 'undefined') {
+      supabaseClient.auth.onAuthStateChange(() => {
+        setTimeout(setupSignupAuth, 300);
+      });
+    }
+
+    function setupSignupAuth() {
+      const gate = document.getElementById('signup-auth-gate');
+      const form = document.getElementById('signup-form-inner');
+      if (!gate || !form) return;
+
+      if (AUTH.isLoggedIn()) {
+        gate.style.display = 'none';
+        form.style.display = '';
+        const username = AUTH.getDiscordUsername();
+        const avatar = AUTH.getDiscordAvatar();
+        document.getElementById('discord-input').value = username || '';
+        document.getElementById('signup-username-display').textContent = username || 'Unknown';
+        const avatarEl = document.getElementById('signup-avatar');
+        if (avatar) { avatarEl.src = avatar; avatarEl.style.display = ''; }
+        updateSignupBtn();
+      } else {
+        gate.style.display = '';
+        form.style.display = 'none';
+      }
     }
 
     function updateSignupBtn() {
