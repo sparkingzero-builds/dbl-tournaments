@@ -1357,6 +1357,23 @@
         <button class="btn btn-primary btn-charge" onclick="updateAllElo()">Update ELO Ratings</button>
       </div>
 
+      <!-- Grant Title -->
+      <div class="card mt-3">
+        <h3 class="mb-2">Grant Title</h3>
+        <p class="text-muted mb-2" style="font-size:13px;">Award an exclusive title to a player.</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:end;">
+          <div>
+            <label class="text-muted" style="font-size:11px;">Player Username</label>
+            <input type="text" id="grant-title-user" placeholder="e.g. fw.blacklol" style="background:var(--bg); border:1px solid var(--line); color:var(--text); padding:8px 12px; border-radius:6px; width:200px;">
+          </div>
+          <div>
+            <label class="text-muted" style="font-size:11px;">Title</label>
+            <select id="grant-title-select" style="background:var(--bg); border:1px solid var(--line); color:var(--text); padding:8px 12px; border-radius:6px; width:220px;"></select>
+          </div>
+          <button class="btn btn-primary" onclick="grantTitle()">Grant</button>
+        </div>
+      </div>
+
       <!-- Ban Vote Results -->
       <div class="card mt-3" id="ban-results-card" style="display:none;">
         <h3 class="mb-2 text-pink">Ban Vote Results</h3>
@@ -2810,6 +2827,38 @@
       const expected = 1 / (1 + Math.pow(10, (opponentElo - playerElo) / 400));
       const score = won ? 1 : 0;
       return Math.round(K * (score - expected));
+    }
+
+    // Populate grant title dropdown
+    (function() {
+      const sel = document.getElementById('grant-title-select');
+      if (sel && typeof TitleManager !== 'undefined') {
+        Object.values(TitleManager.TITLES).forEach(t => {
+          const opt = document.createElement('option');
+          opt.value = t.id;
+          opt.textContent = t.name + (t.source === 'exclusive' ? ' ★' : '');
+          sel.appendChild(opt);
+        });
+      }
+    })();
+
+    async function grantTitle() {
+      const username = document.getElementById('grant-title-user').value.trim();
+      const titleId = document.getElementById('grant-title-select').value;
+      if (!username || !titleId) { NotificationSystem.show('Enter username and select title', 'warning'); return; }
+      try {
+        const { error } = await supabaseClient.from('player_titles').upsert({
+          discord_username: username, title_id: titleId, equipped: true
+        }, { onConflict: 'discord_username,title_id' });
+        if (error) throw error;
+        // Unequip other titles
+        await supabaseClient.from('player_titles').update({ equipped: false })
+          .ilike('discord_username', username).neq('title_id', titleId);
+        NotificationSystem.show(`Granted "${TitleManager.TITLES[titleId]?.name || titleId}" to ${username}`, 'success');
+      } catch (e) {
+        console.error('Grant title error:', e);
+        NotificationSystem.show('Error: ' + e.message, 'error');
+      }
     }
 
     async function updateAllElo() {

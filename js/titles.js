@@ -12,6 +12,9 @@
     whale:           { id: 'whale',           name: 'Whale',             description: 'Spend 5000+ total currency',                  color: '#3b82f6', source: 'earned', price: 0 },
     gambler:         { id: 'gambler',         name: 'Gambler',           description: 'Win 10+ bets',                                color: '#22c55e', source: 'earned', price: 0 },
 
+    // -- Exclusive Titles --
+    tournament_destroyer: { id: 'tournament_destroyer', name: 'Tournament Destroyer', description: 'Champion of the 3rd Tournament — an exclusive role', color: '#ff2d78', source: 'exclusive', price: 0, badge: 'https://dbgsbuilds.com/wp-content/themes/dbgsquad-lite/asset/badge/36311_00000000E0DE6B17.png' },
+
     // -- Purchasable Titles --
     the_chosen_one:      { id: 'the_chosen_one',      name: 'The Chosen One',      description: 'A title of destiny',                   color: '#00e5ff', source: 'shop', price: 500 },
     shadow_monarch:      { id: 'shadow_monarch',      name: 'Shadow Monarch',      description: 'Ruler of the shadows',                 color: '#7c3aed', source: 'shop', price: 750 },
