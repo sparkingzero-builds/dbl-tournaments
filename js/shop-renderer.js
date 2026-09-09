@@ -328,22 +328,21 @@ const ShopRenderer = (function () {
         + '<div class="item-grid" style="margin-bottom:30px;">';
       for (var ei = 0; ei < exclusiveTitles.length; ei++) {
         var ex = exclusiveTitles[ei];
-        exHtml += '<div class="item-card" data-rarity="mythic" style="aspect-ratio:4/3;">'
+        exHtml += '<div class="item-card" data-rarity="mythic">'
           + '<div class="card-badge" style="background:var(--gold);box-shadow:0 0 10px rgba(255,215,64,0.4);color:#000;">EXCLUSIVE</div>'
-          + '<div class="card-visual">'
+          + '<div class="card-visual" style="display:flex;align-items:center;justify-content:center;min-height:160px;">'
             + '<div class="card-bg-effect aura-effect"></div>'
-            + '<div style="z-index:1;text-align:center;padding:16px;">'
-              + (ex.badge ? '<img src="' + esc(ex.badge) + '" alt="" style="height:64px;margin-bottom:8px;">' : '')
-              + '<div style="font-family:\'Exo 2\',sans-serif;font-size:18px;font-weight:900;color:' + esc(ex.color) + ';text-shadow:0 0 12px ' + esc(ex.color) + ';text-transform:uppercase;letter-spacing:0.08em;">' + esc(ex.name) + '</div>'
-              + '<div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4;">' + esc(ex.description) + '</div>'
+            + '<div style="z-index:1;text-align:center;padding:20px 16px;">'
+              + (ex.badge ? '<img src="' + esc(ex.badge) + '" alt="" style="height:72px;display:block;margin:0 auto 12px;">' : '')
+              + '<div style="font-family:\'Exo 2\',sans-serif;font-size:16px;font-weight:900;color:' + esc(ex.color) + ';text-shadow:0 0 12px ' + esc(ex.color) + ';text-transform:uppercase;letter-spacing:0.08em;">' + esc(ex.name) + '</div>'
             + '</div>'
           + '</div>'
           + '<div class="card-info">'
             + '<div class="card-name">' + esc(ex.name) + '</div>'
             + '<div class="card-type" style="color:var(--gold);">Exclusive Title</div>'
           + '</div>'
-          + '<div class="card-price-bar">'
-            + '<div class="card-price"><span class="price-value" style="color:var(--gold);">NOT FOR SALE</span></div>'
+          + '<div class="card-price-bar" style="justify-content:center;">'
+            + '<span style="color:var(--gold);font-family:\'Exo 2\',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.1em;">NOT FOR SALE</span>'
           + '</div>'
         + '</div>';
       }
