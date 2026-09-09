@@ -424,8 +424,7 @@
               <h3 class="mb-2" style="color:var(--gold);">Change Team</h3>
               <p class="text-muted" style="font-size:12px;margin-bottom:10px;">Already signed up? Pick a new team below.</p>
               <div class="flex flex-col gap-2">
-                <label style="font-weight:600;font-size:0.9rem;">Your Discord Username</label>
-                <input type="text" id="repick-username" placeholder="e.g. Player#1234" />
+                <input type="hidden" id="repick-username" />
                 <label style="font-weight:600;font-size:0.9rem;margin-top:8px;">New Team</label>
                 <div class="team-display" id="repick-team-slots"></div>
                 <button class="btn btn-secondary" onclick="openRepickModal()">Pick Characters</button>
@@ -558,6 +557,8 @@
         document.getElementById('signup-username-display').textContent = username || 'Unknown';
         const avatarEl = document.getElementById('signup-avatar');
         if (avatar) { avatarEl.src = avatar; avatarEl.style.display = ''; }
+        const repickInput = document.getElementById('repick-username');
+        if (repickInput) repickInput.value = username || '';
         updateSignupBtn();
       } else {
         gate.style.display = '';
