@@ -336,6 +336,74 @@
     .el-LGT { background: #e8e4f8; color: #000; }
     .el-DRK { background: #6b21a8; color: #fff; }
 
+    /* ── Ban Phase ── */
+    .ban-phase { max-width: 900px; margin: 0 auto; padding: 20px; }
+    .ban-phase-title {
+      font-family: 'Exo 2', sans-serif; font-size: clamp(28px,6vw,48px); font-weight: 900;
+      text-transform: uppercase; letter-spacing: 4px; text-align: center;
+      background: linear-gradient(180deg, var(--red), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: 6px;
+    }
+    .ban-phase-sub { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+    .ban-vote-status {
+      display: flex; justify-content: center; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .ban-vote-dot {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--panel); border: 2px solid var(--line);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: var(--muted); transition: all 0.3s;
+    }
+    .ban-vote-dot.voted { border-color: var(--green); background: rgba(46,213,115,0.15); color: var(--green); }
+    .ban-vote-dot.you { border-color: var(--cyan); }
+    .ban-vote-dot.you.voted { border-color: var(--green); }
+    .ban-your-pick {
+      text-align: center; padding: 16px; background: var(--panel); border: 1px solid var(--line);
+      border-radius: 10px; margin-bottom: 20px;
+    }
+    .ban-your-pick.locked { border-color: var(--green); background: rgba(46,213,115,0.05); }
+    .ban-search-wrap { max-width: 400px; margin: 0 auto 16px; }
+    .ban-search-wrap input {
+      width: 100%; padding: 10px 14px; background: var(--bg); border: 1px solid var(--line);
+      border-radius: 8px; color: var(--text); font-size: 14px;
+    }
+    .ban-char-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 8px; max-height: 400px; overflow-y: auto; padding: 4px;
+    }
+    .ban-char-card {
+      position: relative; cursor: pointer; border-radius: 8px; overflow: hidden;
+      border: 2px solid transparent; transition: all 0.2s; background: var(--panel); text-align: center;
+    }
+    .ban-char-card:hover { border-color: var(--red); transform: scale(1.05); }
+    .ban-char-card.selected { border-color: var(--red); box-shadow: 0 0 16px rgba(255,71,87,0.4); }
+    .ban-char-card.disabled { opacity: 0.3; pointer-events: none; }
+    .ban-char-card img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+    .ban-char-card .char-name { font-size: 9px; padding: 2px 4px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ban-char-card .char-element { position: absolute; top: 2px; left: 2px; font-size: 8px; padding: 1px 4px; border-radius: 3px; font-weight: 700; }
+    .ban-reveal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999;
+      display: flex; align-items: center; justify-content: center; flex-direction: column;
+    }
+    .ban-reveal-title {
+      font-family: 'Exo 2', sans-serif; font-size: 32px; font-weight: 900; color: var(--red);
+      text-transform: uppercase; letter-spacing: 4px; margin-bottom: 30px;
+      text-shadow: 0 0 20px rgba(255,71,87,0.5);
+    }
+    .ban-reveal-grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+    .ban-reveal-card {
+      background: var(--panel); border: 2px solid var(--red); border-radius: 12px;
+      padding: 16px; text-align: center; width: 140px;
+      animation: ban-reveal-in 0.5s ease-out both;
+    }
+    .ban-reveal-card img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; }
+    .ban-reveal-card .name { font-family: 'Exo 2', sans-serif; font-weight: 700; color: var(--red); font-size: 13px; }
+    .ban-reveal-card .votes { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    @keyframes ban-reveal-in {
+      from { opacity: 0; transform: scale(0.5) rotateY(90deg); }
+      to { opacity: 1; transform: scale(1) rotateY(0); }
+    }
+
     @media (max-width: 768px) {
       .draft-layout {
         grid-template-columns: 1fr;
@@ -439,6 +507,25 @@
       <h2 style="color:var(--gold);">Draft Complete!</h2>
       <p class="text-muted">All picks are in. The tournament will begin shortly.</p>
       <a href="tournament.html" class="btn btn-primary mt-2">Back to Tournament</a>
+    </div>
+
+    <!-- Ban Phase -->
+    <div id="draft-ban-phase" style="display:none;">
+      <div class="ban-phase">
+        <div class="ban-phase-title">Ban Phase</div>
+        <div class="ban-phase-sub">Each player votes to ban 1 character. Top 3 most voted get banned. Votes are anonymous until everyone has voted.</div>
+        <div class="ban-vote-status" id="ban-vote-dots"></div>
+        <div class="ban-your-pick" id="ban-your-pick">
+          <p style="color:var(--muted); font-size:13px;">Select a character below to cast your ban vote</p>
+        </div>
+        <div class="ban-search-wrap">
+          <input type="text" id="ban-search" placeholder="Search characters..." oninput="renderBanPool()" />
+        </div>
+        <div class="ban-char-grid" id="ban-char-grid"></div>
+        <div style="text-align:center; margin-top:16px;">
+          <button class="btn btn-primary" id="ban-confirm-btn" style="display:none; background:var(--red);" onclick="confirmBanVote()">Confirm Ban Vote</button>
+        </div>
+      </div>
     </div>
 
     <div id="draft-main" style="display:none;">
@@ -580,17 +667,238 @@
           if (t && t.status === 'drafting') {
             clearInterval(pollInterval);
             tournament.status = 'drafting';
-            startDraftUI();
+            enterDraftFlow();
           }
         }, 3000);
         return;
       }
 
-      startDraftUI();
+      enterDraftFlow();
     });
 
     function showError(msg) {
       document.getElementById('draft-loading').innerHTML = `<h2 style="color:var(--red);">Error</h2><p class="text-muted">${msg}</p>`;
+    }
+
+    // ── Ban Phase ─────────────────────────────────────────
+    let banSelectedCharId = null;
+    let banVoteLocked = false;
+    let banPollInterval = null;
+
+    async function startBanPhase() {
+      document.getElementById('draft-loading').style.display = 'none';
+      document.getElementById('draft-not-started').style.display = 'none';
+      document.getElementById('draft-ban-phase').style.display = '';
+
+      // Check if player already voted
+      if (myUsername) {
+        const { data: myVote } = await supabaseClient.from('draft_ban_votes')
+          .select('character_id').eq('tournament_id', tournament.id)
+          .ilike('discord_username', myUsername).maybeSingle();
+        if (myVote) {
+          banSelectedCharId = myVote.character_id;
+          banVoteLocked = true;
+        }
+      }
+
+      renderBanVoteDots();
+      renderBanPool();
+      renderBanYourPick();
+
+      // Poll for all votes
+      banPollInterval = setInterval(checkBanVotes, 3000);
+      checkBanVotes();
+    }
+
+    async function checkBanVotes() {
+      const { data: votes } = await supabaseClient.from('draft_ban_votes')
+        .select('discord_username, character_id')
+        .eq('tournament_id', tournament.id);
+
+      const voteCount = votes ? votes.length : 0;
+      const totalPlayers = players.length;
+
+      // Update dots
+      const dots = document.querySelectorAll('.ban-vote-dot');
+      dots.forEach((dot, i) => {
+        if (i < voteCount) dot.classList.add('voted');
+        else dot.classList.remove('voted');
+      });
+
+      // All voted — reveal!
+      if (voteCount >= totalPlayers && totalPlayers > 0) {
+        clearInterval(banPollInterval);
+        await revealBans(votes);
+      }
+    }
+
+    function renderBanVoteDots() {
+      const container = document.getElementById('ban-vote-dots');
+      let html = '';
+      for (let i = 0; i < players.length; i++) {
+        const isYou = myUsername && players[i].discord_username.toLowerCase() === myUsername.toLowerCase();
+        const voted = isYou && banVoteLocked;
+        html += `<div class="ban-vote-dot ${isYou ? 'you' : ''} ${voted ? 'voted' : ''}" title="${players[i].discord_username}">${i + 1}</div>`;
+      }
+      container.innerHTML = html;
+    }
+
+    function renderBanPool() {
+      const grid = document.getElementById('ban-char-grid');
+      const search = (document.getElementById('ban-search')?.value || '').toLowerCase();
+      const allowedIds = tournament.allowed_characters ? new Set(tournament.allowed_characters.map(String)) : null;
+
+      let chars = allCharacters.filter(c => {
+        if (allowedIds && !allowedIds.has(String(c.id))) return false;
+        if (search && !c.name.toLowerCase().includes(search)) return false;
+        return true;
+      });
+
+      grid.innerHTML = chars.map(c => {
+        const isSelected = String(c.id) === String(banSelectedCharId);
+        const isDisabled = banVoteLocked && !isSelected;
+        return `
+          <div class="ban-char-card ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}"
+               onclick="${!banVoteLocked ? `selectBanChar('${c.id}', '${c.name.replace(/'/g, "\\'")}')` : ''}">
+            <span class="char-element el-${c.element}">${c.element}</span>
+            <img src="${c.image}" alt="${c.name}" loading="lazy" />
+            <div class="char-name">${c.name}</div>
+          </div>`;
+      }).join('');
+    }
+
+    function selectBanChar(id, name) {
+      if (banVoteLocked) return;
+      banSelectedCharId = String(id);
+      renderBanPool();
+      renderBanYourPick();
+      document.getElementById('ban-confirm-btn').style.display = '';
+    }
+
+    function renderBanYourPick() {
+      const el = document.getElementById('ban-your-pick');
+      if (banVoteLocked) {
+        const char = allCharacters.find(c => String(c.id) === String(banSelectedCharId));
+        el.className = 'ban-your-pick locked';
+        el.innerHTML = `<p style="color:var(--green); font-weight:700;">Vote Locked In!</p>
+          <p style="color:var(--muted); font-size:13px; margin-top:4px;">Waiting for other players to vote...</p>`;
+      } else if (banSelectedCharId) {
+        const char = allCharacters.find(c => String(c.id) === String(banSelectedCharId));
+        el.className = 'ban-your-pick';
+        el.innerHTML = `<p style="color:var(--muted); font-size:12px;">YOUR BAN VOTE</p>
+          <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:8px;">
+            ${char ? `<img src="${char.image}" style="width:40px; height:40px; border-radius:6px; object-fit:cover;">` : ''}
+            <span style="color:var(--red); font-family:'Exo 2',sans-serif; font-weight:700; font-size:16px;">${char ? char.name : 'Unknown'}</span>
+          </div>`;
+      } else {
+        el.className = 'ban-your-pick';
+        el.innerHTML = `<p style="color:var(--muted); font-size:13px;">Select a character below to cast your ban vote</p>`;
+      }
+    }
+
+    async function confirmBanVote() {
+      if (!myUsername || !banSelectedCharId || banVoteLocked) return;
+      try {
+        const { error } = await supabaseClient.from('draft_ban_votes').upsert({
+          tournament_id: tournament.id,
+          discord_username: myUsername,
+          character_id: String(banSelectedCharId)
+        }, { onConflict: 'tournament_id,discord_username' });
+        if (error) throw error;
+        banVoteLocked = true;
+        document.getElementById('ban-confirm-btn').style.display = 'none';
+        renderBanPool();
+        renderBanYourPick();
+        renderBanVoteDots();
+        if (typeof NotificationSystem !== 'undefined') NotificationSystem.show('Ban vote locked in!', 'success');
+      } catch (e) {
+        console.error('Ban vote error:', e);
+        if (typeof NotificationSystem !== 'undefined') NotificationSystem.show('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function revealBans(votes) {
+      // Tally votes
+      const tally = {};
+      votes.forEach(v => {
+        tally[v.character_id] = (tally[v.character_id] || 0) + 1;
+      });
+
+      // Sort by vote count descending
+      const sorted = Object.entries(tally).sort((a, b) => b[1] - a[1]);
+
+      // Top 3 banned (ties included)
+      const bannedIds = [];
+      let slotsUsed = 0;
+      for (let i = 0; i < sorted.length && slotsUsed < 3; i++) {
+        bannedIds.push(sorted[i][0]);
+        slotsUsed++;
+        // Check for ties at the boundary
+        if (slotsUsed >= 3 && i + 1 < sorted.length && sorted[i + 1][1] === sorted[i][1]) {
+          bannedIds.push(sorted[i + 1][0]);
+          slotsUsed++;
+          i++;
+        }
+      }
+
+      // Show reveal overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'ban-reveal-overlay';
+      overlay.innerHTML = `<div class="ban-reveal-title">Characters Banned!</div><div class="ban-reveal-grid" id="ban-reveal-grid"></div>
+        <button class="btn btn-primary" style="margin-top:30px;" onclick="this.parentElement.remove(); proceedToDraft();">Continue to Draft</button>`;
+      document.body.appendChild(overlay);
+
+      const grid = document.getElementById('ban-reveal-grid');
+      for (let i = 0; i < bannedIds.length; i++) {
+        const char = allCharacters.find(c => String(c.id) === String(bannedIds[i]));
+        const voteCount = tally[bannedIds[i]];
+        setTimeout(() => {
+          const card = document.createElement('div');
+          card.className = 'ban-reveal-card';
+          card.style.animationDelay = (i * 0.3) + 's';
+          card.innerHTML = `<img src="${char ? char.image : ''}" alt="${char ? char.name : '?'}" />
+            <div class="name">${char ? char.name : 'Unknown'}</div>
+            <div class="votes">${voteCount} vote${voteCount > 1 ? 's' : ''}</div>`;
+          grid.appendChild(card);
+          if (typeof playSound === 'function') playSound('ko');
+        }, i * 600);
+      }
+
+      // Store banned IDs on tournament
+      const existingBans = tournament.tournament_bans || [];
+      const newBans = [...new Set([...existingBans.map(String), ...bannedIds])];
+      await supabaseClient.from('tournaments').update({ tournament_bans: newBans }).eq('id', tournament.id);
+      tournament.tournament_bans = newBans;
+    }
+
+    function proceedToDraft() {
+      document.getElementById('draft-ban-phase').style.display = 'none';
+      startDraftUI();
+    }
+
+    async function enterDraftFlow() {
+      // Check if ban voting is complete
+      const { data: votes } = await supabaseClient.from('draft_ban_votes')
+        .select('discord_username, character_id')
+        .eq('tournament_id', tournament.id);
+      const voteCount = votes ? votes.length : 0;
+      const totalPlayers = players.length;
+
+      // Check if draft picks already exist (ban phase already done)
+      const { data: existingPicks } = await supabaseClient.from('draft_picks')
+        .select('id').eq('tournament_id', tournament.id).limit(1);
+
+      if (existingPicks && existingPicks.length > 0) {
+        // Draft already in progress, skip ban phase
+        startDraftUI();
+      } else if (voteCount >= totalPlayers && totalPlayers > 0) {
+        // All voted, reveal and proceed
+        document.getElementById('draft-loading').style.display = 'none';
+        await revealBans(votes);
+      } else {
+        // Ban phase still in progress
+        startBanPhase();
+      }
     }
 
     // ── Snake Order Generation ────────────────────────────
@@ -723,12 +1031,14 @@
       const elFilter = document.getElementById('draft-el-filter').value;
       const rarityFilter = document.getElementById('draft-rarity-filter').value;
       const draftedIds = new Set(draftPicks.map(p => String(p.character_id)));
+      const bannedIds = new Set((tournament.tournament_bans || []).map(String));
 
       // Filter to allowed characters
       const allowedIds = tournament.allowed_characters ? new Set(tournament.allowed_characters.map(String)) : null;
       const myTurn = isMyTurn();
 
       let chars = allCharacters.filter(c => {
+        if (bannedIds.has(String(c.id))) return false;
         if (allowedIds && !allowedIds.has(String(c.id))) return false;
         if (search && !c.name.toLowerCase().includes(search)) return false;
         if (elFilter && c.element !== elFilter) return false;
