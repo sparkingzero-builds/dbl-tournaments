@@ -320,6 +320,37 @@ const ShopRenderer = (function () {
 
     grid.innerHTML = '<div class="loader"><div class="loader-spinner"></div></div>';
 
+    // Render exclusive titles section
+    var exclusiveSection = document.getElementById('exclusive-titles-section');
+    var exclusiveTitles = Object.values(TitleManager.TITLES).filter(function (t) { return t.source === 'exclusive'; });
+    if (exclusiveSection && exclusiveTitles.length > 0) {
+      var exHtml = '<div class="section-header" style="color:var(--gold);border-bottom-color:var(--gold);">Exclusive Titles</div>'
+        + '<div class="item-grid" style="margin-bottom:30px;">';
+      for (var ei = 0; ei < exclusiveTitles.length; ei++) {
+        var ex = exclusiveTitles[ei];
+        exHtml += '<div class="item-card" data-rarity="mythic" style="aspect-ratio:4/3;">'
+          + '<div class="card-badge" style="background:var(--gold);box-shadow:0 0 10px rgba(255,215,64,0.4);color:#000;">EXCLUSIVE</div>'
+          + '<div class="card-visual">'
+            + '<div class="card-bg-effect aura-effect"></div>'
+            + '<div style="z-index:1;text-align:center;padding:16px;">'
+              + (ex.badge ? '<img src="' + esc(ex.badge) + '" alt="" style="height:64px;margin-bottom:8px;">' : '')
+              + '<div style="font-family:\'Exo 2\',sans-serif;font-size:18px;font-weight:900;color:' + esc(ex.color) + ';text-shadow:0 0 12px ' + esc(ex.color) + ';text-transform:uppercase;letter-spacing:0.08em;">' + esc(ex.name) + '</div>'
+              + '<div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4;">' + esc(ex.description) + '</div>'
+            + '</div>'
+          + '</div>'
+          + '<div class="card-info">'
+            + '<div class="card-name">' + esc(ex.name) + '</div>'
+            + '<div class="card-type" style="color:var(--gold);">Exclusive Title</div>'
+          + '</div>'
+          + '<div class="card-price-bar">'
+            + '<div class="card-price"><span class="price-value" style="color:var(--gold);">NOT FOR SALE</span></div>'
+          + '</div>'
+        + '</div>';
+      }
+      exHtml += '</div>';
+      exclusiveSection.innerHTML = exHtml;
+    }
+
     var shopTitles = Object.values(TitleManager.TITLES).filter(function (t) {
       return t.source === 'shop';
     });
