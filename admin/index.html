@@ -2829,18 +2829,19 @@
       return Math.round(K * (score - expected));
     }
 
-    // Populate grant title dropdown
-    (function() {
+    // Populate grant title dropdown (deferred until TitleManager loads)
+    function populateTitleDropdown() {
       const sel = document.getElementById('grant-title-select');
-      if (sel && typeof TitleManager !== 'undefined') {
-        Object.values(TitleManager.TITLES).forEach(t => {
-          const opt = document.createElement('option');
-          opt.value = t.id;
-          opt.textContent = t.name + (t.source === 'exclusive' ? ' ★' : '');
-          sel.appendChild(opt);
-        });
-      }
-    })();
+      if (!sel || typeof TitleManager === 'undefined') return;
+      sel.innerHTML = '';
+      Object.values(TitleManager.TITLES).forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = t.name + (t.source === 'exclusive' ? ' ★' : '');
+        sel.appendChild(opt);
+      });
+    }
+    window.addEventListener('DOMContentLoaded', () => setTimeout(populateTitleDropdown, 500));
 
     async function grantTitle() {
       const username = document.getElementById('grant-title-user').value.trim();
@@ -5387,6 +5388,7 @@
       }
     }
   </script>
+  <script src="../js/titles.js"></script>
   <script src="../js/notification-inbox.js"></script>
   <script src="../js/toolbar.js"></script>
 <script>
