@@ -658,13 +658,13 @@
       const { data: sups } = await supabaseClient.from('signups').select('*').eq('tournament_id', tournament.id);
       players = sups || [];
 
-      if (tournament.status !== 'drafting') {
+      if (tournament.status !== 'drafting' && tournament.status !== 'banning' && tournament.status !== 'active') {
         document.getElementById('draft-loading').style.display = 'none';
         document.getElementById('draft-not-started').style.display = '';
         // Poll until status changes
         pollInterval = setInterval(async () => {
           const { data: t } = await supabaseClient.from('tournaments').select('status').eq('id', tournament.id).single();
-          if (t && t.status === 'drafting') {
+          if (t && t.status === 'drafting' || t.status === 'banning' || t.status === 'active') {
             clearInterval(pollInterval);
             tournament.status = 'drafting';
             enterDraftFlow();
