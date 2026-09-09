@@ -391,7 +391,7 @@
         ${isSignup ? `
         <div class="signup-section">
           <div>
-            <h3 class="mb-2">Registered Players</h3>
+            <h3 class="mb-2">Registered Players ${currentTournament.max_players ? `<span style="color:var(--muted);font-size:14px;">(${signups.length}/${currentTournament.max_players})</span>` : ''}</h3>
             <div id="player-list" class="player-list stagger"></div>
           </div>
           <div class="signup-form-panel">
@@ -569,6 +569,12 @@
     function updateSignupBtn() {
       const btn = document.getElementById('signup-btn');
       if (!btn) return;
+      const maxPlayers = currentTournament?.max_players || 0;
+      if (maxPlayers > 0 && signups.length >= maxPlayers) {
+        btn.disabled = true;
+        btn.textContent = 'FULL';
+        return;
+      }
       const name = document.getElementById('discord-input')?.value.trim();
       if (currentTournament && currentTournament.format === 'draft') {
         btn.disabled = !name;
@@ -627,6 +633,15 @@
         const blocked = await db.isBlacklisted(name);
         if (blocked) {
           NotificationSystem.show('You are not allowed to sign up.', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Sign Up';
+          return;
+        }
+
+        // Check max player cap
+        const maxPlayers = currentTournament.max_players || 0;
+        if (maxPlayers > 0 && signups.length >= maxPlayers) {
+          NotificationSystem.show(`Tournament is full! (${maxPlayers}/${maxPlayers} players)`, 'error');
           btn.disabled = false;
           btn.textContent = 'Sign Up';
           return;
