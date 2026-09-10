@@ -381,7 +381,7 @@
           <div style="display:flex;gap:8px;margin-top:14px;justify-content:center;flex-wrap:wrap;">
             <a href="bracket.html" class="btn btn-sm btn-secondary">Bracket</a>
             <a href="banpick.html" class="btn btn-sm btn-secondary">Ban Phase</a>
-            <a href="draft.html" class="btn btn-sm btn-secondary">Draft Mode</a>
+            ${currentTournament.format === 'draft' ? `<a href="draft.html?id=${currentTournament.id}" class="btn btn-sm btn-secondary" style="${['banning','active','drafting'].includes(currentTournament.status) ? 'border-color:var(--gold);color:var(--gold);animation:live-pulse 1.5s ease-in-out infinite;' : ''}">Draft Mode</a>` : ''}
             <a href="fight-night.html" class="btn btn-sm btn-secondary">Fight Night</a>
           </div>
         </div>
