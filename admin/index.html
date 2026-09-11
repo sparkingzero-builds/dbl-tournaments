@@ -2503,7 +2503,7 @@
         signups = await db.getSignups(currentTournament.id);
         renderManualBanList();
         loadBanResults();
-        renderTournamentPage();
+        loadActiveTournament();
       } catch (e) {
         NotificationSystem.show('Error: ' + e.message, 'error');
       }

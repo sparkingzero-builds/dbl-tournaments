@@ -525,6 +525,11 @@
         <div style="text-align:center; margin-top:16px;">
           <button class="btn btn-primary" id="ban-confirm-btn" style="display:none; background:var(--red);" onclick="confirmBanVote()">Confirm Ban Vote</button>
         </div>
+        <!-- Admin: Ban Vote Log -->
+        <div id="admin-ban-log" style="display:none; margin-top:24px; padding:16px; background:var(--panel); border:1px solid var(--line); border-radius:12px;">
+          <h3 style="color:var(--gold); margin:0 0 12px;">Admin — Ban Vote Log</h3>
+          <div id="admin-ban-log-list" style="font-size:14px;"></div>
+        </div>
       </div>
     </div>
 
@@ -619,6 +624,7 @@
     let players = [];          // Signup list
     let selectedCharId = null; // Currently highlighted char in pool
     let myUsername = null;
+    let isAdmin = false;
     let pollInterval = null;
     let timerInterval = null;
     let pickDeadline = null;
@@ -657,6 +663,19 @@
       // Load signups
       const { data: sups } = await supabaseClient.from('signups').select('*').eq('tournament_id', tournament.id);
       players = sups || [];
+
+      // Only registered players (or admin) can view the draft
+      isAdmin = new URLSearchParams(window.location.search).get('key') === 'Cro$man112';
+      if (!isAdmin) {
+        if (!myUsername) {
+          showError('You must be logged in to view the draft. <button class="btn btn-primary" style="margin-top:12px" onclick="AUTH.login()">Login with Discord</button>');
+          return;
+        }
+        if (!players.some(p => p.discord_username.toLowerCase() === myUsername.toLowerCase())) {
+          showError('You are not registered in this tournament.');
+          return;
+        }
+      }
 
       if (tournament.status !== 'drafting' && tournament.status !== 'banning' && tournament.status !== 'active') {
         document.getElementById('draft-loading').style.display = 'none';
@@ -704,13 +723,40 @@
       renderBanVoteDots();
       renderBanPool();
       renderBanYourPick();
+      if (isAdmin) renderAdminBanLog();
 
       // Poll for all votes
       banPollInterval = setInterval(checkBanVotes, 3000);
       checkBanVotes();
     }
 
+    async function renderAdminBanLog() {
+      if (!isAdmin) return;
+      const logEl = document.getElementById('admin-ban-log');
+      const listEl = document.getElementById('admin-ban-log-list');
+      logEl.style.display = '';
+      const { data: votes } = await supabaseClient.from('draft_ban_votes')
+        .select('discord_username, character_id, created_at')
+        .eq('tournament_id', tournament.id)
+        .order('created_at', { ascending: false });
+      if (!votes || votes.length === 0) {
+        listEl.innerHTML = '<div style="color:var(--muted)">No votes yet.</div>';
+        return;
+      }
+      listEl.innerHTML = votes.map(v => {
+        const char = allCharacters.find(c => String(c.id) === String(v.character_id));
+        const name = char ? char.name : `ID ${v.character_id}`;
+        const time = new Date(v.created_at).toLocaleTimeString();
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);">
+          <span style="color:var(--cyan);min-width:140px;">${v.discord_username}</span>
+          <span style="color:var(--pink);">${name}</span>
+          <span style="color:var(--muted);margin-left:auto;font-size:12px;">${time}</span>
+        </div>`;
+      }).join('');
+    }
+
     async function checkBanVotes() {
+      if (isAdmin) renderAdminBanLog();
       const { data: votes } = await supabaseClient.from('draft_ban_votes')
         .select('discord_username, character_id')
         .eq('tournament_id', tournament.id);
