@@ -629,6 +629,30 @@
     let timerInterval = null;
     let pickDeadline = null;
 
+    async function manualDraftLogin() {
+      const input = document.getElementById('manual-draft-login');
+      if (!input) return;
+      const name = input.value.trim();
+      if (!name) return;
+      const match = players.find(p => p.discord_username.toLowerCase() === name.toLowerCase());
+      if (!match) {
+        if (typeof NotificationSystem !== 'undefined') NotificationSystem.show('Username not found in tournament signups.', 'error');
+        return;
+      }
+      myUsername = match.discord_username;
+      document.getElementById('draft-loading').innerHTML = '<div class="loader"><div class="loader-spinner"></div></div><p class="text-muted">Loading draft...</p>';
+      initDraft();
+    }
+
+    async function initDraft() {
+      if (tournament.status !== 'drafting' && tournament.status !== 'banning' && tournament.status !== 'active') {
+        document.getElementById('draft-loading').style.display = 'none';
+        document.getElementById('draft-not-started').style.display = '';
+        return;
+      }
+      enterDraftFlow();
+    }
+
     // ── Init ──────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', async () => {
       await AUTH.init();
@@ -668,7 +692,13 @@
       isDraftAdmin = new URLSearchParams(window.location.search).get('key') === 'Cro$man112';
       if (!isDraftAdmin) {
         if (!myUsername) {
-          showError('You must be logged in to view the draft. <button class="btn btn-primary" style="margin-top:12px" onclick="AUTH.login()">Login with Discord</button>');
+          showError(`You must be logged in to view the draft.
+            <button class="btn btn-primary" style="margin-top:12px" onclick="AUTH.login()">Login with Discord</button>
+            <div style="margin-top:16px;color:var(--muted);font-size:13px;">Can't access Discord?</div>
+            <div style="margin-top:8px;display:flex;gap:8px;justify-content:center;align-items:center;">
+              <input type="text" id="manual-draft-login" placeholder="Enter your username" style="padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:14px;" />
+              <button class="btn btn-primary" style="font-size:13px;padding:8px 16px;" onclick="manualDraftLogin()">Enter</button>
+            </div>`);
           return;
         }
         if (!players.some(p => p.discord_username.toLowerCase() === myUsername.toLowerCase())) {
