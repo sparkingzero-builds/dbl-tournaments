@@ -683,7 +683,7 @@
         // Poll until status changes
         pollInterval = setInterval(async () => {
           const { data: t } = await supabaseClient.from('tournaments').select('status').eq('id', tournament.id).single();
-          if (t && t.status === 'drafting' || t.status === 'banning' || t.status === 'active') {
+          if (t && (t.status === 'drafting' || t.status === 'banning' || t.status === 'active')) {
             clearInterval(pollInterval);
             tournament.status = 'drafting';
             enterDraftFlow();
@@ -923,13 +923,6 @@
     }
 
     async function enterDraftFlow() {
-      // Check if ban voting is complete
-      const { data: votes } = await supabaseClient.from('draft_ban_votes')
-        .select('discord_username, character_id')
-        .eq('tournament_id', tournament.id);
-      const voteCount = votes ? votes.length : 0;
-      const totalPlayers = players.length;
-
       // Check if draft picks already exist (ban phase already done)
       const { data: existingPicks } = await supabaseClient.from('draft_picks')
         .select('id').eq('tournament_id', tournament.id).limit(1);
@@ -937,13 +930,32 @@
       if (existingPicks && existingPicks.length > 0) {
         // Draft already in progress, skip ban phase
         startDraftUI();
-      } else if (voteCount >= totalPlayers && totalPlayers > 0) {
+        return;
+      }
+
+      // If bans already set by admin (ban phase ended), go straight to draft
+      if (tournament.tournament_bans && tournament.tournament_bans.length > 0 && tournament.status === 'active') {
+        startDraftUI();
+        return;
+      }
+
+      // Check if ban voting is complete
+      const { data: votes } = await supabaseClient.from('draft_ban_votes')
+        .select('discord_username, character_id')
+        .eq('tournament_id', tournament.id);
+      const voteCount = votes ? votes.length : 0;
+      const totalPlayers = players.length;
+
+      if (voteCount >= totalPlayers && totalPlayers > 0) {
         // All voted, reveal and proceed
         document.getElementById('draft-loading').style.display = 'none';
         await revealBans(votes);
-      } else {
+      } else if (tournament.status === 'banning') {
         // Ban phase still in progress
         startBanPhase();
+      } else {
+        // Status is active but no bans — just start draft
+        startDraftUI();
       }
     }
 
@@ -1254,7 +1266,9 @@
   <script src="js/elo-live.js"></script>
   <script src="js/announcements.js"></script>
   <script src="js/toolbar.js"></script>
-  <script>`n    if (typeof initParticles === 'function') initParticles(document.getElementById('particles'));`n  </script>
+  <script>
+    if (typeof initParticles === 'function') initParticles(document.getElementById('particles'));
+  </script>
 </body>
 </html>
 
