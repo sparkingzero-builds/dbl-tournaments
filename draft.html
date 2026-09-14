@@ -624,7 +624,7 @@
     let players = [];          // Signup list
     let selectedCharId = null; // Currently highlighted char in pool
     let myUsername = null;
-    let isAdmin = false;
+    let isDraftAdmin = false;
     let pollInterval = null;
     let timerInterval = null;
     let pickDeadline = null;
@@ -665,8 +665,8 @@
       players = sups || [];
 
       // Only registered players (or admin) can view the draft
-      isAdmin = new URLSearchParams(window.location.search).get('key') === 'Cro$man112';
-      if (!isAdmin) {
+      isDraftAdmin = new URLSearchParams(window.location.search).get('key') === 'Cro$man112';
+      if (!isDraftAdmin) {
         if (!myUsername) {
           showError('You must be logged in to view the draft. <button class="btn btn-primary" style="margin-top:12px" onclick="AUTH.login()">Login with Discord</button>');
           return;
@@ -723,7 +723,7 @@
       renderBanVoteDots();
       renderBanPool();
       renderBanYourPick();
-      if (isAdmin) renderAdminBanLog();
+      if (isDraftAdmin) renderAdminBanLog();
 
       // Poll for all votes
       banPollInterval = setInterval(checkBanVotes, 3000);
@@ -731,7 +731,7 @@
     }
 
     async function renderAdminBanLog() {
-      if (!isAdmin) return;
+      if (!isDraftAdmin) return;
       const logEl = document.getElementById('admin-ban-log');
       const listEl = document.getElementById('admin-ban-log-list');
       logEl.style.display = '';
@@ -756,7 +756,7 @@
     }
 
     async function checkBanVotes() {
-      if (isAdmin) renderAdminBanLog();
+      if (isDraftAdmin) renderAdminBanLog();
       const { data: votes } = await supabaseClient.from('draft_ban_votes')
         .select('discord_username, character_id')
         .eq('tournament_id', tournament.id);
